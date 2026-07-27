@@ -60,7 +60,10 @@ const UI_TEXT = {
     serviceSupportTitle:"תמיכה טכנית", serviceSupportDesc:"יש לך תקלה או שאלה על מחשב קיים? אנחנו כאן בשבילך",
     serviceContactTitle:"יצירת קשר", serviceContactDesc:"שאלה כללית? דברו איתנו ישירות בוואטסאפ",
     comingSoonTitle:"בקרוב באתר", comingSoonText:"הדף הזה נמצא כרגע בבנייה. בינתיים אפשר לבנות מחשב בהתאמה אישית או לפנות אלינו ישירות.",
-    backToServices:"⟵ חזרה לתפריט השירותים", goToBuilder:"לבניית מחשב בהתאמה אישית"
+    backToServices:"⟵ חזרה לתפריט השירותים", goToBuilder:"לבניית מחשב בהתאמה אישית",
+    siteComingSoonTitle:"האתר החדש שלנו בדרך!",
+    siteComingSoonText:"אנחנו עובדים על חוויית קנייה חדשה ומשודרגת ל-DvirTech. בינתיים, נשמח לעזור לכם ישירות.",
+    contactWhatsappBtn:"💬 דברו איתנו בוואטסאפ"
   },
   en: {
     navReady:"Ready-Made PCs", navBuilder:"PC Builder", navPeripherals:"Peripherals",
@@ -101,7 +104,10 @@ const UI_TEXT = {
     serviceSupportTitle:"Technical Support", serviceSupportDesc:"Have an issue or question about an existing PC? We're here for you",
     serviceContactTitle:"Contact Us", serviceContactDesc:"General question? Chat with us directly on WhatsApp",
     comingSoonTitle:"Coming Soon", comingSoonText:"This page is currently under construction. In the meantime, you can build a custom PC or reach out to us directly.",
-    backToServices:"⟵ Back to services", goToBuilder:"Go to Custom PC Builder"
+    backToServices:"⟵ Back to services", goToBuilder:"Go to Custom PC Builder",
+    siteComingSoonTitle:"Our New Website Is On Its Way!",
+    siteComingSoonText:"We're working on a new, upgraded shopping experience for DvirTech. In the meantime, we'd love to help you directly.",
+    contactWhatsappBtn:"💬 Chat With Us on WhatsApp"
   }
 };
 
