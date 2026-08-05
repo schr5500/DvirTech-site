@@ -1,0 +1,85 @@
+<!DOCTYPE html>
+<html lang="he" dir="rtl">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>DvirTech — צור קשר</title>
+<script>
+  (function(){
+    var saved = "he";
+    try { saved = localStorage.getItem("dvirtech_lang") || "he"; } catch(e) {}
+    document.documentElement.lang = saved;
+    document.documentElement.dir = saved === "he" ? "rtl" : "ltr";
+  })();
+</script>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link href="https://fonts.googleapis.com/css2?family=Rubik:wght@400;500;600;700;800;900&family=Heebo:wght@300;400;500;700&display=swap" rel="stylesheet">
+<link rel="stylesheet" href="style.css">
+</head>
+<body>
+
+<header>
+  <div class="wrap headbar">
+    <div class="brand"><img class="brand-logo" src="images/logo-dvirtech.png" alt="DvirTech"></div>
+    <nav>
+      <a href="catalog.html" id="navReady"></a>
+      <a href="builder.html" id="navBuilder"></a>
+      <a href="catalog.html" id="navPeripherals"></a>
+      <a href="coming-soon.html?service=support" id="navLab"></a>
+      <a href="contact.html" id="navContact"></a>
+    </nav>
+    <div class="lang-switch">
+      <button class="lang-btn" data-lang="he" onclick="setLang('he')">עברית</button>
+      <button class="lang-btn" data-lang="en" onclick="setLang('en')">English</button>
+    </div>
+  </div>
+</header>
+
+<div class="wrap" style="max-width:640px;padding-top:44px;padding-bottom:70px">
+  <h1 id="pageTitle" style="font-size:28px;margin:0 0 8px"></h1>
+  <p id="pageSubtitle" style="color:var(--ink-soft);margin:0 0 26px;line-height:1.7"></p>
+
+  <div class="panel">
+    <h3 style="display:flex;align-items:center;gap:8px;margin:0 0 4px">📞 <span id="phoneLabel"></span></h3>
+    <p style="font-size:20px;font-weight:700;direction:ltr;text-align:end;margin:4px 0 14px" dir="ltr">050-200-0373</p>
+    <div style="display:flex;gap:10px;flex-wrap:wrap">
+      <a class="btn btn-accent" style="width:auto;flex:1;min-width:160px" id="whatsappBtn" href="#" target="_blank" rel="noopener"></a>
+      <a class="btn btn-secondary" style="width:auto;flex:1;min-width:120px;margin-top:0" id="callBtn" href="tel:0502000373"></a>
+    </div>
+  </div>
+
+  <div class="panel">
+    <h3 style="display:flex;align-items:center;gap:8px;margin:0 0 4px">✉️ <span id="emailLabel"></span></h3>
+    <p style="font-size:16px;font-weight:700;direction:ltr;text-align:end;margin:4px 0 14px" dir="ltr">schr5500@gmail.com</p>
+    <a class="btn btn-secondary" style="margin-top:0" id="emailBtn" href="mailto:schr5500@gmail.com"></a>
+  </div>
+
+  <div class="panel">
+    <h3 id="hoursLabel" style="margin:0 0 8px"></h3>
+    <p id="hoursText" style="margin:0 0 16px;color:var(--ink-soft);font-size:14px;line-height:1.7"></p>
+    <h3 id="areaLabel" style="margin:0 0 8px"></h3>
+    <p id="areaText" style="margin:0;color:var(--ink-soft);font-size:14px"></p>
+  </div>
+
+  <div class="panel" style="border:1.5px dashed var(--line)">
+    <h3 id="cancelTitle" style="margin:0 0 8px"></h3>
+    <p id="cancelText" style="margin:0 0 14px;color:var(--ink-soft);font-size:13.5px;line-height:1.7"></p>
+    <a class="btn btn-secondary" style="margin-top:0" id="cancelBtn" href="#" target="_blank" rel="noopener"></a>
+  </div>
+</div>
+
+<footer>
+  <img class="footer-logo" src="images/logo-dvirtech.png" alt="DvirTech">
+  <span id="footerText"></span>
+  <div class="footer-legal">
+    <a href="about.html" id="footerAboutLink"></a>
+    <a href="contact.html" id="footerContactLink"></a>
+    <a href="terms.html" id="footerTermsLink"></a>
+  </div>
+</footer>
+
+<script src="i18n.js"></script>
+<script src="contact.js"></script>
+<script src="cart.js"></script>
+</body>
+</html>

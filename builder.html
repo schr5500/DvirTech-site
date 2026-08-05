@@ -1,0 +1,158 @@
+<!DOCTYPE html>
+<html lang="he" dir="rtl">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>DvirTech</title>
+<script>
+  // מונע הבהוב שפה: קובע dir/lang לפני שהעמוד מצטייר, לפי מה שנשמר בעבר
+  (function(){
+    var saved = "he";
+    try { saved = localStorage.getItem("dvirtech_lang") || "he"; } catch(e) {}
+    document.documentElement.lang = saved;
+    document.documentElement.dir = saved === "he" ? "rtl" : "ltr";
+  })();
+</script>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link href="https://fonts.googleapis.com/css2?family=Rubik:wght@400;500;600;700;800;900&family=Heebo:wght@300;400;500;700&display=swap" rel="stylesheet">
+<link rel="stylesheet" href="style.css">
+</head>
+<body>
+
+<header>
+  <div class="wrap headbar">
+    <div class="brand"><img class="brand-logo" src="images/logo-dvirtech.png" alt="DvirTech"></div>
+    <nav>
+      <a href="catalog.html" id="navReady"></a>
+      <a href="builder.html" id="navBuilder"></a>
+      <a href="catalog.html" id="navPeripherals"></a>
+      <a href="coming-soon.html?service=support" id="navLab"></a>
+      <a href="contact.html" id="navContact"></a>
+    </nav>
+    <div class="lang-switch">
+      <button class="lang-btn" data-lang="he" onclick="setLang('he')">עברית</button>
+      <button class="lang-btn" data-lang="en" onclick="setLang('en')">English</button>
+    </div>
+  </div>
+</header>
+
+<section class="hero">
+  <div class="wrap">
+    <h1><span id="heroTitle"></span><span class="g" id="heroTitleHighlight"></span></h1>
+    <p id="heroSubtitle"></p>
+  </div>
+</section>
+
+<div class="trust-bar">
+  <div class="wrap trust-wrap">
+    <span><b>🛡️</b> <span id="trustWarranty"></span></span>
+    <span><b>🔍</b> <span id="trustStress"></span></span>
+    <span><b>💬</b> <span id="trustSupport"></span></span>
+    <span><b>🚚</b> <span id="trustShipping"></span></span>
+  </div>
+</div>
+
+<div class="wrap" style="padding-top:22px">
+  <div class="filter-explainer" id="filterExplainer"></div>
+</div>
+
+<div class="wrap builder">
+
+  <div id="stepsContainer"></div>
+
+
+  <div class="sticky">
+    <div class="panel">
+      <h3 id="summaryTitle"></h3>
+      <p class="sub" id="summarySubtitle"></p>
+
+      <ul class="summary-list" id="summaryList"></ul>
+      <div class="total-row"><span id="totalLabel"></span><span id="totalPrice">0 ₪</span></div>
+
+      <div class="case-diagram">
+        <div class="diagram-title" id="diagramTitle"></div>
+        <div class="pc-visual-outer">
+          <div class="pc-stage" id="pcStage"></div>
+        </div>
+      </div>
+
+      <div id="validationMsg"></div>
+
+      <div style="margin:14px 0">
+        <label class="field-label" id="useCaseLabel"></label>
+        <select id="useCase" onchange="onUseCaseChange()"></select>
+      </div>
+
+      <div id="resolutionField" style="margin:14px 0">
+        <label class="field-label" id="resolutionLabel"></label>
+        <select id="resolution"></select>
+      </div>
+
+      <div>
+        <label class="field-label" id="contextLabel"></label>
+        <div id="popularOptions"></div>
+        <div id="customContextRow"></div>
+        <div class="add-row">
+          <input id="customContextInput">
+          <button id="addContextBtn" onclick="addCustomContext()"></button>
+        </div>
+      </div>
+
+      <button class="btn btn-primary" id="analyzeBtn" onclick="analyzeWithAI()">
+        <span id="analyzeBtnText"></span> <small id="analyzeBtnSub"></small>
+      </button>
+      <button class="btn btn-accent" id="whatsappBtn" onclick="sendWhatsApp()"></button>
+      <button class="btn btn-primary" id="finishBuildBtn" onclick="finishBuildAndAddToCart()" style="background:var(--navy-900)"></button>
+      <div id="finishBuildNote" class="validation-msg" style="display:none"></div>
+
+      <div class="ai-panel" id="aiPanel">
+        <div id="aiLoading" class="loading" style="display:none"><div class="spinner"></div> <span id="aiLoadingText"></span></div>
+        <div id="aiContent"></div>
+      </div>
+    </div>
+  </div>
+</div>
+
+<footer>
+  <img class="footer-logo" src="images/logo-dvirtech.png" alt="DvirTech">
+  <span id="footerText"></span>
+  <div class="footer-legal">
+    <a href="about.html" id="footerAboutLink"></a>
+    <a href="contact.html" id="footerContactLink"></a>
+    <a href="terms.html" id="footerTermsLink"></a>
+  </div>
+</footer>
+
+<script src="catalog.js"></script>
+<script src="i18n.js"></script>
+<script src="app.js"></script>
+<script src="cart.js"></script>
+<script>
+  // תוסף קטן, לא נוגע ב-app.js: אוסף את ההרכבה הנוכחית ומעביר אותה
+  // ל-API הכללי של העגלה (cart.js). "הרכבה חינם" (0 ₪) מתווספת אוטומטית
+  // בתוך addBuildToCart, בדיוק לפי המחירון (הרכבה כשקונים חלקים ממני).
+  function finishBuildAndAddToCart(){
+    if(missingRequired().length){
+      renderValidation();
+      const box = document.getElementById("validationMsg");
+      box.innerHTML += `<div class="validation-msg">${t("freeAssemblyEligibilityNote")}</div>`;
+      return;
+    }
+    const activeCats = STEP_ORDER.filter(c => getItem(c) && getItem(c).id !== "none");
+    const lines = activeCats.map(c => ({ label: localLabel(c), name: localName(getItem(c)), qty: getQty(c) }));
+    // parts: אותם רכיבים כ-SKU (קטגוריה:id) — זה מה שבפועל נשלח לתמחור
+    // בצד שרת ב-checkout, מול הקטלוג החי (ראה 4-payment-api.gs).
+    const parts = activeCats.map(c => ({ sku: c + ":" + getItem(c).id, qty: getQty(c) }));
+    const totalText = document.getElementById("totalPrice").textContent;
+    const totalNum = parseInt(totalText.replace(/[^\d]/g,""), 10) || 0;
+    addBuildToCart(lines, totalNum, parts);
+  }
+  function renderBuilderCartText(){
+    document.getElementById("finishBuildBtn").textContent = t("finishBuildBtn");
+  }
+  renderBuilderCartText();
+  const _origSetLangBuilder = window.setLang;
+  window.setLang = function(lang){ _origSetLangBuilder(lang); renderBuilderCartText(); };
+</script>
+</body>
+</html>

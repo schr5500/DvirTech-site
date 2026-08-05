@@ -1,0 +1,100 @@
+<!DOCTYPE html>
+<html lang="he" dir="rtl">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>DvirTech — תשלום</title>
+<script>
+  (function(){
+    var saved = "he";
+    try { saved = localStorage.getItem("dvirtech_lang") || "he"; } catch(e) {}
+    document.documentElement.lang = saved;
+    document.documentElement.dir = saved === "he" ? "rtl" : "ltr";
+  })();
+</script>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link href="https://fonts.googleapis.com/css2?family=Rubik:wght@400;500;600;700;800;900&family=Heebo:wght@300;400;500;700&display=swap" rel="stylesheet">
+<link rel="stylesheet" href="style.css">
+</head>
+<body>
+
+<header>
+  <div class="wrap headbar">
+    <div class="brand"><img class="brand-logo" src="images/logo-dvirtech.png" alt="DvirTech"></div>
+  </div>
+</header>
+
+<div class="wrap" style="max-width:520px;padding-top:44px;padding-bottom:70px">
+
+  <div id="loadingState" style="text-align:center;padding:40px 0;color:var(--ink-soft)">טוען את פרטי ההזמנה…</div>
+
+  <div id="errorState" style="display:none;text-align:center;padding:40px 0">
+    <p id="errorText" style="color:var(--ink-soft)"></p>
+  </div>
+
+  <div id="payContent" style="display:none">
+    <h1 style="font-size:24px;margin:0 0 4px" id="payTitle">תשלום עבור השירות</h1>
+    <p style="color:var(--ink-soft);margin:0 0 22px" id="payClientLine"></p>
+
+    <div class="panel">
+      <ul class="summary-list" style="margin-bottom:8px">
+        <li><span class="k" id="descLabel">תיאור</span><span class="v" id="descValue"></span></li>
+        <li><span class="k">סכום מקורי</span><span class="v" id="baseAmountValue"></span></li>
+      </ul>
+
+      <div style="margin:18px 0 12px">
+        <label class="field-label" style="margin-bottom:10px;display:block">אמצעי תשלום</label>
+        <div class="options" style="grid-template-columns:1fr 1fr">
+          <div class="opt selected" id="optRegular" onclick="selectPaymentType('regular')">
+            <div class="name">תשלום רגיל</div>
+            <div class="spec" id="regularFeeLabel"></div>
+          </div>
+          <div class="opt" id="optInstallments" onclick="selectPaymentType('installments')">
+            <div class="name">תשלומים</div>
+            <div class="spec" id="installmentsFeeLabel"></div>
+          </div>
+        </div>
+      </div>
+
+      <div id="installmentsCountWrap" style="display:none;margin-bottom:12px">
+        <label class="field-label" id="installmentsCountLabel">מספר תשלומים</label>
+        <select id="installmentsCount" onchange="renderTotals()">
+          <option value="2">2</option><option value="3">3</option><option value="4">4</option>
+          <option value="6">6</option><option value="8">8</option><option value="10">10</option><option value="12">12</option>
+        </select>
+      </div>
+
+      <ul class="summary-list">
+        <li><span class="k" id="feeLabel">עמלת חברת אשראי</span><span class="v" id="feeValue"></span></li>
+      </ul>
+      <div class="total-row" style="margin-top:10px">
+        <span>סה"כ לתשלום</span>
+        <span id="totalValue">0 ₪</span>
+      </div>
+
+      <p style="font-size:11.5px;color:var(--ink-soft);margin:10px 0 0" id="feeNote">
+        העמלה משקפת את עלות הסליקה בפועל מול חברת האשראי, ומתעדכנת אוטומטית לפי אמצעי התשלום שנבחר.
+      </p>
+
+      <button class="btn btn-accent" id="continueBtn" onclick="startCharge()">המשך לתשלום מאובטח</button>
+      <p id="chargeError" style="display:none;color:var(--red);font-size:13px;margin-top:10px;text-align:center"></p>
+    </div>
+
+    <p style="font-size:12px;color:var(--ink-soft);text-align:center;margin-top:16px">
+      התשלום עצמו מתבצע בדף מאובטח של Sumit — DvirTech לא רואה ולא שומר את פרטי הכרטיס שלך.
+    </p>
+  </div>
+</div>
+
+<footer>
+  <img class="footer-logo" src="images/logo-dvirtech.png" alt="DvirTech">
+  <div class="footer-legal">
+    <a href="about.html">אודות</a>
+    <a href="contact.html">צור קשר</a>
+    <a href="terms.html">תקנון</a>
+  </div>
+</footer>
+
+<script src="pay.js"></script>
+</body>
+</html>

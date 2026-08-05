@@ -1,0 +1,67 @@
+<!DOCTYPE html>
+<html lang="he" dir="rtl">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>DvirTech — תודה על ההזמנה</title>
+<script>
+  (function(){
+    var saved = "he";
+    try { saved = localStorage.getItem("dvirtech_lang") || "he"; } catch(e) {}
+    document.documentElement.lang = saved;
+    document.documentElement.dir = saved === "he" ? "rtl" : "ltr";
+  })();
+</script>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link href="https://fonts.googleapis.com/css2?family=Rubik:wght@400;500;600;700;800;900&family=Heebo:wght@300;400;500;700&display=swap" rel="stylesheet">
+<link rel="stylesheet" href="style.css">
+</head>
+<body>
+
+<header>
+  <div class="wrap headbar">
+    <div class="brand"><img class="brand-logo" src="images/logo-dvirtech.png" alt="DvirTech"></div>
+  </div>
+</header>
+
+<div class="wrap" style="max-width:520px;padding-top:44px;padding-bottom:70px;text-align:center">
+
+  <div id="loadingState" style="padding:40px 0;color:var(--ink-soft)">מאמת את התשלום מול SUMIT…</div>
+
+  <div id="paidState" style="display:none">
+    <h1 style="font-size:24px;margin:0 0 10px">✅ התשלום התקבל, תודה!</h1>
+    <p style="color:var(--ink-soft);margin:0 0 22px">
+      הקבלה נשלחת אוטומטית לכתובת המייל שהזנת. נהיה איתך בקשר בקרוב לגבי המשך הטיפול בהזמנה.
+    </p>
+    <a href="index.html" class="btn btn-primary" style="display:inline-flex;width:auto;padding:12px 22px">חזרה לעמוד הבית</a>
+  </div>
+
+  <div id="pendingState" style="display:none">
+    <h1 style="font-size:24px;margin:0 0 10px">⏳ התשלום עדיין בבדיקה</h1>
+    <p style="color:var(--ink-soft);margin:0 0 22px" id="pendingText"></p>
+    <a href="contact.html" class="btn btn-primary" style="display:inline-flex;width:auto;padding:12px 22px">צור קשר</a>
+  </div>
+
+  <div id="errorState" style="display:none">
+    <h1 style="font-size:24px;margin:0 0 10px">⚠️ לא הצלחנו לאמת את התשלום</h1>
+    <p style="color:var(--ink-soft);margin:0 0 22px" id="errorText"></p>
+    <p style="font-size:13px;color:var(--ink-soft);margin:0 0 22px">
+      אם בוצע חיוב בפועל, אין צורך לדאוג — נבדוק את זה ידנית. פשוט צרו קשר עם פרטי ההזמנה.
+    </p>
+    <a href="contact.html" class="btn btn-primary" style="display:inline-flex;width:auto;padding:12px 22px">צור קשר</a>
+  </div>
+
+</div>
+
+<footer>
+  <img class="footer-logo" src="images/logo-dvirtech.png" alt="DvirTech">
+  <div class="footer-legal">
+    <a href="about.html">אודות</a>
+    <a href="contact.html">צור קשר</a>
+    <a href="terms.html">תקנון</a>
+  </div>
+</footer>
+
+<script src="thanks.js"></script>
+</body>
+</html>
