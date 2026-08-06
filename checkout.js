@@ -42,7 +42,13 @@ function renderCheckoutPage(){
   content.style.display = "block";
 
   document.getElementById("checkoutSummary").innerHTML = items.map(i => `
-    <li><span class="k">${i.name}${i.qty>1?` × ${i.qty}`:""}</span><span class="v">${i.price===0 ? t("included") : (i.price*i.qty).toLocaleString()+" ₪"}</span></li>`).join("");
+    <li>
+      <span class="k">
+        <div>${i.name}${i.qty>1?` × ${i.qty}`:""}</div>
+        ${i.noteLines && i.noteLines.length ? `<div class="cart-item-note">${i.noteLines.join("<br>")}</div>` : ""}
+      </span>
+      <span class="v">${i.price===0 ? t("included") : (i.price*i.qty).toLocaleString()+" ₪"}</span>
+    </li>`).join("");
   document.getElementById("checkoutTotalPrice").textContent = cartTotalOf(items).toLocaleString() + " ₪";
 }
 

@@ -41,7 +41,12 @@ function addToCart(item){
   renderCart();
   openCart();
 }
-function removeFromCart(id){ cartItems = cartItems.filter(i => i.id !== id); saveCartItems(); renderCart(); }
+// מסירים גם כל פריט "צמוד" להרכבה שהוסרה (כרגע: שורת ההרכבה החינמית) —
+// אחרת נשארת שורת "הרכבה חינם" יתומה בעגלה בלי שום הרכבה בפועל שקשורה אליה.
+function removeFromCart(id){
+  cartItems = cartItems.filter(i => i.id !== id && i.buildId !== id);
+  saveCartItems(); renderCart();
+}
 function changeCartQty(id, delta){
   const it = cartItems.find(i => i.id === id);
   if(!it) return;
@@ -55,12 +60,15 @@ function cartCount(){ return cartItems.reduce((s,i)=> s + i.qty, 0); }
 // שנבחרו + הסה"כ (לתצוגה בלבד) + parts (רשימת {sku,qty} לכל רכיב, בדיוק
 // לפי selections ב-app.js) — parts הוא מה שבאמת נשלח לתמחור בצד שרת
 // בזמן checkout, ה-name/price כאן הם רק לתצוגה מיידית בעגלה עצמה.
-// מוסיף שורת הרכבה אחת + שורת "הרכבה (כשקונים חלקים ממני)" ב-0 ₪
-// (בדיוק לפי המחירון: קונים חלקים ממני = הרכבה חינם).
+// noteLines: כל רכיב בשורה נפרדת (לא משפט אחד ארוך) לקריאות בעגלה.
+// מוסיף שורת הרכבה אחת + שורת "הרכבה (כשקונים חלקים ממני)" ב-0 ₪, ומקשר
+// ביניהן דרך buildId — כך ש-removeFromCart מסיר את שתיהן יחד, ולא משאיר
+// שורת "הרכבה חינם" יתומה כשמסירים רק את ההרכבה.
 function addBuildToCart(buildLines, buildTotal, parts){
-  const desc = buildLines.map(l => `${l.label}: ${l.name}${l.qty>1?` ×${l.qty}`:""}`).join(", ");
-  addToCartSilently({ type:"build", name: tr("הרכבה בהתאמה אישית","Custom PC Build"), price: buildTotal, qty:1, note: desc, parts: parts || [] });
-  addToCartSilently({ type:"service", sku:"assembly-included", name: tr("הרכבה (כשקונים חלקים ממני)","Assembly (when buying parts from me)"), price:0, qty:1 });
+  const noteLines = buildLines.map(l => `${l.label}: ${l.name}${l.qty>1?` ×${l.qty}`:""}`);
+  const buildId = "c" + Date.now() + Math.random().toString(36).slice(2,7);
+  cartItems.push({ id: buildId, type:"build", name: tr("הרכבה בהתאמה אישית","Custom PC Build"), price: buildTotal, qty:1, noteLines: noteLines, parts: parts || [] });
+  addToCartSilently({ type:"service", sku:"assembly-included", name: tr("הרכבה (כשקונים חלקים ממני)","Assembly (when buying parts from me)"), price:0, qty:1, buildId: buildId });
   saveCartItems(); renderCart(); openCart();
 }
 function addToCartSilently(item){
@@ -125,7 +133,7 @@ function renderCart(){
     <li class="cart-item">
       <div class="cart-item-main">
         <div class="cart-item-name">${i.name}</div>
-        ${i.note ? `<div class="cart-item-note">${i.note}</div>` : ""}
+        ${i.noteLines && i.noteLines.length ? `<div class="cart-item-note">${i.noteLines.join("<br>")}</div>` : ""}
         <div class="cart-item-price">${i.price === 0 ? t("included") : i.price.toLocaleString()+" ₪"}</div>
       </div>
       <div class="cart-item-ctrl">
