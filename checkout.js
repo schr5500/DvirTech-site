@@ -17,7 +17,7 @@
 ===================================================================== */
 
 const CART_STORAGE_KEY = "dvirtech_cart_items_v1";
-const PAYMENT_API_URL = "https://REPLACE-WITH-YOUR-WEBAPP-EXEC-URL";
+const PAYMENT_API_URL = "https://script.google.com/macros/s/AKfycbwuW5tgiRDhoIEFNkHHWgkVot6FyHFEUBa1mx41ck1lp74ChzT8pciMV9qaI0NcDw-sKA/exec";
 
 function readCartFromStorage(){
   try{
