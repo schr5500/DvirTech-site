@@ -14,10 +14,34 @@
    זה לא באג, זו הדרך היחידה למנוע preflight CORS שדפדפנים שולחים לפני
    POST לדומיין אחר, ש-Apps Script Web Apps לא יודעים לענות עליו.
    4-payment-api.gs מפרסר את הגוף כ-JSON ידנית מהצד שלו (readBody_).
+
+   ⚠️ עמלת תשלומים — ההבחנה המשפטית שהובילה לעיצוב הזה:
+   - כרטיס רגיל מול תשלום מזומן/Bit: אי אפשר להראות "עמלת אשראי" בנפרד
+     (אסור על פי חוק הגנת הצרכן — פסיקה נגד מש-כר/משקט). זו לא בחירה
+     אמיתית של הלקוח, אז זה חייב להיות גלום במחיר המוצג. **לכן תשלום
+     של 1 עד 3 תשלומים לא מציג/מוסיף שום עמלה — המחיר תמיד זהה.**
+   - 4 תשלומים ומעלה זו בחירה אמיתית ואופציונלית של הלקוח (יש לו את
+     האפשרות לשלם בפחות תשלומים תמיד) — לכן מותר להציג עמלה נפרדת
+     ומפורטת, כל עוד היא לא עולה על העלות בפועל ומוצגת ללקוח לפני
+     שהוא מתחייב. זה בדיוק מה שקורה כאן.
+   ⚠️ העמלה מחושבת *לכל חודש תשלום* (לא אחוז שטוח קבוע) — 6 תשלומים
+   עולים יותר מ-4, בדיוק כמו מימון אמיתי. הנוסחה וההסבר של המקדם
+   (INSTALLMENT_FEE_PCT_PER_MONTH_PRE_VAT למטה) מבוססים על ההערכה
+   הקיימת מ-1-CRM-main.gs — **עדיין לא אומתו מול הדשבורד/החוזה בפועל של
+   UPAY**. לוודא שם לפני שסומכים על המספר הזה למכירות אמיתיות.
 ===================================================================== */
 
 const CART_STORAGE_KEY = "dvirtech_cart_items_v1";
 const PAYMENT_API_URL = "https://script.google.com/macros/s/AKfycbwuW5tgiRDhoIEFNkHHWgkVot6FyHFEUBa1mx41ck1lp74ChzT8pciMV9qaI0NcDw-sKA/exec";
+
+/* לתצוגה בלבד — השרת (4-payment-api.gs) מחשב את זה מחדש ובאופן עצמאי,
+   לא סומך על מה שנשלח מכאן. ⚠️ אם משנים כאן, לשנות גם שם
+   (INSTALLMENT_FEE_PCT_PER_MONTH_PRE_VAT). */
+const INSTALLMENT_FEE_PCT_PER_MONTH_PRE_VAT = 1.0;   // ⚠️ לאמת מול UPAY בפועל — ראה הערה למעלה
+const INSTALLMENT_FEE_FREE_UPTO = 3;                 // 1–3 תשלומים: ללא עמלה בכלל
+const VAT_RATE = 0.18;
+
+let cartSubtotal = 0;
 
 function readCartFromStorage(){
   try{
@@ -27,6 +51,15 @@ function readCartFromStorage(){
 }
 
 function cartTotalOf(items){ return items.reduce((s,i)=> s + i.price*i.qty, 0); }
+
+// עמלה לכל חודש תשלום, לא אחוז שטוח — ככל שיש יותר תשלומים, העמלה גדלה
+// בהתאם (בדיוק כמו מימון אמיתי). מחושב על כל התשלומים (לא רק על אלה
+// שמעבר ל-3), כי מ-4 תשלומים ומעלה כל העסקה כפופה לתנאי המימון.
+function installmentFeePct(count){
+  if(count <= INSTALLMENT_FEE_FREE_UPTO) return 0;
+  const raw = INSTALLMENT_FEE_PCT_PER_MONTH_PRE_VAT * count;
+  return Math.round(raw * (1 + VAT_RATE) * 1000) / 1000;
+}
 
 function renderCheckoutPage(){
   const items = readCartFromStorage();
@@ -49,7 +82,33 @@ function renderCheckoutPage(){
       </span>
       <span class="v">${i.price===0 ? t("included") : (i.price*i.qty).toLocaleString()+" ₪"}</span>
     </li>`).join("");
-  document.getElementById("checkoutTotalPrice").textContent = cartTotalOf(items).toLocaleString() + " ₪";
+  cartSubtotal = cartTotalOf(items);
+  document.getElementById("checkoutTotalPrice").textContent = cartSubtotal.toLocaleString() + " ₪";
+  renderCheckoutTotals();
+}
+
+function renderCheckoutTotals(){
+  const count = parseInt(document.getElementById("installmentsCount").value, 10) || 1;
+  const pct = installmentFeePct(count);
+  const fee = Math.round(cartSubtotal * (pct / 100) * 100) / 100;
+  const grandTotal = Math.round((cartSubtotal + fee) * 100) / 100;
+
+  const feeRow = document.getElementById("feeRow");
+  const breakdownRow = document.getElementById("monthlyBreakdownRow");
+  if(pct > 0){
+    feeRow.style.display = "block";
+    document.getElementById("feeLabel").textContent = t("feeLabelPrefix") + " (" + pct + "%)";
+    document.getElementById("feeValue").textContent = fee.toLocaleString() + " ₪";
+
+    const monthly = Math.round((grandTotal / count) * 100) / 100;
+    breakdownRow.style.display = "block";
+    breakdownRow.textContent = t("monthlyBreakdownPrefix") + " " + count + " " +
+      t("monthlyBreakdownMiddle") + " " + monthly.toLocaleString() + " ₪ " + t("monthlyBreakdownSuffix");
+  }else{
+    feeRow.style.display = "none";
+    breakdownRow.style.display = "none";
+  }
+  document.getElementById("grandTotalPrice").textContent = grandTotal.toLocaleString() + " ₪";
 }
 
 function toggleBusinessField(){
@@ -113,6 +172,8 @@ async function submitCheckout(){
   btn.disabled = true;
   btn.textContent = t("checkoutSubmitting");
 
+  const installments = parseInt(document.getElementById("installmentsCount").value, 10) || 1;
+
   try{
     const res = await fetch(PAYMENT_API_URL, {
       method: "POST",
@@ -120,7 +181,8 @@ async function submitCheckout(){
       body: JSON.stringify({
         action: "createPayment",
         customer: { name, phone, email, isBusiness, companyName },
-        lines: lines
+        lines: lines,
+        installments: installments
       })
     });
     const data = await res.json();
@@ -151,7 +213,10 @@ function renderCheckoutStaticText(){
   document.getElementById("pageSubtitle").textContent = t("checkoutScreenSubtitle");
   document.getElementById("emptyStateText").textContent = t("cartEmpty");
   document.getElementById("emptyStateBtn").textContent = t("catalogTitle");
-  document.getElementById("checkoutTotalLabel").textContent = t("checkoutTotalLabel");
+  document.getElementById("checkoutTotalLabel").textContent = t("checkoutSubtotalLabel");
+  document.getElementById("installmentsLabel").textContent = t("installmentsCountLabel");
+  document.getElementById("installmentsHint").textContent = t("installmentsHint");
+  document.getElementById("grandTotalLabel").textContent = t("grandTotalLabel");
   document.getElementById("labelName").textContent = t("labelName");
   document.getElementById("labelPhone").textContent = t("labelPhone");
   document.getElementById("labelEmail").textContent = t("labelEmail");

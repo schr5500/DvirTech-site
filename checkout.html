@@ -47,6 +47,25 @@
         <span id="checkoutTotalPrice">0 ₪</span>
       </div>
 
+      <div style="margin:18px 0 12px">
+        <label class="field-label" style="margin-bottom:6px;display:block" id="installmentsLabel"></label>
+        <select id="installmentsCount" onchange="renderCheckoutTotals()">
+          <option value="1">1</option><option value="2">2</option><option value="3">3</option>
+          <option value="4">4</option><option value="6">6</option><option value="8">8</option>
+          <option value="10">10</option><option value="12">12</option>
+        </select>
+        <p style="font-size:11.5px;color:var(--ink-soft);margin:6px 0 0" id="installmentsHint"></p>
+      </div>
+
+      <ul class="summary-list" id="feeRow" style="display:none;margin-bottom:8px">
+        <li><span class="k" id="feeLabel"></span><span class="v" id="feeValue">0 ₪</span></li>
+      </ul>
+      <div class="checkout-total-row">
+        <span id="grandTotalLabel"></span>
+        <span id="grandTotalPrice">0 ₪</span>
+      </div>
+      <p id="monthlyBreakdownRow" style="display:none;font-size:12.5px;color:var(--ink-soft);margin:8px 0 0;text-align:center"></p>
+
       <div class="checkout-field">
         <label class="field-label" id="labelName"></label>
         <input id="custName" type="text" autocomplete="name">

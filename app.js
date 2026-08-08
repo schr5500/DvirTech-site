@@ -3,6 +3,11 @@
    =====================================================================
    גנרי לגמרי מול CATALOG: הוספת מוצר לקטגוריה קיימת לא דורשת לגעת כאן.
    כל טקסט קבוע עובר דרך t() / tr() כדי לתמוך בעברית ואנגלית בו-זמנית.
+
+   ⚠️ CATALOG כבר לא const מקומי מ-catalog.js — הוא נטען חי מהגיליון
+   הפרטי דרך catalog-loader.js (fetch ל-4-payment-api.gs, action=getCatalog),
+   ומאתחל את הקבצים כאן רק אחרי שהוא מגיע. אם קורא לקובץ הזה עצמאית,
+   ודא ש-CATALOG כבר קיים לפני שקוראים לפונקציות למטה.
 ===================================================================== */
 
 const ICONS = {
@@ -223,6 +228,7 @@ function setLang(lang){
 
 /* ================= step + option rendering ================= */
 function renderSteps(){
+  if(!CATALOG) return;   // עוד לא נטען מהגיליון (ראה catalog-loader.js) — הגנה מפני מרוץ עם החלפת שפה מוקדמת
   const container = document.getElementById("stepsContainer");
   container.innerHTML = STEP_ORDER.map((key, idx) => `
     <div class="panel" id="panel-${key}">
@@ -569,6 +575,5 @@ function renderAIResult(parsed, resolution){
   content.innerHTML = `<div class="ai-summary">🧠 ${parsed.summary}</div>${fpsHtml}`;
 }
 
-renderStaticText();
-renderSteps();
-renderContextPicker();
+/* אין קריאת init כאן — catalog-loader.js קורא ל-renderStaticText/renderSteps/
+   renderContextPicker אחרי ש-CATALOG נטען בפועל מהגיליון (ראה הערה למעלה). */

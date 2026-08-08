@@ -29,7 +29,11 @@ img{max-width:100%;display:block}
 
 /* ---------- header ---------- */
 header{background:var(--navy-950);border-bottom:1px solid rgba(255,255,255,.05);position:sticky;top:0;z-index:30}
-.headbar{display:flex;align-items:center;justify-content:space-between;padding:12px 0}
+/* direction קבוע (לא תלוי ב-dir של המסמך) — כדי שהלוגו, כפתורי השפה
+   והניווט לא "יקפצו" לצד השני כשמחליפים בין עברית לאנגלית. רק הטקסט
+   עצמו (שמתורגם) אמור להשתנות, לא הפריסה. direction הוא property
+   שעובר בירושה, אז זה חל גם על .lang-switch/.lang-btn בפנים. */
+.headbar{display:flex;align-items:center;justify-content:space-between;padding:12px 0;direction:ltr}
 .brand{display:flex;align-items:center;gap:10px}
 .brand-logo{height:64px;width:auto;border-radius:12px;box-shadow:0 3px 14px rgba(0,0,0,.4);flex-shrink:0;display:block}
 .footer-logo{height:40px;width:auto;border-radius:8px;margin:0 auto 10px;display:block}
