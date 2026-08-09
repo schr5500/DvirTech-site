@@ -44,6 +44,10 @@ function maxQtyFor(cat, item){
     return mobo ? (mobo.cpuSockets || 1) : 1;
   }
   if(cat === "storage"){
+    // חריצי M.2 מגבילים כונני NVMe בלבד. כונן SATA (SSD או דיסק מכני)
+    // מתחבר בכבל ולא תופס חריץ, ולכן אין לו את התקרה הזו. כונן בלי
+    // driveType בגיליון נחשב NVMe — כך היה כל המלאי עד שנוספה העמודה.
+    if(item && item.driveType && item.driveType !== "nvme") return 4;
     const mobo = getItem("mobo");
     return mobo ? Math.max(1, mobo.m2Slots || 1) : 1;
   }
@@ -345,13 +349,18 @@ function updateSummary(){
     total += item.price * qty;
     const max = maxQtyFor(cat, item);
     const atMax = qty >= max;
-    const limitKey = { ram:"qtyLimitRam", cpu:"qtyLimitCpu", storage:"qtyLimitStorage" }[cat];
-    const limitNote = (atMax && QTY_CATEGORIES.includes(cat)) ? `<div class="qty-limit-note">${getItem("mobo") ? t(limitKey) : t("qtyLimitDefault")}</div>` : "";
+    // כונן SATA לא מוגבל בחריצי M.2 — גם ההסבר למשתמש חייב להשתנות איתו
+    const storageKey = (item.driveType && item.driveType !== "nvme") ? "qtyLimitStorageSata" : "qtyLimitStorage";
+    const limitKey = { ram:"qtyLimitRam", cpu:"qtyLimitCpu", storage:storageKey }[cat];
+    // תקרת SATA לא תלויה בלוח האם, ולכן ההסבר שלה תקף גם לפני שנבחר לוח
+    const limitText = (getItem("mobo") || storageKey === "qtyLimitStorageSata" && cat === "storage")
+      ? t(limitKey) : t("qtyLimitDefault");
+    const limitNote = (atMax && QTY_CATEGORIES.includes(cat)) ? `<div class="qty-limit-note">${limitText}</div>` : "";
     const qtyControls = QTY_CATEGORIES.includes(cat) ? `
       <span class="qty-ctrl">
         <button onclick="changeQty('${cat}',-1)" ${qty<=1?"disabled":""}>−</button>
         <span>${qty}</span>
-        <button onclick="changeQty('${cat}',1)" ${atMax?"disabled":""} title="${atMax ? (getItem("mobo") ? t(limitKey) : t("qtyLimitDefault")) : ""}">+</button>
+        <button onclick="changeQty('${cat}',1)" ${atMax?"disabled":""} title="${atMax ? limitText : ""}">+</button>
       </span>${limitNote}` : "";
     return `<li><span class="k">${localLabel(cat)}</span><span class="v">${localName(item)}${qty>1?` × ${qty}`:""}${qtyControls}</span></li>`;
   }).join("");

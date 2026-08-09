@@ -33,7 +33,7 @@ const FACETS = {
   gpu:         ["chipset", "brand", "vramGb", "tier"],
   mobo:        ["brand", "socket", "ramType", "formFactor", "tier"],
   ram:         ["brand", "capacityGb", "ramType", "speedMhz"],
-  storage:     ["brand"],
+  storage:     ["brand", "driveType", "capacityGb", "pcieGen"],
   cooling:     ["brand", "type", "radiatorMm", "heightMm"],
   psu:         ["brand", "wattage"],
   "case":      ["brand", "supportedFormFactors", "maxGpuLengthMm"]
@@ -62,6 +62,8 @@ const FACET_LABELS = {
   formFactor:           { he: "גודל לוח",          en: "Form factor" },
   supportedFormFactors: { he: "לוחות נתמכים",      en: "Supported boards" },
   capacityGb:           { he: "נפח",               en: "Capacity" },
+  driveType:            { he: "סוג כונן",          en: "Drive type" },
+  pcieGen:              { he: "דור PCIe",          en: "PCIe generation" },
   speedMhz:             { he: "מהירות",            en: "Speed" },
   type:                 { he: "סוג קירור",         en: "Cooler type" },
   radiatorMm:           { he: "גודל רדיאטור",      en: "Radiator size" },
@@ -78,6 +80,8 @@ const VALUE_LABELS = {
   connection: { wired:{he:"חוטי",en:"Wired"}, wireless:{he:"אלחוטי",en:"Wireless"}, bluetooth:{he:"Bluetooth",en:"Bluetooth"} },
   switchType: { mechanical:{he:"מכני",en:"Mechanical"}, membrane:{he:"ממברנה",en:"Membrane"}, optical:{he:"אופטי",en:"Optical"} },
   type:       { air:{he:"אוויר",en:"Air"}, aio:{he:"נוזלי (AIO)",en:"Liquid (AIO)"} },
+  driveType:  { nvme:{he:"SSD NVMe (M.2)",en:"NVMe SSD (M.2)"}, "sata-ssd":{he:"SSD SATA",en:"SATA SSD"}, hdd:{he:"דיסק מכני (HDD)",en:"Hard drive (HDD)"} },
+  pcieGen:    { 3:{he:"PCIe 3.0",en:"PCIe 3.0"}, 4:{he:"PCIe 4.0",en:"PCIe 4.0"}, 5:{he:"PCIe 5.0",en:"PCIe 5.0"} },
   tier:       { 1:{he:"בסיסי",en:"Entry"}, 2:{he:"בינוני",en:"Mid"}, 3:{he:"גבוה",en:"High"}, 4:{he:"פרימיום",en:"Premium"} }
 };
 
@@ -103,10 +107,16 @@ function valueLabel(facetKey, raw){
   const map = VALUE_LABELS[facetKey];
   if(map && map[raw] !== undefined) return L(map[raw]);
   if(typeof raw === "boolean") return raw ? tr("כן","Yes") : tr("לא","No");
+  // נפח אחסון מוצג ביחידה שאנשים באמת אומרים: 2TB, לא 2,000GB. חייב
+  // לבוא לפני שורת היחידות — אחרת "GB" של FACET_UNITS תופס קודם והכלל
+  // הזה לא רץ לעולם. capacityGb משמש גם לזיכרון RAM, ושם הערכים לעולם
+  // לא מגיעים ל-1000 ולכן הם ממשיכים להיות מוצגים ב-GB.
+  if((facetKey === "storageGb" || facetKey === "capacityGb") && typeof raw === "number" && raw >= 1000){
+    return (raw/1000) + "TB";
+  }
   const unit = FACET_UNITS[facetKey];
   if(unit && typeof raw === "number") return raw.toLocaleString() + unit;
   if(facetKey === "warrantyMonths") return raw + " " + tr("חודשים","months");
-  if(facetKey === "storageGb" && raw >= 1000) return (raw/1000) + "TB";
   return String(raw);
 }
 
