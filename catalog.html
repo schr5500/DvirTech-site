@@ -2,58 +2,23 @@
 <html lang="he" dir="rtl">
 <head>
 <meta charset="UTF-8">
-<meta name="viewport" content="width=device-width, initial-scale=1.0">
-<title>DvirTech — קטלוג</title>
+<title>DvirTech — מוצרים</title>
+<!-- הקטלוג עבר ל-products.html (חנות אחת עם תת-קטגוריות וסינון, שנקראת
+     ישירות מגיליון הספקים). הדף הזה נשאר רק כדי שקישורים ישנים
+     באתר, בסימניות ובמנועי חיפוש ימשיכו להגיע ליעד הנכון. -->
+<link rel="canonical" href="products.html">
+<meta name="robots" content="noindex">
 <script>
   (function(){
-    var saved = "he";
-    try { saved = localStorage.getItem("dvirtech_lang") || "he"; } catch(e) {}
-    document.documentElement.lang = saved;
-    document.documentElement.dir = saved === "he" ? "rtl" : "ltr";
+    var cat = new URLSearchParams(location.search).get("cat");
+    location.replace("products.html" + (cat ? "?cat=" + encodeURIComponent(cat) : ""));
   })();
 </script>
-<link rel="preconnect" href="https://fonts.googleapis.com">
-<link href="https://fonts.googleapis.com/css2?family=Rubik:wght@400;500;600;700;800;900&family=Heebo:wght@300;400;500;700&display=swap" rel="stylesheet">
-<link rel="stylesheet" href="style.css">
+<meta http-equiv="refresh" content="0; url=products.html">
 </head>
 <body>
-
-<header>
-  <div class="wrap headbar">
-    <div class="brand"><img class="brand-logo" src="images/logo-dvirtech.png" alt="DvirTech"></div>
-    <nav>
-      <a href="catalog.html" id="navReady"></a>
-      <a href="builder.html" id="navBuilder"></a>
-      <a href="catalog.html" id="navPeripherals"></a>
-      <a href="coming-soon.html?service=support" id="navLab"></a>
-      <a href="contact.html" id="navContact"></a>
-    </nav>
-    <div class="lang-switch">
-      <button class="lang-btn" data-lang="he" onclick="setLang('he')">עברית</button>
-      <button class="lang-btn" data-lang="en" onclick="setLang('en')">English</button>
-    </div>
-  </div>
-</header>
-
-<div class="wrap" style="padding-top:36px">
-  <h1 id="catalogTitle" style="font-size:26px;margin:0 0 8px"></h1>
-  <p id="catalogSubtitle" style="color:var(--ink-soft);margin:0 0 10px"></p>
-  <div class="catalog-grid" id="catalogGrid"></div>
-</div>
-
-<footer>
-  <img class="footer-logo" src="images/logo-dvirtech.png" alt="DvirTech">
-  <span id="footerText"></span>
-  <div class="footer-legal">
-    <a href="about.html" id="footerAboutLink"></a>
-    <a href="contact.html" id="footerContactLink"></a>
-    <a href="terms.html" id="footerTermsLink"></a>
-  </div>
-</footer>
-
-<script src="i18n.js"></script>
-<script src="store-products.js"></script>
-<script src="store-catalog-render.js"></script>
-<script src="cart.js"></script>
+<p style="font-family:system-ui;padding:24px">
+  מעבירים אותך לעמוד המוצרים… <a href="products.html">לחצו כאן אם זה לא קורה אוטומטית</a>
+</p>
 </body>
 </html>

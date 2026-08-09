@@ -1,0 +1,154 @@
+/* =====================================================================
+   DvirTech — עיצוב דף המוצרים (products.html)
+   =====================================================================
+   קובץ נפרד מ-style.css בכוונה: כל מה שנוגע לדף החנות והסינון יושב כאן,
+   כך שאפשר לעצב אותו מחדש בלי לגעת בשאר האתר. משתמש במשתני הצבע
+   הקיימים (--ink, --ink-soft וכו') עם ערכי גיבוי, כדי שיישב טוב גם אם
+   style.css ישתנה.
+===================================================================== */
+
+.shop-wrap { padding-top: 32px; padding-bottom: 60px; }
+.shop-title { font-size: 26px; margin: 0 0 6px; }
+.shop-subtitle { color: var(--ink-soft, #64748b); margin: 0 0 18px; max-width: 720px; }
+
+/* ---------- תפריט "מוצרים" בהדר ---------- */
+.nav-drop { position: relative; display: inline-block; }
+.nav-drop-btn {
+  background: none; border: 0; cursor: pointer; font: inherit; color: inherit;
+  padding: 0; letter-spacing: inherit;
+}
+.nav-drop-menu {
+  display: none; position: absolute; top: calc(100% + 10px); inset-inline-start: 0;
+  min-width: 200px; background: #fff; border: 1px solid rgba(0,0,0,.08);
+  border-radius: 12px; box-shadow: 0 12px 32px rgba(15,23,42,.14);
+  padding: 6px; z-index: 60;
+}
+.nav-drop.open .nav-drop-menu { display: block; }
+.nav-drop-menu button {
+  display: block; width: 100%; text-align: start; background: none; border: 0;
+  padding: 9px 12px; border-radius: 8px; cursor: pointer; font: inherit;
+  color: var(--ink, #0f172a); white-space: nowrap;
+}
+.nav-drop-menu button:hover { background: #f1f5f9; }
+
+/* ---------- רצועת הקטגוריות ---------- */
+.cat-strip {
+  display: flex; gap: 8px; overflow-x: auto; padding-bottom: 12px;
+  margin-bottom: 18px; scrollbar-width: thin;
+}
+.cat-pill {
+  flex: 0 0 auto; display: inline-flex; align-items: center; gap: 7px;
+  padding: 9px 16px; border-radius: 999px; cursor: pointer;
+  border: 1px solid rgba(15,23,42,.12); background: #fff;
+  font-size: 14px; font-weight: 600; color: var(--ink, #0f172a);
+  transition: background .15s, border-color .15s;
+}
+.cat-pill:hover { border-color: rgba(15,23,42,.28); }
+.cat-pill.active { background: var(--ink, #0f172a); color: #fff; border-color: transparent; }
+.cat-pill-n {
+  font-size: 11px; font-weight: 700; opacity: .6;
+  background: rgba(15,23,42,.08); border-radius: 999px; padding: 1px 7px;
+}
+.cat-pill.active .cat-pill-n { background: rgba(255,255,255,.2); opacity: .9; }
+
+/* ---------- פריסה: סרגל סינון + רשת מוצרים ---------- */
+.shop-layout { display: grid; grid-template-columns: 260px 1fr; gap: 26px; align-items: start; }
+
+.filters {
+  position: sticky; top: 20px; background: #fff; border-radius: 14px;
+  border: 1px solid rgba(15,23,42,.08); padding: 16px; max-height: calc(100vh - 40px);
+  overflow-y: auto;
+}
+.filters-head { display: flex; align-items: center; justify-content: space-between; margin-bottom: 12px; }
+.filters-head h2 { font-size: 16px; margin: 0; }
+.filters-close, .filters-apply, .filters-toggle { display: none; }
+
+.filter-search {
+  width: 100%; padding: 9px 12px; border-radius: 9px; font: inherit;
+  border: 1px solid rgba(15,23,42,.14); margin-bottom: 14px;
+}
+
+.filter-group { border-top: 1px solid rgba(15,23,42,.07); }
+.filter-group:first-child { border-top: 0; }
+.filter-group-head {
+  width: 100%; display: flex; align-items: center; justify-content: space-between;
+  background: none; border: 0; cursor: pointer; padding: 12px 2px;
+  font: inherit; font-weight: 700; font-size: 14px; color: var(--ink, #0f172a);
+}
+.filter-group-head .chev { transition: transform .18s; opacity: .5; }
+.filter-group.open .filter-group-head .chev { transform: rotate(180deg); }
+.filter-group-body { display: none; padding-bottom: 10px; }
+.filter-group.open .filter-group-body { display: block; }
+
+.filter-row {
+  display: flex; align-items: center; gap: 9px; padding: 6px 2px;
+  cursor: pointer; font-size: 14px; border-radius: 7px;
+}
+.filter-row:hover { background: #f8fafc; }
+.filter-row input { accent-color: var(--ink, #0f172a); cursor: pointer; }
+.filter-row-label { flex: 1; }
+/* ערך שאין לו תוצאות תחת הסינון הנוכחי — עדיין לחיץ, רק מעומעם */
+.filter-row.dim { opacity: .42; }
+.filter-row-count { font-size: 12px; color: var(--ink-soft, #64748b); }
+.no-filters { font-size: 14px; color: var(--ink-soft, #64748b); }
+
+/* ---------- סרגל כלים עליון ---------- */
+.shop-toolbar { display: flex; align-items: center; gap: 14px; margin-bottom: 12px; flex-wrap: wrap; }
+.result-count { font-size: 14px; color: var(--ink-soft, #64748b); font-weight: 600; }
+.sort-wrap { margin-inline-start: auto; display: flex; align-items: center; gap: 8px; font-size: 14px; }
+.sort-wrap select {
+  padding: 7px 10px; border-radius: 8px; font: inherit;
+  border: 1px solid rgba(15,23,42,.14); background: #fff; cursor: pointer;
+}
+
+/* ---------- צ'יפים של סינונים פעילים ---------- */
+.active-chips { display: flex; flex-wrap: wrap; gap: 8px; margin-bottom: 16px; }
+.active-chips:empty { margin-bottom: 0; }
+.chip {
+  display: inline-flex; align-items: center; gap: 7px; cursor: pointer;
+  padding: 6px 12px; border-radius: 999px; font-size: 13px; font-weight: 600;
+  background: #eef2ff; border: 1px solid #c7d2fe; color: #3730a3;
+}
+.chip:hover { background: #e0e7ff; }
+.chip-x { opacity: .6; font-size: 11px; }
+.chip-clear { background: none; border-color: rgba(15,23,42,.16); color: var(--ink-soft, #64748b); }
+
+/* ---------- רשת המוצרים ---------- */
+.product-grid {
+  display: grid; gap: 16px;
+  grid-template-columns: repeat(auto-fill, minmax(215px, 1fr));
+}
+.p-card {
+  display: flex; flex-direction: column; gap: 7px; padding: 16px;
+  background: #fff; border: 1px solid rgba(15,23,42,.08); border-radius: 14px;
+  transition: box-shadow .18s, transform .18s;
+}
+.p-card:hover { box-shadow: 0 10px 26px rgba(15,23,42,.09); transform: translateY(-2px); }
+.p-brand {
+  font-size: 11px; font-weight: 800; letter-spacing: .04em; text-transform: uppercase;
+  color: var(--ink-soft, #64748b);
+}
+.p-name { font-size: 15px; margin: 0; line-height: 1.35; }
+.p-spec { font-size: 13px; color: var(--ink-soft, #64748b); margin: 0; flex: 1; line-height: 1.5; }
+.p-price { font-size: 19px; font-weight: 800; margin-top: 4px; }
+.p-card .btn { width: 100%; }
+
+.empty-state {
+  padding: 40px 20px; text-align: center; color: var(--ink-soft, #64748b);
+  display: flex; flex-direction: column; align-items: center; gap: 14px;
+}
+
+/* ---------- מובייל: הסינון הופך למגירה ---------- */
+@media (max-width: 860px) {
+  .shop-layout { grid-template-columns: 1fr; }
+  .filters-toggle { display: inline-block; }
+  .filters {
+    display: none; position: fixed; inset: auto 0 0 0; top: 0;
+    z-index: 90; border-radius: 0; max-height: 100vh; padding: 20px;
+  }
+  .filters.show { display: block; }
+  .filters-close { display: block; background: none; border: 0; font-size: 20px; cursor: pointer; }
+  .filters-apply { display: block; width: 100%; margin-top: 18px; position: sticky; bottom: 0; }
+  .sort-wrap { margin-inline-start: 0; width: 100%; }
+  .product-grid { grid-template-columns: repeat(auto-fill, minmax(160px, 1fr)); }
+}

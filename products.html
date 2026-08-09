@@ -1,0 +1,94 @@
+<!DOCTYPE html>
+<html lang="he" dir="rtl">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>DvirTech — מוצרים</title>
+<script>
+  (function(){
+    var saved = "he";
+    try { saved = localStorage.getItem("dvirtech_lang") || "he"; } catch(e) {}
+    document.documentElement.lang = saved;
+    document.documentElement.dir = saved === "he" ? "rtl" : "ltr";
+  })();
+</script>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link href="https://fonts.googleapis.com/css2?family=Rubik:wght@400;500;600;700;800;900&family=Heebo:wght@300;400;500;700&display=swap" rel="stylesheet">
+<link rel="stylesheet" href="style.css">
+<link rel="stylesheet" href="products.css">
+</head>
+<body>
+
+<header>
+  <div class="wrap headbar">
+    <div class="brand"><img class="brand-logo" src="images/logo-dvirtech.png" alt="DvirTech"></div>
+    <nav>
+      <!-- תפריט "מוצרים" עם תת-קטגוריות. הרשימה עצמה נבנית ב-JS מתוך
+           אותו getCatalog שמזין את הדף, כדי שלשונית חדשה בגיליון תופיע
+           בתפריט אוטומטית בלי לגעת ב-HTML. -->
+      <div class="nav-drop" id="navProductsDrop">
+        <button class="nav-drop-btn" id="navProducts" aria-haspopup="true" aria-expanded="false"></button>
+        <div class="nav-drop-menu" id="navProductsMenu"></div>
+      </div>
+      <a href="builder.html" id="navBuilder"></a>
+      <a href="coming-soon.html?service=support" id="navLab"></a>
+      <a href="contact.html" id="navContact"></a>
+    </nav>
+    <div class="lang-switch">
+      <button class="lang-btn" data-lang="he" onclick="setLang('he')">עברית</button>
+      <button class="lang-btn" data-lang="en" onclick="setLang('en')">English</button>
+    </div>
+  </div>
+</header>
+
+<div class="wrap shop-wrap">
+  <h1 id="shopTitle" class="shop-title"></h1>
+  <p id="shopSubtitle" class="shop-subtitle"></p>
+
+  <!-- רצועת קטגוריות אופקית — ניווט מהיר בלי לפתוח את התפריט -->
+  <div class="cat-strip" id="catStrip"></div>
+
+  <div class="shop-layout">
+    <!-- סרגל הסינון. בדסקטופ קבוע בצד, במובייל נפתח כמגירה מלמטה. -->
+    <aside class="filters" id="filtersPanel">
+      <div class="filters-head">
+        <h2 id="filtersTitle"></h2>
+        <button class="filters-close" id="filtersClose" onclick="closeFilters()" aria-label="close">✕</button>
+      </div>
+      <input type="search" class="filter-search" id="filterSearch" oninput="onSearchInput(this.value)">
+      <div id="filterGroups"></div>
+      <button class="btn btn-secondary filters-apply" onclick="closeFilters()" id="filtersApplyBtn"></button>
+    </aside>
+
+    <main class="shop-main">
+      <div class="shop-toolbar">
+        <button class="btn btn-secondary filters-toggle" onclick="openFilters()" id="filtersToggleBtn"></button>
+        <span class="result-count" id="resultCount"></span>
+        <label class="sort-wrap">
+          <span id="sortLabel"></span>
+          <select id="sortSelect" onchange="onSortChange(this.value)"></select>
+        </label>
+      </div>
+
+      <div class="active-chips" id="activeChips"></div>
+      <div class="product-grid" id="productGrid"></div>
+      <div class="empty-state" id="emptyState" style="display:none"></div>
+    </main>
+  </div>
+</div>
+
+<footer>
+  <img class="footer-logo" src="images/logo-dvirtech.png" alt="DvirTech">
+  <span id="footerText"></span>
+  <div class="footer-legal">
+    <a href="about.html" id="footerAboutLink"></a>
+    <a href="contact.html" id="footerContactLink"></a>
+    <a href="terms.html" id="footerTermsLink"></a>
+  </div>
+</footer>
+
+<script src="i18n.js"></script>
+<script src="products.js"></script>
+<script src="cart.js"></script>
+</body>
+</html>
