@@ -98,6 +98,10 @@ let currentCat = null;
 let activeFilters = {};      // { facetKey: Set(values) }
 let searchTerm = "";
 let sortMode = "priceAsc";
+/* טווח המחירים שנבחר. null = הקצה לא הוזז, כלומר אין הגבלה מהצד הזה —
+   כך אפשר להבדיל בין "המשתמש בחר בדיוק את המחיר הגבוה ביותר" לבין
+   "המשתמש לא נגע בכלל", וה-chip לא קופץ סתם. */
+let priceRange = { min: null, max: null };
 
 /* ==================== helpers ==================== */
 function L(obj){ return LANG === "en" ? obj.en : obj.he; }
@@ -140,7 +144,49 @@ function valuesOf(item, key){
   return Array.isArray(v) ? v : [v];
 }
 
+/* ==================== טווח המחירים ====================
+   גבולות הסקאלה נגזרים מכל המוצרים בקטגוריה ולא מהתוצאות המסוננות —
+   אחרת הסרגל היה מתכווץ תוך כדי גרירה והידית הייתה בורחת מתחת לאצבע.
+   הצעדים מעוגלים כלפי חוץ כדי שהקצוות יהיו מספרים נעימים (₪250 ולא ₪247). */
+function priceStepFor(span){
+  if(span <= 200) return 10;
+  if(span <= 1000) return 25;
+  if(span <= 5000) return 50;
+  return 100;
+}
+
+function priceBounds(){
+  const prices = sellableItems(currentCat).map(it => Number(it.price)).filter(p => p > 0);
+  if(prices.length < 2) return null;                    // מוצר יחיד — אין מה לסנן
+  const lowest = Math.min.apply(null, prices), highest = Math.max.apply(null, prices);
+  if(lowest === highest) return null;
+  const step = priceStepFor(highest - lowest);
+  const lo = Math.floor(lowest / step) * step;
+  const hi = Math.ceil(highest / step) * step;
+  return { lo: lo, hi: hi, step: step };
+}
+
+// הערך שמוצג בידית: מה שנבחר, ואם לא נגעו בה — הקצה של הסקאלה
+function priceHandles(b){
+  return {
+    min: priceRange.min === null ? b.lo : Math.max(b.lo, Math.min(priceRange.min, b.hi)),
+    max: priceRange.max === null ? b.hi : Math.min(b.hi, Math.max(priceRange.max, b.lo))
+  };
+}
+
+function priceFilterActive(){
+  return priceRange.min !== null || priceRange.max !== null;
+}
+
+function itemMatchesPrice(item){
+  const p = Number(item.price);
+  if(priceRange.min !== null && p < priceRange.min) return false;
+  if(priceRange.max !== null && p > priceRange.max) return false;
+  return true;
+}
+
 function itemMatchesFilters(item, exceptKey){
+  if(!itemMatchesPrice(item)) return false;
   for(const key in activeFilters){
     if(key === exceptKey) continue;
     const chosen = activeFilters[key];
@@ -222,16 +268,169 @@ function renderNavMenu(){
   }).join("");
 }
 
+function priceText(v){ return Number(v).toLocaleString() + " ₪"; }
+
+/* שתי סקאלות שקופות אחת על השנייה. הפעולה על ה-input עצמו מנוטרלת
+   (pointer-events) והידיות בלבד לחיצות — אחרת הסקאלה העליונה הייתה
+   חוסמת לגמרי את הידית שמתחתיה.
+   ה-container מוגדר LTR בכוונה, גם באתר שכולו RTL: זול משמאל ויקר
+   מימין זה מה שכולם מצפים לו בסרגל מחירים, וזה גם מה שדביר ביקש. */
+function renderPriceGroup(){
+  const b = priceBounds();
+  if(!b) return "";
+  const h = priceHandles(b);
+  const pct = v => ((v - b.lo) / (b.hi - b.lo)) * 100;
+
+  // תמיד פתוח: מחיר הוא הסינון הראשון שאנשים מחפשים, וסקאלה מקופלת
+  // נראית כמו כותרת ולא כמו משהו שאפשר לשחק איתו.
+  return `
+    <div class="filter-group price-group open">
+      <button class="filter-group-head" onclick="toggleGroup(this)">
+        <span>${tr("מחיר","Price")}</span>
+        <span class="chev">▾</span>
+      </button>
+      <div class="filter-group-body">
+        <div class="price-slider">
+          <div class="price-track"></div>
+          <div class="price-fill" id="priceFill"
+               style="left:${pct(h.min)}%;right:${100 - pct(h.max)}%"></div>
+          <input type="range" class="price-input" id="priceMin"
+                 min="${b.lo}" max="${b.hi}" step="${b.step}" value="${h.min}"
+                 aria-label="${tr("מחיר מינימלי","Minimum price")}"
+                 oninput="onPriceInput('min')" onchange="onPriceCommit()">
+          <input type="range" class="price-input" id="priceMax"
+                 min="${b.lo}" max="${b.hi}" step="${b.step}" value="${h.max}"
+                 aria-label="${tr("מחיר מקסימלי","Maximum price")}"
+                 oninput="onPriceInput('max')" onchange="onPriceCommit()">
+        </div>
+        <div class="price-fields">
+          ${priceFieldHtml_("min", tr("מחיר מינימלי","Min price"), h.min, b)}
+          <span class="price-fields-sep">–</span>
+          ${priceFieldHtml_("max", tr("מחיר מקסימלי","Max price"), h.max, b)}
+        </div>
+      </div>
+    </div>`;
+}
+
+/* התיבה מתחת לכל ידית — למי שיודע בדיוק איזה מספר הוא רוצה ולא בא לו
+   לכוון אותו בגרירה. onchange ולא oninput: סינון על כל הקשה היה מסנן
+   לפי "1" באמצע הקלדת "1500". Enter מוציא פוקוס וזה מפעיל את onchange. */
+function priceFieldHtml_(which, label, value, b){
+  return `
+    <label class="price-field">
+      <span class="price-field-label">${label}</span>
+      <span class="price-field-box">
+        <span class="price-field-cur">₪</span>
+        <input type="number" class="price-field-input" id="price${which === "min" ? "Min" : "Max"}Box"
+               inputmode="numeric" min="${b.lo}" max="${b.hi}" value="${value}"
+               onchange="onPriceBox('${which}', this.value)"
+               onkeydown="if(event.key==='Enter'){event.preventDefault();this.blur();}">
+      </span>
+    </label>`;
+}
+
+/* כשהידיות יושבות בדיוק אחת על השנייה רק העליונה ניתנת לתפיסה, ולכן
+   העליונה חייבת להיות זו שיש לה לאן לזוז: בקצה העליון של הסקאלה זו
+   המינימום (שיכולה רק לרדת), ובקצה התחתון זו המקסימום. בלי זה אפשר
+   להיתקע עם שתי ידיות צמודות שאף אחת מהן לא זזה. */
+function priceStack_(b, lo){
+  const elMin = document.getElementById("priceMin");
+  if(elMin) elMin.style.zIndex = lo > (b.lo + b.hi) / 2 ? 5 : 3;
+}
+
+/* מקור אמת אחד: priceRange. הסקאלה, הפס והתיבות כולם נגזרים ממנו כאן,
+   כך שגרירה והקלדה לא יכולות להיפרד זו מזו.
+   הערה על ה"פיקסל": הסקאלה קופצת בצעדים (₪25/₪50/₪100) והתיבה מקבלת
+   מספר מדויק. במקרה כזה הידית עומדת על הצעד הקרוב אבל המספר שנשמר
+   ומסנן הוא מה שהוקלד — עדיף עיגול של כמה פיקסלים על פני "תיקנתי לך
+   את המספר שהקלדת". */
+function syncPriceUI_(b){
+  const h = priceHandles(b);
+  const elMin = document.getElementById("priceMin"), elMax = document.getElementById("priceMax");
+  if(!elMin || !elMax) return;
+
+  elMin.value = h.min;
+  elMax.value = h.max;
+  // הפס מצויר לפי מה שהסקאלה באמת מציגה (אחרי הצמדה לצעד), אחרת קצה
+  // הפס והידית לא יושבים באותו מקום
+  const pct = v => ((v - b.lo) / (b.hi - b.lo)) * 100;
+  const fill = document.getElementById("priceFill");
+  fill.style.left = pct(Number(elMin.value)) + "%";
+  fill.style.right = (100 - pct(Number(elMax.value))) + "%";
+
+  const boxMin = document.getElementById("priceMinBox"), boxMax = document.getElementById("priceMaxBox");
+  if(boxMin && document.activeElement !== boxMin) boxMin.value = h.min;
+  if(boxMax && document.activeElement !== boxMax) boxMax.value = h.max;
+
+  priceStack_(b, Number(elMin.value));
+}
+
+/* תוך כדי גרירה מרעננים רק את הסקאלה, התיבות והתוצאות — בכוונה לא את
+   סרגל הסינון כולו. renderFilters בונה מחדש את ה-innerHTML, וזה היה
+   מוחק את ה-input שהאצבע אוחזת בו והגרירה הייתה נקטעת אחרי צעד אחד. */
+function onPriceInput(which){
+  const b = priceBounds();
+  if(!b) return;
+  const elMin = document.getElementById("priceMin"), elMax = document.getElementById("priceMax");
+  let lo = Number(elMin.value), hi = Number(elMax.value);
+
+  // הידיות לא עוברות אחת את השנייה — זו שנדחפה נעצרת בשנייה
+  if(lo > hi){ if(which === "min") lo = hi; else hi = lo; }
+
+  setPriceSide_("min", lo, b);
+  setPriceSide_("max", hi, b);
+  syncPriceUI_(b);
+  renderChips();
+  renderGrid();
+}
+
+// קצה שיושב על גבול הסקאלה = "לא הוגבל", ולכן null ולא מספר. כך הצ'יפ
+// לא מופיע סתם ו"נקה הכל" יודע שאין מה לנקות.
+function setPriceSide_(which, value, b){
+  const v = Math.min(b.hi, Math.max(b.lo, value));
+  if(which === "min") priceRange.min = v <= b.lo ? null : v;
+  else                priceRange.max = v >= b.hi ? null : v;
+}
+
+/* התיבות: מספר ריק או לא חוקי = ביטול ההגבלה מהצד הזה. מספר שחורג
+   מהגבולות נצבט פנימה, ומספר שעובר את הצד השני נעצר בו — בדיוק כמו
+   הידיות, כדי ששתי דרכי הקלט יתנהגו אותו דבר. */
+function onPriceBox(which, raw){
+  const b = priceBounds();
+  if(!b) return;
+  const txt = String(raw).replace(/[^\d.-]/g, "").trim();
+  const num = txt === "" ? NaN : Number(txt);
+
+  if(isNaN(num)){
+    if(which === "min") priceRange.min = null; else priceRange.max = null;
+  }else{
+    const h = priceHandles(b);
+    const capped = which === "min" ? Math.min(num, h.max) : Math.max(num, h.min);
+    setPriceSide_(which, capped, b);
+  }
+
+  renderAll();          // הקלדה היא סוף פעולה, אז מרעננים גם את המונים
+}
+
+// בסוף הגרירה מרעננים הכל, כדי שהמונים של שאר הקבוצות יתעדכנו
+function onPriceCommit(){ renderAll(); }
+
+function clearPriceFilter(){
+  priceRange = { min: null, max: null };
+  renderAll();
+}
+
 function renderFilters(){
   const wrap = document.getElementById("filterGroups");
   const groups = buildFacetData();
+  const priceHtml = renderPriceGroup();
 
-  if(!groups.length){
+  if(!groups.length && !priceHtml){
     wrap.innerHTML = `<p class="no-filters">${tr("אין סינונים לקטגוריה הזו.","No filters for this category.")}</p>`;
     return;
   }
 
-  wrap.innerHTML = groups.map((g, gi) => {
+  wrap.innerHTML = priceHtml + groups.map((g, gi) => {
     const chosen = activeFilters[g.key];
     // ברירת מחדל: 3 הקבוצות הראשונות פתוחות, השאר מקופלות — אחרת
     // הסרגל ארוך מדי וקשה לסרוק אותו בעין.
@@ -253,6 +452,9 @@ function renderFilters(){
         </div>
       </div>`;
   }).join("");
+
+  const pb = priceBounds();
+  if(pb) priceStack_(pb, priceHandles(pb).min);
 }
 
 function renderChips(){
@@ -265,6 +467,18 @@ function renderChips(){
         ${facetLabel(key)}: ${valueLabel(key, raw)} <span class="chip-x">✕</span></button>`);
     });
   });
+  if(priceFilterActive()){
+    const b = priceBounds();
+    if(b){
+      const h = priceHandles(b);
+      // רק הקצה שהוזז מוצג — "עד ₪2,000" קריא יותר מ-"₪0 – ₪2,000"
+      const label = priceRange.min === null ? tr("עד ","Up to ") + priceText(h.max)
+                  : priceRange.max === null ? tr("מ-","From ") + priceText(h.min)
+                  : priceText(h.min) + " – " + priceText(h.max);
+      chips.push(`<button class="chip" onclick="clearPriceFilter()">
+        ${tr("מחיר","Price")}: ${label} <span class="chip-x">✕</span></button>`);
+    }
+  }
   if(searchTerm){
     chips.push(`<button class="chip" onclick="clearSearch()">"${searchTerm}" <span class="chip-x">✕</span></button>`);
   }
@@ -316,6 +530,7 @@ function selectCategory(cat){
   if(cat === currentCat) return;
   currentCat = cat;
   activeFilters = {};
+  priceRange = { min: null, max: null };   // טווח של קטגוריה אחת לא רלוונטי לאחרת
   searchTerm = "";
   document.getElementById("filterSearch").value = "";
   try{ history.replaceState(null, "", "?cat=" + encodeURIComponent(cat)); }catch(e){}
@@ -335,6 +550,7 @@ function toggleFilter(key, value, on){
 
 function clearAllFilters(){
   activeFilters = {};
+  priceRange = { min: null, max: null };
   searchTerm = "";
   document.getElementById("filterSearch").value = "";
   renderAll();

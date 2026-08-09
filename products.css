@@ -92,6 +92,76 @@
 .filter-row-count { font-size: 12px; color: var(--ink-soft, #64748b); }
 .no-filters { font-size: 14px; color: var(--ink-soft, #64748b); }
 
+/* ---------- סינון לפי טווח מחירים ----------
+   כל הבלוק LTR גם באתר RTL: זול משמאל, יקר מימין — ככה סרגלי מחיר
+   נראים בכל מקום, והמספרים ממילא נקראים משמאל לימין. */
+.price-group .filter-group-body { direction: ltr; padding: 2px 4px 14px; }
+.price-slider { position: relative; height: 26px; }
+.price-track, .price-fill {
+  position: absolute; top: 50%; transform: translateY(-50%);
+  height: 4px; border-radius: 4px; pointer-events: none;
+}
+.price-track { left: 0; right: 0; background: rgba(15,23,42,.12); }
+.price-fill { background: var(--grad, linear-gradient(100deg,#2563EB,#4FD9C7)); }
+
+/* שני ה-input שקופים ומונחים זה על זה. בלי pointer-events:none הסקאלה
+   העליונה הייתה בולעת כל לחיצה והידית התחתונה לא הייתה ניתנת לתפיסה. */
+.price-input {
+  position: absolute; left: 0; top: 0; width: 100%; height: 26px; margin: 0;
+  -webkit-appearance: none; appearance: none;
+  background: none; pointer-events: none;
+}
+.price-input:focus { outline: none; }
+.price-input::-webkit-slider-thumb {
+  -webkit-appearance: none; pointer-events: auto; cursor: grab;
+  width: 18px; height: 18px; border-radius: 50%;
+  background: #fff; border: 2px solid var(--blue, #2563EB);
+  box-shadow: 0 1px 4px rgba(15,23,42,.25);
+}
+.price-input::-webkit-slider-thumb:active { cursor: grabbing; }
+.price-input::-moz-range-thumb {
+  pointer-events: auto; cursor: grab;
+  width: 18px; height: 18px; border-radius: 50%;
+  background: #fff; border: 2px solid var(--blue, #2563EB);
+  box-shadow: 0 1px 4px rgba(15,23,42,.25);
+}
+.price-input:focus-visible::-webkit-slider-thumb { box-shadow: 0 0 0 4px rgba(37,99,235,.25); }
+.price-input:focus-visible::-moz-range-thumb    { box-shadow: 0 0 0 4px rgba(37,99,235,.25); }
+/* סדר הערימה נקבע ב-JS (priceStack_): כששתי הידיות יושבות בדיוק אחת
+   על השנייה, זו שיש לה לאן לזוז חייבת להיות למעלה — אחרת נתקעים. */
+#priceMax { z-index: 4; }
+#priceMin { z-index: 3; }
+
+/* התיבות להקלדה ישירה, אחת מתחת לכל ידית */
+.price-fields { display: flex; align-items: flex-end; gap: 8px; margin-top: 10px; }
+.price-field { flex: 1; min-width: 0; display: block; cursor: text; }
+.price-field-label {
+  display: block; margin-bottom: 4px;
+  font-size: 11px; font-weight: 600; letter-spacing: .01em;
+  color: var(--ink-soft, #5b6b82);
+}
+.price-field-box {
+  display: flex; align-items: center; gap: 3px;
+  border: 1px solid rgba(15,23,42,.14); border-radius: 8px;
+  background: #fff; padding: 0 8px; height: 34px;
+  transition: border-color .15s, box-shadow .15s;
+}
+.price-field-box:focus-within {
+  border-color: var(--blue, #2563EB); box-shadow: 0 0 0 3px rgba(37,99,235,.14);
+}
+.price-field-cur { font-size: 12px; color: var(--ink-soft, #5b6b82); }
+.price-field-input {
+  width: 100%; min-width: 0; border: 0; background: none; padding: 0;
+  font: inherit; font-size: 13px; font-weight: 600; color: var(--ink, #0f172a);
+}
+.price-field-input:focus { outline: none; }
+/* החצים של number צרים ומכוערים בתיבה בגודל הזה, והגרירה ממילא
+   ממלאת את אותו תפקיד */
+.price-field-input::-webkit-outer-spin-button,
+.price-field-input::-webkit-inner-spin-button { -webkit-appearance: none; margin: 0; }
+.price-field-input { -moz-appearance: textfield; appearance: textfield; }
+.price-fields-sep { padding-bottom: 9px; color: var(--ink-soft, #5b6b82); }
+
 /* ---------- סרגל כלים עליון ---------- */
 .shop-toolbar { display: flex; align-items: center; gap: 14px; margin-bottom: 12px; flex-wrap: wrap; }
 .result-count { font-size: 14px; color: var(--ink-soft, #64748b); font-weight: 600; }
@@ -151,4 +221,9 @@
   .filters-apply { display: block; width: 100%; margin-top: 18px; position: sticky; bottom: 0; }
   .sort-wrap { margin-inline-start: 0; width: 100%; }
   .product-grid { grid-template-columns: repeat(auto-fill, minmax(160px, 1fr)); }
+  /* ידית של 18px היא יעד קטן מדי לאצבע — במגע היא גדלה */
+  .price-slider { height: 32px; }
+  .price-input { height: 32px; }
+  .price-input::-webkit-slider-thumb { width: 24px; height: 24px; }
+  .price-input::-moz-range-thumb    { width: 24px; height: 24px; }
 }
