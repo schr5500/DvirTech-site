@@ -3,8 +3,10 @@
 <head>
 <meta charset="UTF-8">
 <meta name="viewport" content="width=device-width, initial-scale=1.0">
-<title>DvirTech — האתר בקרוב</title>
+<title>DvirTech — מחשבים, רכיבים וציוד היקפי</title>
+<meta name="description" content="מחשבים מוכנים, רכיבים וציוד היקפי מהמותגים המובילים, עם הרכבה, אחריות והתקנה עד הבית והמשרד.">
 <script>
+  // מונע הבהוב שפה: קובע dir/lang לפני שהעמוד מצטייר, לפי מה שנשמר בעבר
   (function(){
     var saved = "he";
     try { saved = localStorage.getItem("dvirtech_lang") || "he"; } catch(e) {}
@@ -12,38 +14,222 @@
     document.documentElement.dir = saved === "he" ? "rtl" : "ltr";
   })();
 </script>
+<link rel="preconnect" href="https://script.google.com" crossorigin>
+<link rel="preconnect" href="https://script.googleusercontent.com" crossorigin>
 <link rel="preconnect" href="https://fonts.googleapis.com">
-<link href="https://fonts.googleapis.com/css2?family=Rubik:wght@400;500;600;700;800;900&family=Heebo:wght@300;400;500;700&display=swap" rel="stylesheet">
-<link rel="stylesheet" href="site-coming-soon.css">
+<link href="https://fonts.googleapis.com/css2?family=Rubik:wght@400;500;600;700;800;900&family=Heebo:wght@300;400;500;700;800&display=swap" rel="stylesheet">
+<link rel="stylesheet" href="style.css">
 </head>
 <body>
 
-<div class="glow glow1"></div>
-<div class="glow glow2"></div>
+<!-- =====================================================================
+     ⚠️ אזהרה לפני העלאה לגיטהאב
+     בגיטהאב index.html הוא דף ה"בקרוב", ודף הבית האמיתי יושב שם כ-home.html.
+     העלאה של הקובץ הזה בשם index.html מסירה את חסימת ה"בקרוב" ומפרסמת את
+     האתר. להעלות רק כשמשיקים במכוון.
+===================================================================== -->
 
-<main class="center-wrap">
-<div class="card">
-  <div class="lang-switch">
-    <button class="lang-btn" data-lang="he" onclick="setLang('he')">עברית</button>
-    <button class="lang-btn" data-lang="en" onclick="setLang('en')">English</button>
+<header>
+  <div class="wrap headbar">
+    <a class="brand" href="index.html" aria-label="DvirTech — לדף הבית"><img class="brand-logo" src="images/logo-dvirtech-transparent.png" alt="DvirTech"></a>
+
+    <nav id="mainNav">
+      <a href="index.html" class="active" data-he="ראשי" data-en="Home"></a>
+      <a href="products.html?cat=readyPc" data-he="מחשבים מוכנים" data-en="Ready-Made PCs"></a>
+      <a href="products.html?cat=peripherals" data-he="ציוד היקפי" data-en="Peripherals"></a>
+      <a href="products.html?cat=gpu" data-he="רכיבים" data-en="Components"></a>
+      <a href="builder.html" data-he="בניית מחשב" data-en="PC Builder"></a>
+      <a href="coming-soon.html?service=support" data-he="שירות ותמיכה" data-en="Service & Support"></a>
+      <a href="why-dvirtech.html" data-he="למה DvirTech?" data-en="Why DvirTech?"></a>
+      <a href="contact.html" data-he="צור קשר" data-en="Contact"></a>
+    </nav>
+
+    <label class="head-search">
+      <input id="siteSearch" type="search" data-ph-he="חיפוש מוצרים…" data-ph-en="Search products…">
+      <svg class="ui-ic" aria-hidden="true"><use href="#ui-search"/></svg>
+    </label>
+
+    <div class="head-acts">
+      <button class="head-ic" onclick="openCart&&openCart()" aria-label="עגלה">
+        <svg class="ui-ic" aria-hidden="true"><use href="#ui-cart"/></svg>
+        <span class="head-ic-badge" id="headCartCount" style="display:none">0</span>
+      </button>
+      <a class="head-ic" href="contact.html" aria-label="צור קשר">
+        <svg class="ui-ic" aria-hidden="true"><use href="#ui-user"/></svg>
+      </a>
+    </div>
+
+    <div class="lang-switch">
+      <button class="lang-btn" data-lang="he" onclick="setLang('he')">עברית</button>
+      <button class="lang-btn" data-lang="en" onclick="setLang('en')">English</button>
+    </div>
   </div>
+</header>
 
-  <img class="logo" src="images/logo-dvirtech.png" alt="DvirTech">
+<!-- ======================= HERO ======================= -->
+<!-- ===================================================================
+     הירו הוא התמונה עצמה, מקצה לקצה, והטקסט יושב מעליה.
+     קודם התמונה הייתה <img> בתוך עמודה — וזה נראה כמו מלבן שהודבק על
+     הדף. עכשיו היא רקע של הסקשן כולו, וגבולות הדהייה למטה נגזרים
+     מהצבע שנמדד בפועל מקצוות הקובץ (#F4F5FB) שכמעט זהה לרקע האתר
+     (#F5F8FC) — ולכן אין קו תפר שרואים.
+     הגל ה-SVG שהיה כאן הוסר: לתמונה יש גל משלה, ושניהם יחד התנגשו.
+===================================================================== -->
+<section class="hero hero-full">
+  <div class="hero-photo" aria-hidden="true"></div>
 
-  <div class="badge"><span class="dot"></span><span id="badgeText"></span></div>
+  <div class="wrap hero-in">
+    <div class="hero-copy">
+      <h1><span data-he="הטכנולוגיה שמחברת אותך" data-en="Technology that connects you"></span><br>
+          <span class="g" data-he="להכי טוב" data-en="to the very best"></span></h1>
+      <p class="hero-lede" data-he="מגוון מחשבים, ציוד היקפי ורכיבים מהמותגים המובילים." data-en="A full range of PCs, peripherals and components from the leading brands."></p>
+      <a class="btn btn-primary hero-cta" href="products.html?cat=all">
+        <svg class="ui-ic" aria-hidden="true"><use href="#ui-arrow"/></svg>
+        <span data-he="לצפייה במבצעים" data-en="See the deals"></span>
+      </a>
+    </div>
+  </div>
+</section>
 
-  <h1><span id="titleMain"></span> <span class="g" id="titleHighlight"></span></h1>
-  <p id="bodyText"></p>
-
-  <div class="actions">
-    <a class="btn btn-primary" id="waBtn" href="#" target="_blank" rel="noopener"></a>
-    <a class="btn btn-ghost" id="mailBtn" href="mailto:schr5500@gmail.com"></a>
+<!-- ======================= פס יתרונות ======================= -->
+<div class="wrap">
+  <div class="trust-strip">
+    <div><svg class="ui-ic" aria-hidden="true"><use href="#ui-truck"/></svg>
+      <span><b data-he="משלוח מהיר" data-en="Fast delivery"></b><span data-he="2-5 ימי עסקים" data-en="2-5 business days"></span></span></div>
+    <div><svg class="ui-ic" aria-hidden="true"><use href="#ui-shield"/></svg>
+      <span><b data-he="אחריות ושירות" data-en="Warranty & service"></b><span data-he="על כל המוצרים" data-en="On every product"></span></span></div>
+    <div><svg class="ui-ic" aria-hidden="true"><use href="#ui-lock"/></svg>
+      <span><b data-he="תשלום מאובטח" data-en="Secure payment"></b><span data-he="עד 12 תשלומים" data-en="Up to 12 installments"></span></span></div>
+    <div><svg class="ui-ic" aria-hidden="true"><use href="#ui-headset"/></svg>
+      <span><b data-he="שירות לקוחות" data-en="Customer service"></b><span data-he="זמין עבורך" data-en="Here when you need it"></span></span></div>
+    <div><svg class="ui-ic" aria-hidden="true"><use href="#ui-box"/></svg>
+      <span><b data-he="מבחר גדול" data-en="Wide selection"></b><span data-he="מהמותגים המובילים" data-en="From the leading brands"></span></span></div>
   </div>
 </div>
-</main>
 
-<footer id="footerText"></footer>
+<!-- ======================= קטגוריות ======================= -->
+<div class="wrap">
+  <div class="sec-head">
+    <h2><svg class="ui-ic" aria-hidden="true"><use href="#ui-box"/></svg>
+      <span data-he="קנייה לפי קטגוריה" data-en="Shop by category"></span></h2>
+    <a class="more" href="products.html"><span data-he="צפה בכל הקטגוריות" data-en="All categories"></span>
+      <svg class="ui-ic" aria-hidden="true"><use href="#ui-arrow"/></svg></a>
+  </div>
+  <div class="carousel">
+    <button class="car-btn car-prev" data-car="catRow" aria-label="הקודם"><svg class="ui-ic"><use href="#ui-arrow"/></svg></button>
+    <button class="car-btn car-next" data-car="catRow" aria-label="הבא"><svg class="ui-ic"><use href="#ui-arrow"/></svg></button>
+    <div class="rowscroll" id="catRow"></div>
+  </div>
+</div>
 
-<script src="site-coming-soon.js"></script>
+<!-- ======================= באנרים ======================= -->
+<div class="wrap">
+  <div class="promo-row">
+    <!-- ⚠️ קבצי המקור של שלוש התמונות האלה כללו כותרת וכפתור *צרובים
+         בפיקסלים*, שכפולים לטקסט כאן. לכן הן נחתכו לצד המוצרים בלבד
+         (ראה images/promo-*.jpg) והטקסט נשאר HTML אמיתי — מתורגם,
+         נגיש, ולא נמתח במסכים צרים. -->
+    <a class="promo promo--dark promo--photo" style="--promo-img:url('images/promo-gaming.jpg')" href="products.html?cat=readyPc">
+      <div class="promo-txt">
+        <b data-he="מחשבי גיימינג" data-en="Gaming PCs"></b>
+        <span data-he="עוצמה. ביצועים. חוויה." data-en="Power. Performance. Experience."></span>
+        <span class="go" data-he="למחשבי גיימינג" data-en="Shop gaming"></span>
+      </div>
+    </a>
+
+    <a class="promo promo--blue promo--photo" style="--promo-img:url('images/promo-builder.jpg')" href="builder.html">
+      <div class="promo-txt">
+        <b data-he="בנה את המחשב שלך" data-en="Build your own PC"></b>
+        <span data-he="בחר רכיבים, התאמה אישית מלאה, ובנה מחשב בדיוק בשבילך." data-en="Pick your parts, full customization, a PC built exactly for you."></span>
+        <span class="go" data-he="התחל לבנות" data-en="Start building"></span>
+      </div>
+    </a>
+
+    <a class="promo promo--dark promo--photo" style="--promo-img:url('images/promo-service.jpg')" href="coming-soon.html?service=support">
+      <div class="promo-txt">
+        <b data-he="תיקון ושדרוג" data-en="Repair & upgrade"></b>
+        <span data-he="אבחון, שדרוג והתקנה עד הבית." data-en="Diagnosis, upgrades and on-site setup."></span>
+        <span class="go" data-he="לשירות ותמיכה" data-en="Service & support"></span>
+      </div>
+    </a>
+  </div>
+</div>
+
+<!-- ======================= מבצעים חמים ======================= -->
+<div class="wrap">
+  <div class="sec-head">
+    <h2><svg class="ui-ic" aria-hidden="true"><use href="#ui-spark"/></svg>
+      <span data-he="מבצעים חמים" data-en="Hot deals"></span></h2>
+    <a class="more" href="products.html"><span data-he="הצג הכל" data-en="View all"></span>
+      <svg class="ui-ic" aria-hidden="true"><use href="#ui-arrow"/></svg></a>
+  </div>
+  <div class="carousel">
+    <button class="car-btn car-prev" data-car="dealRow" aria-label="הקודם"><svg class="ui-ic"><use href="#ui-arrow"/></svg></button>
+    <button class="car-btn car-next" data-car="dealRow" aria-label="הבא"><svg class="ui-ic"><use href="#ui-arrow"/></svg></button>
+    <div class="rowscroll" id="dealRow"></div>
+  </div>
+</div>
+
+<!-- ======================= יצרנים ======================= -->
+<div class="wrap">
+  <div class="brand-strip">
+    <span>intel</span><span>AMD</span><span>NVIDIA</span><span>ASUS</span>
+    <span>MSI</span><span>GIGABYTE</span><span>CORSAIR</span><span>SAMSUNG</span>
+  </div>
+</div>
+
+<!-- הריווח מהתוכן מגיע מ-.footer-top-gap ב-style.css ולא מ-style inline:
+     margin-top inline גובר על margin-top:auto של ה-sticky footer, וזה
+     בדיוק מה שהשאיר כאן רווח מתחת לפוטר במסך גבוה. -->
+<footer class="footer-top-gap">
+  <div class="wrap">
+    <div class="footer-grid">
+      <div>
+        <span class="footer-logo-crop"><img class="footer-logo" src="images/logo-dvirtech-transparent.png" alt="DvirTech"></span>
+        <p data-he="שירותי מחשוב ותמיכה טכנית. מחשבים בהתאמה אישית, תיקון, שדרוג והתקנה עד הבית והמשרד." data-en="Computing services and technical support. Custom PCs, repair, upgrades and on-site installation."></p>
+      </div>
+      <div>
+        <h4 data-he="החנות" data-en="Shop"></h4>
+        <ul>
+          <li><a href="products.html?cat=readyPc" data-he="מחשבים מוכנים" data-en="Ready-Made PCs"></a></li>
+          <li><a href="products.html?cat=gpu" data-he="רכיבים" data-en="Components"></a></li>
+          <li><a href="products.html?cat=peripherals" data-he="ציוד היקפי" data-en="Peripherals"></a></li>
+          <li><a href="builder.html" data-he="בונה המחשבים" data-en="PC Builder"></a></li>
+        </ul>
+      </div>
+      <div>
+        <h4 data-he="שירות" data-en="Service"></h4>
+        <ul>
+          <li><a href="coming-soon.html?service=support" data-he="תיקון ושדרוג" data-en="Repair & upgrade"></a></li>
+          <li><a href="coming-soon.html?service=support" data-he="שירותי IT לעסק" data-en="Business IT"></a></li>
+          <li><a href="contact.html" data-he="התקנה עד הבית" data-en="On-site installation"></a></li>
+          <li><a href="contact.html" data-he="ייעוץ חינם" data-en="Free consultation"></a></li>
+        </ul>
+      </div>
+      <div>
+        <h4 data-he="מידע" data-en="Info"></h4>
+        <ul>
+          <li><a href="why-dvirtech.html" data-he="למה DvirTech?" data-en="Why DvirTech?"></a></li>
+          <li><a href="about.html" data-he="אודות" data-en="About"></a></li>
+          <li><a href="contact.html" data-he="צור קשר" data-en="Contact"></a></li>
+          <li><a href="terms.html" data-he="תקנון" data-en="Terms"></a></li>
+        </ul>
+      </div>
+    </div>
+    <span id="footerText"></span>
+    <div class="footer-legal">
+      <a href="about.html" id="footerAboutLink"></a>
+      <a href="contact.html" id="footerContactLink"></a>
+      <a href="terms.html" id="footerTermsLink"></a>
+    </div>
+  </div>
+</footer>
+
+<script src="sprite.js"></script>
+<script src="i18n.js"></script>
+<script src="search-core.js"></script>
+<script src="home.js"></script>
+<script src="site-search.js"></script>
+<script src="cart.js"></script>
 </body>
 </html>

@@ -1,0 +1,227 @@
+/* =====================================================================
+   DvirTech — דף הבית (index.html)
+   =====================================================================
+   הקובץ נקרא בעבר landing.js. השם הוחלף כי "landing" התבלבל עם דף
+   הנחיתה השיווקי שב-LandingPage/ — זה כאן הוא הקוד של דף הבית של החנות.
+   -----------------------------------------------------------------
+   מה הקובץ הזה עושה:
+   1. תרגום — כל טקסט קבוע בדף יושב ב-HTML כ-data-he / data-en, והפונקציה
+      applyI18n עוברת עליו. בכוונה לא הוספתי ~40 מפתחות ל-i18n.js: ככה
+      הטקסט של דף הבית נשאר גלוי וניתן לעריכה בתוך ה-HTML עצמו, ו-i18n.js
+      נשאר שמור למחרוזות שמשותפות לכמה דפים.
+   2. קטגוריות ומבצעים — נטענים מאותו getCatalog שמזין את החנות ואת
+      הבונה. אין כאן שום מחיר או שם מוצר קשיח: מה שבגיליון הוא מה שמוצג.
+
+   ⚠️ הקטלוג נטען דרך dvtGetCatalog() שב-search-core.js (נטען לפני
+   הקובץ הזה), כדי שהדף ותיבת החיפוש בהדר יחלקו בקשה אחת במקום שתיים.
+===================================================================== */
+
+const WHATSAPP_NUMBER = "972502000373";
+
+/* אותו סדר קטגוריות כמו בחנות: מוצרים שלמים קודם, אחר כך רכיבים.
+   קטגוריה חדשה בגיליון תופיע כאן אוטומטית בסוף הרשימה. */
+const HOME_CATEGORY_ORDER = [
+  "readyPc", "monitor", "peripherals",
+  "gpu", "cpu", "mobo", "ram", "storage", "cooling", "psu", "case"
+];
+
+let HOME_CATALOG = {};
+
+/* ==================== תרגום ==================== */
+function applyI18n(){
+  document.querySelectorAll("[data-he]").forEach(el => {
+    const v = LANG === "en" ? el.dataset.en : el.dataset.he;
+    if(v != null) el.textContent = v;
+  });
+  document.querySelectorAll("[data-ph-he]").forEach(el => {
+    el.placeholder = LANG === "en" ? el.dataset.phEn : el.dataset.phHe;
+  });
+  const ft = document.getElementById("footerText");
+  if(ft) ft.textContent = t("footerText");
+  renderFooterLegal();
+  document.querySelectorAll(".lang-btn").forEach(b => b.classList.toggle("active", b.dataset.lang === LANG));
+}
+
+function setLang(lang){
+  if(lang === LANG) return;
+  setLangCore(lang);
+  applyI18n();
+  renderCategories();
+  renderDeals();
+}
+
+/* ==================== עזרים ==================== */
+
+/* התוויות לתצוגה יושבות ב-search-core.js (DVT_CAT_LABEL) ומשותפות
+   לדף הבית, לדף המוצרים ולחיפוש — כך אותה קטגוריה נקראת אותו דבר
+   בכל מקום באתר. */
+function catLabel(key, group){ return dvtCatLabel(key, group); }
+function itemLabel(it){ return (LANG === "en" && it.nameEn) ? it.nameEn : it.name; }
+
+/* תמונת קטגוריה אמיתית, כשיש. גוברת על איור ה-SVG של sprite.js — אותו
+   כלל "תמונה אמיתית מנצחת" שחל על כרטיסי מוצר. כרגע יש תמונות רק לחלק
+   מהקטגוריות (דביר צילם/ייצר אותן ידנית); "readyPc" מיוצג ע"י תמונת
+   מחשב נייח כי אין עדיין תמונה נפרדת למחשבים ניידים בגיליון עצמו —
+   "מחשבים ניידים" הם פריטים בתוך אותה קטגוריה, לא קטגוריה נפרדת.
+   קטגוריה שלא ברשימה פשוט נופלת חזרה לאיור, בלי צורך בטיפול מיוחד. */
+const HOME_CAT_IMAGE = {
+  cpu:         "images/categories/cpu.jpg",
+  gpu:         "images/categories/gpu.jpg",
+  ram:         "images/categories/ram.jpg",
+  mobo:        "images/categories/mobo.jpg",
+  storage:     "images/categories/storage.jpg",
+  psu:         "images/categories/psu.jpg",
+  cooling:     "images/categories/cooling.jpg",
+  "case":      "images/categories/case.jpg",
+  monitor:     "images/categories/monitor.jpg",
+  readyPc:     "images/categories/readyPc.jpg",
+  peripherals: "images/categories/peripherals.jpg"
+};
+
+function catArt(cat){
+  const src = HOME_CAT_IMAGE[cat];
+  return src
+    ? `<img src="${src}" alt="" loading="lazy" decoding="async">`
+    : `<svg aria-hidden="true"><use href="#${dvtIcon(cat)}"/></svg>`;
+}
+
+/* תמונה לכרטיס *מוצר* (רצועת המבצעים), להבדיל מכרטיס קטגוריה.
+   סדר העדיפויות: תמונת המוצר עצמו (עמודת image בגיליון) ← תמונת
+   הקטגוריה ← איור SVG. כרגע אין עדיין עמודת image, ולכן בפועל מוצגת
+   תמונת הקטגוריה — וזו הסיבה ששני מוצרים מאותה קטגוריה נראים אותו
+   דבר. ברגע שתתווסף העמודה, כל מוצר יקבל את התמונה שלו בלי שינוי קוד. */
+function productArt(cat, item){
+  if(item && item.image) return `<img src="${item.image}" alt="" loading="lazy" decoding="async">`;
+  return catArt(cat);
+}
+
+// פריטי-דמה ("ללא כרטיס מסך") הם בחירה בבונה ולא מוצר שנמכר.
+function homeSellable(cat){
+  // "מסכים" היא קטגוריה וירטואלית — אין לה לשונית בגיליון, היא נגזרת
+  // מציוד היקפי לפי subType. ראה DVT_VIRTUAL_CATS ב-search-core.js.
+  if(dvtIsVirtualCat(cat)) return dvtVirtualItems(HOME_CATALOG, cat);
+  const g = HOME_CATALOG[cat];
+  if(!g) return [];
+  return (g.items || []).filter(dvtIsSellable);
+}
+
+function homeCategories(){
+  const known = HOME_CATEGORY_ORDER.filter(c => homeSellable(c).length);
+  const extra = Object.keys(HOME_CATALOG)
+    .filter(c => c !== "services" && HOME_CATEGORY_ORDER.indexOf(c) === -1 && homeSellable(c).length);
+  return known.concat(extra);
+}
+
+const nis = v => Number(v).toLocaleString("he-IL") + " ₪";
+
+/* ==================== רינדור ==================== */
+function renderCategories(){
+  const row = document.getElementById("catRow");
+  if(!row) return;
+  const cats = homeCategories();
+  if(!cats.length){ row.innerHTML = ""; return; }
+
+  row.innerHTML = cats.map(cat => `
+    <a class="cat-card" href="products.html?cat=${encodeURIComponent(cat)}">
+      <div class="cat-art">${catArt(cat)}</div>
+      <b>${catLabel(cat, HOME_CATALOG[cat])}</b>
+    </a>`).join("");
+}
+
+/* "מבצעים חמים": פריט אחד מכל קטגוריה, הזול ביותר בה. זו בחירה מכוונת —
+   ככה הרצועה מציגה רוחב של קטלוג ולא שמונה כרטיסי מסך. כשתהיה עמודת
+   מבצע אמיתית בגיליון, מחליפים כאן את הסינון בה. */
+function pickDeals(){
+  const out = [];
+  homeCategories().forEach(cat => {
+    const items = homeSellable(cat).slice().sort((a,b) => Number(a.price) - Number(b.price));
+    if(items[0]) out.push({ cat, it: items[0] });
+  });
+  return out.slice(0, 10);
+}
+
+function renderDeals(){
+  const row = document.getElementById("dealRow");
+  if(!row) return;
+  const deals = pickDeals();
+  if(!deals.length){ row.innerHTML = ""; return; }
+
+  row.innerHTML = deals.map(({cat, it}) => `
+    <a class="deal" href="product.html?cat=${encodeURIComponent(it._realCat || cat)}&id=${encodeURIComponent(it.id)}">
+      <div class="deal-art">${productArt(cat, it)}</div>
+      <div class="deal-cat">${catLabel(cat, HOME_CATALOG[cat])}</div>
+      <div class="deal-name">${itemLabel(it)}</div>
+      <div class="deal-foot">
+        <span class="deal-price">${nis(it.price)}</span>
+        ${it.brand ? `<span class="deal-off" style="background:#EEF4FE;color:#1B6FE0;border-color:#CFE0F8">${it.brand}</span>` : ""}
+      </div>
+    </a>`).join("");
+}
+
+/* מצב ביניים בזמן טעינה — כדי שהרצועות לא יקפצו מריק למלא */
+function renderSkeleton(){
+  const sk = n => Array.from({length:n}, () => `
+    <div class="cat-card" style="pointer-events:none;opacity:.55">
+      <div class="cat-art"></div><b style="display:block;height:12px;background:#EDF2F8;border-radius:6px"></b>
+    </div>`).join("");
+  const c = document.getElementById("catRow");
+  const d = document.getElementById("dealRow");
+  if(c) c.innerHTML = sk(7);
+  if(d) d.innerHTML = sk(7);
+}
+
+function renderLoadError(){
+  const msg = tr("לא הצלחנו לטעון את הקטלוג כרגע. אפשר לרענן, או לעבור ישירות לחנות.",
+                 "Couldn't load the catalog right now. Refresh, or go straight to the shop.");
+  ["catRow","dealRow"].forEach((id, i) => {
+    const el = document.getElementById(id);
+    if(!el) return;
+    el.style.display = "block";
+    el.innerHTML = i === 0
+      ? `<div class="lock-msg" style="margin:6px 0">${msg} <a href="products.html" style="color:var(--blue);font-weight:700">${tr("לחנות","To the shop")}</a></div>`
+      : "";
+  });
+}
+
+/* ==================== קרוסלה ==================== */
+function initCarousels(){
+  document.querySelectorAll(".car-btn").forEach(btn => {
+    btn.addEventListener("click", () => {
+      const row = document.getElementById(btn.dataset.car);
+      if(!row) return;
+      // ב-RTL scrollLeft שלילי, ולכן הכיוון נגזר מ-dir של המסמך ולא מקבוע
+      const rtl = document.documentElement.dir === "rtl";
+      const dir = btn.classList.contains("car-next") ? 1 : -1;
+      row.scrollBy({ left: dir * (rtl ? -1 : 1) * Math.round(row.clientWidth * 0.8), behavior: "smooth" });
+    });
+  });
+}
+
+/* החיפוש עצמו (תפריט נפתח + חיפוש מלא בכל הקטגוריות) עבר ל-site-search.js,
+   קובץ משותף שרץ בכל דף עם תיבת #siteSearch — לא רק כאן. */
+
+/* ==================== טעינה ==================== */
+async function loadHome(){
+  renderSkeleton();
+  try{
+    HOME_CATALOG = await dvtGetCatalog();
+  }catch(e){
+    console.error("[home] getCatalog failed:", e);
+    renderLoadError();
+    return;
+  }
+  renderCategories();
+  renderDeals();
+
+  // אם הקטלוג הוצג מהמטמון והרענון ברקע גילה שינוי (מחיר, מוצר חדש) —
+  // מציירים מחדש בשקט, בלי שהמשתמש יחכה.
+  dvtOnCatalogRefresh(fresh => {
+    HOME_CATALOG = fresh;
+    renderCategories();
+    renderDeals();
+  });
+}
+
+applyI18n();
+initCarousels();
+loadHome();

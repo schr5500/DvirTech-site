@@ -6,16 +6,22 @@
    ומחשב הרכבה, ואילו כאן פשוט מציגים רשימה ומסננים אותה.
 
    אין כאן שום מחיר קשיח ושום רשימת מוצרים קשיחה — הכל מגיע מהשרת.
-   ⚠️ PAYMENT_API_URL חייב להיות זהה לזה שב-checkout.js ו-catalog-loader.js.
+
+   ⚠️ הקטלוג נטען דרך dvtGetCatalog() שב-search-core.js (שנטען לפני
+   הקובץ הזה), ולא דרך fetch מקומי. כך הדף והחיפוש חולקים בקשה אחת.
+   כתובת ה-API עצמה יושבת שם כ-DVT_API_URL וחייבת להישאר זהה לזו
+   שב-checkout.js.
 ===================================================================== */
 
-const PAYMENT_API_URL = "https://script.google.com/macros/s/AKfycbwuW5tgiRDhoIEFNkHHWgkVot6FyHFEUBa1mx41ck1lp74ChzT8pciMV9qaI0NcDw-sKA/exec";
-
-/* סדר הקטגוריות בחנות. המוצרים השלמים למעלה — זה מה שרוב הלקוחות
-   מחפשים — ואחריהם הרכיבים הבודדים. services לא מופיע כאן: שירות
-   נלווה נמכר יחד עם הרכבה, לא כפריט מדף. */
+/* סדר הקטגוריות בחנות. "all" היא קטגוריה וירטואלית (לא קיימת בגיליון,
+   לא ב-SHOP_CATALOG) שמאחדת את כל השאר — ראו sellableItems(). היא
+   ראשונה בכוונה: מי שמגיע ל-products.html בלי ?cat= (למשל מקישור
+   "הצג הכל" או מתוצאות חיפוש) אמור לראות הכל, לא קטגוריה שרירותית.
+   אחריה המוצרים השלמים — זה מה שרוב הלקוחות מחפשים — ואז הרכיבים
+   הבודדים. services לא מופיע כאן: שירות נלווה נמכר יחד עם הרכבה,
+   לא כפריט מדף. */
 const SHOP_CATEGORY_ORDER = [
-  "readyPc", "peripherals",
+  "all", "readyPc", "monitor", "peripherals",
   "cpu", "gpu", "mobo", "ram", "storage", "cooling", "psu", "case"
 ];
 
@@ -27,7 +33,13 @@ const SHOP_CATEGORY_ORDER = [
    הסינון תמיד נבנה מהערכים שקיימים *בפועל* בנתונים, אז שדה ריק
    בגיליון פשוט לא מייצר קבוצת סינון — אין קבוצות ריקות באתר. */
 const FACETS = {
+  // "brand" הוא השדה היחיד שקיים בעקביות בכל קטגוריה — בדיוק בשביל זה
+  // הוא הסינון היחיד שהגיוני להציג כשהתצוגה מערבבת קטגוריות שונות.
+  all:         ["brand"],
   readyPc:     ["brand", "useCase", "ramGb", "storageGb", "warrantyMonths"],
+  // מסכים הם תת-קבוצה של ציוד היקפי, ולכן אותם שדות בלי subType —
+  // כאן כולם מסכים ממילא, וקבוצת סינון עם ערך יחיד לא מסננת כלום.
+  monitor:     ["brand", "sizeInch", "refreshHz", "resolution", "panel", "connection"],
   peripherals: ["subType", "brand", "connection", "switchType", "sizeInch", "refreshHz", "resolution", "panel", "rgb"],
   cpu:         ["brand", "socket", "tier", "ramType", "overclockable"],
   gpu:         ["chipset", "brand", "vramGb", "tier"],
@@ -39,58 +51,8 @@ const FACETS = {
   "case":      ["brand", "supportedFormFactors", "maxGpuLengthMm"]
 };
 
-const FACET_LABELS = {
-  brand:                { he: "יצרן",              en: "Brand" },
-  useCase:              { he: "ייעוד",             en: "Use case" },
-  ramGb:                { he: "זיכרון",            en: "Memory" },
-  storageGb:            { he: "אחסון",             en: "Storage" },
-  warrantyMonths:       { he: "אחריות",            en: "Warranty" },
-  subType:              { he: "סוג מוצר",          en: "Product type" },
-  connection:           { he: "חיבור",             en: "Connection" },
-  switchType:           { he: "סוג מתגים",         en: "Switch type" },
-  sizeInch:             { he: "גודל מסך",          en: "Screen size" },
-  refreshHz:            { he: "קצב רענון",         en: "Refresh rate" },
-  resolution:           { he: "רזולוציה",          en: "Resolution" },
-  panel:                { he: "סוג פאנל",          en: "Panel type" },
-  rgb:                  { he: "תאורת RGB",         en: "RGB lighting" },
-  socket:               { he: "תושבת",             en: "Socket" },
-  tier:                 { he: "רמת ביצועים",       en: "Performance tier" },
-  ramType:              { he: "סוג זיכרון",        en: "Memory type" },
-  overclockable:        { he: "תמיכה באוברקלוק",   en: "Overclockable" },
-  chipset:              { he: "שבב גרפי",          en: "GPU chipset" },
-  vramGb:               { he: "זיכרון גרפי",       en: "VRAM" },
-  formFactor:           { he: "גודל לוח",          en: "Form factor" },
-  supportedFormFactors: { he: "לוחות נתמכים",      en: "Supported boards" },
-  capacityGb:           { he: "נפח",               en: "Capacity" },
-  driveType:            { he: "סוג כונן",          en: "Drive type" },
-  pcieGen:              { he: "דור PCIe",          en: "PCIe generation" },
-  speedMhz:             { he: "מהירות",            en: "Speed" },
-  type:                 { he: "סוג קירור",         en: "Cooler type" },
-  radiatorMm:           { he: "גודל רדיאטור",      en: "Radiator size" },
-  heightMm:             { he: "גובה",              en: "Height" },
-  wattage:              { he: "הספק",              en: "Wattage" },
-  maxGpuLengthMm:       { he: "אורך כרטיס מירבי",  en: "Max GPU length" }
-};
-
-/* תרגום ערכים טכניים לעברית קריאה. מה שלא מופיע כאן מוצג כמו שהוא
-   (שמות יצרנים, LGA1700, DDR5 וכו' — לא מתרגמים). */
-const VALUE_LABELS = {
-  useCase:    { office:{he:"משרדי",en:"Office"}, gaming:{he:"גיימינג",en:"Gaming"}, creative:{he:"עריכה ויצירה",en:"Creative"}, server:{he:"שרת",en:"Server"} },
-  subType:    { mouse:{he:"עכבר",en:"Mouse"}, keyboard:{he:"מקלדת",en:"Keyboard"}, monitor:{he:"מסך",en:"Monitor"}, headset:{he:"אוזניות",en:"Headset"}, speakers:{he:"רמקולים",en:"Speakers"}, webcam:{he:"מצלמת רשת",en:"Webcam"}, chair:{he:"כיסא",en:"Chair"}, other:{he:"אחר",en:"Other"} },
-  connection: { wired:{he:"חוטי",en:"Wired"}, wireless:{he:"אלחוטי",en:"Wireless"}, bluetooth:{he:"Bluetooth",en:"Bluetooth"} },
-  switchType: { mechanical:{he:"מכני",en:"Mechanical"}, membrane:{he:"ממברנה",en:"Membrane"}, optical:{he:"אופטי",en:"Optical"} },
-  type:       { air:{he:"אוויר",en:"Air"}, aio:{he:"נוזלי (AIO)",en:"Liquid (AIO)"} },
-  driveType:  { nvme:{he:"SSD NVMe (M.2)",en:"NVMe SSD (M.2)"}, "sata-ssd":{he:"SSD SATA",en:"SATA SSD"}, hdd:{he:"דיסק מכני (HDD)",en:"Hard drive (HDD)"} },
-  pcieGen:    { 3:{he:"PCIe 3.0",en:"PCIe 3.0"}, 4:{he:"PCIe 4.0",en:"PCIe 4.0"}, 5:{he:"PCIe 5.0",en:"PCIe 5.0"} },
-  tier:       { 1:{he:"בסיסי",en:"Entry"}, 2:{he:"בינוני",en:"Mid"}, 3:{he:"גבוה",en:"High"}, 4:{he:"פרימיום",en:"Premium"} }
-};
-
-// יחידת מידה שנוספת לערך מספרי בתצוגת הסינון בלבד
-const FACET_UNITS = {
-  ramGb:"GB", storageGb:"GB", capacityGb:"GB", vramGb:"GB", speedMhz:"MHz",
-  sizeInch:'"', refreshHz:"Hz", radiatorMm:"mm", heightMm:"mm",
-  maxGpuLengthMm:"mm", wattage:"W", warrantyMonths:null
-};
+/* FACET_LABELS / VALUE_LABELS / FACET_UNITS עברו ל-search-core.js
+   כדי שגם דף המוצר ישתמש באותן תוויות. */
 
 /* ==================== state ==================== */
 let SHOP_CATALOG = null;
@@ -104,35 +66,35 @@ let sortMode = "priceAsc";
 let priceRange = { min: null, max: null };
 
 /* ==================== helpers ==================== */
-function L(obj){ return LANG === "en" ? obj.en : obj.he; }
-function facetLabel(key){ return FACET_LABELS[key] ? L(FACET_LABELS[key]) : key; }
-
-function valueLabel(facetKey, raw){
-  const map = VALUE_LABELS[facetKey];
-  if(map && map[raw] !== undefined) return L(map[raw]);
-  if(typeof raw === "boolean") return raw ? tr("כן","Yes") : tr("לא","No");
-  // נפח אחסון מוצג ביחידה שאנשים באמת אומרים: 2TB, לא 2,000GB. חייב
-  // לבוא לפני שורת היחידות — אחרת "GB" של FACET_UNITS תופס קודם והכלל
-  // הזה לא רץ לעולם. capacityGb משמש גם לזיכרון RAM, ושם הערכים לעולם
-  // לא מגיעים ל-1000 ולכן הם ממשיכים להיות מוצגים ב-GB.
-  if((facetKey === "storageGb" || facetKey === "capacityGb") && typeof raw === "number" && raw >= 1000){
-    return (raw/1000) + "TB";
-  }
-  const unit = FACET_UNITS[facetKey];
-  if(unit && typeof raw === "number") return raw.toLocaleString() + unit;
-  if(facetKey === "warrantyMonths") return raw + " " + tr("חודשים","months");
-  return String(raw);
-}
-
-function itemName(it){ return (LANG==="en" && it.nameEn) ? it.nameEn : it.name; }
-function itemSpec(it){ return (LANG==="en" && it.specEn) ? it.specEn : (it.spec || ""); }
+/* L / facetLabel / valueLabel / itemName / itemSpec — ב-search-core.js */
 
 // פריטי-דמה ("ללא כרטיס מסך", "ללא שירות") הם בחירה בבונה, לא מוצר
 // שנמכר — הם לא אמורים להופיע בחנות בכלל.
+//
+// כל פריט מחזיר עם _realCat — הקטגוריה האמיתית שלו בגיליון. בקטגוריה
+// רגילה זה תמיד שווה ל-cat עצמו; ב-"all" זה מה שמבדיל בין הפריטים
+// המעורבבים, וזה מה ש-renderGrid/addCatalogItemToCart משתמשים בו כדי
+// לדעת לאיזה SKU אמיתי (category:id) להוסיף לעגלה ואיזה איור להציג —
+// "all" עצמה איננה קטגוריה אמיתית ואין לה משמעות בשרת או בבונה.
 function sellableItems(cat){
+  if(cat === "all"){
+    const out = [];
+    SHOP_CATEGORY_ORDER.forEach(c => {
+      // קטגוריה וירטואלית מדלגת ב-"הכל": הפריטים שלה כבר נספרים דרך
+      // קטגוריית המקור שלהם (מסך נכלל ב"ציוד היקפי"), ובלי הדילוג
+      // הזה כל מסך היה מופיע פעמיים ברשימה.
+      if(c === "all" || dvtIsVirtualCat(c)) return;
+      out.push(...sellableItems(c));
+    });
+    return out;
+  }
+  if(dvtIsVirtualCat(cat)) return dvtVirtualItems(SHOP_CATALOG, cat);
+
   const group = SHOP_CATALOG[cat];
   if(!group) return [];
-  return (group.items || []).filter(it => it.id !== "none" && Number(it.price) > 0);
+  return (group.items || [])
+    .filter(dvtIsSellable)
+    .map(it => Object.assign({ _realCat: cat }, it));
 }
 
 /* ==================== ניתוח הערכים לסינון ==================== */
@@ -194,11 +156,17 @@ function itemMatchesFilters(item, exceptKey){
     const vals = valuesOf(item, key).map(String);
     if(!vals.some(v => chosen.has(v))) return false;
   }
-  if(searchTerm){
-    const hay = (item.name + " " + (item.nameEn||"") + " " + (item.spec||"") + " " + (item.brand||"")).toLowerCase();
-    if(hay.indexOf(searchTerm.toLowerCase()) === -1) return false;
-  }
+  if(searchTerm && itemSearchScore(item) <= 0) return false;
   return true;
+}
+
+/* ניקוד ההתאמה של פריט למונח החיפוש הנוכחי. הלוגיקה עצמה יושבת
+   ב-search-core.js ומשותפת עם תיבת החיפוש בהדר, כדי ששתיהן ידרגו
+   בדיוק אותו דבר. */
+function itemSearchScore(item){
+  if(!searchTerm) return 0;
+  const cat = item._realCat || currentCat;
+  return dvtItemScore(item, catLabel(cat), searchTerm);
 }
 
 /* המונה ליד כל ערך מחושב מול שאר הסינונים הפעילים אבל *לא* מול
@@ -245,27 +213,40 @@ function filteredItems(){
     priceDesc: (a,b) => b.price - a.price,
     nameAsc:   (a,b) => itemName(a).localeCompare(itemName(b))
   };
-  return items.sort(sorters[sortMode] || sorters.priceAsc);
+  const bySort = sorters[sortMode] || sorters.priceAsc;
+
+  // כשיש מונח חיפוש, הרלוונטיות גוברת על המיון שנבחר: חיפוש "RAM"
+  // חייב להראות קודם מקלות זיכרון ורק אחר כך לוחות אם שבמפרט שלהם
+  // מוזכרים חריצי RAM. בתוך אותה רמת רלוונטיות המיון שנבחר קובע.
+  if(searchTerm){
+    return items.sort((a,b) => (itemSearchScore(b) - itemSearchScore(a)) || bySort(a,b));
+  }
+  return items.sort(bySort);
 }
 
 /* ==================== render ==================== */
+// עובר דרך dvtCatLabel (search-core.js) כדי שהשמות יהיו זהים לדף הבית
+// ולתוצאות החיפוש — ובעיקר כדי שהתווית שמשתתפת בניקוד החיפוש תהיה
+// "זיכרון RAM" ולא "זיכרון" של הבונה.
+function catLabel(cat){
+  return dvtCatLabel(cat, SHOP_CATALOG ? SHOP_CATALOG[cat] : null);
+}
+
 function renderCatStrip(){
   const strip = document.getElementById("catStrip");
   strip.innerHTML = shopCategories().map(cat => {
-    const g = SHOP_CATALOG[cat];
     const n = sellableItems(cat).length;
     return `<button class="cat-pill ${cat===currentCat?"active":""}" onclick="selectCategory('${cat}')">
-      ${LANG==="en" ? g.labelEn : g.label} <span class="cat-pill-n">${n}</span>
+      ${catLabel(cat)} <span class="cat-pill-n">${n}</span>
     </button>`;
   }).join("");
 }
 
 function renderNavMenu(){
   const menu = document.getElementById("navProductsMenu");
-  menu.innerHTML = shopCategories().map(cat => {
-    const g = SHOP_CATALOG[cat];
-    return `<button onclick="selectCategory('${cat}');closeNavMenu()">${LANG==="en" ? g.labelEn : g.label}</button>`;
-  }).join("");
+  menu.innerHTML = shopCategories().map(cat =>
+    `<button onclick="selectCategory('${cat}');closeNavMenu()">${catLabel(cat)}</button>`
+  ).join("");
 }
 
 function priceText(v){ return Number(v).toLocaleString() + " ₪"; }
@@ -504,14 +485,35 @@ function renderGrid(){
   }
   empty.style.display = "none";
 
+  // תמונת מוצר אמיתית (עמודת image בגיליון) גוברת תמיד. בלעדיה מוצג
+  // איור הקטגוריה מ-sprite.js, כדי שלכרטיס תמיד יהיה חלק חזותי.
+  // ⚠️ האיור לפי it._realCat ולא currentCat: בתצוגת "הכל" currentCat
+  // הוא "all" (לא קטגוריה אמיתית, אין לה איור משלה), וכל פריט צריך
+  // את האיור של הקטגוריה האמיתית שלו, לא את אותו איור לכולם.
+  const art = it => it.image
+    ? `<img src="${it.image}" alt="" loading="lazy">`
+    : `<svg aria-hidden="true"><use href="#${typeof dvtIcon === "function" ? dvtIcon(it._realCat) : "ic-case"}"/></svg>`;
+
+  // תג הקטגוריה מוצג רק בתצוגת "הכל" — כשמסתכלים על קטגוריה אחת ממילא
+  // ברור מה רואים, והתג היה רק רעש חוזר על עצמו.
+  const catTag = it => currentCat === "all"
+    ? `<div class="p-cat-tag">${catLabel(it._realCat)}</div>` : "";
+
+  // כל הכרטיס מוביל לדף המוצר, חוץ מכפתור "הוסף לעגלה" שעוצר את
+  // ההתפשטות כדי שקנייה מהירה מהרשימה תמשיך לעבוד כמו קודם.
+  const href = it => `product.html?cat=${encodeURIComponent(it._realCat)}&id=${encodeURIComponent(it.id)}`;
+
   grid.innerHTML = items.map(it => `
-    <div class="p-card">
+    <a class="p-card" href="${href(it)}">
+      <div class="p-art">${art(it)}</div>
+      ${catTag(it)}
       ${it.brand ? `<div class="p-brand">${it.brand}</div>` : ""}
       <h4 class="p-name">${itemName(it)}</h4>
       <p class="p-spec">${itemSpec(it)}</p>
       <div class="p-price">${Number(it.price).toLocaleString()} ₪</div>
-      <button class="btn btn-primary" onclick="addCatalogItemToCart('${currentCat}','${it.id}')">${t("addToCartBtn")}</button>
-    </div>`).join("");
+      <button class="btn btn-primary"
+              onclick="event.preventDefault();event.stopPropagation();addCatalogItemToCart('${it._realCat}','${it.id}')">${t("addToCartBtn")}</button>
+    </a>`).join("");
 }
 
 function renderAll(){
@@ -523,7 +525,8 @@ function renderAll(){
 
 /* ==================== actions ==================== */
 function shopCategories(){
-  return SHOP_CATEGORY_ORDER.filter(c => SHOP_CATALOG[c] && sellableItems(c).length);
+  return SHOP_CATEGORY_ORDER.filter(c =>
+    (c === "all" || dvtIsVirtualCat(c) || SHOP_CATALOG[c]) && sellableItems(c).length);
 }
 
 function selectCategory(cat){
@@ -582,9 +585,11 @@ function addCatalogItemToCart(cat, id){
 
 /* ==================== static text ==================== */
 function renderShopStaticText(){
+  document.getElementById("navHome").textContent = t("navHome");
   document.getElementById("navProducts").textContent = tr("מוצרים ▾","Products ▾");
   document.getElementById("navBuilder").textContent = t("navBuilder");
   document.getElementById("navLab").textContent = t("navLab");
+  document.getElementById("navWhy").textContent = t("navWhy");
   document.getElementById("navContact").textContent = t("navContact");
   document.getElementById("shopTitle").textContent = tr("מוצרים","Products");
   document.getElementById("shopSubtitle").textContent =
@@ -619,10 +624,7 @@ function setLang(lang){
 async function loadShop(){
   renderShopStaticText();
   try{
-    const res = await fetch(PAYMENT_API_URL + "?action=getCatalog");
-    const data = await res.json();
-    if(!data.ok || !data.catalog) throw new Error(data.error || "getCatalog failed");
-    SHOP_CATALOG = data.catalog;
+    SHOP_CATALOG = await dvtGetCatalog();
   }catch(e){
     document.getElementById("productGrid").innerHTML =
       `<div class="empty-state">${tr(
@@ -635,11 +637,30 @@ async function loadShop(){
   const cats = shopCategories();
   if(!cats.length) return;
 
-  const wanted = new URLSearchParams(location.search).get("cat");
+  const params = new URLSearchParams(location.search);
+  const wanted = params.get("cat");
   currentCat = cats.indexOf(wanted) > -1 ? wanted : cats[0];
+
+  // ?q= מגיע מהחיפוש הכלל-אתרי בהדר (site-search.js) — מציב את מילת
+  // החיפוש כאילו המשתמש הקליד אותה כאן, כולל בתיבה עצמה, כך שאפשר גם
+  // לערוך אותה בלי להתחיל מחדש.
+  const wantedQ = params.get("q");
+  if(wantedQ){
+    searchTerm = wantedQ;
+    const searchBox = document.getElementById("filterSearch");
+    if(searchBox) searchBox.value = wantedQ;
+  }
 
   renderNavMenu();
   renderAll();
+
+  // הדף נפתח מהמטמון מיידית; אם הרענון ברקע גילה שינוי אמיתי, מרעננים
+  // את התצוגה בלי להפריע לסינון או לגלילה הנוכחיים.
+  dvtOnCatalogRefresh(fresh => {
+    SHOP_CATALOG = fresh;
+    renderNavMenu();
+    renderAll();
+  });
 
   const drop = document.getElementById("navProductsDrop");
   document.getElementById("navProducts").onclick = function(){

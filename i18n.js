@@ -22,8 +22,8 @@ function setLangCore(lang){
 
 const UI_TEXT = {
   he: {
-    navReady:"מחשבים מוכנים", navBuilder:"בונה המחשבים", navPeripherals:"ציוד היקפי",
-    navLab:"מעבדה ושירות", navContact:"צור קשר",
+    navHome:"ראשי", navReady:"מחשבים מוכנים", navBuilder:"בונה המחשבים", navPeripherals:"ציוד היקפי",
+    navComponents:"רכיבים", navLab:"שירות ותמיכה", navWhy:"למה DvirTech?", navContact:"צור קשר",
     heroTitle:"בנה את המחשב שלך", heroTitleHighlight:"צעד־אחר־צעד",
     heroSubtitle:"בחר רכיבים תואמים בלבד, קבל מחיר מדויק בזמן אמת, תרשים חי שמתמלא לפי הבחירות שלך, וניתוח AI שמסביר למה ההרכבה מתאימה לך.",
     trustWarranty:"אחריות יבואן רשמי", trustStress:"בדיקת מאמץ לפני מסירה",
@@ -127,8 +127,8 @@ const UI_TEXT = {
     checkoutCancelledNotice:"התשלום בוטל — ההזמנה עדיין שמורה בעגלה שלך, אפשר לנסות שוב בכל עת."
   },
   en: {
-    navReady:"Ready-Made PCs", navBuilder:"PC Builder", navPeripherals:"Peripherals",
-    navLab:"Lab & Service", navContact:"Contact Us",
+    navHome:"Home", navReady:"Ready-Made PCs", navBuilder:"PC Builder", navPeripherals:"Peripherals",
+    navComponents:"Components", navLab:"Service & Support", navWhy:"Why DvirTech?", navContact:"Contact Us",
     heroTitle:"Build Your PC", heroTitleHighlight:"Step by Step",
     heroSubtitle:"Pick only compatible parts, get an accurate real-time price, a live build diagram that fills in as you choose, and an AI breakdown of why this build suits you.",
     trustWarranty:"Official Importer Warranty", trustStress:"Stress-Tested Before Delivery",

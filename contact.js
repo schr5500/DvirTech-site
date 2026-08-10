@@ -10,10 +10,13 @@ const CONTACT_WHATSAPP_NUMBER = "972502000373";
 const CONTACT_EMAIL = "schr5500@gmail.com";
 
 function renderContactPage(){
+  document.getElementById("navHome").textContent = t("navHome");
   document.getElementById("navReady").textContent = t("navReady");
-  document.getElementById("navBuilder").textContent = t("navBuilder");
   document.getElementById("navPeripherals").textContent = t("navPeripherals");
+  document.getElementById("navComponents").textContent = t("navComponents");
+  document.getElementById("navBuilder").textContent = t("navBuilder");
   document.getElementById("navLab").textContent = t("navLab");
+  document.getElementById("navWhy").textContent = t("navWhy");
   document.getElementById("navContact").textContent = t("navContact");
 
   document.getElementById("pageTitle").textContent = t("contactTitle");

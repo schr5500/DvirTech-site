@@ -13,6 +13,8 @@
     document.documentElement.dir = saved === "he" ? "rtl" : "ltr";
   })();
 </script>
+<link rel="preconnect" href="https://script.google.com" crossorigin>
+<link rel="preconnect" href="https://script.googleusercontent.com" crossorigin>
 <link rel="preconnect" href="https://fonts.googleapis.com">
 <link href="https://fonts.googleapis.com/css2?family=Rubik:wght@400;500;600;700;800;900&family=Heebo:wght@300;400;500;700&display=swap" rel="stylesheet">
 <link rel="stylesheet" href="style.css">
@@ -21,12 +23,15 @@
 
 <header>
   <div class="wrap headbar">
-    <div class="brand"><img class="brand-logo" src="images/logo-dvirtech.png" alt="DvirTech"></div>
+    <a class="brand" href="index.html" aria-label="DvirTech — לדף הבית"><img class="brand-logo" src="images/logo-dvirtech-transparent.png" alt="DvirTech"></a>
     <nav>
-      <a href="catalog.html" id="navReady"></a>
+      <a href="index.html" id="navHome"></a>
+      <a href="products.html?cat=readyPc" id="navReady"></a>
+      <a href="products.html?cat=peripherals" id="navPeripherals"></a>
+      <a href="products.html?cat=gpu" id="navComponents"></a>
       <a href="builder.html" id="navBuilder"></a>
-      <a href="catalog.html" id="navPeripherals"></a>
       <a href="coming-soon.html?service=support" id="navLab"></a>
+      <a href="why-dvirtech.html" id="navWhy"></a>
       <a href="contact.html" id="navContact"></a>
     </nav>
     <div class="lang-switch">
@@ -114,7 +119,7 @@
 </div>
 
 <footer>
-  <img class="footer-logo" src="images/logo-dvirtech.png" alt="DvirTech">
+  <span class="footer-logo-crop"><img class="footer-logo" src="images/logo-dvirtech-transparent.png" alt="DvirTech"></span>
   <span id="footerText"></span>
   <div class="footer-legal">
     <a href="about.html" id="footerAboutLink"></a>
@@ -123,6 +128,7 @@
   </div>
 </footer>
 
+<script src="sprite.js"></script>
 <script src="i18n.js"></script>
 <script src="app.js"></script>
 <script src="cart.js"></script>
