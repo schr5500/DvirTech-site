@@ -461,7 +461,9 @@ function renderChips(){
     }
   }
   if(searchTerm){
-    chips.push(`<button class="chip" onclick="clearSearch()">"${searchTerm}" <span class="chip-x">✕</span></button>`);
+    // searchTerm מגיע מ-?q= בכתובת, כלומר מבחוץ — חייב בריחה לפני
+    // הזרקה ל-innerHTML, אחרת קישור זדוני מריץ קוד בדף.
+    chips.push(`<button class="chip" onclick="clearSearch()">"${escHtml(searchTerm)}" <span class="chip-x">✕</span></button>`);
   }
   wrap.innerHTML = chips.length
     ? chips.join("") + `<button class="chip chip-clear" onclick="clearAllFilters()">${tr("נקה הכל","Clear all")}</button>`

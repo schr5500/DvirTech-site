@@ -17,10 +17,26 @@ const CART_STORAGE_KEY = "dvirtech_cart_items_v1";
 /* ================= state + persistence ================= */
 let cartItems = [];
 
+/* שורה שרדה מגרסה ישנה של העגלה, או ש-localStorage נערך ידנית, עלולה
+   להגיע בלי name/price ולהציג "undefined" ו-NaN ₪ בסיכום. עדיף להשמיט
+   שורה פגומה מלהציג ללקוח מחיר שגוי. */
+function sanitizeCartItems(list){
+  if(!Array.isArray(list)) return [];
+  return list.filter(i =>
+    i && typeof i === "object" &&
+    typeof i.name === "string" && i.name &&
+    Number.isFinite(Number(i.price)) && Number(i.price) >= 0 &&
+    Number.isFinite(Number(i.qty)) && Number(i.qty) >= 1
+  ).map(i => Object.assign({}, i, {
+    price: Number(i.price),
+    qty: Math.min(Math.floor(Number(i.qty)), 20)   // 20 = התקרה שהשרת אוכף ב-priceCart_
+  }));
+}
+
 function loadCartItems(){
   try{
     const raw = localStorage.getItem(CART_STORAGE_KEY);
-    cartItems = raw ? JSON.parse(raw) : [];
+    cartItems = sanitizeCartItems(raw ? JSON.parse(raw) : []);
   }catch(e){ cartItems = []; }
 }
 function saveCartItems(){
@@ -132,8 +148,8 @@ function renderCart(){
   list.innerHTML = cartItems.map(i => `
     <li class="cart-item">
       <div class="cart-item-main">
-        <div class="cart-item-name">${i.name}</div>
-        ${i.noteLines && i.noteLines.length ? `<div class="cart-item-note">${i.noteLines.join("<br>")}</div>` : ""}
+        <div class="cart-item-name">${escHtml(i.name)}</div>
+        ${i.noteLines && i.noteLines.length ? `<div class="cart-item-note">${i.noteLines.map(escHtml).join("<br>")}</div>` : ""}
         <div class="cart-item-price">${i.price === 0 ? t("included") : i.price.toLocaleString()+" ₪"}</div>
       </div>
       <div class="cart-item-ctrl">

@@ -64,6 +64,19 @@ function _dvtWriteCache(catalog){
   }catch(e){ /* מכסת אחסון מלאה / גלישה פרטית — פשוט בלי מטמון */ }
 }
 
+/* בריחת HTML לכל טקסט שנכנס ל-innerHTML. חובה על מילת חיפוש — היא
+   מגיעה מ-?q= בכתובת, כך שבלי זה קישור זדוני מריץ קוד בדף. מוחל גם על
+   שמות מוצרים ותוויות: הם מהגיליון, אבל שם שמכיל < או & היה שובר את
+   הפריסה גם בלי כוונה רעה. */
+function escHtml(s){
+  return String(s == null ? "" : s)
+    .replace(/&/g, "&amp;")
+    .replace(/</g, "&lt;")
+    .replace(/>/g, "&gt;")
+    .replace(/"/g, "&quot;")
+    .replace(/'/g, "&#39;");
+}
+
 /* מי שרוצה לדעת שהנתונים התרעננו ברקע (למשל כדי לרנדר מחדש) נרשם כאן. */
 const _dvtRefreshSubs = [];
 function dvtOnCatalogRefresh(fn){ if(typeof fn === "function") _dvtRefreshSubs.push(fn); }

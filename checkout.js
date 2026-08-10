@@ -46,10 +46,36 @@ const VAT_RATE = 0.18;
 
 let cartSubtotal = 0;
 
+/* checkout.js לא טוען את search-core.js, אז עותק מקומי. */
+function escHtml(s){
+  return String(s == null ? "" : s)
+    .replace(/&/g, "&amp;")
+    .replace(/</g, "&lt;")
+    .replace(/>/g, "&gt;")
+    .replace(/"/g, "&quot;")
+    .replace(/'/g, "&#39;");
+}
+
+/* אותה הגנה כמו ב-cart.js: שורה פגומה (בלי name/price, או מגרסת עגלה
+   ישנה) הופכת ל-"undefined" ו-NaN ₪ בדף התשלום. משמיטים אותה במקום
+   להציג ללקוח סכום שגוי. השרת ממילא מתמחר מחדש לפי sku בלבד. */
+function sanitizeCartItems(list){
+  if(!Array.isArray(list)) return [];
+  return list.filter(i =>
+    i && typeof i === "object" &&
+    typeof i.name === "string" && i.name &&
+    Number.isFinite(Number(i.price)) && Number(i.price) >= 0 &&
+    Number.isFinite(Number(i.qty)) && Number(i.qty) >= 1
+  ).map(i => Object.assign({}, i, {
+    price: Number(i.price),
+    qty: Math.min(Math.floor(Number(i.qty)), 20)   // 20 = התקרה שהשרת אוכף ב-priceCart_
+  }));
+}
+
 function readCartFromStorage(){
   try{
     const raw = localStorage.getItem(CART_STORAGE_KEY);
-    return raw ? JSON.parse(raw) : [];
+    return sanitizeCartItems(raw ? JSON.parse(raw) : []);
   }catch(e){ return []; }
 }
 
@@ -80,8 +106,8 @@ function renderCheckoutPage(){
   document.getElementById("checkoutSummary").innerHTML = items.map(i => `
     <li>
       <span class="k">
-        <div>${i.name}${i.qty>1?` × ${i.qty}`:""}</div>
-        ${i.noteLines && i.noteLines.length ? `<div class="cart-item-note">${i.noteLines.join("<br>")}</div>` : ""}
+        <div>${escHtml(i.name)}${i.qty>1?` × ${i.qty}`:""}</div>
+        ${i.noteLines && i.noteLines.length ? `<div class="cart-item-note">${i.noteLines.map(escHtml).join("<br>")}</div>` : ""}
       </span>
       <span class="v">${i.price===0 ? t("included") : (i.price*i.qty).toLocaleString()+" ₪"}</span>
     </li>`).join("");

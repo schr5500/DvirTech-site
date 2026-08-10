@@ -100,15 +100,16 @@ function initSiteSearch(){
     const cats = siteSearchCategoryHits(catalog, term);
 
     if(!all.length && !cats.length){
+      const safeTerm = escHtml(term);
       panel.innerHTML = `<div class="site-search-empty">${
-        _ssTr(`אין תוצאות עבור "${term}"`, `No results for "${term}"`)}</div>`;
+        _ssTr(`אין תוצאות עבור "${safeTerm}"`, `No results for "${safeTerm}"`)}</div>`;
       panel.classList.add("show");
       return;
     }
 
     const catRows = cats.map(c => `
       <a class="site-search-row site-search-cat-row" href="products.html?cat=${encodeURIComponent(c.cat)}">
-        <span class="ssr-name">${c.label}</span>
+        <span class="ssr-name">${escHtml(c.label)}</span>
         <span class="ssr-meta"><span class="ssr-cat">${
           _ssTr(`${c.n} מוצרים`, `${c.n} products`)}</span></span>
       </a>`).join("");
@@ -118,14 +119,14 @@ function initSiteSearch(){
       const price = Number(it.price).toLocaleString("he-IL") + " ₪";
       const href  = "products.html?cat=" + encodeURIComponent(cat) + "&q=" + encodeURIComponent(term);
       return `<a class="site-search-row" href="${href}">
-        <span class="ssr-name">${name}</span>
-        <span class="ssr-meta"><span class="ssr-cat">${label}</span><span class="ssr-price">${price}</span></span>
+        <span class="ssr-name">${escHtml(name)}</span>
+        <span class="ssr-meta"><span class="ssr-cat">${escHtml(label)}</span><span class="ssr-price">${price}</span></span>
       </a>`;
     }).join("");
 
     const seeAll = all.length
       ? `<a class="site-search-all" href="products.html?cat=all&q=${encodeURIComponent(term)}">${
-          _ssTr(`כל ${all.length} התוצאות עבור "${term}"`, `See all ${all.length} results for "${term}"`)} ←</a>`
+          _ssTr(`כל ${all.length} התוצאות עבור "${escHtml(term)}"`, `See all ${all.length} results for "${escHtml(term)}"`)} ←</a>`
       : "";
 
     panel.innerHTML = catRows + itemRows + seeAll;
