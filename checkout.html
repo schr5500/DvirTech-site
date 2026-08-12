@@ -44,6 +44,10 @@
 
     <div id="checkoutContent">
       <ul class="summary-list" id="checkoutSummary"></ul>
+
+      <!-- מוצג רק כשהעגלה מכילה רכיבים שמרכיבים מחשב שלם אבל הם נקנו
+           בנפרד ולא דרך הבונה. checkout.js מחליט (ראה assemblyNotice). -->
+      <div class="assembly-notice" id="assemblyNotice" hidden></div>
       <div class="checkout-total-row">
         <span id="checkoutTotalLabel"></span>
         <span id="checkoutTotalPrice">0 ₪</span>
@@ -114,6 +118,8 @@
 
 <script src="sprite.js"></script>
 <script src="i18n.js"></script>
+<script src="search-core.js"></script>
+<script src="site-header.js"></script>
 <script src="checkout.js"></script>
 </body>
 </html>

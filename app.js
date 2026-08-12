@@ -28,8 +28,35 @@ let useCaseKey = "gaming";
 let lastChangedCat = null;
 let lastTotal = null;
 
-function getItem(cat){ return selections[cat] ? CATALOG[cat].items.find(i => i.id === selections[cat].id) : null; }
-function getQty(cat){ return selections[cat] ? selections[cat].qty : 0; }
+/* שירותים נוספים הם *בחירה מרובה*: לקוח יכול לקחת גם הרכבה וגם התקנת
+   Windows, ושניהם נכנסים למחיר ולעגלה. כל שאר הקטגוריות נשארו בחירה
+   יחידה, ולכן המצב נשמר בנפרד ולא בתוך selections. */
+let serviceIds = new Set();
+
+function serviceItems(){
+  const g = CATALOG && CATALOG.services;
+  if(!g) return [];
+  return (g.items || []).filter(i => serviceIds.has(i.id) && i.id !== "none");
+}
+function isServiceChosen(id){ return serviceIds.has(id); }
+function toggleService(id){
+  if(id === "none"){ serviceIds.clear(); }        // "ללא שירות נוסף" מנקה הכל
+  else if(serviceIds.has(id)) serviceIds.delete(id);
+  else serviceIds.add(id);
+  lastChangedCat = "services";
+  refreshAll();
+}
+
+function getItem(cat){
+  // תאימות לאחור: קוד קיים שמבקש getItem("services") מקבל את הראשון
+  // שנבחר. מי שצריך את כולם ישתמש ב-serviceItems().
+  if(cat === "services") return serviceItems()[0] || null;
+  return selections[cat] ? CATALOG[cat].items.find(i => i.id === selections[cat].id) : null;
+}
+function getQty(cat){
+  if(cat === "services") return serviceItems().length ? 1 : 0;
+  return selections[cat] ? selections[cat].qty : 0;
+}
 
 function radiatorFits(mm, support){ return !!support && (support.front === mm || support.top === mm); }
 
@@ -182,14 +209,14 @@ function renderStaticText(){
   document.documentElement.lang = LANG;
   document.documentElement.dir = LANG === "he" ? "rtl" : "ltr";
 
-  document.getElementById("navHome").textContent = t("navHome");
-  document.getElementById("navReady").textContent = t("navReady");
-  document.getElementById("navPeripherals").textContent = t("navPeripherals");
-  document.getElementById("navComponents").textContent = t("navComponents");
-  document.getElementById("navBuilder").textContent = t("navBuilder");
-  document.getElementById("navLab").textContent = t("navLab");
-  document.getElementById("navWhy").textContent = t("navWhy");
-  document.getElementById("navContact").textContent = t("navContact");
+  { const _e=document.getElementById("navHome"); if(_e) _e.textContent = t("navHome"); }
+  { const _e=document.getElementById("navReady"); if(_e) _e.textContent = t("navReady"); }
+  { const _e=document.getElementById("navPeripherals"); if(_e) _e.textContent = t("navPeripherals"); }
+  { const _e=document.getElementById("navComponents"); if(_e) _e.textContent = t("navComponents"); }
+  { const _e=document.getElementById("navBuilder"); if(_e) _e.textContent = t("navBuilder"); }
+  { const _e=document.getElementById("navLab"); if(_e) _e.textContent = t("navLab"); }
+  { const _e=document.getElementById("navWhy"); if(_e) _e.textContent = t("navWhy"); }
+  { const _e=document.getElementById("navContact"); if(_e) _e.textContent = t("navContact"); }
 
   document.getElementById("heroTitle").textContent = t("heroTitle") + " ";
   document.getElementById("heroTitleHighlight").textContent = t("heroTitleHighlight");
@@ -292,10 +319,20 @@ function renderOptions(cat){
   }
 
   body.innerHTML = `<div class="options">${items.map(({item, meta}) => {
-    const selected = selections[cat] && selections[cat].id === item.id;
+    // שירותים = בחירה מרובה, ולכן סימון לפי serviceIds ולא לפי selections
+    const selected = cat === "services"
+      ? (item.id === "none" ? serviceIds.size === 0 : isServiceChosen(item.id))
+      : (selections[cat] && selections[cat].id === item.id);
+    const onclick = cat === "services"
+      ? `toggleService('${item.id}')`
+      : `selectItem('${cat}','${item.id}')`;
+    // סימן וי על שירות שנבחר — מבהיר שאפשר לבחור יותר מאחד
+    const multiMark = (cat === "services" && item.id !== "none")
+      ? `<span class="opt-check" aria-hidden="true">${selected ? "✓" : ""}</span>` : "";
     const badge = meta.status && STATUS_META[meta.status] ? `<div class="badge-tag ${STATUS_META[meta.status].cls}">${STATUS_META[meta.status].label()}</div>` : "";
     return `
-    <div class="opt${selected ? " selected" : ""}" data-cat="${cat}" data-id="${item.id}" onclick="selectItem('${cat}','${item.id}')" title="${meta.reason || ""}">
+    <div class="opt${selected ? " selected" : ""}${cat === "services" ? " opt--multi" : ""}" data-cat="${cat}" data-id="${item.id}" onclick="${onclick}" title="${meta.reason || ""}">
+      ${multiMark}
       ${badge}
       ${thumbHtml(item, cat)}
       <div class="name">${localName(item)}</div>
@@ -346,6 +383,17 @@ function updateSummary(){
   const list = document.getElementById("summaryList");
   let total = 0;
   list.innerHTML = STEP_ORDER.map(cat=>{
+    // שירותים: כל מה שנבחר מופיע כשורה נפרדת, וכולם נספרים במחיר
+    if(cat === "services"){
+      const chosen = serviceItems();
+      if(!chosen.length){
+        return `<li><span class="k">${localLabel(cat)}</span><span class="v empty">${t("notSelected")}</span></li>`;
+      }
+      return chosen.map((svc, i) => {
+        total += svc.price;
+        return `<li><span class="k">${i === 0 ? localLabel(cat) : ""}</span><span class="v">${localName(svc)}</span></li>`;
+      }).join("");
+    }
     const item = getItem(cat);
     if(!item) return `<li><span class="k">${localLabel(cat)}</span><span class="v empty">${t("notSelected")}</span></li>`;
     const qty = getQty(cat);

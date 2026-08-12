@@ -1,0 +1,49 @@
+<!DOCTYPE html>
+<html lang="he" dir="rtl">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>DvirTech — האתר בקרוב</title>
+<script>
+  (function(){
+    var saved = "he";
+    try { saved = localStorage.getItem("dvirtech_lang") || "he"; } catch(e) {}
+    document.documentElement.lang = saved;
+    document.documentElement.dir = saved === "he" ? "rtl" : "ltr";
+  })();
+</script>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link href="https://fonts.googleapis.com/css2?family=Rubik:wght@400;500;600;700;800;900&family=Heebo:wght@300;400;500;700&display=swap" rel="stylesheet">
+<link rel="stylesheet" href="site-coming-soon.css">
+</head>
+<body>
+
+<div class="glow glow1"></div>
+<div class="glow glow2"></div>
+
+<main class="center-wrap">
+<div class="card">
+  <div class="lang-switch">
+    <button class="lang-btn" data-lang="he" onclick="setLang('he')">עברית</button>
+    <button class="lang-btn" data-lang="en" onclick="setLang('en')">English</button>
+  </div>
+
+  <img class="logo" src="images/logo-dvirtech-transparent.png" alt="DvirTech">
+
+  <div class="badge"><span class="dot"></span><span id="badgeText"></span></div>
+
+  <h1><span id="titleMain"></span> <span class="g" id="titleHighlight"></span></h1>
+  <p id="bodyText"></p>
+
+  <div class="actions">
+    <a class="btn btn-primary" id="waBtn" href="#" target="_blank" rel="noopener"></a>
+    <a class="btn btn-ghost" id="mailBtn" href="mailto:schr5500@gmail.com"></a>
+  </div>
+</div>
+</main>
+
+<footer id="footerText"></footer>
+
+<script src="site-coming-soon.js"></script>
+</body>
+</html>

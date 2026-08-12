@@ -20,8 +20,12 @@
    אחריה המוצרים השלמים — זה מה שרוב הלקוחות מחפשים — ואז הרכיבים
    הבודדים. services לא מופיע כאן: שירות נלווה נמכר יחד עם הרכבה,
    לא כפריט מדף. */
+/* ⚠️ קטגוריה שלא רשומה כאן לא קיימת מבחינת הדף: initPage נופל ל-"הכל"
+   וגם התפריט העליון לא יוכל להוביל אליה. כל קטגוריה וירטואלית חדשה
+   ב-DVT_VIRTUAL_CATS חייבת להופיע גם ברשימה הזו. */
 const SHOP_CATEGORY_ORDER = [
-  "all", "readyPc", "monitor", "peripherals",
+  "all", "sale", "readyPc",
+  "monitor", "keyboard", "mouse", "headset", "webcam", "peripherals",
   "cpu", "gpu", "mobo", "ram", "storage", "cooling", "psu", "case"
 ];
 
@@ -77,13 +81,21 @@ let priceRange = { min: null, max: null };
 // לדעת לאיזה SKU אמיתי (category:id) להוסיף לעגלה ואיזה איור להציג —
 // "all" עצמה איננה קטגוריה אמיתית ואין לה משמעות בשרת או בבונה.
 function sellableItems(cat){
+  // "מבצעים" — פסאודו־קטגוריה: כל המוצרים שיש להם oldPrice גבוה מהמחיר
+  // הנוכחי בגיליון, מכל הקטגוריות. אין לה קיום בשרת ולא בבונה, בדיוק
+  // כמו "הכל", ולכן _realCat נשמר מהפריט המקורי.
+  if(cat === "sale"){
+    return sellableItems("all").filter(dvtIsOnSale);
+  }
   if(cat === "all"){
     const out = [];
     SHOP_CATEGORY_ORDER.forEach(c => {
       // קטגוריה וירטואלית מדלגת ב-"הכל": הפריטים שלה כבר נספרים דרך
       // קטגוריית המקור שלהם (מסך נכלל ב"ציוד היקפי"), ובלי הדילוג
       // הזה כל מסך היה מופיע פעמיים ברשימה.
-      if(c === "all" || dvtIsVirtualCat(c)) return;
+      // ⚠️ חייבים לדלג גם על "sale": היא נגזרת מ-"all", ובלי הדילוג
+      // הזה sellableItems נכנסת לרקורסיה אינסופית.
+      if(c === "all" || c === "sale" || dvtIsVirtualCat(c)) return;
       out.push(...sellableItems(c));
     });
     return out;
@@ -229,6 +241,7 @@ function filteredItems(){
 // ולתוצאות החיפוש — ובעיקר כדי שהתווית שמשתתפת בניקוד החיפוש תהיה
 // "זיכרון RAM" ולא "זיכרון" של הבונה.
 function catLabel(cat){
+  if(cat === "sale") return tr("מבצעים", "Deals");
   return dvtCatLabel(cat, SHOP_CATALOG ? SHOP_CATALOG[cat] : null);
 }
 
@@ -426,7 +439,7 @@ function renderFilters(){
           ${g.rows.map(r => `
             <label class="filter-row ${r.count===0?"dim":""}">
               <input type="checkbox" ${chosen && chosen.has(r.key) ? "checked":""}
-                     onchange="toggleFilter('${g.key}', ${JSON.stringify(r.key)}, this.checked)">
+                     onchange="toggleFilter('${g.key}', ${escHtml(JSON.stringify(r.key))}, this.checked)">
               <span class="filter-row-label">${valueLabel(g.key, r.raw)}</span>
               <span class="filter-row-count">${r.count}</span>
             </label>`).join("")}
@@ -444,7 +457,10 @@ function renderChips(){
   Object.keys(activeFilters).forEach(key => {
     activeFilters[key].forEach(v => {
       const raw = isNaN(Number(v)) ? v : Number(v);
-      chips.push(`<button class="chip" onclick="toggleFilter('${key}', ${JSON.stringify(v)}, false)">
+      // ⚠️ escHtml חובה: JSON.stringify מחזיר מרכאות כפולות, והמאפיין
+      // onclick עצמו תחום במרכאות כפולות — בלי בריחה המאפיין נקטע באמצע
+      // וכל הסינון מפסיק לעבוד (זה בדיוק הבאג שהיה כאן).
+      chips.push(`<button class="chip" onclick="toggleFilter('${key}', ${escHtml(JSON.stringify(v))}, false)">
         ${facetLabel(key)}: ${valueLabel(key, raw)} <span class="chip-x">✕</span></button>`);
     });
   });
@@ -505,16 +521,28 @@ function renderGrid(){
   // ההתפשטות כדי שקנייה מהירה מהרשימה תמשיך לעבוד כמו קודם.
   const href = it => `product.html?cat=${encodeURIComponent(it._realCat)}&id=${encodeURIComponent(it.id)}`;
 
+  /* ⚠️ מוצר שאזל *נשאר* ברשימה, מעומעם ועם תג — אבל בלי כפתור קנייה.
+     להעלים אותו לגמרי נראה כמו קטלוג שמתרוקן, ולקוח שרואה "אזל"
+     יודע לחזור. תג המבצע מוחלף בתג האזילה כדי לא להבטיח הנחה על
+     משהו שאי אפשר לקנות. */
+  const stock = it => (typeof dvtInStock === "function") ? dvtInStock(it) : true;
+
   grid.innerHTML = items.map(it => `
-    <a class="p-card" href="${href(it)}">
+    <a class="p-card${stock(it) ? "" : " p-card--oos"}" href="${href(it)}">
+      ${!stock(it) ? `<span class="p-oos-badge">${tr("אזל המלאי","Out of stock")}</span>`
+        : dvtIsOnSale(it) ? `<span class="p-sale-badge">-${dvtDiscountPct(it)}%</span>` : ""}
       <div class="p-art">${art(it)}</div>
       ${catTag(it)}
       ${it.brand ? `<div class="p-brand">${it.brand}</div>` : ""}
       <h4 class="p-name">${itemName(it)}</h4>
       <p class="p-spec">${itemSpec(it)}</p>
-      <div class="p-price">${Number(it.price).toLocaleString()} ₪</div>
-      <button class="btn btn-primary"
-              onclick="event.preventDefault();event.stopPropagation();addCatalogItemToCart('${it._realCat}','${it.id}')">${t("addToCartBtn")}</button>
+      <div class="p-price">${Number(it.price).toLocaleString()} ₪${
+        dvtIsOnSale(it) && stock(it) ? `<span class="p-price-was">${dvtOldPrice(it).toLocaleString()} ₪</span>` : ""}</div>
+      ${stock(it)
+        ? `<button class="btn btn-primary"
+              onclick="event.preventDefault();event.stopPropagation();addCatalogItemToCart('${it._realCat}','${it.id}')">${t("addToCartBtn")}</button>`
+        : `<button class="btn btn-primary" disabled
+              onclick="event.preventDefault();event.stopPropagation()">${tr("אזל המלאי","Out of stock")}</button>`}
     </a>`).join("");
 }
 
@@ -527,8 +555,10 @@ function renderAll(){
 
 /* ==================== actions ==================== */
 function shopCategories(){
+  // "מבצעים" נעלמת לגמרי כשאין אף מוצר במבצע — עדיף בלי הלשונית מאשר
+  // לשונית שמובילה לרשימה ריקה.
   return SHOP_CATEGORY_ORDER.filter(c =>
-    (c === "all" || dvtIsVirtualCat(c) || SHOP_CATALOG[c]) && sellableItems(c).length);
+    (c === "all" || c === "sale" || dvtIsVirtualCat(c) || SHOP_CATALOG[c]) && sellableItems(c).length);
 }
 
 function selectCategory(cat){
@@ -582,17 +612,18 @@ function closeNavMenu(){
 function addCatalogItemToCart(cat, id){
   const it = sellableItems(cat).find(x => x.id === id);
   if(!it) return;
+  if(typeof dvtInStock === "function" && !dvtInStock(it)) return;   // אזל — הכפתור ממילא חסום
   addToCart({ type:"product", sku: cat + ":" + it.id, name: itemName(it), price: Number(it.price), qty: 1 });
 }
 
 /* ==================== static text ==================== */
 function renderShopStaticText(){
-  document.getElementById("navHome").textContent = t("navHome");
-  document.getElementById("navProducts").textContent = tr("מוצרים ▾","Products ▾");
-  document.getElementById("navBuilder").textContent = t("navBuilder");
-  document.getElementById("navLab").textContent = t("navLab");
-  document.getElementById("navWhy").textContent = t("navWhy");
-  document.getElementById("navContact").textContent = t("navContact");
+  { const _e=document.getElementById("navHome"); if(_e) _e.textContent = t("navHome"); }
+  { const _e=document.getElementById("navProducts"); if(_e) _e.textContent = tr("מוצרים ▾","Products ▾"); }
+  { const _e=document.getElementById("navBuilder"); if(_e) _e.textContent = t("navBuilder"); }
+  { const _e=document.getElementById("navLab"); if(_e) _e.textContent = t("navLab"); }
+  { const _e=document.getElementById("navWhy"); if(_e) _e.textContent = t("navWhy"); }
+  { const _e=document.getElementById("navContact"); if(_e) _e.textContent = t("navContact"); }
   document.getElementById("shopTitle").textContent = tr("מוצרים","Products");
   document.getElementById("shopSubtitle").textContent =
     tr("כל המוצרים במלאי — מחשבים מוכנים, ציוד היקפי ורכיבים בודדים. אותם מחירים בדיוק כמו בבונה המחשבים.",
@@ -652,6 +683,15 @@ async function loadShop(){
     const searchBox = document.getElementById("filterSearch");
     if(searchBox) searchBox.value = wantedQ;
   }
+
+  /* סינון מוכן מראש מהכתובת, למשל ?cat=readyPc&useCase=gaming — כך
+     שבאנר "מחשבי גיימינג" בדף הבית נוחת על מחשבי הגיימינג בלבד ולא
+     על כל המחשבים המוכנים. כל שדה שמוגדר כסינון לקטגוריה נתמך. */
+  (FACETS[currentCat] || []).forEach(key => {
+    const v = params.get(key);
+    if(v === null || v === "") return;
+    activeFilters[key] = new Set(v.split(",").map(s => s.trim()).filter(Boolean));
+  });
 
   renderNavMenu();
   renderAll();

@@ -72,6 +72,33 @@ function sanitizeCartItems(list){
   }));
 }
 
+/* הרכיבים שבלעדיהם אין מחשב עובד. אם כולם בעגלה כפריטים נפרדים —
+   הלקוח בעצם מרכיב מחשב "ידנית", ואז כדאי להסביר לו שההרכבה חינם
+   מותנית במעבר דרך הבונה: רק שם נבדקת ההתאמה בין הרכיבים. */
+const ASSEMBLY_CORE_CATS = ["cpu","mobo","ram","storage","psu","case"];
+
+function renderAssemblyNotice(items){
+  const box = document.getElementById("assemblyNotice");
+  if(!box) return;
+
+  const hasBuild = items.some(i => i.type === "build");
+  const cats = new Set(items
+    .filter(i => typeof i.sku === "string")
+    .map(i => i.sku.split(":")[0]));
+  const looksLikeFullPc = ASSEMBLY_CORE_CATS.every(c => cats.has(c));
+
+  // הרכבה דרך הבונה כבר מזכה — אין מה להציע
+  if(hasBuild || !looksLikeFullPc){ box.hidden = true; box.innerHTML = ""; return; }
+
+  box.hidden = false;
+  box.innerHTML = `
+    <b>${tr("רוצה הרכבה חינם?","Want free assembly?")}</b>
+    <p>${tr(
+      "יש בעגלה את כל הרכיבים למחשב שלם. הטבת ההרכבה ללא עלות ניתנת על הרכבות שנבנו דרך בונה המחשבים — רק שם נבדקת ההתאמה בין הרכיבים (שקע המעבד, גודל המארז, הספק הספק וכו'), וכך אני יודע שההרכבה תעבוד.",
+      "Your cart has every part of a complete PC. Free assembly applies to builds configured in the PC Builder — that's where part compatibility is checked (CPU socket, case clearance, PSU headroom), so I know the build will actually work.")}</p>
+    <a class="btn btn-secondary" href="builder.html">${tr("מעבר לבונה המחשבים","Open the PC Builder")}</a>`;
+}
+
 function readCartFromStorage(){
   try{
     const raw = localStorage.getItem(CART_STORAGE_KEY);
@@ -111,6 +138,7 @@ function renderCheckoutPage(){
       </span>
       <span class="v">${i.price===0 ? t("included") : (i.price*i.qty).toLocaleString()+" ₪"}</span>
     </li>`).join("");
+  renderAssemblyNotice(items);
   cartSubtotal = cartTotalOf(items);
   document.getElementById("checkoutTotalPrice").textContent = cartSubtotal.toLocaleString() + " ₪";
   renderCheckoutTotals();

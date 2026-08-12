@@ -3,9 +3,9 @@
 <head>
 <meta charset="UTF-8">
 <meta name="viewport" content="width=device-width, initial-scale=1.0">
-<title>DvirTech</title>
+<title>DvirTech — בונה המחשבים</title>
+<meta name="description" content="בנה מחשב בהתאמה אישית: בחירת רכיבים תואמים, בדיקת תאימות חיה, והצעת מחיר מיידית.">
 <script>
-  // מונע הבהוב שפה: קובע dir/lang לפני שהעמוד מצטייר, לפי מה שנשמר בעבר
   (function(){
     var saved = "he";
     try { saved = localStorage.getItem("dvirtech_lang") || "he"; } catch(e) {}
@@ -15,108 +15,675 @@
 </script>
 <link rel="preconnect" href="https://script.google.com" crossorigin>
 <link rel="preconnect" href="https://script.googleusercontent.com" crossorigin>
-<link rel="preconnect" href="https://fonts.googleapis.com">
-<link href="https://fonts.googleapis.com/css2?family=Rubik:wght@400;500;600;700;800;900&family=Heebo:wght@300;400;500;700&display=swap" rel="stylesheet">
 <link rel="stylesheet" href="style.css">
+<!-- ריצת הרכיב של הבונה (פורמט DesignCode). חייב להיטען ראשון. -->
+<script src="builder-assets/support.js"></script>
 </head>
 <body>
 
-<header>
-  <div class="wrap headbar">
-    <a class="brand" href="index.html" aria-label="DvirTech — לדף הבית"><img class="brand-logo" src="images/logo-dvirtech-transparent.png" alt="DvirTech"></a>
-    <nav>
-      <a href="index.html" id="navHome"></a>
-      <a href="products.html?cat=readyPc" id="navReady"></a>
-      <a href="products.html?cat=peripherals" id="navPeripherals"></a>
-      <a href="products.html?cat=gpu" id="navComponents"></a>
-      <a href="builder.html" id="navBuilder"></a>
-      <a href="coming-soon.html?service=support" id="navLab"></a>
-      <a href="why-dvirtech.html" id="navWhy"></a>
-      <a href="contact.html" id="navContact"></a>
-    </nav>
-    <div class="lang-switch">
-      <button class="lang-btn" data-lang="he" onclick="setLang('he')">עברית</button>
-      <button class="lang-btn" data-lang="en" onclick="setLang('en')">English</button>
+<header><div class="wrap headbar"></div></header>
+
+<x-dc>
+<helmet>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+
+<script type="importmap">
+{"imports":{"three":"https://unpkg.com/three@0.160.0/build/three.module.js","three/addons/":"https://unpkg.com/three@0.160.0/examples/jsm/"}}
+</script>
+<link href="https://fonts.googleapis.com/css2?family=Rubik:wght@400;500;600;700;800;900&family=Heebo:wght@300;400;500;700&display=swap" rel="stylesheet">
+<style>
+  *{box-sizing:border-box}
+  body{margin:0;background:#F5F8FC}
+  a{color:#1B6FE0;text-decoration:none}
+  a:hover{color:#0E4C97}
+  @keyframes fanSpin{to{transform:rotate(360deg)}}
+  @keyframes softGlow{0%,100%{opacity:.55}50%{opacity:1}}
+  @keyframes partIn{0%{opacity:0;transform:scale(.82)}60%{opacity:1;transform:scale(1.05)}100%{opacity:1;transform:scale(1)}}
+  @keyframes rowIn{from{opacity:0;transform:translateY(6px)}to{opacity:1;transform:none}}
+  @keyframes podium{0%,100%{opacity:.5;transform:scaleX(.97)}50%{opacity:.95;transform:scaleX(1.02)}}
+  @media (max-width:1180px){
+    [data-cols]{grid-template-columns:1fr !important}
+    [data-col="picker"]{order:1}[data-col="stage"]{order:2}[data-col="summary"]{order:3}
+    [data-col]{position:static !important}
+    [data-stage-row]{flex-direction:column !important}
+    [data-partlist]{flex-direction:row !important;flex-wrap:wrap !important;width:100% !important}
+    [data-partlist] > *{flex:1 1 210px}
+  }
+  @media (max-width:1000px){header nav{display:none !important}}
+  @media (prefers-reduced-motion:reduce){*{animation:none !important}}
+</style>
+</helmet>
+<div dir="rtl" style="font-family:'Heebo',sans-serif;line-height:1.65;color:#0E2A47;background:#fff;min-height:100vh">
+
+  <!-- ⚠️ הערת הזכאות ל"הרכבה ללא עלות" הייתה בבונה הישן (i18n:
+     freeAssemblyEligibilityNote) ונשמטה בעיצוב החדש. מוחזרת כאן. -->
+<div class="wrap"><p class="builder-free-note">
+  <b>הרכבה ללא עלות</b> ניתנת על הרכבות שהוגדרו ונרכשו דרך הבונה הזה — רק כאן נבדקת ההתאמה בין הרכיבים.
+  רכישת רכיבים בודדים בנפרד אינה מזכה אוטומטית בהטבה.
+</p></div>
+
+<!-- ⚠️ ההדר של הייצוא הוסר: site-header.js בונה הדר אחד
+         לכל האתר (אותם פריטים, אותו סדר, אותו צד). בלי ההסרה הזו
+         הופיעו שני תפריטים זה מעל זה. הסגנון הלבן נשמר דרך CSS. -->
+
+  <div style="width:100%;max-width:1820px;margin:0 auto;padding:30px 22px 0;display:flex;align-items:center;gap:18px;flex-wrap:wrap">
+    <div style="flex:1;min-width:260px">
+      <h1 style="font-family:'Rubik',sans-serif;margin:0;font-size:30px;font-weight:800;letter-spacing:-.4px;color:#0E2A47">בונה המחשבים</h1>
+      <p style="margin:4px 0 0;color:#5F7590;font-size:14.5px">בוחרים רכיב, רואים אותו נכנס למחשב, ומקבלים הרכבה שנבדקה לפני המשלוח.</p>
+    </div>
+    <div style="display:flex;align-items:center;gap:0;background:#fff;border:1px solid #E2EAF2;border-radius:999px;padding:8px 12px;box-shadow:0 2px 10px rgba(14,42,71,.05)">
+      <sc-for list="{{ stepper }}" as="s" hint-placeholder-count="3">
+        <div style="display:flex;align-items:center;gap:9px;padding:0 12px">
+          <span style="width:24px;height:24px;border-radius:50%;display:grid;place-items:center;font-family:'Rubik',sans-serif;font-size:12px;font-weight:800;background:{{ s.bg }};color:{{ s.fg }}">{{ s.n }}</span>
+          <span style="font-size:13px;font-weight:{{ s.w }};color:{{ s.tc }};white-space:nowrap">{{ s.label }}</span>
+        </div>
+        <sc-if value="{{ s.line }}" hint-placeholder-val="{{ true }}"><span style="width:46px;height:2px;border-radius:2px;background:#E2EAF2"></span></sc-if>
+      </sc-for>
     </div>
   </div>
-</header>
 
-<section class="hero">
-  <div class="wrap">
-    <h1><span id="heroTitle"></span><span class="g" id="heroTitleHighlight"></span></h1>
-    <p id="heroSubtitle"></p>
-  </div>
-</section>
-
-<div class="trust-bar">
-  <div class="wrap trust-wrap">
-    <span><b>🛡️</b> <span id="trustWarranty"></span></span>
-    <span><b>🔍</b> <span id="trustStress"></span></span>
-    <span><b>💬</b> <span id="trustSupport"></span></span>
-    <span><b>🚚</b> <span id="trustShipping"></span></span>
-  </div>
-</div>
-
-<div class="wrap" style="padding-top:22px">
-  <div class="filter-explainer" id="filterExplainer"></div>
-</div>
-
-<div class="wrap builder">
-
-  <div id="stepsContainer"></div>
-
-
-  <div class="sticky">
-    <div class="panel">
-      <h3 id="summaryTitle"></h3>
-      <p class="sub" id="summarySubtitle"></p>
-
-      <ul class="summary-list" id="summaryList"></ul>
-      <div class="total-row"><span id="totalLabel"></span><span id="totalPrice">0 ₪</span></div>
-
-      <div class="case-diagram">
-        <div class="diagram-title" id="diagramTitle"></div>
-        <div class="pc-visual-outer">
-          <div class="pc-stage" id="pcStage"></div>
+  <div style="width:100%;max-width:1820px;margin:0 auto;padding:20px 22px 0">
+    <div style="background:#fff;border:1px solid #EDF2F8;box-shadow:0 2px 12px rgba(14,42,71,.05);border-radius:20px;padding:22px 24px;display:flex;align-items:center;gap:14px;flex-wrap:wrap">
+      <div style="width:100%;display:flex;align-items:baseline;gap:10px;flex-wrap:wrap;justify-content:center;text-align:center">
+        <h2 style="font-family:'Rubik',sans-serif;margin:0;font-size:18.5px;font-weight:700;letter-spacing:-.2px;color:#0E2A47;text-wrap:balance;white-space:nowrap">בוא נתאים את המחשב למה שאתה באמת צריך</h2>
+        <span style="font-size:13px;color:#5F7590">כדי שאמליץ לך על הרכיבים הנכונים — לא יותר ולא פחות</span>
+      </div>
+      <div style="display:flex;gap:12px;flex-wrap:wrap;width:100%;justify-content:center;margin-top:4px">
+        <sc-for list="{{ useCases }}" as="u" hint-placeholder-count="4">
+          <button onClick="{{ u.pick }}" style="display:inline-flex;align-items:center;gap:9px;border:1.5px solid {{ u.bd }};background:{{ u.bg }};color:{{ u.fg }};border-radius:14px;padding:13px 22px;white-space:nowrap;font-family:'Heebo',sans-serif;font-size:14.5px;font-weight:{{ u.weight }};cursor:pointer;transition:.15s;box-shadow:{{ u.shadow }}" style-hover="border-color:#C9DEF8">
+            <span style="font-size:17px;line-height:1">{{ u.icon }}</span>{{ u.label }}
+          </button>
+        </sc-for>
+      </div>
+      <div style="width:100%;display:flex;align-items:center;gap:12px;flex-wrap:wrap;padding-top:6px;justify-content:center">
+        <span style="font-size:13px;color:#5F7590;flex:none">{{ chipsLabel }}</span>
+        <div style="display:flex;gap:8px;flex-wrap:wrap;flex:1;justify-content:center">
+          <sc-for list="{{ chips }}" as="c" hint-placeholder-count="5">
+            <span onClick="{{ c.toggle }}" style="display:inline-flex;align-items:center;gap:6px;border:1.5px solid {{ c.bd }};border-radius:999px;padding:6px 14px;font-size:13px;cursor:pointer;background:{{ c.bg }};color:{{ c.fg }};transition:.15s">{{ c.label }}</span>
+          </sc-for>
         </div>
+        <sc-if value="{{ showRes }}" hint-placeholder-val="{{ true }}">
+          <label style="display:inline-flex;align-items:center;gap:8px;flex:none;font-size:13px;color:#5F7590">רזולוציה
+            <select style="padding:10px 14px;border-radius:12px;border:1.5px solid #EDF2F8;font-family:'Heebo',sans-serif;font-size:13.5px;background:#F7FAFD;color:#0E2A47">
+              <option>1440p</option><option>1080p</option><option>4K</option>
+            </select>
+          </label>
+        </sc-if>
+      </div>
+    </div>
+  </div>
+
+  <div data-cols="1" style="width:100%;max-width:1820px;margin:0 auto;padding:20px 22px 52px;display:grid;grid-template-columns:minmax(280px,20.5%) minmax(640px,1fr) minmax(290px,21.5%);gap:20px;align-items:start">
+
+    <div data-col="summary" style="background:#fff;border:1px solid #EDF2F8;border-radius:22px;box-shadow:0 6px 24px rgba(14,42,71,.07);padding:24px;position:sticky;top:88px">
+      <div style="display:flex;align-items:baseline;justify-content:space-between;gap:10px;margin-bottom:4px">
+        <h3 style="font-family:'Rubik',sans-serif;margin:0;font-size:19px;font-weight:800;letter-spacing:-.2px;color:#0E2A47">סיכום ההרכבה</h3>
+        <span style="font-size:12px;color:#5F7590">{{ chosenCount }} רכיבים נבחרו</span>
+      </div>
+      <ul style="list-style:none;padding:0;margin:14px 0 0">
+        <sc-for list="{{ summary }}" as="row" hint-placeholder-count="8">
+          <li style="display:flex;align-items:center;gap:12px;padding:11px 10px;border-radius:13px;transition:background .15s" style-hover="background:#F7FAFD">
+            <span role="img" style="width:40px;height:40px;border-radius:10px;background-color:{{ row.thumbBg }};background-image:{{ row.imgUrl }};background-size:{{ row.imgSize }};background-repeat:no-repeat;background-position:center;flex:none;opacity:{{ row.imgOp }}"></span>
+            <span style="flex:1;min-width:0">
+              <span dir="auto" style="display:block;font-size:14px;font-weight:600;color:{{ row.nameColor }};line-height:1.35;overflow:hidden;text-overflow:ellipsis;white-space:nowrap;direction:{{ row.dir }};text-align:right">{{ row.name }}</span>
+              <span style="display:block;font-size:11.5px;color:#5F7590;letter-spacing:.2px;margin-top:2px">{{ row.cat }}</span>
+            </span>
+            <sc-if value="{{ row.hasQty }}" hint-placeholder-val="{{ false }}">
+              <span style="display:inline-flex;align-items:center;gap:5px;background:#F7FAFD;border:1px solid #E2EAF2;border-radius:999px;padding:2px 8px;flex:none">
+                <button onClick="{{ row.dec }}" style="border:none;background:none;width:16px;height:16px;color:#1B6FE0;font-weight:800;cursor:pointer;font-size:13px;line-height:1;padding:0">−</button>
+                <span style="font-size:11.5px;font-weight:700;min-width:9px;text-align:center">{{ row.qty }}</span>
+                <button onClick="{{ row.inc }}" style="border:none;background:none;width:16px;height:16px;color:#1B6FE0;font-weight:800;cursor:pointer;font-size:13px;line-height:1;padding:0">+</button>
+              </span>
+            </sc-if>
+            <span style="font-family:'Rubik',sans-serif;font-size:13.5px;font-weight:700;color:{{ row.priceColor }};flex:none;white-space:nowrap">{{ row.price }}</span>
+          </li>
+        </sc-for>
+      </ul>
+
+      <div style="margin-top:16px;border-radius:14px;padding:14px 15px;background:#F7FAFD;border:1px solid #EDF2F8">
+        <div style="font-size:12.5px;font-weight:700;color:#0E2A47;margin-bottom:9px">שירותים נוספים</div>
+        <sc-for list="{{ services }}" as="sv" hint-placeholder-count="2">
+          <label style="display:flex;align-items:center;gap:9px;padding:5px 0;cursor:pointer" onClick="{{ sv.toggle }}">
+            <span style="width:19px;height:19px;border-radius:6px;border:1.5px solid {{ sv.bd }};background:{{ sv.bg }};color:#fff;display:grid;place-items:center;font-size:11px;font-weight:900;flex:none">{{ sv.mark }}</span>
+            <span style="flex:1;font-size:12.5px;color:#0E2A47">{{ sv.label }}</span>
+            <span style="font-size:12px;font-weight:700;color:{{ sv.priceColor }}">{{ sv.price }}</span>
+          </label>
+        </sc-for>
       </div>
 
-      <div id="validationMsg"></div>
-
-      <div style="margin:14px 0">
-        <label class="field-label" id="useCaseLabel"></label>
-        <select id="useCase" onchange="onUseCaseChange()"></select>
+      <div style="margin-top:18px;background:#F7FAFD;border:1px solid #EDF2F8;border-radius:16px;padding:17px 17px 16px;display:flex;align-items:flex-end;justify-content:space-between;gap:8px">
+        <span style="font-size:13px;color:#5F7590;line-height:1.4">סה"כ<br><span style="font-size:11px;color:#5F7590">כולל מע"מ</span></span>
+        <span style="font-family:'Rubik',sans-serif;font-size:34px;font-weight:800;line-height:1;color:#0B2C4D;letter-spacing:-.5px">{{ total }} ₪</span>
       </div>
 
-      <div id="resolutionField" style="margin:14px 0">
-        <label class="field-label" id="resolutionLabel"></label>
-        <select id="resolution"></select>
-      </div>
-
-      <div>
-        <label class="field-label" id="contextLabel"></label>
-        <div id="popularOptions"></div>
-        <div id="customContextRow"></div>
-        <div class="add-row">
-          <input id="customContextInput">
-          <button id="addContextBtn" onclick="addCustomContext()"></button>
-        </div>
-      </div>
-
-      <button class="btn btn-primary" id="analyzeBtn" onclick="analyzeWithAI()">
-        <span id="analyzeBtnText"></span> <small id="analyzeBtnSub"></small>
+      <button style="display:flex;align-items:center;justify-content:center;gap:10px;border:none;cursor:pointer;font-family:'Heebo',sans-serif;font-weight:700;font-size:15.5px;border-radius:14px;padding:16px 18px;width:100%;margin-top:16px;background:linear-gradient(100deg,#1B6FE0,#2FC4B0);color:#fff;box-shadow:0 10px 24px rgba(27,111,224,.22);transition:.18s" style-hover="box-shadow:0 14px 30px rgba(27,111,224,.28);filter:brightness(1.04)">
+        המשך לסיכום והרכבה
+        <svg viewBox="0 0 24 24" style="width:17px;height:17px;fill:none;stroke:currentColor;stroke-width:2;stroke-linecap:round;stroke-linejoin:round"><path d="M14 6l-6 6 6 6"></path></svg>
       </button>
-      <button class="btn btn-accent" id="whatsappBtn" onclick="sendWhatsApp()"></button>
-      <button class="btn btn-primary" id="finishBuildBtn" onclick="finishBuildAndAddToCart()" style="background:var(--navy-900)"></button>
-      <div id="finishBuildNote" class="validation-msg" style="display:none"></div>
+      <button style="display:flex;align-items:center;justify-content:center;gap:9px;cursor:pointer;font-family:'Heebo',sans-serif;font-weight:700;font-size:14px;border-radius:14px;padding:13px 18px;width:100%;margin-top:10px;background:#fff;color:#0C8467;border:1.5px solid #BDE6D8;transition:.18s" style-hover="background:#F2FBF8;border-color:#8FD6C1">
+        <svg viewBox="0 0 24 24" style="width:16px;height:16px;fill:currentColor"><path d="M17.5 14.4c-.3-.2-1.7-.9-2-1-.3-.1-.5-.2-.7.1-.2.3-.7 1-.9 1.2-.2.2-.3.2-.6.1-.3-.2-1.2-.5-2.3-1.4-.9-.8-1.4-1.7-1.6-2-.2-.3 0-.5.1-.6l.5-.6c.1-.2.2-.3.3-.5 0-.2 0-.4 0-.5 0-.2-.7-1.6-.9-2.2-.2-.6-.5-.5-.7-.5h-.6c-.2 0-.5.1-.8.4-.3.3-1 1-1 2.5s1.1 2.9 1.2 3.1c.2.2 2.1 3.2 5.1 4.5.7.3 1.3.5 1.7.6.7.2 1.4.2 1.9.1.6-.1 1.7-.7 2-1.4.2-.7.2-1.3.2-1.4-.1-.1-.3-.2-.6-.3zM12 2C6.5 2 2 6.5 2 12c0 1.8.5 3.4 1.3 4.9L2 22l5.3-1.4c1.4.8 3 1.2 4.7 1.2 5.5 0 10-4.5 10-10S17.5 2 12 2z"></path></svg>
+        שליחת ההרכבה בוואטסאפ
+      </button>
+      <div style="display:flex;gap:10px;margin-top:10px">
+        <button style="flex:1;border:1px solid #EDF2F8;background:#fff;color:#5F7590;border-radius:12px;padding:12px;font-family:'Heebo',sans-serif;font-size:12.5px;font-weight:600;cursor:pointer;transition:.15s" style-hover="color:#1B6FE0;border-color:#C9DEF8">שמור לרשימת משאלות</button>
+        <button onClick="{{ clearAll }}" style="flex:1;border:1px solid #EDF2F8;background:#fff;color:#5F7590;border-radius:12px;padding:12px;font-family:'Heebo',sans-serif;font-size:12.5px;font-weight:600;cursor:pointer;transition:.15s" style-hover="color:#1B6FE0;border-color:#C9DEF8">נקה הכל</button>
+      </div>
+      <sc-if value="{{ missingText }}" hint-placeholder-val="{{ false }}">
+        <div style="margin-top:12px;font-size:12px;color:#92650F;background:#FFF6EA;border:1px solid #F6DDAF;border-radius:11px;padding:10px 12px;line-height:1.5">חסר עוד: {{ missingText }}</div>
+      </sc-if>
+    </div>
 
-      <div class="ai-panel" id="aiPanel">
-        <div id="aiLoading" class="loading" style="display:none"><div class="spinner"></div> <span id="aiLoadingText"></span></div>
-        <div id="aiContent"></div>
+    <div data-col="stage" style="background:linear-gradient(180deg,#0E2C4C 0%,#071628 100%);border-radius:24px;padding:26px;position:relative;overflow:hidden;border:1px solid rgba(143,233,218,.16);box-shadow:0 22px 60px rgba(2,10,20,.4)">
+      <div style="display:flex;gap:8px;align-items:center;position:relative">
+        <span style="margin-inline-end:auto;display:inline-flex;align-items:center;gap:7px;border-radius:999px;padding:7px 14px;font-size:12.5px;font-weight:600;white-space:nowrap;background:{{ compat.bg }};color:{{ compat.fg }};border:1px solid {{ compat.bd }}">
+          <span style="font-size:12px">{{ compat.mark }}</span>{{ compat.text }}
+        </span>
+        <button onClick="{{ setView3d }}" style="display:inline-flex;align-items:center;gap:8px;border:1px solid {{ view3d.bd }};background:{{ view3d.bg }};color:{{ view3d.fg }};border-radius:10px;padding:9px 15px;font-family:'Heebo',sans-serif;font-size:13px;font-weight:700;cursor:pointer">
+          <svg viewBox="0 0 24 24" style="width:15px;height:15px;fill:none;stroke:currentColor;stroke-width:1.6"><path d="M12 3l8 4.5v9L12 21l-8-4.5v-9L12 3z"></path><path d="M12 12l8-4.5M12 12v9M12 12L4 7.5"></path></svg>
+          תצוגה תלת-ממדית
+        </button>
+        <button onClick="{{ setViewIn }}" style="display:inline-flex;align-items:center;gap:8px;border:1px solid {{ viewIn.bd }};background:{{ viewIn.bg }};color:{{ viewIn.fg }};border-radius:10px;padding:9px 15px;font-family:'Heebo',sans-serif;font-size:13px;font-weight:700;cursor:pointer">
+          <svg viewBox="0 0 24 24" style="width:15px;height:15px;fill:none;stroke:currentColor;stroke-width:1.6"><rect x="3" y="4" width="18" height="13" rx="2"></rect><path d="M8 21h8"></path></svg>
+          תצוגה פנימית
+        </button>
+      </div>
+
+      <div data-stage-row="1" style="display:flex;gap:32px;align-items:stretch;margin-top:18px;position:relative">
+
+        <div style="flex:1;min-width:0;position:relative;display:flex;flex-direction:column;align-items:center;justify-content:center;gap:14px;min-height:700px">
+          <div style="position:absolute;top:50%;left:50%;transform:translate(-50%,-50%);width:420px;height:420px;border-radius:50%;background:radial-gradient(circle,rgba(255,255,255,.055),transparent 68%);pointer-events:none"></div>
+          <div style="position:absolute;bottom:24px;left:50%;transform:translateX(-50%);width:70%;height:22px;border-radius:50%;background:radial-gradient(ellipse,rgba(0,0,0,.45),transparent 72%)"></div>
+          <div style="position:absolute;bottom:28px;left:50%;transform:translateX(-50%);width:58%;height:1px;background:linear-gradient(90deg,transparent,rgba(143,233,218,.55),transparent)"></div>
+
+          <x-import component-from-global-scope="PCStage" from="builder-assets/pc-stage.js" config="{{ stageCfg }}" mode="{{ stageMode }}" bg="{{ stageBg }}" fallback="builder-assets/assets/stage-fallback.jpg" hint-size="100%,700px" style="width:100%;height:700px;display:block;border-radius:18px;overflow:hidden"></x-import>
+          <sc-if value="{{ stageEmpty }}" hint-placeholder-val="{{ false }}">
+            <div style="font-size:13px;color:rgba(255,255,255,.6);text-align:center;line-height:1.6;max-width:260px;flex:none">בחר רכיב ראשון מהרשימה — ותראה אותו נכנס למחשב</div>
+          </sc-if>
+        </div>
+
+        <div data-partlist="1" style="width:238px;flex:none;display:flex;flex-direction:column;gap:9px">
+          <sc-for list="{{ stageParts }}" as="p" hint-placeholder-count="8">
+            <div onClick="{{ p.go }}" style="display:flex;align-items:center;gap:11px;padding:11px 13px;border-radius:13px;background:{{ p.bg }};border:1px solid {{ p.bd }};cursor:pointer;transition:.18s;animation:{{ p.anim }}" style-hover="border-color:rgba(143,233,218,.7)">
+              <span role="img" style="width:32px;height:32px;border-radius:9px;background-color:rgba(255,255,255,.06);background-image:{{ p.imgUrl }};background-size:{{ p.imgSize }};background-repeat:no-repeat;background-position:center;flex:none;opacity:{{ p.imgOp }}"></span>
+              <span style="flex:1;min-width:0">
+                <span style="display:block;font-size:10.5px;color:#8FE9DA;letter-spacing:.2px">{{ p.cat }}</span>
+                <span dir="auto" style="display:block;font-family:'Rubik',sans-serif;font-size:12px;font-weight:600;color:{{ p.nameColor }};line-height:1.4;overflow:hidden;text-overflow:ellipsis;white-space:nowrap;direction:{{ p.dir }};text-align:right">{{ p.name }}</span>
+              </span>
+              <svg viewBox="0 0 24 24" style="width:13px;height:13px;flex:none;fill:none;stroke:{{ p.iconColor }};stroke-width:1.7;stroke-linecap:round;stroke-linejoin:round"><path d="M4 20h4l10-10-4-4L4 16v4z"></path><path d="M14 6l4 4"></path></svg>
+            </div>
+          </sc-for>
+        </div>
+      </div>
+
+      <div style="margin-top:16px;background:rgba(255,255,255,.05);border:1px solid rgba(255,255,255,.07);border-radius:16px;padding:16px 18px">
+        <div style="text-align:center;font-size:12px;color:rgba(255,255,255,.62);letter-spacing:.2px;margin-bottom:12px">ציון ביצועים משוער</div>
+        <div style="display:grid;grid-template-columns:repeat(4,1fr);gap:10px">
+          <sc-for list="{{ meters }}" as="m" hint-placeholder-count="4">
+            <div style="display:flex;align-items:center;gap:10px;justify-content:center">
+              <span style="width:54px;height:54px;flex:none;position:relative;display:block">
+                <svg viewBox="0 0 54 54" style="width:54px;height:54px;display:block;transform:rotate(-90deg)">
+                  <circle cx="27" cy="27" r="23" fill="none" stroke="rgba(255,255,255,.12)" stroke-width="5"></circle>
+                  <circle cx="27" cy="27" r="23" fill="none" stroke="{{ m.color }}" stroke-width="5" stroke-linecap="round" stroke-dasharray="144.5" stroke-dashoffset="{{ m.off }}" style="transition:stroke-dashoffset .9s cubic-bezier(.22,.9,.3,1)"></circle>
+                </svg>
+                <span style="position:absolute;inset:0;display:grid;place-items:center;font-family:'Rubik',sans-serif;font-size:12px;font-weight:800;color:#fff">{{ m.pct }}</span>
+              </span>
+              <span style="font-size:12.5px;color:rgba(255,255,255,.78);line-height:1.35">{{ m.label }}</span>
+            </div>
+          </sc-for>
+        </div>
+      </div>
+      <p style="margin:11px 0 0;text-align:center;font-size:11.5px;color:rgba(255,255,255,.66)">* הציונים הם הערכה להמחשה בלבד ועשויים להשתנות בהתאם לשימוש. אין בהם התחייבות לביצועים.</p>
+    </div>
+
+    <div data-col="picker" style="background:#fff;border:1px solid #EDF2F8;border-radius:22px;box-shadow:0 6px 24px rgba(14,42,71,.07);padding:24px;position:sticky;top:88px;color:#0E2A47">
+      <div style="display:flex;align-items:center;justify-content:space-between;gap:10px">
+        <h3 style="font-family:'Rubik',sans-serif;margin:0;font-size:18px;font-weight:800;letter-spacing:-.2px;white-space:nowrap">בחר רכיב</h3>
+        <a href="#" style="font-size:12.5px;color:#1B6FE0;display:inline-flex;align-items:center;gap:5px;white-space:nowrap">
+          <svg viewBox="0 0 24 24" style="width:13px;height:13px;fill:none;stroke:currentColor;stroke-width:2;stroke-linecap:round;stroke-linejoin:round"><path d="M10 6l6 6-6 6"></path></svg>
+          חזרה לקטגוריה
+        </a>
+      </div>
+
+      <div style="margin-top:16px;display:grid;grid-template-columns:repeat(4,1fr);gap:8px;background:#F7FAFD;border-radius:14px;padding:9px">
+        <button onClick="{{ tab.case.go }}" style="display:flex;flex-direction:column;align-items:center;gap:5px;border:none;background:{{ tab.case.bg }};border-radius:10px;padding:11px 4px 10px;cursor:pointer;position:relative;font-family:'Heebo',sans-serif;box-shadow:{{ tab.case.shadow }}">
+          <svg viewBox="0 0 24 24" style="width:19px;height:19px;fill:none;stroke:currentColor;stroke-width:1.6;color:{{ tab.case.color }}"><rect x="6" y="2" width="12" height="20" rx="1.5"></rect><circle cx="12" cy="6" r="1"></circle><path d="M9 11h6M9 14h6"></path></svg>
+          <span style="font-size:10.5px;font-weight:{{ tab.case.weight }};color:{{ tab.case.color }};white-space:nowrap">מארז</span>
+          <span style="position:absolute;bottom:-6px;inset-inline:16%;height:2px;border-radius:2px;background:{{ tab.case.underline }}"></span>
+        </button>
+        <button onClick="{{ tab.mobo.go }}" style="display:flex;flex-direction:column;align-items:center;gap:5px;border:none;background:{{ tab.mobo.bg }};border-radius:10px;padding:11px 4px 10px;cursor:pointer;position:relative;font-family:'Heebo',sans-serif;box-shadow:{{ tab.mobo.shadow }}">
+          <svg viewBox="0 0 24 24" style="width:19px;height:19px;fill:none;stroke:currentColor;stroke-width:1.6;color:{{ tab.mobo.color }}"><rect x="3" y="3" width="18" height="18" rx="1.5"></rect><rect x="6" y="6" width="6" height="6"></rect><path d="M15 6h3M15 9h3M15 13h3M6 15h3M11 15h7"></path></svg>
+          <span style="font-size:10.5px;font-weight:{{ tab.mobo.weight }};color:{{ tab.mobo.color }};white-space:nowrap">לוחות אם</span>
+          <span style="position:absolute;bottom:-6px;inset-inline:16%;height:2px;border-radius:2px;background:{{ tab.mobo.underline }}"></span>
+        </button>
+        <button onClick="{{ tab.cpu.go }}" style="display:flex;flex-direction:column;align-items:center;gap:5px;border:none;background:{{ tab.cpu.bg }};border-radius:10px;padding:11px 4px 10px;cursor:pointer;position:relative;font-family:'Heebo',sans-serif;box-shadow:{{ tab.cpu.shadow }}">
+          <svg viewBox="0 0 24 24" style="width:19px;height:19px;fill:none;stroke:currentColor;stroke-width:1.6;color:{{ tab.cpu.color }}"><rect x="6" y="6" width="12" height="12" rx="1.5"></rect><rect x="9" y="9" width="6" height="6"></rect><path d="M9 2v3M12 2v3M15 2v3M9 19v3M12 19v3M15 19v3M2 9h3M2 12h3M2 15h3M19 9h3M19 12h3M19 15h3"></path></svg>
+          <span style="font-size:10.5px;font-weight:{{ tab.cpu.weight }};color:{{ tab.cpu.color }};white-space:nowrap">מעבד</span>
+          <span style="position:absolute;bottom:-6px;inset-inline:16%;height:2px;border-radius:2px;background:{{ tab.cpu.underline }}"></span>
+        </button>
+        <button onClick="{{ tab.ram.go }}" style="display:flex;flex-direction:column;align-items:center;gap:5px;border:none;background:{{ tab.ram.bg }};border-radius:10px;padding:11px 4px 10px;cursor:pointer;position:relative;font-family:'Heebo',sans-serif;box-shadow:{{ tab.ram.shadow }}">
+          <svg viewBox="0 0 24 24" style="width:19px;height:19px;fill:none;stroke:currentColor;stroke-width:1.6;color:{{ tab.ram.color }}"><rect x="4" y="7" width="16" height="9" rx="1"></rect><path d="M7 16v3M10 16v3M13 16v3M16 16v3M7 7v3M10 7v2M13 7v2M16 7v3"></path></svg>
+          <span style="font-size:10.5px;font-weight:{{ tab.ram.weight }};color:{{ tab.ram.color }};white-space:nowrap">זיכרון</span>
+          <span style="position:absolute;bottom:-6px;inset-inline:16%;height:2px;border-radius:2px;background:{{ tab.ram.underline }}"></span>
+        </button>
+        <button onClick="{{ tab.storage.go }}" style="display:flex;flex-direction:column;align-items:center;gap:5px;border:none;background:{{ tab.storage.bg }};border-radius:10px;padding:11px 4px 10px;cursor:pointer;position:relative;font-family:'Heebo',sans-serif;box-shadow:{{ tab.storage.shadow }}">
+          <svg viewBox="0 0 24 24" style="width:19px;height:19px;fill:none;stroke:currentColor;stroke-width:1.6;color:{{ tab.storage.color }}"><rect x="4" y="4" width="16" height="16" rx="2"></rect><circle cx="12" cy="12" r="3.2"></circle><circle cx="12" cy="12" r=".6" fill="currentColor"></circle></svg>
+          <span style="font-size:10.5px;font-weight:{{ tab.storage.weight }};color:{{ tab.storage.color }};white-space:nowrap">אחסון</span>
+          <span style="position:absolute;bottom:-6px;inset-inline:16%;height:2px;border-radius:2px;background:{{ tab.storage.underline }}"></span>
+        </button>
+        <button onClick="{{ tab.gpu.go }}" style="display:flex;flex-direction:column;align-items:center;gap:5px;border:none;background:{{ tab.gpu.bg }};border-radius:10px;padding:11px 4px 10px;cursor:pointer;position:relative;font-family:'Heebo',sans-serif;box-shadow:{{ tab.gpu.shadow }}">
+          <svg viewBox="0 0 24 24" style="width:19px;height:19px;fill:none;stroke:currentColor;stroke-width:1.6;color:{{ tab.gpu.color }}"><rect x="3" y="8" width="18" height="8" rx="1.5"></rect><circle cx="8" cy="12" r="1.8"></circle><circle cx="13" cy="12" r="1.8"></circle><path d="M3 10.5h-1.5M3 13.5h-1.5M18 16v2h-3v-2"></path></svg>
+          <span style="font-size:10.5px;font-weight:{{ tab.gpu.weight }};color:{{ tab.gpu.color }};white-space:nowrap">כרטיס מסך</span>
+          <span style="position:absolute;bottom:-6px;inset-inline:16%;height:2px;border-radius:2px;background:{{ tab.gpu.underline }}"></span>
+        </button>
+        <button onClick="{{ tab.psu.go }}" style="display:flex;flex-direction:column;align-items:center;gap:5px;border:none;background:{{ tab.psu.bg }};border-radius:10px;padding:11px 4px 10px;cursor:pointer;position:relative;font-family:'Heebo',sans-serif;box-shadow:{{ tab.psu.shadow }}">
+          <svg viewBox="0 0 24 24" style="width:19px;height:19px;fill:none;stroke:currentColor;stroke-width:1.6;color:{{ tab.psu.color }}"><rect x="4" y="5" width="16" height="14" rx="1.5"></rect><path d="M9 9h6l-2 3h2l-4 5 1-4h-2z" fill="currentColor" stroke="none"></path></svg>
+          <span style="font-size:10.5px;font-weight:{{ tab.psu.weight }};color:{{ tab.psu.color }};white-space:nowrap">ספקי כוח</span>
+          <span style="position:absolute;bottom:-6px;inset-inline:16%;height:2px;border-radius:2px;background:{{ tab.psu.underline }}"></span>
+        </button>
+        <button onClick="{{ tab.caseFans.go }}" style="display:flex;flex-direction:column;align-items:center;gap:5px;border:none;background:{{ tab.caseFans.bg }};border-radius:10px;padding:11px 4px 10px;cursor:pointer;position:relative;font-family:'Heebo',sans-serif;box-shadow:{{ tab.caseFans.shadow }}">
+          <svg viewBox="0 0 24 24" style="width:19px;height:19px;fill:none;stroke:currentColor;stroke-width:1.6;color:{{ tab.caseFans.color }}"><rect x="3" y="3" width="18" height="18" rx="2"></rect><circle cx="12" cy="12" r="4"></circle><path d="M12 3v5M12 16v5M3 12h5M16 12h5"></path></svg>
+          <span style="font-size:10.5px;font-weight:{{ tab.caseFans.weight }};color:{{ tab.caseFans.color }};white-space:nowrap">מאווררים</span>
+          <span style="position:absolute;bottom:-6px;inset-inline:16%;height:2px;border-radius:2px;background:{{ tab.caseFans.underline }}"></span>
+        </button>
+        <button onClick="{{ tab.paste.go }}" style="display:flex;flex-direction:column;align-items:center;gap:5px;border:none;background:{{ tab.paste.bg }};border-radius:10px;padding:11px 4px 10px;cursor:pointer;position:relative;font-family:'Heebo',sans-serif;box-shadow:{{ tab.paste.shadow }}">
+          <svg viewBox="0 0 24 24" style="width:19px;height:19px;fill:none;stroke:currentColor;stroke-width:1.6;color:{{ tab.paste.color }}"><rect x="7" y="4" width="10" height="14" rx="2"></rect><path d="M10 18v2h4v-2M12 8v5"></path></svg>
+          <span style="font-size:10.5px;font-weight:{{ tab.paste.weight }};color:{{ tab.paste.color }};white-space:nowrap">משחה</span>
+          <span style="position:absolute;bottom:-6px;inset-inline:16%;height:2px;border-radius:2px;background:{{ tab.paste.underline }}"></span>
+        </button>
+        <button onClick="{{ tab.cooling.go }}" style="display:flex;flex-direction:column;align-items:center;gap:5px;border:none;background:{{ tab.cooling.bg }};border-radius:10px;padding:11px 4px 10px;cursor:pointer;position:relative;font-family:'Heebo',sans-serif;box-shadow:{{ tab.cooling.shadow }}">
+          <svg viewBox="0 0 24 24" style="width:19px;height:19px;fill:none;stroke:currentColor;stroke-width:1.6;color:{{ tab.cooling.color }}"><circle cx="12" cy="12" r="3"></circle><path d="M12 4v4M12 16v4M4 12h4M16 12h4M6.3 6.3l2.8 2.8M14.9 14.9l2.8 2.8M6.3 17.7l2.8-2.8M14.9 9.1l2.8-2.8"></path></svg>
+          <span style="font-size:10.5px;font-weight:{{ tab.cooling.weight }};color:{{ tab.cooling.color }};white-space:nowrap">קירור למעבד</span>
+          <span style="position:absolute;bottom:-6px;inset-inline:16%;height:2px;border-radius:2px;background:{{ tab.cooling.underline }}"></span>
+        </button>
+        <button onClick="{{ tab.wifi.go }}" style="display:flex;flex-direction:column;align-items:center;gap:5px;border:none;background:{{ tab.wifi.bg }};border-radius:10px;padding:11px 4px 10px;cursor:pointer;position:relative;font-family:'Heebo',sans-serif;box-shadow:{{ tab.wifi.shadow }}">
+          <svg viewBox="0 0 24 24" style="width:19px;height:19px;fill:none;stroke:currentColor;stroke-width:1.6;color:{{ tab.wifi.color }}"><path d="M4 9a13 13 0 0 1 16 0M7 12.5a8.5 8.5 0 0 1 10 0M10 16a4 4 0 0 1 4 0"></path><circle cx="12" cy="19" r="1"></circle></svg>
+          <span style="font-size:10.5px;font-weight:{{ tab.wifi.weight }};color:{{ tab.wifi.color }};white-space:nowrap">רשת</span>
+          <span style="position:absolute;bottom:-6px;inset-inline:16%;height:2px;border-radius:2px;background:{{ tab.wifi.underline }}"></span>
+        </button>
+        <button onClick="{{ tab.extras.go }}" style="display:flex;flex-direction:column;align-items:center;gap:5px;border:none;background:{{ tab.extras.bg }};border-radius:10px;padding:11px 4px 10px;cursor:pointer;position:relative;font-family:'Heebo',sans-serif;box-shadow:{{ tab.extras.shadow }}">
+          <svg viewBox="0 0 24 24" style="width:19px;height:19px;fill:none;stroke:currentColor;stroke-width:1.6;color:{{ tab.extras.color }}"><path d="M4 15c2.5 0 2.5-6 5-6s2.5 6 5 6 2.5-6 5-6"></path><circle cx="19.5" cy="9" r="1.4"></circle></svg>
+          <span style="font-size:10.5px;font-weight:{{ tab.extras.weight }};color:{{ tab.extras.color }};white-space:nowrap">אביזרים</span>
+          <span style="position:absolute;bottom:-6px;inset-inline:16%;height:2px;border-radius:2px;background:{{ tab.extras.underline }}"></span>
+        </button>
+      </div>
+
+      <label style="display:block;position:relative;margin-top:16px">
+        <input placeholder="{{ searchPh }}" style="width:100%;border:1px solid #EDF2F8;border-radius:12px;padding:11px 38px 11px 14px;font-family:'Heebo',sans-serif;font-size:13.5px;background:#F7FAFD;color:#0E2A47">
+        <svg viewBox="0 0 24 24" style="position:absolute;inset-inline-start:12px;top:50%;transform:translateY(-50%);width:16px;height:16px;color:#5F7590;fill:none;stroke:currentColor;stroke-width:1.7;stroke-linecap:round"><circle cx="11" cy="11" r="7"></circle><path d="M16.5 16.5L21 21"></path></svg>
+      </label>
+
+      <sc-if value="{{ filterNote }}" hint-placeholder-val="{{ false }}">
+        <div style="margin-top:11px;font-size:11.5px;color:#0E9C8A;background:#F0FDFA;border:1px solid #B7EFE5;padding:7px 11px;border-radius:9px;line-height:1.5">{{ filterNote }}</div>
+      </sc-if>
+
+      <div style="margin-top:16px;display:flex;flex-direction:column;gap:14px;max-height:640px;overflow-y:auto;padding-inline-end:4px">
+        <sc-for list="{{ options }}" as="o" hint-placeholder-count="6">
+          <div onClick="{{ o.pick }}" style="position:relative;display:flex;align-items:center;gap:13px;border:1.5px solid {{ o.bd }};background:{{ o.bg }};border-radius:16px;padding:17px 18px;cursor:pointer;transition:.15s;box-shadow:{{ o.shadow }}" style-hover="border-color:#C9DEF8;background:#FBFDFF">
+            <span style="position:absolute;inset-inline-start:0;top:16px;bottom:16px;width:3px;border-radius:3px;background:{{ o.accent }}"></span>
+            <span style="width:22px;height:22px;border-radius:50%;border:1.5px solid {{ o.dotBd }};background:{{ o.dotBg }};display:grid;place-items:center;flex:none;color:#fff;font-size:12px;font-weight:900">{{ o.mark }}</span>
+            <span style="flex:1;min-width:0">
+              <span dir="auto" style="display:block;font-size:15px;font-weight:700;color:{{ o.nameColor }};line-height:1.35;letter-spacing:-.1px;direction:{{ o.dir }};text-align:right">{{ o.name }}</span>
+              <span style="display:block;font-size:12.5px;color:#5F7590;margin-top:5px;line-height:1.5">{{ o.spec }}</span>
+              <sc-if value="{{ o.note }}" hint-placeholder-val="{{ false }}">
+                <span style="display:flex;gap:5px;font-size:11.5px;color:#92650F;background:#FFF6EA;border-radius:8px;padding:6px 9px;margin-top:8px;line-height:1.45">⚠️ {{ o.note }}</span>
+              </sc-if>
+              <span style="display:block;font-family:'Rubik',sans-serif;font-size:14.5px;font-weight:800;color:{{ o.priceColor }};margin-top:8px">{{ o.price }}</span>
+            </span>
+            <span role="img" style="width:68px;height:68px;border-radius:15px;background-color:#F7FAFD;background-image:{{ o.imgUrl }};background-size:{{ o.imgSize }};background-repeat:no-repeat;background-position:center;flex:none;opacity:{{ o.imgOp }}"></span>
+          </div>
+        </sc-for>
       </div>
     </div>
   </div>
+
+  <div style="width:100%;max-width:1320px;margin:0 auto;padding:0 20px 34px">
+    <div style="background:#fff;border:1px solid #E2EAF2;border-radius:16px;box-shadow:0 2px 10px rgba(14,42,71,.05);display:grid;grid-template-columns:repeat(4,1fr);gap:2px;overflow:hidden">
+      <div style="display:flex;align-items:center;gap:12px;padding:18px 20px;border-inline-start:1px solid #EDF2F8">
+        <span style="width:38px;height:38px;border-radius:11px;background:#EEF5FE;display:grid;place-items:center;flex:none;color:#1B6FE0">
+          <svg viewBox="0 0 24 24" style="width:19px;height:19px;fill:none;stroke:currentColor;stroke-width:1.7;stroke-linecap:round;stroke-linejoin:round"><path d="M4.5 14v-2a7.5 7.5 0 0 1 15 0v2"></path><rect x="2.5" y="13" width="4" height="6.5" rx="2"></rect><rect x="17.5" y="13" width="4" height="6.5" rx="2"></rect><path d="M17.5 19c-1.4 2-3.2 2.6-5 2.6"></path></svg>
+        </span>
+        <span>
+          <span style="display:block;font-size:13px;font-weight:700;color:#0E2A47">שירות ותמיכה</span>
+          <span style="display:block;font-size:11.5px;color:#5F7590">תמיכה אנושית ישירה מהמרכיב</span>
+        </span>
+      </div>
+      <div style="display:flex;align-items:center;gap:12px;padding:18px 20px;border-inline-start:1px solid #EDF2F8">
+        <span style="width:38px;height:38px;border-radius:11px;background:#EEF5FE;display:grid;place-items:center;flex:none;color:#1B6FE0">
+          <svg viewBox="0 0 24 24" style="width:19px;height:19px;fill:none;stroke:currentColor;stroke-width:1.7;stroke-linecap:round;stroke-linejoin:round"><path d="M2 7h11v9H2zM13 10h4l3 3v3h-7z"></path><circle cx="6.5" cy="18" r="1.8"></circle><circle cx="17" cy="18" r="1.8"></circle></svg>
+        </span>
+        <span>
+          <span style="display:block;font-size:13px;font-weight:700;color:#0E2A47">משלוח מהיר</span>
+          <span style="display:block;font-size:11.5px;color:#5F7590">1–3 ימי עסקים</span>
+        </span>
+      </div>
+      <div style="display:flex;align-items:center;gap:12px;padding:18px 20px;border-inline-start:1px solid #EDF2F8">
+        <span style="width:38px;height:38px;border-radius:11px;background:#EEF5FE;display:grid;place-items:center;flex:none;color:#1B6FE0">
+          <svg viewBox="0 0 24 24" style="width:19px;height:19px;fill:none;stroke:currentColor;stroke-width:1.7;stroke-linecap:round;stroke-linejoin:round"><path d="M12 3l7 3v5.5c0 4.4-2.9 8-7 9.5-4.1-1.5-7-5.1-7-9.5V6z"></path><path d="M9.2 12.2l2 2 3.8-4"></path></svg>
+        </span>
+        <span>
+          <span style="display:block;font-size:13px;font-weight:700;color:#0E2A47">אחריות מלאה</span>
+          <span style="display:block;font-size:11.5px;color:#5F7590">עד 3 שנות אחריות</span>
+        </span>
+      </div>
+      <div style="display:flex;align-items:center;gap:12px;padding:18px 20px;border-inline-start:1px solid #EDF2F8">
+        <span style="width:38px;height:38px;border-radius:11px;background:#EEF5FE;display:grid;place-items:center;flex:none;color:#1B6FE0">
+          <svg viewBox="0 0 24 24" style="width:19px;height:19px;fill:none;stroke:currentColor;stroke-width:1.7;stroke-linecap:round;stroke-linejoin:round"><rect x="4.5" y="10" width="15" height="10.5" rx="2.5"></rect><path d="M8 10V7.5a4 4 0 0 1 8 0V10"></path></svg>
+        </span>
+        <span>
+          <span style="display:block;font-size:13px;font-weight:700;color:#0E2A47">תשלום מאובטח</span>
+          <span style="display:block;font-size:11.5px;color:#5F7590">עד 12 תשלומים</span>
+        </span>
+      </div>
+    </div>
+    <p style="margin:18px 0 0;font-size:11.5px;color:#5F7590;line-height:1.65;text-align:center;max-width:900px;margin-inline:auto">
+      <b style="color:#5F7590">שימו לב:</b> בונה המחשבים הוא כלי עזר שנועד לסייע בבחירת רכיבים תואמים, ואינו מהווה התחייבות או ערובה לתקינות ההרכב. <b style="color:#5F7590">ייתכנו אי-דיוקים או חוסרים בבדיקת התאימות</b>, לרבות כתוצאה מנתונים שגויים מצד היצרן או הספק; האחריות לבדיקה ולהתאמה הסופית של הרכיבים היא על הלקוח. המחיר המוצג הוא <b style="color:#5F7590">הצעת מחיר</b> ומאושר סופית מול הספקים בעת ההזמנה. הציונים והמדדים הם הערכה כללית בלבד ואינם התחייבות לביצועים בפועל. בכל ספק — <a href="contact.html">דברו איתי לפני ההזמנה</a> · <a href="terms.html">לתקנון המלא</a>
+    </p>
+  </div>
+
+  <footer style="background:#0B2C4D;color:#9DB4CB;text-align:center;padding:30px 20px 24px;font-size:12.5px">
+    <img src="builder-assets/assets/logo-dvirtech-transparent.png" alt="DvirTech" style="height:38px;width:auto;margin:0 auto 10px;display:block">
+    <span>DvirTech — הרכבת מחשבים בהתאמה אישית</span>
+  </footer>
 </div>
+</x-dc>
+<script type="text/x-dc" data-dc-script data-props="{&quot;$preview&quot;:{&quot;width&quot;:1440,&quot;height&quot;:1180},&quot;stageBg&quot;:{&quot;editor&quot;:&quot;color&quot;,&quot;default&quot;:&quot;#0A2036&quot;,&quot;tsType&quot;:&quot;string&quot;,&quot;options&quot;:[&quot;#0A2036&quot;,&quot;#0E2E4E&quot;,&quot;#0B1220&quot;,&quot;#101822&quot;],&quot;section&quot;:&quot;תצוגה תלת-ממדית&quot;}}">
+const DATA = (window.DVIR_BUILDER_DATA || {});
+const CATS = DATA.CATS, CATALOG = DATA.CATALOG, SERVICES = DATA.SERVICES,
+      USE_CASES = DATA.USE_CASES, NEEDED = DATA.NEEDED;
+
+class Component extends DCLogic {
+  state = {
+    cat: "case",
+    /* ⚠️ מתחילים ריק. קודם היו כאן מזהי דמו מהעיצוב, ולכן כניסה
+       ראשונה לדף כבר הציגה מעבד וכרטיס מסך "נבחרים" — מוצרים
+       שהלקוח מעולם לא בחר. הרכבה שמורה נטענת מ-localStorage
+       ב-builder-bridge.js (window.__DVT_SAVED_BUILD). */
+    sel: (window.__DVT_SAVED_BUILD && window.__DVT_SAVED_BUILD.sel) || {},
+    qty: (window.__DVT_SAVED_BUILD && window.__DVT_SAVED_BUILD.qty) || { cpu:1, ram:1, storage:1 },
+    services: (window.__DVT_SAVED_BUILD && window.__DVT_SAVED_BUILD.services) || ["assembly"],
+    useCase: "gaming",
+    chips: ["Fortnite"],
+    view: "3d",
+    last: null
+  };
+
+  meterTargets(){
+    const pc = v => Math.min(100, Math.round(v));
+    const g = this.tier("gpu"), c = this.tier("cpu"), r = this.tier("ram"),
+          cool = this.tier("cooling"), psu = this.tier("psu"), s = this.tier("storage"),
+          fans = this.item("caseFans");
+    return {
+      gaming: pc((g*15 + c*5) * 1.05),
+      editing: pc(c*13 + r*7),
+      cooling: pc(cool*18 + (psu > 3 ? 10 : 4) + (fans ? (fans.fans || 0) * 2 : 0)),
+      storage: pc(s*22 + 12)
+    };
+  }
+
+  /* רנדר תלת-ממד מוכן מראש לפי המפרט של הפריט (builder-assets/assets/models). מוחזר null
+     לקטגוריה שעדיין אין לה מודל — ואז נופלים חזרה לתמונת הקטגוריה. */
+  renderOf(cat, it){
+    if(!it) return null;
+    const M = "builder-assets/assets/models/";
+    if(cat === "cpu")     return M + (/intel|core\s*i/i.test(it.name) ? "cpu-intel" : "cpu-amd") + ".png";
+    if(cat === "cooling") return M + (it.cool === "aio" ? "cooler-aio-" + (it.fans === 3 ? "3" : "2") : "cooler-air") + ".png";
+    if(cat === "ram")     return M + "ram-2.png";
+    if(cat === "mobo")    return M + "mobo-" + (it.form === "matx" ? "matx" : "atx") + ".png";
+    if(cat === "storage") return M + "ssd-m2.png";
+    if(cat === "psu")     return M + "psu.png";
+    if(cat === "paste")   return M + (it.price > 0 ? "paste-pro" : "paste") + ".png";
+    if(cat === "wifi"){
+      if(it.id === "wifi-none") return "none";
+      if(it.id === "wifi-mobo") return this.renderOf("mobo", this.item("mobo"));
+      return M + (it.id === "wifi-25g" ? "lan-card" : "wifi-card") + ".png";
+    }
+    if(cat === "case" && it.form) return M + "case-" + it.form + (it.argb ? "-rgb" : "") + ".png";
+    if(cat === "gpu"){
+      const nv = /RTX|GeForce/i.test(it.name);
+      const cls = /(90|XTX)/.test(it.name) ? "xl" : /(80|800)/.test(it.name) ? "l" : /(70|700)/.test(it.name) ? "m" : "s";
+      return M + "gpu-" + cls + "-" + (nv ? "nv" : "amd") + ".png";
+    }
+    if(cat === "caseFans") return it.fans ? M + "fans-" + it.fans + (it.rgb ? "-argb" : "") + ".png" : "none";
+    return null;
+  }
+  /* לאריחים קטנים משתמשים בגרסה החתוכה לגבולות התוכן (thumbs/), אחרת
+     המודל מצטמצם לרסיס בתוך שוליים שקופים גדולים. */
+  thumbOf(cat, it){
+    const r = this.renderOf(cat, it);
+    if(r === "none") return "none";        // "ללא תוספת" — אריח ריק ולא תמונת מוצר מטעה
+    return r ? "url(" + r.replace("builder-assets/assets/models/", "builder-assets/assets/models/thumbs/") + ")"
+             : "url(" + (CATS.find(c => c.key === cat) || {}).img + ")";
+  }
+
+  /* תצורת הבמה התלת-ממדית: מה נבחר, ומזהה לכל רכיב כדי שהבמה תדע
+     איזה חלק חדש ותכניס אותו באנימציה. */
+  stageCfg(){
+    const cfg = {};
+    const cs = this.item("case"), mb = this.item("mobo"), cp = this.item("cpu"),
+          cl = this.item("cooling"), rm = this.item("ram"), gp = this.item("gpu"),
+          sd = this.item("storage"), ps = this.item("psu"), fk = this.item("caseFans");
+    if(cs){ cfg.case = { form: cs.form || "mid", argb: !!cs.argb }; cfg.caseKey = cs.id; }
+    if(mb){ cfg.mobo = { form: mb.form || "atx" }; cfg.moboKey = mb.id; }
+    if(cp){ cfg.cpu = { brand: /intel|core\s*i/i.test(cp.name) ? "intel" : "amd" }; cfg.cpuKey = cp.id; }
+    if(cl){ cfg.cooling = { type: cl.cool === "aio" ? "aio" : "air", fans: cl.fans || 2 }; cfg.coolKey = cl.id; }
+    if(rm){ cfg.ram = { sticks: Math.min(4, 2 * (this.state.qty.ram || 1)) }; cfg.ramKey = rm.id + "x" + (this.state.qty.ram || 1); }
+    if(gp){
+      const cls = /(90|XTX)/.test(gp.name) ? 3 : /(80|800)/.test(gp.name) ? 2 : /(70|700)/.test(gp.name) ? 1 : 0;
+      cfg.gpu = { cls, brand: /RTX|GeForce/i.test(gp.name) ? "nv" : "amd" }; cfg.gpuKey = gp.id;
+    }
+    if(sd){ cfg.storage = true; cfg.storageKey = sd.id; }
+    if(ps){ cfg.psu = true; cfg.psuKey = ps.id; }
+    const wf = this.item("wifi"), pt = this.item("paste");
+    if(wf && wf.id !== "wifi-none" && wf.id !== "wifi-mobo"){
+      cfg.wifi = wf.id === "wifi-25g" ? "lan" : "wifi"; cfg.wifiKey = wf.id;
+    }
+    if(pt){ cfg.paste = pt.price > 0 ? "pro" : "std"; cfg.pasteKey = pt.id; }
+    const ex = this.item("extras");
+    if(ex && (ex.rgbCable || ex.strip)){
+      cfg.extras = { rgbCable: !!ex.rgbCable, strip: !!ex.strip }; cfg.extrasKey = ex.id;
+    }
+    if(fk && fk.fans){ cfg.fans = { count: fk.fans, rgb: !!fk.rgb }; cfg.fansKey = fk.id; }
+    else if(cs){ cfg.fansKey = "case-" + cs.id; }
+    cfg.mode = this.state.view === "in" ? "in" : "3d";
+    return JSON.stringify(cfg);
+  }
+
+  item(cat){ const id = this.state.sel[cat]; const list = CATALOG[cat] || []; return id ? list.find(i => i.id === id) : null; }
+
+  /* כל מה שנבחר, לפי קטגוריה — הקלט של מנוע ההתאמה. */
+  selMap(){ const m = {}; CATS.forEach(c => { const it = this.item(c.key); if(it) m[c.key] = it; }); return m; }
+
+  /* תוצאת הבדיקה, מחושבת מחדש בכל רנדר (כלומר בכל שינוי בחירה). */
+  compatResult(){
+    if(typeof dvtCheckBuild !== "function") return { issues:[], errors:0, warns:0, missingFields:[] };
+    return dvtCheckBuild(this.selMap(), this.state.qty);
+  }
+
+  /* ההערה שמוצגת על אפשרות ברשימה: מה ישתבש אם *היא* תיבחר.
+     ⚠️ dvtRateOption ולא dvtCheckBuild ידני: הוא משווה מול ההרכב בלי
+     הקטגוריה הזו ומחזיר רק ממצאים *חדשים*. קודם כאן הוצגה כל שגיאה
+     בהרכב, ולכן אם הלוח לא נכנס למארז — כל כרטיסי המסך ברשימה נצבעו
+     באדום עם הודעה שאין לה קשר אליהם. */
+  noteFor(cat, it){
+    if(typeof dvtRateOption !== "function") return null;
+    return dvtRateOption(cat, it, this.selMap(), this.state.qty).text;
+  }
+  /* חסום = יש שגיאה שהבחירה הזו *גורמת*. לשימוש עתידי בסימון הרשימה. */
+  blockedFor(cat, it){
+    if(typeof dvtRateOption !== "function") return false;
+    return dvtRateOption(cat, it, this.selMap(), this.state.qty).blocked;
+  }
+  tier(cat){ const it = this.item(cat); return it ? it.t : 0; }
+  pick(cat, id){
+    this.setState(s => {
+      const next = { sel: Object.assign({}, s.sel, { [cat]: id }), last: cat };
+      if(window.dvtSaveBuild) window.dvtSaveBuild(Object.assign({}, s, next));
+      return next;
+    });
+  }
+  qtyOf(cat){ return this.state.qty[cat] || 1; }
+  bump(cat, d){
+    this.setState(s => {
+      /* ⚠️ קודם התקרה הייתה 4 לכל קטגוריה — ולכן אפשר היה "להרכיב"
+         4 מעבדים. עכשיו היא נגזרת מהלוח/הספק שנבחרו. */
+      const cap = (typeof dvtMaxQty === "function") ? dvtMaxQty(cat, this.selMap()) : 4;
+      const n = Math.max(1, Math.min(cap, (s.qty[cat] || 1) + d));
+      const next = { qty: Object.assign({}, s.qty, { [cat]: n }) };
+      if(window.dvtSaveBuild) window.dvtSaveBuild(Object.assign({}, s, next));
+      return next;
+    });
+  }
+  money(n){ return n.toLocaleString("en-US"); }
+  /* שם שמתחיל בעברית נשאר RTL; שם לטיני מוצג LTR ונחתך מהסוף */
+  dirOf(name){ return /^[\u0590-\u05FF]/.test(String(name || "")) ? "rtl" : "ltr"; }
+
+  renderVals(){
+    const st = this.state;
+    const uc = USE_CASES.find(u => u.key === st.useCase) || USE_CASES[0];
+    const chosen = CATS.filter(c => st.sel[c.key]);
+    let total = 0;
+    CATS.forEach(c => { const it = this.item(c.key); if(it) total += it.price * (st.qty[c.key] || 1); });
+    SERVICES.forEach(s => { if(st.services.includes(s.id)) total += s.price; });
+
+    const targets = this.meterTargets();
+    const meters = [
+      { key:"gaming", label:"משחקים", color:"#2FC4B0" },
+      { key:"editing", label:"עריכה", color:"#5AA9F5" },
+      { key:"cooling", label:"קירור", color:"#2FC4B0" },
+      { key:"storage", label:"אחסון", color:"#5AA9F5" }
+    ].map(m => {
+      const v = targets[m.key] || 0;
+      // הקשת עצמה זוחלת ליעד דרך transition על stroke-dashoffset (בלי JS בכל פריים)
+      return { label:m.label, color:m.color, pct: Math.round(v) + "%", off: (144.5 * (1 - v/100)).toFixed(1) };
+    });
+
+    const missing = NEEDED.filter(k => !st.sel[k]).map(k => CATS.find(c => c.key === k).label);
+
+    return {
+      stepper: [
+        { n:1, label:"בחירת רכיבים", bg:"#1B6FE0", fg:"#fff", w:"700", tc:"#0E2A47", line:true },
+        { n:2, label:"בדיקת תאימות", bg:"#EDF2F8", fg:"#5F7590", w:"500", tc:"#5F7590", line:true },
+        { n:3, label:"סיכום והזמנה", bg:"#EDF2F8", fg:"#5F7590", w:"500", tc:"#5F7590", line:false }
+      ],
+      useCases: USE_CASES.map(u => {
+        const on = st.useCase === u.key;
+        return { icon: u.icon, label: u.label,
+          bg: on ? "#F4F9FF" : "#fff", fg: on ? "#0E4C97" : "#0E2A47",
+          bd: on ? "#1B6FE0" : "#EDF2F8", weight: on ? "700" : "500",
+          shadow: on ? "0 6px 18px rgba(27,111,224,.12)" : "none",
+          pick: () => this.setState({ useCase: u.key, chips: [] }) };
+      }),
+      chipsLabel: uc.chipsLabel,
+      showRes: uc.res,
+      chips: uc.chips.map(label => {
+        const on = st.chips.includes(label);
+        return { label, bg: on ? "linear-gradient(100deg,#1B6FE0,#2FC4B0)" : "#fff", fg: on ? "#fff" : "#5F7590",
+          bd: on ? "transparent" : "#E2EAF2",
+          toggle: () => this.setState(s => ({ chips: s.chips.includes(label) ? s.chips.filter(x => x !== label) : s.chips.concat(label) })) };
+      }),
+      chosenCount: chosen.length,
+      summary: CATS.map(c => {
+        const it = this.item(c.key);
+        const hasQty = ["cpu","ram","storage"].includes(c.key) && !!it;
+        const q = this.qtyOf(c.key);
+        return {
+          cat: c.label,
+          name: it ? it.name : "לא נבחר",
+          dir: this.dirOf(it ? it.name : "לא נבחר"),
+          nameColor: it ? "#0E2A47" : "#B3C1D1",
+          price: it ? (it.price === 0 ? "כלול" : this.money(it.price * q) + " ₪") : "—",
+          priceColor: it ? (it.price === 0 ? "#0E9C8A" : "#1B6FE0") : "#C4D0DD",
+          imgUrl: it ? this.thumbOf(c.key, it) : "url(" + c.img + ")",
+          imgSize: this.renderOf(c.key, it) ? "82%" : "cover",
+          imgOp: it ? "1" : "0.25",
+          thumbBg: it ? "#F3F8FF" : "#F5F8FC",
+          hasQty, qty: q,
+          inc: () => this.bump(c.key, 1),
+          dec: () => this.bump(c.key, -1)
+        };
+      }),
+      services: SERVICES.map(s => {
+        const on = st.services.includes(s.id);
+        return { label: s.label, mark: on ? "✓" : "", bg: on ? "#1B6FE0" : "#fff", bd: on ? "#1B6FE0" : "#D7E1EC",
+          price: s.price === 0 ? "כלול" : this.money(s.price) + " ₪",
+          priceColor: s.price === 0 ? "#0E9C8A" : "#1B6FE0",
+          toggle: () => this.setState(x => ({ services: x.services.includes(s.id) ? x.services.filter(i => i !== s.id) : x.services.concat(s.id) })) };
+      }),
+      total: this.money(total),
+      missingText: missing.length ? missing.join(", ") : null,
+      clearAll: () => this.setState({ sel:{}, last:null }),
+
+      view3d: st.view === "3d" ? { bg:"#1B6FE0", fg:"#fff", bd:"transparent" } : { bg:"rgba(255,255,255,.06)", fg:"rgba(255,255,255,.72)", bd:"rgba(255,255,255,.16)" },
+      viewIn: st.view === "in" ? { bg:"#1B6FE0", fg:"#fff", bd:"transparent" } : { bg:"rgba(255,255,255,.06)", fg:"rgba(255,255,255,.72)", bd:"rgba(255,255,255,.16)" },
+      stageMode: st.view === "in" ? "in" : "3d",
+      stageBg: this.props.stageBg ?? "#0A2036",
+      stageCfg: this.stageCfg(),
+      setView3d: () => this.setState({ view:"3d" }),
+      setViewIn: () => this.setState({ view:"in" }),
+
+      stageEmpty: chosen.length === 0,
+      compat: (() => {
+        /* ⚠️ קודם זה בדק רק אם לפריט יש שדה note קבוע בקוד — ולכן
+           רדיאטור 240 נצבע כבעייתי בזמן ש-360 לא נבדק בכלל. עכשיו
+           הבדיקה מחושבת מהמפרט בפועל (builder-compat.js). */
+        const r = this.compatResult();
+        if(r.errors) return { mark:"✕", text:r.errors===1?"אי-התאמה אחת":(r.errors+" אי-התאמות"), bg:"rgba(228,50,43,.16)", fg:"#FFC9C6", bd:"rgba(255,138,133,.45)" };
+        if(r.warns)  return { mark:"⚠️", text:r.warns===1?"הערה אחת":(r.warns+" הערות"), bg:"#FFF6EA", fg:"#92650F", bd:"#F6DDAF" };
+        return { mark:"✓", text:"תאימות תקינה", bg:"rgba(47,196,176,.16)", fg:"#8FE9DA", bd:"rgba(143,233,218,.4)" };
+      })(),
+      stageParts: CATS.map(c => {
+        const it = this.item(c.key);
+        const active = st.last === c.key;
+        return {
+          cat: c.label, name: it ? it.name : "בחר " + c.label,
+          dir: this.dirOf(it ? it.name : "בחר"),
+          nameColor: it ? "#fff" : "rgba(255,255,255,.42)",
+          bg: it ? "rgba(255,255,255,.07)" : "rgba(255,255,255,.03)",
+          bd: active ? "rgba(47,196,176,.85)" : it ? "rgba(143,233,218,.3)" : "rgba(255,255,255,.09)",
+          imgUrl: it ? this.thumbOf(c.key, it) : "url(" + c.img + ")",
+          imgSize: this.renderOf(c.key, it) ? "82%" : "cover",
+          imgOp: it ? "1" : "0.28",
+          iconColor: it ? "#8FE9DA" : "rgba(255,255,255,.3)",
+          anim: active ? "rowIn .35s ease-out" : "none",
+          go: () => this.setState({ cat: c.key })
+        };
+      }),
+      meters,
+
+      tab: CATS.reduce((acc, c) => {
+        const on = st.cat === c.key;
+        acc[c.key] = {
+          bg: on ? "#fff" : "transparent", shadow: on ? "0 2px 8px rgba(14,42,71,.08)" : "none",
+          color: on ? "#1B6FE0" : "#5F7590", weight: on ? "700" : "500",
+          underline: on ? "#1B6FE0" : "transparent",
+          go: () => this.setState({ cat: c.key })
+        };
+        return acc;
+      }, {}),
+      searchPh: "חפש " + (CATS.find(c => c.key === st.cat) || {}).label + "…",
+      filterNote: st.cat === "mobo" && this.item("cpu") ? "מציג רק לוחות אם תואמים לסוקט LGA1700 של המעבד שנבחר"
+        : st.cat === "gpu" && this.item("case") ? "מסונן לפי אורך מקסימלי במארז וספק הכוח שנבחר" : null,
+      options: (CATALOG[st.cat] || []).map(it => {
+        const on = st.sel[st.cat] === it.id;
+        return { name: it.name, spec: it.spec, note: this.noteFor(st.cat, it), dir: this.dirOf(it.name),
+          price: it.price === 0 ? "כלול" : this.money(it.price) + " ₪",
+          priceColor: it.price === 0 ? "#0E9C8A" : (on ? "#0E4C97" : "#0E2A47"),
+          nameColor: on ? "#0E4C97" : "#0E2A47",
+          bd: on ? "#1B6FE0" : "transparent",
+          bg: on ? "#fff" : "#FAFCFE",
+          shadow: on ? "0 8px 22px rgba(27,111,224,.13)" : "none",
+          accent: on ? "#2FC4B0" : "transparent",
+          imgOp: on ? "1" : "0.72",
+          dotBd: on ? "#1B6FE0" : "#CBD8E6", dotBg: on ? "#1B6FE0" : "#fff",
+          mark: on ? "✓" : "",
+          imgUrl: this.thumbOf(st.cat, it),
+          imgSize: this.renderOf(st.cat, it) ? "86%" : "cover",
+          pick: () => this.pick(st.cat, it.id) };
+      })
+    };
+  }
+}
+</script>
 
 <footer>
   <span class="footer-logo-crop"><img class="footer-logo" src="images/logo-dvirtech-transparent.png" alt="DvirTech"></span>
@@ -130,35 +697,14 @@
 
 <script src="sprite.js"></script>
 <script src="i18n.js"></script>
-<script src="app.js"></script>
+<script src="search-core.js"></script>
+<script src="site-search.js"></script>
+<script src="site-header.js"></script>
 <script src="cart.js"></script>
-<script src="catalog-loader.js"></script>
-<script>
-  // תוסף קטן, לא נוגע ב-app.js: אוסף את ההרכבה הנוכחית ומעביר אותה
-  // ל-API הכללי של העגלה (cart.js). "הרכבה חינם" (0 ₪) מתווספת אוטומטית
-  // בתוך addBuildToCart, בדיוק לפי המחירון (הרכבה כשקונים חלקים ממני).
-  function finishBuildAndAddToCart(){
-    if(missingRequired().length){
-      renderValidation();
-      const box = document.getElementById("validationMsg");
-      box.innerHTML += `<div class="validation-msg">${t("freeAssemblyEligibilityNote")}</div>`;
-      return;
-    }
-    const activeCats = STEP_ORDER.filter(c => getItem(c) && getItem(c).id !== "none");
-    const lines = activeCats.map(c => ({ label: localLabel(c), name: localName(getItem(c)), qty: getQty(c) }));
-    // parts: אותם רכיבים כ-SKU (קטגוריה:id) — זה מה שבפועל נשלח לתמחור
-    // בצד שרת ב-checkout, מול הקטלוג החי (ראה 4-payment-api.gs).
-    const parts = activeCats.map(c => ({ sku: c + ":" + getItem(c).id, qty: getQty(c) }));
-    const totalText = document.getElementById("totalPrice").textContent;
-    const totalNum = parseInt(totalText.replace(/[^\d]/g,""), 10) || 0;
-    addBuildToCart(lines, totalNum, parts);
-  }
-  function renderBuilderCartText(){
-    document.getElementById("finishBuildBtn").textContent = t("finishBuildBtn");
-  }
-  renderBuilderCartText();
-  const _origSetLangBuilder = window.setLang;
-  window.setLang = function(lang){ _origSetLangBuilder(lang); renderBuilderCartText(); };
-</script>
+<!-- ⚠️ הסדר חשוב: builder-data.js מגדיר את מבנה הנתונים, builder-bridge.js
+     מחליף את הקטלוג הסטטי שבו בקטלוג החי מהגיליון ומחבר את "הוסף לעגלה". -->
+<script src="builder-assets/builder-data.js"></script>
+<script src="builder-compat.js"></script>
+<script src="builder-bridge.js"></script>
 </body>
 </html>

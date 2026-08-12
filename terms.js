@@ -23,7 +23,8 @@ const TERMS_SECTIONS = {
     {
       title: "2. הזמנות והצעות מחיר",
       html: `<p>האתר אינו חנות עם מלאי זמין מיידית. עבור הרכבות מחשבים בהתאמה אישית, האתר מציג <b>הצעת מחיר</b> בלבד, בתוקף ל-7 ימים ממועד הצגתה. המחיר הסופי נבדק ומאושר מול הספקים בפועל בעת ביצוע ההזמנה, ועשוי להשתנות אם חל שינוי במחירי הספקים בין מועד ההצעה למועד ההזמנה — במקרה כזה תימסר ללקוח הודעה מראש, ותתאפשר לו הסכמה למחיר המעודכן או ביטול ללא כל עלות.</p>
-             <p>תחילת ביצוע הזמנה של הרכבה בהתאמה אישית (הזמנת רכיבים בפועל אצל ספקים) מותנית בתשלום מלוא סכום העסקה מראש.</p>`
+             <p>תחילת ביצוע הזמנה של הרכבה בהתאמה אישית (הזמנת רכיבים בפועל אצל ספקים) מותנית בתשלום מלוא סכום העסקה מראש.</p>
+             <p><b>תמונות להמחשה בלבד.</b> התמונות המוצגות באתר, לרבות תמונות מוצרים, קטגוריות ובאנרים, הן להמחשה ולהתרשמות כללית בלבד ואינן מהוות מצג לגבי המוצר הספציפי שיסופק. ייתכנו הבדלים בין התמונה המוצגת לבין המוצר בפועל, בין היתר בגוון, בגימור, באריזה, באביזרים הנלווים ובגרסת הדגם. המפרט הטכני הכתוב לצד המוצר הוא המחייב, ובכל מקרה של אי-התאמה בין התמונה לבין המפרט הכתוב — המפרט הכתוב גובר.</p>`
     },
     {
       title: "3. מדיניות אספקה ומשלוחים",
@@ -34,7 +35,9 @@ const TERMS_SECTIONS = {
       title: "4. אחריות בית העסק והאתר",
       html: `<p>בית העסק עושה מאמץ סביר לוודא שהמידע המוצג באתר (מחירים, מפרטים, זמינות) מדויק ועדכני, אך אינו מתחייב לכך במלואו — בפרט לאור העובדה שהמחירים המוצגים הם הצעת מחיר הנבדקת מול הספק בפועל בעת ההזמנה, כאמור בסעיף 2 לעיל. נפלה טעות סופר או טעות מחיר באתר, בית העסק רשאי לתקנה, ולא יהיה מחויב למכור לפי המחיר השגוי; במקרה כזה יוצע ללקוח לבטל את ההזמנה ללא כל עלות.</p>
              <p>בית העסק אחראי לאיכות העבודה שביצע בעצמו (הרכבה, התקנה, אבחון, תיקון), בהתאם לתנאי האחריות המפורטים בסעיף 5 להלן. אחריות על רכיבי חומרה (מעבד, לוח אם, כרטיס מסך וכיו״ב) היא באחריות היצרן/היבואן הרשמי בלבד, ובית העסק ילווה את הלקוח מול היבואן בעת הצורך, ככל הניתן.</p>
-             <p>בית העסק אינו אחראי לנזק עקיף, תוצאתי, או לאובדן מידע/נתונים, אלא ככל שהדבר נובע מרשלנות בית העסק ובכפוף לכל דין. מומלץ ללקוח לגבות מידע חשוב לפני מסירת מחשב לתיקון, שדרוג או כל טיפול אחר.</p>`
+             <p>בית העסק אינו אחראי לנזק עקיף, תוצאתי, או לאובדן מידע/נתונים, אלא ככל שהדבר נובע מרשלנות בית העסק ובכפוף לכל דין. מומלץ ללקוח לגבות מידע חשוב לפני מסירת מחשב לתיקון, שדרוג או כל טיפול אחר.</p>
+             <p><b>בונה המחשבים — כלי עזר בלבד.</b> כלי "בונה המחשבים" שבאתר נועד לסייע ללקוח בבחירת רכיבים תואמים, ובדיקות ההתאמה שהוא מבצע (שקע מעבד, סוג זיכרון, גודל מארז, הספק ספק כוח וכיו״ב) הן הנחיה כללית בלבד. הכלי אינו מהווה ייעוץ מקצועי, התחייבות או ערובה לכך שההרכב יפעל, ואינו מכסה בהכרח כל אי-תאימות אפשרית בין רכיבים. ייתכנו טעויות, חוסרים או אי-דיוקים בנתוני הרכיבים ובלוגיקת הבדיקה, לרבות כאלה שאינם בשליטת בית העסק (למשל נתונים שגויים מצד היצרן או הספק). האחריות לבדיקה הסופית ולהתאמת הרכיבים זה לזה מוטלת על הלקוח, ובית העסק לא יישא באחריות לנזק, להוצאה או לאובדן שנגרמו כתוצאה מהסתמכות על תוצאות הכלי. <b>לקוח שאינו בטוח מוזמן לפנות לבית העסק לפני ביצוע ההזמנה</b> לקבלת בדיקה אישית של ההרכב, ללא עלות.</p>
+             <p><b>הרכבה ללא עלות.</b> הטבת ההרכבה ללא עלות ניתנת על הרכבות שהוגדרו ונרכשו דרך בונה המחשבים שבאתר, שכן רק שם נבדקת ההתאמה בין הרכיבים. רכישת רכיבים בודדים בנפרד אינה מזכה אוטומטית בהטבה זו.</p>`
     },
     {
       title: "5. ביטול עסקה, החזרים ואחריות שירות",
@@ -76,7 +79,8 @@ const TERMS_SECTIONS = {
     {
       title: "2. Orders & Price Quotes",
       html: `<p>The Site is not a store with immediately available stock. For custom PC builds, the Site presents a <b>price quote only</b>, valid for 7 days from when it's shown. The final price is checked and confirmed against actual supplier pricing at the time the order is placed, and may change if supplier prices change between the quote and the order — in that case the customer will be notified in advance and may accept the updated price or cancel at no cost.</p>
-             <p>Starting the fulfillment of a custom build order (actually ordering parts from suppliers) requires payment of the full transaction amount in advance.</p>`
+             <p>Starting the fulfillment of a custom build order (actually ordering parts from suppliers) requires payment of the full transaction amount in advance.</p>
+             <p><b>Images are for illustration only.</b> Images shown on the Site — including product images, category images, and banners — are for general illustration and impression only, and do not constitute a representation regarding the specific product to be supplied. Differences may exist between the image shown and the actual product, including in colour, finish, packaging, bundled accessories, and model revision. The written technical specification alongside the product is the binding one, and in any case of discrepancy between the image and the written specification, the written specification prevails.</p>`
     },
     {
       title: "3. Delivery & Fulfillment Policy",
@@ -87,7 +91,9 @@ const TERMS_SECTIONS = {
       title: "4. Business & Site Liability",
       html: `<p>The Business makes a reasonable effort to keep information on the Site (prices, specs, availability) accurate and current, but does not fully guarantee it — particularly since displayed prices are quotes confirmed against actual supplier pricing at order time, as described in Section 2. If a pricing or typographical error occurs on the Site, the Business may correct it and is not obligated to honor the erroneous price; in that case the customer will be offered a no-cost cancellation.</p>
              <p>The Business is responsible for the quality of work it performs itself (assembly, installation, diagnostics, repair), per the warranty terms in Section 5 below. Warranty on hardware components (CPU, motherboard, GPU, etc.) is the responsibility of the official manufacturer/importer alone; the Business will assist the customer with the importer where possible.</p>
-             <p>The Business is not liable for indirect, consequential damages, or data loss, except to the extent caused by the Business's negligence and subject to applicable law. Customers are advised to back up important data before handing over a computer for repair, upgrade, or any other service.</p>`
+             <p>The Business is not liable for indirect, consequential damages, or data loss, except to the extent caused by the Business's negligence and subject to applicable law. Customers are advised to back up important data before handing over a computer for repair, upgrade, or any other service.</p>
+             <p><b>The PC Builder is an assistive tool only.</b> The Site's "PC Builder" is intended to help the customer choose compatible parts, and the compatibility checks it performs (CPU socket, memory type, case clearance, PSU headroom, etc.) are general guidance only. It does not constitute professional advice, a commitment, or a guarantee that the configuration will work, and it does not necessarily cover every possible incompatibility. Errors, gaps, or inaccuracies may exist in the part data and in the checking logic, including ones outside the Business's control (e.g. incorrect data from a manufacturer or supplier). Final verification and compatibility of the parts is the customer's responsibility, and the Business shall not be liable for damage, expense, or loss arising from reliance on the tool's results. <b>Customers who are unsure are invited to contact the Business before ordering</b> for a personal review of the configuration, free of charge.</p>
+             <p><b>Free assembly.</b> The free-assembly benefit applies to builds configured and purchased through the Site's PC Builder, since that is where part compatibility is checked. Purchasing individual parts separately does not automatically qualify for this benefit.</p>`
     },
     {
       title: "5. Cancellation, Refunds & Service Warranty",
@@ -122,14 +128,14 @@ const TERMS_SECTIONS = {
 };
 
 function renderTermsPage(){
-  document.getElementById("navHome").textContent = t("navHome");
-  document.getElementById("navReady").textContent = t("navReady");
-  document.getElementById("navPeripherals").textContent = t("navPeripherals");
-  document.getElementById("navComponents").textContent = t("navComponents");
-  document.getElementById("navBuilder").textContent = t("navBuilder");
-  document.getElementById("navLab").textContent = t("navLab");
-  document.getElementById("navWhy").textContent = t("navWhy");
-  document.getElementById("navContact").textContent = t("navContact");
+  { const _e=document.getElementById("navHome"); if(_e) _e.textContent = t("navHome"); }
+  { const _e=document.getElementById("navReady"); if(_e) _e.textContent = t("navReady"); }
+  { const _e=document.getElementById("navPeripherals"); if(_e) _e.textContent = t("navPeripherals"); }
+  { const _e=document.getElementById("navComponents"); if(_e) _e.textContent = t("navComponents"); }
+  { const _e=document.getElementById("navBuilder"); if(_e) _e.textContent = t("navBuilder"); }
+  { const _e=document.getElementById("navLab"); if(_e) _e.textContent = t("navLab"); }
+  { const _e=document.getElementById("navWhy"); if(_e) _e.textContent = t("navWhy"); }
+  { const _e=document.getElementById("navContact"); if(_e) _e.textContent = t("navContact"); }
 
   document.getElementById("pageTitle").textContent = t("termsTitle");
   document.getElementById("pageUpdated").textContent = t("termsUpdated");

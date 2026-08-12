@@ -114,6 +114,11 @@ function pdRenderBody(){
     <div class="pd-main">
       <div class="pd-media">
         <div class="pd-art">${pdArt(it, PD_CAT)}</div>
+        <!-- גילוי נאות ליד התמונה עצמה. הנוסח המחייב המלא נמצא בסעיף 2
+             בתקנון; כאן רק שורה קצרה שהלקוח באמת רואה. -->
+        <p class="pd-img-note">${tr("התמונה להמחשה בלבד. המפרט הכתוב הוא המחייב.",
+                                    "Image for illustration only. The written specification prevails.")}
+          <a href="terms.html">${tr("לתקנון","Terms")}</a></p>
       </div>
 
       <div class="pd-info">
@@ -126,6 +131,12 @@ function pdRenderBody(){
           <div class="pd-price">${pdNis(it.price)}</div>
           <div class="pd-price-note">${tr("כולל אחריות יבואן רשמי · עד 12 תשלומים",
                                           "Official importer warranty · up to 12 installments")}</div>
+          <!-- סה"כ מתעדכן חי לפי הכמות. מוסתר בכמות 1, כי אז הוא רק
+               חוזר על המחיר שמעליו. -->
+          <div class="pd-total" id="pdTotalBox" hidden>
+            <span class="pd-total-k">${tr("סה\"כ","Total")} <b id="pdTotalQty">1</b> ${tr("יח'","pcs")}</span>
+            <span class="pd-total-v" id="pdTotalVal"></span>
+          </div>
         </div>
 
         <div class="pd-buy">
@@ -134,14 +145,18 @@ function pdRenderBody(){
             <span id="pdQty">1</span>
             <button type="button" onclick="pdChangeQty(1)" aria-label="${tr("הוסף","Increase")}">+</button>
           </div>
-          <button class="btn btn-primary pd-add" onclick="pdAddToCart()">${t("addToCartBtn")}</button>
+          ${(typeof dvtInStock === "function" && !dvtInStock(it))
+            ? `<button class="btn btn-primary pd-add" disabled>${tr("אזל המלאי","Out of stock")}</button>`
+            : `<button class="btn btn-primary pd-add" onclick="pdAddToCart()">${t("addToCartBtn")}</button>`}
         </div>
 
         <ul class="pd-perks">
           <li><svg class="ui-ic"><use href="#ui-truck"/></svg>${tr("משלוח 2-5 ימי עסקים","Delivery in 2-5 business days")}</li>
           <li><svg class="ui-ic"><use href="#ui-shield"/></svg>${tr("אחריות מלאה על כל רכיב","Full warranty on every part")}</li>
           <li><svg class="ui-ic"><use href="#ui-tools"/></svg>${tr("הרכבה והתקנה בתוספת תשלום","Assembly and setup available")}</li>
-          <li><svg class="ui-ic"><use href="#ui-chat"/></svg>${tr("שאלה על המוצר? דברו איתנו","Questions? Talk to us")}</li>
+          <li><svg class="ui-ic"><use href="#ui-chat"/></svg>${tr("שאלה על המוצר?","Questions about this product?")}
+            <a class="pd-wa" href="${pdWhatsappHref(it)}" target="_blank" rel="noopener"
+               >${tr("דברו איתנו","Talk to us")}</a></li>
         </ul>
       </div>
     </div>
@@ -218,14 +233,36 @@ function sellableInCat(cat){
   return (g.items || []).filter(dvtIsSellable);
 }
 
+/* קישור וואטסאפ עם שם המוצר שהלקוח צופה בו, כדי שלא יצטרך להסביר
+   על מה הוא מדבר ואני אדע מיד לאיזה פריט הוא מתכוון. */
+const PD_WHATSAPP_NUMBER = "972502000373";
+function pdWhatsappHref(it){
+  const msg = tr(
+    `שלום, ראיתי את "${itemName(it)}" באתר ורציתי לשאול כמה שאלות לגביו.`,
+    `Hi, I saw "${itemName(it)}" on your site and had a few questions about it.`);
+  return `https://wa.me/${PD_WHATSAPP_NUMBER}?text=${encodeURIComponent(msg)}`;
+}
+
 /* ==================== פעולות ==================== */
 function pdChangeQty(d){
-  PD_QTY = Math.max(1, Math.min(20, PD_QTY + d));
+  PD_QTY = Math.max(1, Math.min(20, PD_QTY + d));   // 20 = התקרה שהשרת אוכף
   document.getElementById("pdQty").textContent = PD_QTY;
+  pdRenderTotal();
+}
+
+/* סה"כ חי לפי הכמות. מופיע רק מכמות 2 ומעלה. */
+function pdRenderTotal(){
+  const box = document.getElementById("pdTotalBox");
+  if(!box || !PD_ITEM) return;
+  if(PD_QTY < 2){ box.hidden = true; return; }
+  box.hidden = false;
+  document.getElementById("pdTotalQty").textContent = PD_QTY;
+  document.getElementById("pdTotalVal").textContent = pdNis(Number(PD_ITEM.price) * PD_QTY);
 }
 
 function pdAddToCart(){
   if(!PD_ITEM) return;
+  if(typeof dvtInStock === "function" && !dvtInStock(PD_ITEM)) return;
   addToCart({
     type: "product",
     sku: PD_ITEM._realCat + ":" + PD_ITEM.id,

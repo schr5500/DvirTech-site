@@ -1,36 +1,36 @@
 /* =====================================================================
-   DvirTech — טעינת CATALOG חי (builder.html בלבד)
+   DvirTech — טעינת CATALOG לבונה המחשבים (builder.html בלבד)
    =====================================================================
-   מחליף את catalog.js הסטטי הישן: שולף את כל קטגוריות הבונה (מעבד/לוח
-   אם/זיכרון/וכו') מ-4-payment-api.gs (action=getCatalog), שקורא אותן
-   ישירות מהגיליון הפרטי של הספקים. שום מחיר/עלות לא מוזן/מועתק ידנית
-   יותר — הגיליון הוא מקור האמת היחיד, גם לתצוגה כאן וגם לתמחור בפועל
-   ב-createPayment (4-payment-api.gs).
+   ⚠️ שינוי חשוב: הקובץ הזה *כבר לא* עושה fetch משלו.
 
-   ⚠️ PAYMENT_API_URL חייב להיות זהה בדיוק למה שמוגדר ב-checkout.js.
-   ⚠️ CATALOG כאן הוא let, לא const — מאותחל רק אחרי שהתשובה מגיעה.
-   כל שאר app.js/cart.js לא רצים לפני שזה קורה (ראה קריאת האתחול בתחתית).
+   קודם הוא קרא ל-getCatalog בעצמו, לגמרי במקביל ל-search-core.js —
+   ולכן הבונה שילם 6-8 שניות המתנה בכל כניסה, בזמן ששאר הדפים כבר
+   נטענו מיידית מהמטמון. גרוע מזה: שתי הבקשות יכלו לחזור עם תמונת
+   מצב שונה של הגיליון, כך שהבונה והקטלוג הציגו נתונים שאינם זהים.
+
+   עכשיו שניהם שולפים מ-dvtGetCatalog() ב-search-core.js: בקשה אחת,
+   מטמון אחד ב-localStorage, ורענון רקע משותף. הבונה נפתח מיידית
+   כמו כל דף אחר, ומציג בדיוק את אותם מוצרים כמו דף המוצרים.
+
+   ⚠️ CATALOG הוא let ולא const — מאותחל רק אחרי שהנתונים מגיעים.
 ===================================================================== */
 
-const PAYMENT_API_URL = "https://script.google.com/macros/s/AKfycbwuW5tgiRDhoIEFNkHHWgkVot6FyHFEUBa1mx41ck1lp74ChzT8pciMV9qaI0NcDw-sKA/exec";
-
-// סדר קבוע של שלבי הבונה — לא נתוני מוצר, אז לא תלוי בגיליון בכלל
-// (בניגוד ל-CATALOG עצמו). היה מוגדר קודם בתוך catalog.js הסטטי שהוסר.
+// סדר קבוע של שלבי הבונה — לא נתוני מוצר, ולכן לא תלוי בגיליון.
 const STEP_ORDER = ["cpu","mobo","ram","gpu","cooling","storage","psu","case","services"];
 
 let CATALOG = null;
 
 async function loadCatalogAndInit(){
   try{
-    const res = await fetch(PAYMENT_API_URL + "?action=getCatalog");
-    const data = await res.json();
-    if(!data.ok || !data.catalog) throw new Error(data.error || "getCatalog failed");
-    CATALOG = data.catalog;
+    CATALOG = await dvtGetCatalog();
+    if(!CATALOG) throw new Error("empty catalog");
   }catch(e){
-    document.getElementById("stepsContainer").innerHTML =
-      `<div class="panel"><div class="lock-msg">${tr(
+    const box = document.getElementById("stepsContainer");
+    if(box){
+      box.innerHTML = `<div class="panel"><div class="lock-msg">${tr(
         "לא הצלחנו לטעון את הקטלוג כרגע. רענן/י את הדף או נסה/י שוב בעוד רגע.",
         "Couldn't load the catalog right now. Please refresh or try again in a moment.")}</div></div>`;
+    }
     console.error("loadCatalogAndInit failed:", e);
     return;
   }
@@ -38,6 +38,17 @@ async function loadCatalogAndInit(){
   renderStaticText();
   renderSteps();
   renderContextPicker();
+
+  // אם הרענון ברקע גילה שינוי אמיתי בגיליון, מרעננים את הבונה —
+  // בלי לאבד את מה שהלקוח כבר בחר (renderSteps קורא מ-selections).
+  if(typeof dvtOnCatalogRefresh === "function"){
+    dvtOnCatalogRefresh(fresh => {
+      CATALOG = fresh;
+      renderSteps();
+      renderContextPicker();
+      if(typeof renderSummary === "function") renderSummary();
+    });
+  }
 }
 
 loadCatalogAndInit();

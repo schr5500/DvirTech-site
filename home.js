@@ -131,31 +131,92 @@ function renderCategories(){
 /* "מבצעים חמים": פריט אחד מכל קטגוריה, הזול ביותר בה. זו בחירה מכוונת —
    ככה הרצועה מציגה רוחב של קטלוג ולא שמונה כרטיסי מסך. כשתהיה עמודת
    מבצע אמיתית בגיליון, מחליפים כאן את הסינון בה. */
+/* רק מוצרים שבאמת במבצע — כלומר יש להם oldPrice גבוה מהמחיר הנוכחי
+   בגיליון. קודם זה הציג פשוט את הזול ביותר מכל קטגוריה, מה שנתן
+   "מבצעים" שאינם מבצעים. */
 function pickDeals(){
-  const out = [];
-  homeCategories().forEach(cat => {
-    const items = homeSellable(cat).slice().sort((a,b) => Number(a.price) - Number(b.price));
-    if(items[0]) out.push({ cat, it: items[0] });
-  });
-  return out.slice(0, 10);
+  return dvtSaleItems(HOME_CATALOG).slice(0, 12);
 }
 
 function renderDeals(){
   const row = document.getElementById("dealRow");
   if(!row) return;
   const deals = pickDeals();
-  if(!deals.length){ row.innerHTML = ""; return; }
+
+  // אין מבצעים פעילים בגיליון — המקטע נשאר, עם הודעה קצרה במקום
+  // רצועה ריקה. עדיף להסביר מה קורה מאשר שהאזור פשוט ייעלם.
+  if(!deals.length){
+    row.classList.remove("deal-marquee");
+    row.innerHTML = `<div class="deals-none">
+      <b>${tr("אין כרגע מוצרים במבצע","No active deals right now")}</b>
+      <span>${tr("מבצעים חדשים יופיעו כאן ברגע שיעלו לאתר.",
+                 "New deals will appear here as soon as they go live.")}</span>
+    </div>`;
+    return;
+  }
 
   row.innerHTML = deals.map(({cat, it}) => `
     <a class="deal" href="product.html?cat=${encodeURIComponent(it._realCat || cat)}&id=${encodeURIComponent(it.id)}">
+      <span class="deal-badge">-${dvtDiscountPct(it)}%</span>
       <div class="deal-art">${productArt(cat, it)}</div>
       <div class="deal-cat">${catLabel(cat, HOME_CATALOG[cat])}</div>
       <div class="deal-name">${itemLabel(it)}</div>
       <div class="deal-foot">
         <span class="deal-price">${nis(it.price)}</span>
-        ${it.brand ? `<span class="deal-off" style="background:#EEF4FE;color:#1B6FE0;border-color:#CFE0F8">${it.brand}</span>` : ""}
+        <span class="deal-was">${nis(dvtOldPrice(it))}</span>
       </div>
     </a>`).join("");
+
+  setupDealMarquee(row);
+}
+
+/* גלילה מעגלית איטית — רק אם המבצעים באמת לא נכנסים לרוחב המסך.
+   כשהם נכנסים אין שום סיבה להזיז אותם, וזה רק היה מפריע ללחוץ.
+   העותק השני של הרשימה הוא מה שמאפשר לולאה בלי "קפיצה": האנימציה
+   מזיזה בדיוק את רוחב העותק הראשון וחוזרת ל-0. */
+function setupDealMarquee(row){
+  row.classList.remove("deal-marquee");
+  row.style.removeProperty("--marquee-dur");
+
+  // prefers-reduced-motion: משאירים רצועה נגללת ידנית, בלי תנועה מעצמה
+  if(window.matchMedia && window.matchMedia("(prefers-reduced-motion: reduce)").matches) return;
+
+  // ⚠️ לא נשענים רק על requestAnimationFrame: בלשונית שברקע (וגם בבדיקות
+  // אוטומטיות) הוא לא נורה כלל, והרצועה פשוט לא הייתה מתחילה לזוז.
+  // מה שקורה קודם מנצח, והדגל מוודא שהאתחול ירוץ פעם אחת בלבד.
+  let started = false;
+  const start = () => {
+    if(started) return;
+    started = true;
+
+    if(row.scrollWidth - row.clientWidth <= 8) return;   // הכל נכנס — לא מזיזים
+
+    const cards = [...row.children];
+    const spanWidth = row.scrollWidth;                   // רוחב סט אחד של כרטיסים
+
+    const track = document.createElement("div");
+    track.className = "deal-track";
+    cards.forEach(c => track.appendChild(c));
+    // עותק שני זהה — הוא מה שממלא את החלל בזמן שהראשון יוצא, וכך
+    // הלולאה נראית רציפה. aria-hidden כדי שקורא מסך לא יקריא פעמיים.
+    cards.forEach(c => {
+      const clone = c.cloneNode(true);
+      clone.setAttribute("aria-hidden", "true");
+      clone.querySelectorAll("a, button").forEach(el => el.tabIndex = -1);
+      if(clone.tagName === "A") clone.tabIndex = -1;
+      track.appendChild(clone);
+    });
+
+    row.innerHTML = "";
+    row.appendChild(track);
+    // מהירות קבועה (~26px לשנייה) ולא משך קבוע, כך ש-3 מבצעים ו-30
+    // מבצעים זזים באותו קצב נעים במקום שאחד ידהר והשני יזחל.
+    row.style.setProperty("--marquee-dur", Math.max(18, Math.round(spanWidth / 26)) + "s");
+    row.classList.add("deal-marquee");
+  };
+
+  requestAnimationFrame(start);
+  setTimeout(start, 250);
 }
 
 /* מצב ביניים בזמן טעינה — כדי שהרצועות לא יקפצו מריק למלא */

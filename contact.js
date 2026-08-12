@@ -10,14 +10,14 @@ const CONTACT_WHATSAPP_NUMBER = "972502000373";
 const CONTACT_EMAIL = "schr5500@gmail.com";
 
 function renderContactPage(){
-  document.getElementById("navHome").textContent = t("navHome");
-  document.getElementById("navReady").textContent = t("navReady");
-  document.getElementById("navPeripherals").textContent = t("navPeripherals");
-  document.getElementById("navComponents").textContent = t("navComponents");
-  document.getElementById("navBuilder").textContent = t("navBuilder");
-  document.getElementById("navLab").textContent = t("navLab");
-  document.getElementById("navWhy").textContent = t("navWhy");
-  document.getElementById("navContact").textContent = t("navContact");
+  { const _e=document.getElementById("navHome"); if(_e) _e.textContent = t("navHome"); }
+  { const _e=document.getElementById("navReady"); if(_e) _e.textContent = t("navReady"); }
+  { const _e=document.getElementById("navPeripherals"); if(_e) _e.textContent = t("navPeripherals"); }
+  { const _e=document.getElementById("navComponents"); if(_e) _e.textContent = t("navComponents"); }
+  { const _e=document.getElementById("navBuilder"); if(_e) _e.textContent = t("navBuilder"); }
+  { const _e=document.getElementById("navLab"); if(_e) _e.textContent = t("navLab"); }
+  { const _e=document.getElementById("navWhy"); if(_e) _e.textContent = t("navWhy"); }
+  { const _e=document.getElementById("navContact"); if(_e) _e.textContent = t("navContact"); }
 
   document.getElementById("pageTitle").textContent = t("contactTitle");
   document.getElementById("pageSubtitle").textContent = t("contactSubtitle");
@@ -30,8 +30,34 @@ function renderContactPage(){
   document.getElementById("whatsappBtn").textContent = t("contactWhatsappBtn");
   document.getElementById("callBtn").textContent = t("contactCallBtn");
 
-  document.getElementById("emailBtn").href = `mailto:${CONTACT_EMAIL}`;
-  document.getElementById("emailBtn").textContent = t("contactEmailBtn");
+  // ⚠️ לא mailto: — בלי תוכנת דואר מוגדרת בווינדוס הכפתור פשוט לא עושה
+  // כלום, וזה המצב אצל רוב משתמשי Gmail. פותחים חלון כתיבה ב-Gmail.
+  document.getElementById("emailBtn").href =
+    `https://mail.google.com/mail/?view=cm&fs=1&to=${encodeURIComponent(CONTACT_EMAIL)}`;
+  document.getElementById("emailBtn").textContent = tr("כתוב לי במייל","Email me");
+
+  // כותרות ותיאורים חדשים בכרטיסים
+  const setTxt = (id, v) => { const e = document.getElementById(id); if(e) e.textContent = v; };
+  setTxt("waTitle", tr("וואטסאפ — הדרך המהירה","WhatsApp — fastest"));
+  setTxt("waDesc",  tr("שולחים הודעה ואני חוזר בהקדם. אפשר לצרף תמונות של התקלה או של המחשב.",
+                       "Send a message and I'll get back to you. Feel free to attach photos of the issue."));
+  setTxt("respLabel", tr("זמן תגובה","Response time"));
+  setTxt("respText",  tr("בדרך כלל תוך מספר שעות בשעות הפעילות. בפניות דחופות — עדיף בטלפון.",
+                         "Usually within a few hours during working hours. For anything urgent, calling is best."));
+
+  // כפתורי "העתק" — עובדים תמיד, גם בלי תוכנת דואר או חייגן
+  document.querySelectorAll(".ccard-copy").forEach(btn => {
+    btn.textContent = tr("העתק","Copy");
+    btn.onclick = async () => {
+      try{
+        await navigator.clipboard.writeText(btn.dataset.copy);
+        const was = btn.textContent;
+        btn.textContent = tr("הועתק ✓","Copied ✓");
+        btn.classList.add("done");
+        setTimeout(() => { btn.textContent = was; btn.classList.remove("done"); }, 1600);
+      }catch(e){ /* דפדפן ללא הרשאת קליפבורד — הטקסט ממילא מוצג ליד */ }
+    };
+  });
 
   document.getElementById("hoursLabel").textContent = t("contactHoursLabel");
   document.getElementById("hoursText").textContent = t("contactHoursText");

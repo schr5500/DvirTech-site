@@ -4,6 +4,7 @@
 <meta charset="UTF-8">
 <meta name="viewport" content="width=device-width, initial-scale=1.0">
 <title>DvirTech — צור קשר</title>
+<meta name="description" content="דברו איתי בוואטסאפ, בטלפון או במייל. שירות מחשבים באזור באר שבע, המרכז והשפלה.">
 <script>
   (function(){
     var saved = "he";
@@ -12,78 +13,268 @@
     document.documentElement.dir = saved === "he" ? "rtl" : "ltr";
   })();
 </script>
-<link rel="preconnect" href="https://fonts.googleapis.com">
-<link href="https://fonts.googleapis.com/css2?family=Rubik:wght@400;500;600;700;800;900&family=Heebo:wght@300;400;500;700&display=swap" rel="stylesheet">
+<link rel="preconnect" href="https://script.google.com" crossorigin>
 <link rel="stylesheet" href="style.css">
+<!-- ריצת הרכיב (פורמט DesignCode). חייב להיטען ראשון. -->
+<script src="builder-assets/support.js"></script>
 </head>
 <body>
 
-<header>
-  <div class="wrap headbar">
-    <a class="brand" href="index.html" aria-label="DvirTech — לדף הבית"><img class="brand-logo" src="images/logo-dvirtech-transparent.png" alt="DvirTech"></a>
-    <nav>
-      <a href="index.html" id="navHome"></a>
-      <a href="products.html?cat=readyPc" id="navReady"></a>
-      <a href="products.html?cat=peripherals" id="navPeripherals"></a>
-      <a href="products.html?cat=gpu" id="navComponents"></a>
-      <a href="builder.html" id="navBuilder"></a>
-      <a href="coming-soon.html?service=support" id="navLab"></a>
-      <a href="why-dvirtech.html" id="navWhy"></a>
-      <a href="contact.html" id="navContact"></a>
-    </nav>
-    <div class="lang-switch">
-      <button class="lang-btn" data-lang="he" onclick="setLang('he')">עברית</button>
-      <button class="lang-btn" data-lang="en" onclick="setLang('en')">English</button>
+<header class="site-header--blue"><div class="wrap headbar"></div></header>
+
+<x-dc>
+<helmet>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link href="https://fonts.googleapis.com/css2?family=Rubik:wght@400;500;600;700;800;900&family=Heebo:wght@300;400;500;700&display=swap" rel="stylesheet">
+<style>
+  *{box-sizing:border-box}
+  body{margin:0;background:#F5F8FC}
+  a{color:#1B6FE0;text-decoration:none}
+  a:hover{color:#0E4C97}
+  @media (max-width:1000px){header nav{display:none !important}}
+  @media (max-width:900px){
+    [data-grid3]{grid-template-columns:1fr !important}
+    [data-info]{grid-template-columns:1fr !important}
+    [data-cta]{grid-template-columns:1fr !important}
+    [data-hero]{padding-block:48px !important}
+    [data-hero-photo]{display:none !important}
+    [data-usp]{grid-template-columns:1fr 1fr !important}
+  }
+</style>
+</helmet>
+<div dir="rtl" style="font-family:'Heebo',sans-serif;line-height:1.65;color:#0E2A47;background:#F5F8FC;min-height:100vh">
+
+  <!-- ⚠️ ההדר של הייצוא הוסר: site-header.js בונה הדר אחד
+         לכל האתר (אותם פריטים, אותו סדר, אותו צד). בלי ההסרה הזו
+         הופיעו שני תפריטים זה מעל זה. הסגנון הכחול נשמר דרך CSS. -->
+
+  <section data-hero="1" style="position:relative;background:linear-gradient(100deg,#0B2C4D 0%,#0E3767 52%,#0B2C4D 100%);overflow:hidden;padding:78px 0 86px;min-height:400px">
+    <div data-hero-photo="1" style="position:absolute;left:0;top:0;bottom:0;width:54%;overflow:hidden">
+      <img src="images/contact/contact-hero-2x.jpg" alt="עמדת גיימינג DvirTech" width="1536" height="1024" loading="eager" decoding="async" style="width:100%;height:100%;object-fit:cover;object-position:center left;display:block">
+      <span style="position:absolute;inset:0;background:linear-gradient(to right,rgba(14,55,103,.10) 0%,rgba(14,55,103,.62) 68%,#0E3767 100%)"></span>
+    </div>
+    <div style="position:relative;width:100%;max-width:1320px;margin:0 auto;padding:0 20px;text-align:start;display:flex;align-items:center;gap:40px">
+      <div style="flex:1;min-width:0;order:1">
+      <h1 style="font-family:'Rubik',sans-serif;margin:0;font-size:58px;font-weight:800;color:#fff;letter-spacing:-1px;line-height:1.1">צור קשר</h1>
+      <p style="margin:18px 0 0;font-size:18px;color:#C8DCEC;max-width:560px;line-height:1.7">יש שאלה, בקשה להצעת מחיר, או זקוקים לקצת עזרה? אנחנו כאן בשבילך.</p>
+      <div style="display:flex;gap:44px;margin-top:38px;flex-wrap:wrap">
+        <div style="display:flex;align-items:center;gap:14px">
+          <span style="width:52px;height:52px;border-radius:50%;background:#1B6FE0;display:grid;place-items:center;flex:none;color:#fff">
+            <svg viewBox="0 0 24 24" style="width:23px;height:23px;fill:none;stroke:currentColor;stroke-width:1.6;stroke-linecap:round"><circle cx="12" cy="8" r="3.6"></circle><path d="M4.5 20a7.5 7.5 0 0 1 15 0"></path></svg>
+          </span>
+          <span>
+            <b style="display:block;font-size:14.5px;color:#fff;font-weight:700">שירות ומקצועיות</b>
+            <span style="display:block;font-size:13px;color:#9FBBD6">מענה אנושי, בלי מוקדים</span>
+          </span>
+        </div>
+        <div style="display:flex;align-items:center;gap:14px">
+          <span style="width:52px;height:52px;border-radius:50%;background:#1B6FE0;display:grid;place-items:center;flex:none;color:#fff">
+            <svg viewBox="0 0 24 24" style="width:23px;height:23px;fill:none;stroke:currentColor;stroke-width:1.6;stroke-linecap:round;stroke-linejoin:round"><path d="M14.5 3.5a5 5 0 0 0-6 6L4 14v5.5h5.5L14 15a5 5 0 0 0 6-6l-3 3-3-3z"></path></svg>
+          </span>
+          <span>
+            <b style="display:block;font-size:14.5px;color:#fff;font-weight:700">מומחים להרכבים</b>
+            <span style="display:block;font-size:13px;color:#9FBBD6">ייעוץ מקצועי לבניית המחשב שלך</span>
+          </span>
+        </div>
+      </div>
+      </div>
+    </div>
+  </section>
+
+  <div style="width:100%;max-width:1320px;margin:0 auto;padding:44px 20px 0">
+    <div data-grid3="1" style="display:grid;grid-template-columns:repeat(3,1fr);gap:22px">
+
+      <div style="background:#fff;border:1px solid #EDF2F8;border-radius:18px;box-shadow:0 2px 12px rgba(14,42,71,.05);padding:26px 24px 24px;display:flex;flex-direction:column">
+        <span style="width:56px;height:56px;border-radius:14px;background:#E9F2FE;display:grid;place-items:center;color:#1B6FE0;margin-bottom:20px">
+          <svg viewBox="0 0 24 24" style="width:25px;height:25px;fill:none;stroke:currentColor;stroke-width:1.6;stroke-linejoin:round"><rect x="3" y="5" width="18" height="14" rx="2.5"></rect><path d="M3.5 7l8.5 6 8.5-6"></path></svg>
+        </span>
+        <b style="font-family:'Rubik',sans-serif;font-size:16px;font-weight:700">אימייל</b>
+        <a href="mailto:schr5500@gmail.com" dir="ltr" style="display:block;margin-top:12px;font-family:'Rubik',sans-serif;font-size:18px;font-weight:700;color:#1B6FE0;text-align:start">schr5500@gmail.com</a>
+        <span style="display:block;margin-top:10px;font-size:13.5px;color:#5F7590">נשמח לעזור בהקדם</span>
+        <div style="margin-top:auto;padding-top:22px;display:flex;gap:9px">
+          <a href="https://mail.google.com/mail/?view=cm&amp;fs=1&amp;to=schr5500@gmail.com" target="_blank" rel="noopener" style="flex:1;display:flex;align-items:center;justify-content:space-between;gap:10px;border:1.5px solid #E2EAF2;border-radius:12px;padding:13px 16px;font-size:14px;font-weight:600;color:#0E2A47;transition:.15s" style-hover="border-color:#C9DEF8;background:#F7FAFD">
+            שלחו לנו מייל
+            <svg viewBox="0 0 24 24" style="width:15px;height:15px;fill:none;stroke:#1B6FE0;stroke-width:2;stroke-linecap:round;stroke-linejoin:round"><path d="M14 6l-6 6 6 6"></path></svg>
+          </a>
+          <button onClick="{{ copyMail }}" style="flex:none;border:1.5px solid #E2EAF2;background:#fff;border-radius:12px;padding:0 15px;font-family:'Heebo',sans-serif;font-size:13px;font-weight:600;color:#5F7590;cursor:pointer;transition:.15s" style-hover="border-color:#C9DEF8;color:#1B6FE0">{{ mailCopyLabel }}</button>
+        </div>
+      </div>
+
+      <div style="background:#fff;border:1px solid #EDF2F8;border-radius:18px;box-shadow:0 2px 12px rgba(14,42,71,.05);padding:26px 24px 24px;display:flex;flex-direction:column">
+        <span style="width:56px;height:56px;border-radius:14px;background:#EAFAF4;display:grid;place-items:center;color:#0E9C8A;margin-bottom:20px">
+          <svg viewBox="0 0 24 24" style="width:25px;height:25px;fill:none;stroke:currentColor;stroke-width:1.6;stroke-linecap:round;stroke-linejoin:round"><path d="M6 3.5h3l1.6 4-2 1.4a12 12 0 0 0 6.5 6.5l1.4-2 4 1.6v3c0 1-.8 1.7-1.8 1.6C10.9 19 5 13.1 4.4 5.3 4.3 4.3 5 3.5 6 3.5z"></path></svg>
+        </span>
+        <b style="font-family:'Rubik',sans-serif;font-size:16px;font-weight:700">טלפון / וואטסאפ</b>
+        <a href="tel:0502000373" dir="ltr" style="display:block;margin-top:12px;font-family:'Rubik',sans-serif;font-size:22px;font-weight:800;color:#0E2A47;text-align:start">050-200-0373</a>
+        <span style="display:block;margin-top:10px;font-size:13.5px;color:#5F7590">זמינים גם בוואטסאפ</span>
+        <div style="margin-top:auto;padding-top:22px;display:flex;gap:9px">
+          <a href="https://wa.me/972502000373" target="_blank" rel="noopener" style="flex:1;display:flex;align-items:center;justify-content:center;gap:9px;border:1.5px solid #BDE6D8;border-radius:12px;padding:13px 16px;font-size:14px;font-weight:700;color:#0C8467;transition:.15s" style-hover="background:#F2FBF8;border-color:#8FD6C1">
+            <svg viewBox="0 0 24 24" style="width:17px;height:17px;fill:currentColor"><path d="M17.5 14.4c-.3-.2-1.7-.9-2-1-.3-.1-.5-.2-.7.1-.2.3-.7 1-.9 1.2-.2.2-.3.2-.6.1-.3-.2-1.2-.5-2.3-1.4-.9-.8-1.4-1.7-1.6-2-.2-.3 0-.5.1-.6l.5-.6c.1-.2.2-.3.3-.5 0-.2 0-.4 0-.5 0-.2-.7-1.6-.9-2.2-.2-.6-.5-.5-.7-.5h-.6c-.2 0-.5.1-.8.4-.3.3-1 1-1 2.5s1.1 2.9 1.2 3.1c.2.2 2.1 3.2 5.1 4.5.7.3 1.3.5 1.7.6.7.2 1.4.2 1.9.1.6-.1 1.7-.7 2-1.4.2-.7.2-1.3.2-1.4-.1-.1-.3-.2-.6-.3zM12 2C6.5 2 2 6.5 2 12c0 1.8.5 3.4 1.3 4.9L2 22l5.3-1.4c1.4.8 3 1.2 4.7 1.2 5.5 0 10-4.5 10-10S17.5 2 12 2z"></path></svg>
+            שלחו הודעה
+          </a>
+          <button onClick="{{ copyPhone }}" style="flex:none;border:1.5px solid #E2EAF2;background:#fff;border-radius:12px;padding:0 15px;font-family:'Heebo',sans-serif;font-size:13px;font-weight:600;color:#5F7590;cursor:pointer;transition:.15s" style-hover="border-color:#C9DEF8;color:#1B6FE0">{{ phoneCopyLabel }}</button>
+        </div>
+      </div>
+
+      <div style="background:#fff;border:1px solid #EDF2F8;border-radius:18px;box-shadow:0 2px 12px rgba(14,42,71,.05);padding:26px 24px 24px;display:flex;flex-direction:column">
+        <span style="width:56px;height:56px;border-radius:14px;background:#E9F2FE;display:grid;place-items:center;color:#1B6FE0;margin-bottom:20px">
+          <svg viewBox="0 0 24 24" style="width:25px;height:25px;fill:none;stroke:currentColor;stroke-width:1.6;stroke-linecap:round;stroke-linejoin:round"><path d="M20.5 11.5a8 8 0 0 1-11.6 7.1L4 20l1.4-4.4A8 8 0 1 1 20.5 11.5z"></path></svg>
+        </span>
+        <!-- ⚠️ בייצוא זה היה "טופס פנייה מהיר" עם כפתור שלא מחובר לכלום,
+               ואין באתר טופס או שרת שמקבל פניות — כפתור ראשי שלא עושה
+               כלום גרוע יותר מכפתור פחות יומרני. לכן הוא מוביל לוואטסאפ,
+               אבל *לא* כעוד "שלחו הודעה": ההודעה כאן היא בקשת ייעוץ
+               והצעת מחיר, תפקיד שונה מהכרטיס שלידו ומכפתור הביטול.
+               הכפתור נשאר בגרדיאנט של העיצוב ולא בירוק, כדי שלא ייראה
+               כמו כפתור וואטסאפ שלישי — הטקסט אומר לאן זה מוביל. -->
+        <b style="font-family:'Rubik',sans-serif;font-size:16px;font-weight:700">ייעוץ והצעת מחיר</b>
+        <p style="margin:12px 0 22px;font-size:13.5px;color:#5F7590;line-height:1.7">כתבו לי מה אתם צריכים ואני חוזר אליכם עם המלצה והצעת מחיר מותאמת אישית</p>
+        <a href="https://wa.me/972502000373?text=%D7%94%D7%99%D7%99%20%D7%93%D7%91%D7%99%D7%A8%2C%20%D7%90%D7%A9%D7%9E%D7%97%20%D7%9C%D7%99%D7%99%D7%A2%D7%95%D7%A5%20%D7%95%D7%9C%D7%94%D7%A6%D7%A2%D7%AA%20%D7%9E%D7%97%D7%99%D7%A8.%20%D7%9E%D7%94%20%D7%A9%D7%90%D7%A0%D7%99%20%D7%9E%D7%97%D7%A4%D7%A9%3A%20" target="_blank" rel="noopener" style="margin-top:auto;display:flex;align-items:center;justify-content:center;gap:10px;border:none;cursor:pointer;font-family:'Heebo',sans-serif;font-weight:700;font-size:14.5px;border-radius:12px;padding:15px 18px;width:100%;background:linear-gradient(100deg,#1B6FE0,#2FC4B0);color:#fff;box-shadow:0 10px 24px rgba(27,111,224,.22)">
+          קבלת ייעוץ בוואטסאפ
+          <svg viewBox="0 0 24 24" style="width:16px;height:16px;fill:none;stroke:currentColor;stroke-width:2;stroke-linecap:round;stroke-linejoin:round"><path d="M14 6l-6 6 6 6"></path></svg>
+        </a>
+      </div>
     </div>
   </div>
-</header>
 
-<div class="wrap" style="max-width:640px;padding-top:44px;padding-bottom:70px">
-  <h1 id="pageTitle" style="font-size:28px;margin:0 0 8px"></h1>
-  <p id="pageSubtitle" style="color:var(--ink-soft);margin:0 0 26px;line-height:1.7"></p>
-
-  <div class="panel">
-    <h3 style="display:flex;align-items:center;gap:8px;margin:0 0 4px">📞 <span id="phoneLabel"></span></h3>
-    <p style="font-size:20px;font-weight:700;direction:ltr;text-align:end;margin:4px 0 14px" dir="ltr">050-200-0373</p>
-    <div style="display:flex;gap:10px;flex-wrap:wrap">
-      <a class="btn btn-accent" style="width:auto;flex:1;min-width:160px" id="whatsappBtn" href="#" target="_blank" rel="noopener"></a>
-      <a class="btn btn-secondary" style="width:auto;flex:1;min-width:120px;margin-top:0" id="callBtn" href="tel:0502000373"></a>
+  <div style="width:100%;max-width:1320px;margin:0 auto;padding:22px 20px 0">
+    <div data-info="1" style="background:#fff;border:1px solid #EDF2F8;border-radius:18px;box-shadow:0 2px 12px rgba(14,42,71,.05);display:grid;grid-template-columns:repeat(3,1fr)">
+      <div style="padding:24px 26px">
+        <b style="display:flex;align-items:center;gap:9px;font-family:'Rubik',sans-serif;font-size:14.5px;font-weight:700;color:#1B6FE0">
+          <svg viewBox="0 0 24 24" style="width:17px;height:17px;fill:none;stroke:currentColor;stroke-width:1.7;stroke-linecap:round"><rect x="3.5" y="5" width="17" height="15" rx="2.5"></rect><path d="M3.5 9.5h17M8 3.5v3M16 3.5v3"></path></svg>
+          שעות פעילות
+        </b>
+        <p style="margin:12px 0 0;font-size:13.5px;color:#5F7590;line-height:1.9">ימים א׳ – ה׳: 09:00 – 19:00<br>יום ו׳: 09:00 – 14:00<br>שבת וחגים: סגור</p>
+      </div>
+      <div style="padding:24px 26px;border-inline-start:1px solid #EDF2F8">
+        <b style="display:flex;align-items:center;gap:9px;font-family:'Rubik',sans-serif;font-size:14.5px;font-weight:700;color:#1B6FE0">
+          <svg viewBox="0 0 24 24" style="width:17px;height:17px;fill:none;stroke:currentColor;stroke-width:1.7;stroke-linecap:round;stroke-linejoin:round"><path d="M12 21s7-5.3 7-11a7 7 0 1 0-14 0c0 5.7 7 11 7 11z"></path><circle cx="12" cy="10" r="2.5"></circle></svg>
+          אזור שירות
+        </b>
+        <p style="margin:12px 0 0;font-size:13.5px;color:#5F7590;line-height:1.9">באר שבע והסביבה · מרכז · שפלה<br>משלוחים לכל הארץ<br>איסוף עצמי בתיאום מראש</p>
+      </div>
+      <div style="padding:24px 26px;border-inline-start:1px solid #EDF2F8">
+        <b style="display:flex;align-items:center;gap:9px;font-family:'Rubik',sans-serif;font-size:14.5px;font-weight:700;color:#1B6FE0">
+          <svg viewBox="0 0 24 24" style="width:17px;height:17px;fill:none;stroke:currentColor;stroke-width:1.7;stroke-linecap:round"><circle cx="12" cy="12" r="8.5"></circle><path d="M12 7.5V12l3 2"></path></svg>
+          זמן מענה ממוצע
+        </b>
+        <p style="margin:12px 0 0;font-size:13.5px;color:#5F7590;line-height:1.9">עד 2 שעות בימי עסקים<br>בפניות דחופות — עדיף בטלפון</p>
+      </div>
     </div>
   </div>
 
-  <div class="panel">
-    <h3 style="display:flex;align-items:center;gap:8px;margin:0 0 4px">✉️ <span id="emailLabel"></span></h3>
-    <p style="font-size:16px;font-weight:700;direction:ltr;text-align:end;margin:4px 0 14px" dir="ltr">schr5500@gmail.com</p>
-    <a class="btn btn-secondary" style="margin-top:0" id="emailBtn" href="mailto:schr5500@gmail.com"></a>
+  <div style="width:100%;max-width:1320px;margin:0 auto;padding:22px 20px 0">
+    <div style="background:#fff;border:1px solid #EDF2F8;border-radius:18px;box-shadow:0 2px 12px rgba(14,42,71,.05);padding:20px 24px;display:flex;align-items:center;gap:18px;flex-wrap:wrap">
+      <span style="width:44px;height:44px;border-radius:12px;background:#F7FAFD;display:grid;place-items:center;flex:none;color:#5F7590">
+        <svg viewBox="0 0 24 24" style="width:20px;height:20px;fill:none;stroke:currentColor;stroke-width:1.6;stroke-linecap:round;stroke-linejoin:round"><path d="M4 5h13l3 3v11H4z"></path><path d="M8 10h8M8 14h5"></path></svg>
+      </span>
+      <span style="flex:1;min-width:240px">
+        <b style="display:block;font-family:'Rubik',sans-serif;font-size:15px;font-weight:700">רוצה לבטל עסקה קיימת?</b>
+        <span style="display:block;font-size:13px;color:#5F7590;line-height:1.7;margin-top:3px">אפשר לבטל עסקה בהתאם למדיניות הביטול שבתקנון, בפנייה ישירה ובכתב — בהודעת וואטסאפ או במייל, עם פרטי ההזמנה.</span>
+      </span>
+      <a href="https://wa.me/972502000373?text=%D7%94%D7%99%D7%99%20%D7%93%D7%91%D7%99%D7%A8%2C%20%D7%90%D7%A0%D7%99%20%D7%9E%D7%A2%D7%95%D7%A0%D7%99%D7%99%D7%9F%2F%D7%AA%20%D7%91%D7%91%D7%99%D7%98%D7%95%D7%9C%20%D7%A2%D7%A1%D7%A7%D7%94.%20%D7%A4%D7%A8%D7%98%D7%99%20%D7%94%D7%94%D7%96%D7%9E%D7%A0%D7%94%3A%20%5B%D7%AA%D7%90%D7%A8%D7%99%D7%9A%20%D7%94%D7%94%D7%96%D7%9E%D7%A0%D7%94%20%2F%20%D7%9E%D7%94%20%D7%94%D7%95%D7%96%D7%9E%D7%9F%5D" target="_blank" rel="noopener" style="flex:none;border:1.5px solid #E2EAF2;border-radius:12px;padding:12px 18px;font-size:13.5px;font-weight:600;color:#0E2A47;transition:.15s" style-hover="border-color:#C9DEF8;background:#F7FAFD;color:#1B6FE0">שליחת בקשת ביטול</a>
+    </div>
   </div>
 
-  <div class="panel">
-    <h3 id="hoursLabel" style="margin:0 0 8px"></h3>
-    <p id="hoursText" style="margin:0 0 16px;color:var(--ink-soft);font-size:14px;line-height:1.7"></p>
-    <h3 id="areaLabel" style="margin:0 0 8px"></h3>
-    <p id="areaText" style="margin:0;color:var(--ink-soft);font-size:14px"></p>
+  <div style="width:100%;max-width:1320px;margin:0 auto;padding:22px 20px 46px">
+    <div data-cta="1" style="background:linear-gradient(120deg,#F2F7FD,#EDF6FB);border:1px solid #E2EAF2;border-radius:20px;display:grid;grid-template-columns:1fr 1fr;align-items:center;gap:20px;overflow:hidden">
+      <div style="padding:36px 34px 36px 10px;order:1">
+        <h2 style="font-family:'Rubik',sans-serif;margin:0;font-size:27px;font-weight:800;letter-spacing:-.3px">רוצה לבנות את המחשב המושלם?</h2>
+        <p style="margin:14px 0 0;font-size:15px;color:#5F7590">בואו נבנה יחד את המחשב שמתאים בדיוק לצרכים שלך.</p>
+        <a href="builder.html" style="display:inline-flex;align-items:center;gap:10px;margin-top:24px;background:#fff;border:1.5px solid #C9DEF8;border-radius:14px;padding:14px 22px;font-size:14.5px;font-weight:700;color:#1B6FE0;box-shadow:0 6px 18px rgba(14,42,71,.06)" style-hover="background:#F4F9FF;border-color:#1B6FE0">
+          <svg viewBox="0 0 24 24" style="width:16px;height:16px;fill:none;stroke:currentColor;stroke-width:1.7;stroke-linecap:round;stroke-linejoin:round"><path d="M14.5 3.5a5 5 0 0 0-6 6L4 14v5.5h5.5L14 15a5 5 0 0 0 6-6l-3 3-3-3z"></path></svg>
+          קבלו הצעת מחיר מותאמת אישית
+        </a>
+      </div>
+      <div style="position:relative;padding:26px 10px 26px 0;min-height:250px;order:2">
+        <img src="images/contact/pc-render.png" alt="מחשב בהרכבה אישית" loading="lazy" class="contact-pc-img">
+        <span style="position:absolute;left:18px;top:52px;display:inline-flex;align-items:center;gap:8px;background:#fff;border:1px solid #E2EAF2;border-radius:11px;padding:8px 13px;font-size:12.5px;font-weight:600;box-shadow:0 6px 18px rgba(14,42,71,.08)">
+          <svg viewBox="0 0 24 24" style="width:15px;height:15px;fill:none;stroke:#1B6FE0;stroke-width:1.7;stroke-linecap:round;stroke-linejoin:round"><path d="M12 3l7 3v5.5c0 4.4-2.9 8-7 9.5-4.1-1.5-7-5.1-7-9.5V6z"></path><path d="M9.2 12.2l2 2 3.8-4"></path></svg>
+          התאמה מלאה לצרכים
+        </span>
+        <span style="position:absolute;left:18px;top:112px;display:inline-flex;align-items:center;gap:8px;background:#fff;border:1px solid #E2EAF2;border-radius:11px;padding:8px 13px;font-size:12.5px;font-weight:600;box-shadow:0 6px 18px rgba(14,42,71,.08)">
+          <svg viewBox="0 0 24 24" style="width:15px;height:15px;fill:none;stroke:#1B6FE0;stroke-width:1.7;stroke-linecap:round"><circle cx="12" cy="12" r="8.5"></circle><path d="M12 8v8M9.5 10.2h5M9.5 13.8h5"></path></svg>
+          מחירים הוגנים
+        </span>
+        <span style="position:absolute;left:18px;top:172px;display:inline-flex;align-items:center;gap:8px;background:#fff;border:1px solid #E2EAF2;border-radius:11px;padding:8px 13px;font-size:12.5px;font-weight:600;box-shadow:0 6px 18px rgba(14,42,71,.08)">
+          <svg viewBox="0 0 24 24" style="width:15px;height:15px;fill:none;stroke:#1B6FE0;stroke-width:1.7;stroke-linecap:round;stroke-linejoin:round"><path d="M14.5 3.5a5 5 0 0 0-6 6L4 14v5.5h5.5L14 15a5 5 0 0 0 6-6l-3 3-3-3z"></path></svg>
+          אחריות מלאה
+        </span>
+      </div>
+    </div>
   </div>
 
-  <div class="panel" style="border:1.5px dashed var(--line)">
-    <h3 id="cancelTitle" style="margin:0 0 8px"></h3>
-    <p id="cancelText" style="margin:0 0 14px;color:var(--ink-soft);font-size:13.5px;line-height:1.7"></p>
-    <a class="btn btn-secondary" style="margin-top:0" id="cancelBtn" href="#" target="_blank" rel="noopener"></a>
-  </div>
+  <footer style="background:#0B2C4D;color:#9DB4CB;padding:0 0 26px">
+    <div data-usp="1" style="width:100%;max-width:1320px;margin:0 auto;padding:30px 20px;display:grid;grid-template-columns:repeat(4,1fr);gap:2px">
+      <div style="display:flex;align-items:center;gap:14px;padding:6px 22px">
+        <svg viewBox="0 0 24 24" style="width:27px;height:27px;flex:none;fill:none;stroke:#8FB6DA;stroke-width:1.5;stroke-linecap:round;stroke-linejoin:round"><path d="M4.5 14v-2a7.5 7.5 0 0 1 15 0v2"></path><rect x="2.5" y="13" width="4" height="6.5" rx="2"></rect><rect x="17.5" y="13" width="4" height="6.5" rx="2"></rect><path d="M17.5 19c-1.4 2-3.2 2.6-5 2.6"></path></svg>
+        <span><b style="display:block;font-size:14px;color:#fff;font-weight:700">שירות ותמיכה</b><span style="display:block;font-size:12.5px">צוות מקצועי זמין</span></span>
+      </div>
+      <div style="display:flex;align-items:center;gap:14px;padding:6px 22px;border-inline-start:1px solid rgba(255,255,255,.09)">
+        <svg viewBox="0 0 24 24" style="width:27px;height:27px;flex:none;fill:none;stroke:#8FB6DA;stroke-width:1.5;stroke-linecap:round;stroke-linejoin:round"><rect x="4.5" y="10" width="15" height="10.5" rx="2.5"></rect><path d="M8 10V7.5a4 4 0 0 1 8 0V10"></path></svg>
+        <span><b style="display:block;font-size:14px;color:#fff;font-weight:700">תשלום מאובטח</b><span style="display:block;font-size:12.5px">מוגן ומוצפן</span></span>
+      </div>
+      <div style="display:flex;align-items:center;gap:14px;padding:6px 22px;border-inline-start:1px solid rgba(255,255,255,.09)">
+        <svg viewBox="0 0 24 24" style="width:27px;height:27px;flex:none;fill:none;stroke:#8FB6DA;stroke-width:1.5;stroke-linecap:round;stroke-linejoin:round"><path d="M12 3l7 3v5.5c0 4.4-2.9 8-7 9.5-4.1-1.5-7-5.1-7-9.5V6z"></path><path d="M9.2 12.2l2 2 3.8-4"></path></svg>
+        <span><b style="display:block;font-size:14px;color:#fff;font-weight:700">אחריות מלאה</b><span style="display:block;font-size:12.5px">עד 3 שנות אחריות</span></span>
+      </div>
+      <div style="display:flex;align-items:center;gap:14px;padding:6px 22px;border-inline-start:1px solid rgba(255,255,255,.09)">
+        <svg viewBox="0 0 24 24" style="width:27px;height:27px;flex:none;fill:none;stroke:#8FB6DA;stroke-width:1.5;stroke-linecap:round;stroke-linejoin:round"><path d="M2 7h11v9H2zM13 10h4l3 3v3h-7z"></path><circle cx="6.5" cy="18" r="1.8"></circle><circle cx="17" cy="18" r="1.8"></circle></svg>
+        <span><b style="display:block;font-size:14px;color:#fff;font-weight:700">משלוח מהיר</b><span style="display:block;font-size:12.5px">1–3 ימי עסקים</span></span>
+      </div>
+    </div>
+    <div style="border-top:1px solid rgba(255,255,255,.09);padding-top:24px;text-align:center">
+      <img src="images/logo-dvirtech-transparent.png" alt="DvirTech" style="height:40px;width:auto;margin:0 auto 10px;display:block">
+      <span style="font-size:12.5px">DvirTech © 2025 - כל הזכויות שמורות</span>
+      <!-- ⚠️ בייצוא כל הקישורים היו "#". כאן הם מחוברים לדפים האמיתיים,
+             אחרת הפוטר של הדף הזה הוא היחיד באתר שלא מוביל לשום מקום.
+             מדיניות הפרטיות היא סעיף בתוך התקנון ולכן מצביעה לאותו דף. -->
+      <div style="margin-top:16px;display:flex;gap:22px;justify-content:center;flex-wrap:wrap">
+        <a href="terms.html" style="color:#9DB4CB;font-size:12.5px">מדיניות פרטיות</a>
+        <a href="terms.html" style="color:#9DB4CB;font-size:12.5px">תנאי שימוש</a>
+        <a href="about.html" style="color:#9DB4CB;font-size:12.5px">אודות</a>
+        <a href="contact.html" style="color:#9DB4CB;font-size:12.5px">צור קשר</a>
+      </div>
+    </div>
+  </footer>
+
+  <!-- ⚠️ כפתור הצ׳אט של הייצוא הוסר: הוא ישב על left:26px — בדיוק
+         מתחת לעגלה הצפה של האתר, כך ששני הכפתורים הסתירו זה את זה.
+         במקומו site-header.js מוסיף כפתור וואטסאפ אמיתי בכל דף,
+         מעל העגלה (.wa-fab ב-style.css). -->
 </div>
+</x-dc>
+<script type="text/x-dc" data-dc-script>
+class Component extends DCLogic {
+  state = { copied: null };
+  copy(kind, text){
+    try{ navigator.clipboard.writeText(text); }catch(e){}
+    this.setState({ copied: kind });
+    clearTimeout(this._t);
+    this._t = setTimeout(() => this.setState({ copied: null }), 1600);
+  }
+  componentWillUnmount(){ clearTimeout(this._t); }
+  renderVals(){
+    return {
+      mailCopyLabel: this.state.copied === "mail" ? "הועתק ✓" : "העתק",
+      phoneCopyLabel: this.state.copied === "phone" ? "הועתק ✓" : "העתק",
+      copyMail: () => this.copy("mail", "schr5500@gmail.com"),
+      copyPhone: () => this.copy("phone", "050-200-0373")
+    };
+  }
+}
+</script>
 
-<footer>
-  <span class="footer-logo-crop"><img class="footer-logo" src="images/logo-dvirtech-transparent.png" alt="DvirTech"></span>
-  <span id="footerText"></span>
-  <div class="footer-legal">
-    <a href="about.html" id="footerAboutLink"></a>
-    <a href="contact.html" id="footerContactLink"></a>
-    <a href="terms.html" id="footerTermsLink"></a>
-  </div>
-</footer>
+<!-- ⚠️ בלי <footer> של האתר כאן. לעיצוב הזה יש פוטר משלו (שורת ה-USP,
+     הלוגו, הקרדיט וקישורי החובה) בתוך x-dc, ושני פוטרים זה מתחת לזה
+     נראו כמו תקלה. הקישורים שם מחוברים לאותם דפים בדיוק. -->
 
 <script src="sprite.js"></script>
 <script src="i18n.js"></script>
-<script src="contact.js"></script>
+<script src="search-core.js"></script>
+<script src="site-search.js"></script>
+<script src="site-header.js"></script>
 <script src="cart.js"></script>
+<script src="contact-bridge.js"></script>
 </body>
 </html>

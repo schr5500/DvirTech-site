@@ -77,6 +77,84 @@ function escHtml(s){
     .replace(/'/g, "&#39;");
 }
 
+/* ---------- מלאי ----------
+   ⚠️ עד עכשיו לא הייתה בקוד שום התייחסות למלאי: סימון "אזל המלאי"
+   בגיליון פשוט לא הגיע לאתר, והמוצר נמכר כרגיל. זה הבאג היחיד כאן
+   שעולה כסף אמיתי — לקוח משלם על משהו שאין.
+
+   ההפעלה: עמודה בשם inStock (או "מלאי") בכל לשונית.
+   ריק / חסר = יש מלאי. רק ערך שלילי מפורש מוציא ממכירה, כדי שאלפי
+   שורות קיימות לא ייעלמו מהאתר ברגע שהעמודה תיווצר.
+
+   ⚠️ "אזל" ≠ "נעלם". המוצר ממשיך להופיע בקטלוג עם תג — מוצר שנעלם
+   נראה כמו אתר שבור, ולקוח שרואה "אזל" יודע לחזור. */
+const DVT_OUT_OF_STOCK_WORDS =
+  ["אזל","אזל המלאי","לא במלאי","אין במלאי","חסר","out","outofstock","no","false","0","לא"];
+
+function dvtInStock(it){
+  if(!it) return false;
+  const raw = it.inStock !== undefined ? it.inStock
+            : (it["מלאי"] !== undefined ? it["מלאי"] : it.stock);
+  if(raw === undefined || raw === null || raw === "") return true;   // ברירת מחדל: יש
+  if(raw === true) return true;
+  if(raw === false) return false;
+  if(typeof raw === "number") return raw > 0;
+  const s = String(raw).trim().toLowerCase();
+  if(!s) return true;
+  if(/^\d+$/.test(s)) return Number(s) > 0;                          // כמות במלאי
+  return !DVT_OUT_OF_STOCK_WORDS.includes(s);
+}
+
+/* מוצר אמיתי *וגם* זמין. זה הגייט שכל כפתור קנייה חייב לעבור. */
+function dvtCanBuy(it){ return dvtIsSellable(it) && dvtInStock(it); }
+
+/* גישה סינכרונית לקטלוג שכבר נטען — לשימוש בנקודות שבהן אי אפשר
+   להמתין ל-Promise, כמו הגנת ההוספה לעגלה. מחזיר null אם עוד לא נטען. */
+function dvtCatalogNow(){ return _dvtCatalog || null; }
+
+/* חיפוש פריט לפי ה-SKU שנשמר בעגלה ("gpu:rtx4070"). */
+function dvtFindBySku(sku){
+  const cat = dvtCatalogNow();
+  if(!cat || !sku) return null;
+  const i = String(sku).indexOf(":");
+  if(i < 0) return null;
+  const group = cat[String(sku).slice(0, i)];
+  const id = String(sku).slice(i + 1);
+  if(!group || !Array.isArray(group.items)) return null;
+  return group.items.find(x => String(x.id) === id) || null;
+}
+
+/* ---------- מבצעים ----------
+   מוצר "במבצע" = יש לו מחיר קודם גבוה מהמחיר הנוכחי.
+   הדרך להפעיל את זה: להוסיף לגיליון עמודה בשם oldPrice (או "מחיר קודם")
+   ולמלא אותה רק בשורות שבמבצע. הבקאנד מעביר כל עמודה שאינה פנימית
+   כמו שהיא, כך שאין צורך לגעת ב-4-payment-api.gs בכלל.
+   ⚠️ oldPrice הוא לתצוגה בלבד — הגבייה תמיד לפי price מהגיליון. */
+function dvtOldPrice(it){
+  const raw = it && (it.oldPrice !== undefined ? it.oldPrice : it["מחיר קודם"]);
+  const n = Number(raw);
+  return Number.isFinite(n) && n > 0 ? n : 0;
+}
+function dvtIsOnSale(it){
+  const old = dvtOldPrice(it), now = Number(it && it.price);
+  return old > 0 && Number.isFinite(now) && now > 0 && old > now;
+}
+function dvtDiscountPct(it){
+  if(!dvtIsOnSale(it)) return 0;
+  return Math.round((1 - Number(it.price) / dvtOldPrice(it)) * 100);
+}
+/* כל המוצרים שבמבצע, מכל הקטגוריות, מהנחה גדולה לקטנה. */
+function dvtSaleItems(catalog){
+  const out = [];
+  Object.keys(catalog || {}).forEach(cat => {
+    (catalog[cat].items || []).forEach(it => {
+      // מבצע על מוצר שאזל הוא פרסום למשהו שאי אפשר לקנות
+      if(dvtCanBuy(it) && dvtIsOnSale(it)) out.push({ cat, it });
+    });
+  });
+  return out.sort((a,b) => dvtDiscountPct(b.it) - dvtDiscountPct(a.it));
+}
+
 /* מי שרוצה לדעת שהנתונים התרעננו ברקע (למשל כדי לרנדר מחדש) נרשם כאן. */
 const _dvtRefreshSubs = [];
 function dvtOnCatalogRefresh(fn){ if(typeof fn === "function") _dvtRefreshSubs.push(fn); }
@@ -130,8 +208,13 @@ dvtGetCatalog().catch(() => { /* הדף עצמו כבר מציג הודעת שג
 const DVT_CAT_LABEL = {
   all:         ["הכל",            "All"],
   readyPc:     ["מחשבים מוכנים",  "Ready-Made PCs"],
+  sale:        ["מבצעים",         "Deals"],
   monitor:     ["מסכים",          "Monitors"],
   peripherals: ["ציוד היקפי",     "Peripherals"],
+  mouse:       ["עכברים",         "Mice"],
+  keyboard:    ["מקלדות",         "Keyboards"],
+  headset:     ["אוזניות",        "Headsets"],
+  webcam:      ["מצלמות רשת",     "Webcams"],
   cpu:         ["מעבדים",         "Processors"],
   gpu:         ["כרטיסי מסך",     "Graphics Cards"],
   mobo:        ["לוחות אם",       "Motherboards"],
@@ -195,7 +278,11 @@ function dvtIsSellable(it){
    monitor:peri-mon), אחרת התמחור בצד שרת לא יזהה את הפריט. לכן
    dvtVirtualItems מתייג _realCat לפי from ולא לפי הקטגוריה הווירטואלית. */
 const DVT_VIRTUAL_CATS = {
-  monitor: { from: "peripherals", match: it => it.subType === "monitor" }
+  monitor:  { from: "peripherals", match: it => it.subType === "monitor"  },
+  mouse:    { from: "peripherals", match: it => it.subType === "mouse"    },
+  keyboard: { from: "peripherals", match: it => it.subType === "keyboard" },
+  headset:  { from: "peripherals", match: it => it.subType === "headset"  },
+  webcam:   { from: "peripherals", match: it => it.subType === "webcam"   }
 };
 
 function dvtIsVirtualCat(cat){ return !!DVT_VIRTUAL_CATS[cat]; }

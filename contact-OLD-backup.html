@@ -1,0 +1,125 @@
+<!DOCTYPE html>
+<html lang="he" dir="rtl">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>DvirTech — צור קשר</title>
+<script>
+  (function(){
+    var saved = "he";
+    try { saved = localStorage.getItem("dvirtech_lang") || "he"; } catch(e) {}
+    document.documentElement.lang = saved;
+    document.documentElement.dir = saved === "he" ? "rtl" : "ltr";
+  })();
+</script>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link href="https://fonts.googleapis.com/css2?family=Rubik:wght@400;500;600;700;800;900&family=Heebo:wght@300;400;500;700&display=swap" rel="stylesheet">
+<link rel="stylesheet" href="style.css">
+</head>
+<body>
+
+<header>
+  <div class="wrap headbar">
+    <a class="brand" href="index.html" aria-label="DvirTech — לדף הבית"><img class="brand-logo" src="images/logo-dvirtech-transparent.png" alt="DvirTech"></a>
+    <nav>
+      <a href="index.html" id="navHome"></a>
+      <a href="products.html?cat=readyPc" id="navReady"></a>
+      <a href="products.html?cat=peripherals" id="navPeripherals"></a>
+      <a href="products.html?cat=gpu" id="navComponents"></a>
+      <a href="builder.html" id="navBuilder"></a>
+      <a href="coming-soon.html?service=support" id="navLab"></a>
+      <a href="why-dvirtech.html" id="navWhy"></a>
+      <a href="contact.html" id="navContact"></a>
+    </nav>
+    <div class="lang-switch">
+      <button class="lang-btn" data-lang="he" onclick="setLang('he')">עברית</button>
+      <button class="lang-btn" data-lang="en" onclick="setLang('en')">English</button>
+    </div>
+  </div>
+</header>
+
+<!-- ======================= צור קשר ======================= -->
+<section class="contact-hero">
+  <div class="wrap">
+    <h1 id="pageTitle"></h1>
+    <p id="pageSubtitle"></p>
+  </div>
+</section>
+
+<div class="wrap contact-wrap">
+
+  <!-- שלוש דרכי הפנייה, כרטיס לכל אחת -->
+  <div class="contact-grid">
+    <div class="ccard ccard--wa">
+      <div class="ccard-ic"><svg class="ui-ic" aria-hidden="true"><use href="#ui-chat"/></svg></div>
+      <b id="waTitle"></b>
+      <span id="waDesc"></span>
+      <a class="btn btn-accent" id="whatsappBtn" href="#" target="_blank" rel="noopener"></a>
+    </div>
+
+    <div class="ccard">
+      <div class="ccard-ic"><svg class="ui-ic" aria-hidden="true"><use href="#ui-headset"/></svg></div>
+      <b id="phoneLabel"></b>
+      <a class="ccard-val" href="tel:0502000373" dir="ltr">050-200-0373</a>
+      <div class="ccard-acts">
+        <a class="btn btn-secondary" id="callBtn" href="tel:0502000373"></a>
+        <button class="ccard-copy" type="button" data-copy="050-200-0373"></button>
+      </div>
+    </div>
+
+    <div class="ccard">
+      <div class="ccard-ic"><svg class="ui-ic" aria-hidden="true"><use href="#ui-shield"/></svg></div>
+      <b id="emailLabel"></b>
+      <a class="ccard-val" href="mailto:schr5500@gmail.com" dir="ltr">schr5500@gmail.com</a>
+      <div class="ccard-acts">
+        <!-- ⚠️ mailto: לא עושה כלום כשאין תוכנת דואר מוגדרת בווינדוס —
+             וזה המצב אצל רוב משתמשי Gmail. לכן הכפתור הראשי פותח את
+             Gmail בדפדפן, ולידו כפתור העתקה שתמיד עובד. -->
+        <a class="btn btn-secondary" id="emailBtn" target="_blank" rel="noopener"
+           href="https://mail.google.com/mail/?view=cm&fs=1&to=schr5500@gmail.com"></a>
+        <button class="ccard-copy" type="button" data-copy="schr5500@gmail.com"></button>
+      </div>
+    </div>
+  </div>
+
+  <!-- פרטים מרוכזים -->
+  <div class="contact-info">
+    <div class="cinfo">
+      <b id="hoursLabel"></b>
+      <p id="hoursText"></p>
+    </div>
+    <div class="cinfo">
+      <b id="areaLabel"></b>
+      <p id="areaText"></p>
+    </div>
+    <div class="cinfo">
+      <b id="respLabel"></b>
+      <p id="respText"></p>
+    </div>
+  </div>
+
+  <div class="contact-cancel">
+    <b id="cancelTitle"></b>
+    <p id="cancelText"></p>
+    <a class="btn btn-secondary" id="cancelBtn" href="#" target="_blank" rel="noopener"></a>
+  </div>
+</div>
+
+<footer>
+  <span class="footer-logo-crop"><img class="footer-logo" src="images/logo-dvirtech-transparent.png" alt="DvirTech"></span>
+  <span id="footerText"></span>
+  <div class="footer-legal">
+    <a href="about.html" id="footerAboutLink"></a>
+    <a href="contact.html" id="footerContactLink"></a>
+    <a href="terms.html" id="footerTermsLink"></a>
+  </div>
+</footer>
+
+<script src="sprite.js"></script>
+<script src="i18n.js"></script>
+<script src="search-core.js"></script>
+<script src="site-header.js"></script>
+<script src="contact.js"></script>
+<script src="cart.js"></script>
+</body>
+</html>

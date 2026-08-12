@@ -6,14 +6,14 @@
 ===================================================================== */
 
 function renderAboutPage(){
-  document.getElementById("navHome").textContent = t("navHome");
-  document.getElementById("navReady").textContent = t("navReady");
-  document.getElementById("navPeripherals").textContent = t("navPeripherals");
-  document.getElementById("navComponents").textContent = t("navComponents");
-  document.getElementById("navBuilder").textContent = t("navBuilder");
-  document.getElementById("navLab").textContent = t("navLab");
-  document.getElementById("navWhy").textContent = t("navWhy");
-  document.getElementById("navContact").textContent = t("navContact");
+  { const _e=document.getElementById("navHome"); if(_e) _e.textContent = t("navHome"); }
+  { const _e=document.getElementById("navReady"); if(_e) _e.textContent = t("navReady"); }
+  { const _e=document.getElementById("navPeripherals"); if(_e) _e.textContent = t("navPeripherals"); }
+  { const _e=document.getElementById("navComponents"); if(_e) _e.textContent = t("navComponents"); }
+  { const _e=document.getElementById("navBuilder"); if(_e) _e.textContent = t("navBuilder"); }
+  { const _e=document.getElementById("navLab"); if(_e) _e.textContent = t("navLab"); }
+  { const _e=document.getElementById("navWhy"); if(_e) _e.textContent = t("navWhy"); }
+  { const _e=document.getElementById("navContact"); if(_e) _e.textContent = t("navContact"); }
 
   document.getElementById("pageTitle").textContent = t("aboutTitle");
   document.getElementById("introText").textContent = t("aboutIntro");
