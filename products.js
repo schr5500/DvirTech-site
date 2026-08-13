@@ -660,6 +660,20 @@ function renderGrid(){
   }
   empty.style.display = "none";
 
+  /* ⚠️ "תמונות להמחשה בלבד" — תנאי מפורש של הספק לשימוש בתמונות שלו,
+     ולכן זו לא הערה קוסמטית. מוצג רק כשיש בדף לפחות תמונה אמיתית אחת:
+     כשכל הכרטיסים מציגים איור קטגוריה אין תמונת מוצר להסתייג לגביה,
+     והמשפט רק היה מבלבל. */
+  const note = document.getElementById("imgNote");
+  if(note){
+    const anyImg = pageItems.some(it => it.image);
+    note.textContent = anyImg
+      ? tr("התמונות להמחשה בלבד. המפרט הכתוב הוא המחייב.",
+           "Images are for illustration only. The written specification prevails.")
+      : "";
+    note.style.display = anyImg ? "" : "none";
+  }
+
   // תמונת מוצר אמיתית (עמודת image בגיליון) גוברת תמיד. בלעדיה מוצג
   // איור הקטגוריה מ-sprite.js, כדי שלכרטיס תמיד יהיה חלק חזותי.
   // ⚠️ האיור לפי it._realCat ולא currentCat: בתצוגת "הכל" currentCat

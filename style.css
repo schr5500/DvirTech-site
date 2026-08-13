@@ -71,6 +71,14 @@ h1,h2,h3,h4,.brand-font{font-family:'Rubik',sans-serif;color:var(--ink)}
    רוחב מפורש הוא נצמד ל-max-width שלו וגולש מהחלון. עם width:100%
    הוא נשאר min(1200px, רוחב האב) בכל הקשר. */
 .wrap{width:100%;max-width:1200px;margin:0 auto;padding:0 20px}
+
+/* ⚠️ "תמונות להמחשה בלבד" — תנאי מפורש של הספק לשימוש בתמונות המוצר
+   שלו, ולא קישוט. מוגדר כאן ולא ב-products.css כי דף הבית טוען רק את
+   style.css. מכוון להיות קריא אך לא להתחרות במוצר: קטן, אפור, בשוליים.
+   :empty מסתיר אותו כשאין בדף אף תמונת מוצר אמיתית. */
+.img-note{margin:0 2px 12px;font-size:11.5px;line-height:1.5;
+  color:var(--ink-soft,#6B7A8D)}
+.img-note:empty{display:none;margin:0}
 img{max-width:100%;display:block}
 a{color:inherit}
 

@@ -155,6 +155,18 @@ function renderDeals(){
     return;
   }
 
+  /* ⚠️ "תמונות להמחשה בלבד" — תנאי של הספק לשימוש בתמונות שלו, ולכן
+     לא הערה קוסמטית. מוצג רק אם יש ברצועה תמונת מוצר אמיתית: כשמוצגת
+     תמונת קטגוריה בלבד אין תמונת מוצר להסתייג לגביה. */
+  const dnote = document.getElementById("dealsImgNote");
+  if(dnote){
+    const anyImg = deals.some(({it}) => it && it.image);
+    dnote.textContent = anyImg
+      ? tr("התמונות להמחשה בלבד. המפרט הכתוב הוא המחייב.",
+           "Images are for illustration only. The written specification prevails.")
+      : "";
+  }
+
   row.innerHTML = deals.map(({cat, it}) => `
     <a class="deal" href="product.html?cat=${encodeURIComponent(it._realCat || cat)}&id=${encodeURIComponent(it.id)}">
       <span class="deal-badge">-${dvtDiscountPct(it)}%</span>
