@@ -38,7 +38,9 @@ const NAV_CATALOG_GROUPS = [
 
 /* קישורי הניווט הראשי — זהים בכל דף, באותו סדר תמיד. */
 const SITE_NAV_LINKS = [
-  { href: "index.html",                        he: "ראשי",         en: "Home" },
+  /* ⚠️ home.html ולא index.html. בגיטהאב index.html הוא דף ה"בקרוב",
+     ולכן קישור "ראשי" שמצביע אליו מעיף את הלקוח מהחנות. */
+  { href: "home.html",                         he: "ראשי",         en: "Home" },
   { catalog: true },                            // כאן נכנס תפריט "מוצרים"
   { href: "builder.html",                      he: "בניית מחשב",   en: "PC Builder" },
   { href: "coming-soon.html?service=support",  he: "שירות ותמיכה", en: "Service & Support" },
@@ -64,7 +66,7 @@ function shEsc(s){
 /* שם הקובץ הנוכחי, לצורך סימון הדף הפעיל. */
 function shCurrentPage(){
   const p = location.pathname.split("/").pop();
-  return p || "index.html";
+  return p || "home.html";
 }
 
 function buildSiteHeader(){
@@ -91,7 +93,7 @@ function buildSiteHeader(){
   }).join("");
 
   bar.innerHTML = `
-    <a class="brand" href="index.html" aria-label="DvirTech — ${shEsc(shTr("לדף הבית","Home"))}">
+    <a class="brand" href="home.html" aria-label="DvirTech — ${shEsc(shTr("לדף הבית","Home"))}">
       <img class="brand-logo" src="images/logo-dvirtech-transparent.png" alt="DvirTech">
     </a>
 

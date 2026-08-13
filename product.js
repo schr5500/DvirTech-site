@@ -524,7 +524,7 @@ function pdRenderNotFound(){
 function pdRenderCrumbs(){
   const catName = dvtCatLabel(PD_VIEW_CAT, PD_CATALOG[PD_VIEW_CAT]);
   document.getElementById("pdCrumbs").innerHTML = `
-    <a href="index.html">${tr("ראשי","Home")}</a>
+    <a href="home.html">${tr("ראשי","Home")}</a>
     <span class="pd-crumb-sep">›</span>
     <a href="products.html?cat=all">${tr("מוצרים","Products")}</a>
     <span class="pd-crumb-sep">›</span>

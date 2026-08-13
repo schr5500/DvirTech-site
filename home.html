@@ -23,18 +23,29 @@
 <body>
 
 <!-- =====================================================================
-     ⚠️ אזהרה לפני העלאה לגיטהאב
-     בגיטהאב index.html הוא דף ה"בקרוב", ודף הבית האמיתי יושב שם כ-home.html.
-     העלאה של הקובץ הזה בשם index.html מסירה את חסימת ה"בקרוב" ומפרסמת את
-     האתר. להעלות רק כשמשיקים במכוון.
+     דף הבית של האתר. שמו **home.html** גם מקומית וגם בגיטהאב.
+
+     ⚠️ **אין יותר שינוי שמות בהעלאה.** קודם היה נוהל ידני: להעלות את
+     site-coming-soon.html בשם index.html, ואת index.html בשם home.html.
+     הנוהל הזה שבר את הניווט באתר החי — 19 קישורים (הלוגו, "ראשי",
+     "חזרה לעמוד הבית") הצביעו ל-index.html, שהוא בגיטהאב **דף
+     ה"בקרוב"**. כלומר כל לחיצה על הלוגו העיפה את הלקוח מהחנות.
+
+     עכשיו המבנה זהה בשני המקומות:
+        index.html = דף ה"בקרוב"      (חוסם את הכניסה לאתר)
+        home.html  = דף הבית האמיתי   (כל הקישורים מצביעים לכאן)
+     ההעלאה היא העתקה פשוטה, בלי לשנות שום שם.
+
+     ⚠️ **להשקה:** להחליף את תוכן index.html בהפניה ל-home.html (או
+     להעתיק את home.html עליו). זו הפעולה היחידה שמסירה את החסימה.
 ===================================================================== -->
 
 <header>
   <div class="wrap headbar">
-    <a class="brand" href="index.html" aria-label="DvirTech — לדף הבית"><img class="brand-logo" src="images/logo-dvirtech-transparent.png" alt="DvirTech"></a>
+    <a class="brand" href="home.html" aria-label="DvirTech — לדף הבית"><img class="brand-logo" src="images/logo-dvirtech-transparent.png" alt="DvirTech"></a>
 
     <nav id="mainNav">
-      <a href="index.html" class="active" data-he="ראשי" data-en="Home"></a>
+      <a href="home.html" class="active" data-he="ראשי" data-en="Home"></a>
       <a href="products.html?cat=readyPc" data-he="מחשבים מוכנים" data-en="Ready-Made PCs"></a>
       <a href="products.html?cat=peripherals" data-he="ציוד היקפי" data-en="Peripherals"></a>
       <a href="products.html?cat=gpu" data-he="רכיבים" data-en="Components"></a>
