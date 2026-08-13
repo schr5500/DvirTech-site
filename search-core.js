@@ -124,6 +124,45 @@ function dvtFindBySku(sku){
   return group.items.find(x => String(x.id) === id) || null;
 }
 
+/* ---------- חסימת מוצרים שאזלו ----------
+   ⚠️ `dvtCanBuy` בודק **פריט אחד** שכבר בידך. הפונקציות כאן בודקות
+   **עגלה שלמה**, וזה מקרה אחר: הרכבה מהבונה היא שורה אחת בעגלה אבל
+   בפועל 8-12 רכיבים (`parts`), ומספיק שרכיב אחד אזל כדי שההרכבה כולה
+   לא ניתנת לאספקה. בלי זה, "הרכבה בהתאמה אישית" הייתה עוקפת את הבדיקה
+   לגמרי — היא לא `type:"product"` ואין לה `sku` משלה.
+
+   ⚠️ גם המקרה ההפוך נסגר כאן: מוצר שנוסף לעגלה כשהיה במלאי, והעגלה
+   נשמרת ב-localStorage לימים. הוא צריך להיחסם בכניסה הבאה, לא רק
+   ברגע ההוספה. */
+function dvtOutOfStockSkus(skus){
+  const out = [];
+  (skus || []).forEach(function(sku){
+    const it = dvtFindBySku(sku);
+    // לא מוכר בקטלוג = לא חוסמים. עדיף מכירה מאשר חסימה על סמך ניחוש;
+    // התמחור בצד שרת ידחה SKU שבאמת לא קיים.
+    if(it && !dvtInStock(it)) out.push({ sku: sku, name: it.name || sku });
+  });
+  return out;
+}
+
+/* מקבל את פריטי העגלה ומחזיר את מה שאזל — כולל רכיבים בתוך הרכבה. */
+function dvtCartOutOfStock(items){
+  const skus = [];
+  (items || []).forEach(function(i){
+    if(i && i.type === "build" && Array.isArray(i.parts)){
+      i.parts.forEach(function(p){ if(p && p.sku) skus.push(p.sku); });
+    }else if(i && i.sku && i.type === "product"){
+      skus.push(i.sku);
+    }
+  });
+  // ייתכן שאותו רכיב מופיע גם בהרכבה וגם בנפרד — לדווח עליו פעם אחת
+  const seen = {};
+  return dvtOutOfStockSkus(skus).filter(function(x){
+    if(seen[x.sku]) return false;
+    seen[x.sku] = 1; return true;
+  });
+}
+
 /* ---------- מבצעים ----------
    מוצר "במבצע" = יש לו מחיר קודם גבוה מהמחיר הנוכחי.
    הדרך להפעיל את זה: להוסיף לגיליון עמודה בשם oldPrice (או "מחיר קודם")

@@ -194,6 +194,20 @@ function cartCount(){ return cartItems.reduce((s,i)=> s + i.qty, 0); }
 // ביניהן דרך buildId — כך ש-removeFromCart מסיר את שתיהן יחד, ולא משאיר
 // שורת "הרכבה חינם" יתומה כשמסירים רק את ההרכבה.
 function addBuildToCart(buildLines, buildTotal, parts){
+  /* ⚠️ הרכבה עוקפת את בדיקת המלאי של addToCart: היא לא type:"product"
+     ואין לה sku משלה. מספיק שרכיב אחד מתוך 8-12 אזל כדי שההרכבה כולה
+     לא ניתנת לאספקה, ולכן בודקים כאן את הרכיבים עצמם. */
+  if(typeof dvtOutOfStockSkus === "function" && Array.isArray(parts)){
+    const gone = dvtOutOfStockSkus(parts.map(p => p && p.sku).filter(Boolean));
+    if(gone.length){
+      const msg = tr("אי אפשר להוסיף את ההרכבה — אזל מהמלאי: ",
+                     "Cannot add this build — out of stock: ") +
+                  gone.map(g => g.name).join(", ");
+      if(typeof showToast === "function") showToast(msg); else alert(msg);
+      return;
+    }
+  }
+
   const noteLines = buildLines.map(l => `${l.label}: ${l.name}${l.qty>1?` ×${l.qty}`:""}`);
   const buildId = "c" + Date.now() + Math.random().toString(36).slice(2,7);
   cartItems.push({ id: buildId, type:"build", name: tr("הרכבה בהתאמה אישית","Custom PC Build"), price: buildTotal, qty:1, noteLines: noteLines, parts: parts || [] });

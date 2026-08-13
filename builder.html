@@ -330,6 +330,12 @@
               <sc-if value="{{ o.badge }}" hint-placeholder-val="{{ false }}">
                 <span style="display:inline-flex;align-items:center;gap:4px;margin-top:6px;font-size:10.5px;font-weight:700;border-radius:999px;padding:3px 10px;color:{{ o.badgeFg }};background:{{ o.badgeBg }};border:1px solid {{ o.badgeBd }}">{{ o.badgeIcon }} {{ o.badge }}</span>
               </sc-if>
+              <!-- תג ההמלצה לפי סוג השימוש שהלקוח בחר. נפרד מתג התאימות
+                   ויכול להופיע לצידו: האחד אומר "מתחבר למה שבחרת", השני
+                   "שווה לך בשביל מה שאתה עושה". -->
+              <sc-if value="{{ o.recBadge }}" hint-placeholder-val="{{ false }}">
+                <span style="display:inline-flex;align-items:center;gap:4px;margin-top:6px;margin-inline-start:5px;font-size:10.5px;font-weight:700;border-radius:999px;padding:3px 10px;color:{{ o.recFg }};background:{{ o.recBg }};border:1px solid {{ o.recBd }}">★ {{ o.recBadge }}</span>
+              </sc-if>
               <span style="display:block;font-size:12.5px;color:#5F7590;margin-top:5px;line-height:1.5">{{ o.spec }}</span>
               <sc-if value="{{ o.note }}" hint-placeholder-val="{{ false }}">
                 <span style="display:flex;gap:5px;font-size:11.5px;color:{{ o.noteFg }};background:{{ o.noteBg }};border-radius:8px;padding:6px 9px;margin-top:8px;line-height:1.45">{{ o.noteIcon }} {{ o.note }}</span>
@@ -541,11 +547,15 @@ class Component extends DCLogic {
      תלת-ממדית או שבב שימוש לא אמורה להריץ את מנוע ההתאמה מחדש. */
   ratedOptions(cat){
     const list = CATALOG[cat] || [];
-    const key = cat + "|" + JSON.stringify(this.state.sel) + "|" + JSON.stringify(this.state.qty);
+    /* ⚠️ useCase נכנס למפתח המטמון: ההמלצות ("מומלץ לגיימינג") נגזרות
+       ממנו, ובלעדיו החלפת שבב השימוש הייתה מחזירה רשימה מטמון ישנה
+       עם התגים של השימוש הקודם. */
+    const key = cat + "|" + JSON.stringify(this.state.sel) + "|" +
+                JSON.stringify(this.state.qty) + "|" + this.state.useCase;
     const c = this.__rated;
     if(c && c.key === key && c.src === list) return c.list;
     const rated = (typeof dvtRankOptions === "function")
-      ? dvtRankOptions(cat, list, this.selMap(), this.state.qty)
+      ? dvtRankOptions(cat, list, this.selMap(), this.state.qty, this.state.useCase)
       : list.map(it => Object.assign({}, it, { __compat:{ level:"ok", text:null, blocked:false } }));
     this.__rated = { key, src: list, list: rated };
     return rated;
@@ -743,7 +753,14 @@ class Component extends DCLogic {
             : (r.level === "warn" || r.level === "info") ? r.level
             : by.length ? "fit" : null;
           const L = lv ? OPT_LEVELS[lv] : null;
+          /* ⚠️ המלצה לפי סוג השימוש מוצגת גם כשאין מול מה לבדוק תאימות
+             (בונה ריק) — היא לא נשענת על שאר הבחירות אלא על מה שהלקוח
+             אמר שהוא עושה. על פריט חסום היא **לא** מוצגת: "מומלץ
+             לגיימינג" ליד "לא מתאים" הוא מסר סותר. */
+          const rec = (!bad && it.__rec) ? it.__rec : null;
+          const RB = rec ? OPT_LEVELS.fit : null;
           return { name: it.name, spec: it.spec, note: r.text || null, dir: this.dirOf(it.name),
+            recBadge: rec, recFg: RB ? RB.fg : "", recBg: RB ? RB.bg : "", recBd: RB ? RB.bd : "",
             badge: L ? L.badge : null, badgeIcon: L ? L.icon : "",
             badgeFg: L ? L.fg : "", badgeBg: L ? L.bg : "", badgeBd: L ? L.bd : "",
             noteFg: L ? L.fg : "#92650F", noteBg: L ? L.bg : "#FFF6EA",

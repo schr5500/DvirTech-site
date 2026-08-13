@@ -53,6 +53,15 @@
         <span id="checkoutTotalPrice">0 ₪</span>
       </div>
 
+      <!-- ⚠️ מחיר המשלוח המהיר מוגדר בשרת (SHIPPING_OPTIONS_ ב-
+           4-payment-api.gs) ומוצג כאן מתוך DVT_SHIPPING ב-checkout.js.
+           שני המקומות חייבים להישאר תואמים — הלקוח רואה את מה שכתוב
+           כאן, אבל **נגבה** מה שהשרת מחשב. -->
+      <div style="margin:18px 0 12px">
+        <label class="field-label" style="margin-bottom:6px;display:block" id="shippingLabel"></label>
+        <div id="shippingOptions" class="ship-opts"></div>
+      </div>
+
       <div style="margin:18px 0 12px">
         <label class="field-label" style="margin-bottom:6px;display:block" id="installmentsLabel"></label>
         <select id="installmentsCount" onchange="renderCheckoutTotals()">
@@ -63,6 +72,9 @@
         <p style="font-size:11.5px;color:var(--ink-soft);margin:6px 0 0" id="installmentsHint"></p>
       </div>
 
+      <ul class="summary-list" id="shipRow" style="display:none;margin-bottom:8px">
+        <li><span class="k" id="shipLabel"></span><span class="v" id="shipValue">0 ₪</span></li>
+      </ul>
       <ul class="summary-list" id="feeRow" style="display:none;margin-bottom:8px">
         <li><span class="k" id="feeLabel"></span><span class="v" id="feeValue">0 ₪</span></li>
       </ul>

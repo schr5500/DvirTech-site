@@ -139,16 +139,66 @@ function renderCheckoutPage(){
       <span class="v">${i.price===0 ? t("included") : (i.price*i.qty).toLocaleString()+" ₪"}</span>
     </li>`).join("");
   renderAssemblyNotice(items);
+  renderShippingOptions();
   cartSubtotal = cartTotalOf(items);
   document.getElementById("checkoutTotalPrice").textContent = cartSubtotal.toLocaleString() + " ₪";
   renderCheckoutTotals();
 }
 
+/* ⚠️ **חייב להישאר תואם ל-SHIPPING_OPTIONS_ ב-4-payment-api.gs.**
+   המחיר שנגבה בפועל נלקח **מהשרת**; מה שכאן הוא תצוגה בלבד. אם שני
+   הצדדים ייפרדו, הלקוח יראה סכום אחד וייגבה ממנו אחר — ולכן כל שינוי
+   מחיר חייב להיעשות בשני הקבצים. */
+const DVT_SHIPPING = [
+  { key:"standard", he:"משלוח רגיל", en:"Standard delivery", price:0,  etaHe:"3-5 ימי עסקים", etaEn:"3-5 business days" },
+  { key:"express",  he:"משלוח מהיר", en:"Express delivery",  price:49, etaHe:"עד 2 ימי עסקים", etaEn:"Up to 2 business days" }
+];
+let shippingKey = "standard";
+
+function shippingPrice(){
+  const o = DVT_SHIPPING.find(s => s.key === shippingKey);
+  return o ? o.price : 0;
+}
+
+function renderShippingOptions(){
+  const host = document.getElementById("shippingOptions");
+  if(!host) return;
+  document.getElementById("shippingLabel").textContent = tr("אופן המשלוח","Delivery method");
+  host.innerHTML = DVT_SHIPPING.map(s => `
+    <label class="ship-opt${s.key === shippingKey ? " is-on" : ""}">
+      <input type="radio" name="shipOpt" value="${s.key}"
+             ${s.key === shippingKey ? "checked" : ""}
+             onchange="onShippingChange(this.value)">
+      <span class="ship-name">${tr(s.he, s.en)}</span>
+      <span class="ship-eta">${tr(s.etaHe, s.etaEn)}</span>
+      <span class="ship-price">${s.price === 0 ? tr("ללא עלות","Free") : "+" + s.price.toLocaleString() + " ₪"}</span>
+    </label>`).join("");
+}
+
+function onShippingChange(key){
+  shippingKey = key;
+  renderShippingOptions();
+  renderCheckoutTotals();
+}
+
 function renderCheckoutTotals(){
   const count = parseInt(document.getElementById("installmentsCount").value, 10) || 1;
+  const shipCost = shippingPrice();
+  /* ⚠️ העמלה מחושבת על הסכום **כולל משלוח** — זה מה שנגבה בפועל
+     בכרטיס, וכך בדיוק מחשב createPayment_ בצד השרת. */
+  const base = Math.round((cartSubtotal + shipCost) * 100) / 100;
   const pct = installmentFeePct(count);
-  const fee = Math.round(cartSubtotal * (pct / 100) * 100) / 100;
-  const grandTotal = Math.round((cartSubtotal + fee) * 100) / 100;
+  const fee = Math.round(base * (pct / 100) * 100) / 100;
+  const grandTotal = Math.round((base + fee) * 100) / 100;
+
+  const shipRow = document.getElementById("shipRow");
+  if(shipRow){
+    shipRow.style.display = shipCost > 0 ? "block" : "none";
+    if(shipCost > 0){
+      document.getElementById("shipLabel").textContent = tr("משלוח מהיר","Express delivery");
+      document.getElementById("shipValue").textContent = shipCost.toLocaleString() + " ₪";
+    }
+  }
 
   const feeRow = document.getElementById("feeRow");
   const breakdownRow = document.getElementById("monthlyBreakdownRow");
@@ -224,6 +274,22 @@ async function submitCheckout(){
     return;
   }
 
+  /* ⚠️ העגלה יושבת ב-localStorage לימים. מוצר שהיה במלאי כשנוסף יכול
+     לאזול עד שהלקוח חוזר לשלם, ואת זה בדיקת ההוספה לא תופסת.
+     הבדיקה בצד שרת (`checkStockLive_`) היא הקו האחרון, אבל היא רצה
+     אחרי שהלקוח כבר מילא טפסים — עדיף לומר לו כאן. */
+  if(typeof dvtCartOutOfStock === "function"){
+    const gone = dvtCartOutOfStock(items);
+    if(gone.length){
+      box.style.display = "block";
+      box.textContent = tr("אזל מהמלאי ואי אפשר להזמין: ",
+                           "Out of stock, cannot be ordered: ") +
+                        gone.map(g => g.name).join(", ") +
+                        tr(". הסר מהעגלה ונסה שוב.", ". Please remove and try again.");
+      return;
+    }
+  }
+
   const btn = document.getElementById("checkoutSubmitBtn");
   const originalLabel = btn.textContent;
   btn.disabled = true;
@@ -239,7 +305,9 @@ async function submitCheckout(){
         action: "createPayment",
         customer: { name, phone, email, isBusiness, companyName },
         lines: lines,
-        installments: installments
+        installments: installments,
+        // רק המפתח נשלח. המחיר נקבע בשרת — ראה SHIPPING_OPTIONS_.
+        shipping: shippingKey
       })
     });
     const data = await res.json();

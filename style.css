@@ -446,6 +446,20 @@ nav a.active::after{transform:scaleX(1)}
 
 /* ---------- sidebar ---------- */
 .sticky{position:sticky;top:88px}
+/* בורר אופן המשלוח בדף התשלום. כרטיס לכל אפשרות ולא <select>, כדי
+   שהמחיר והזמן האספקה יהיו גלויים בלי לפתוח רשימה — זו החלטה שמשפיעה
+   על הסכום, ולקוח צריך לראות אותה. */
+.ship-opts{display:grid;gap:8px}
+.ship-opt{display:grid;grid-template-columns:auto 1fr auto;align-items:center;gap:4px 10px;
+  border:1px solid var(--line);border-radius:12px;padding:11px 13px;cursor:pointer;
+  transition:border-color .15s,background .15s}
+.ship-opt:hover{border-color:var(--blue,#1B6FE0)}
+.ship-opt.is-on{border-color:var(--blue,#1B6FE0);background:rgba(27,111,224,.05)}
+.ship-opt input{margin:0;accent-color:var(--blue,#1B6FE0)}
+.ship-opt .ship-name{font-weight:600;font-size:13.5px}
+.ship-opt .ship-price{font-weight:700;font-size:13.5px;color:var(--blue,#1B6FE0);white-space:nowrap}
+.ship-opt .ship-eta{grid-column:2;font-size:11.5px;color:var(--ink-soft);margin-top:-2px}
+
 .summary-list{list-style:none;padding:0;margin:0 0 14px}
 .summary-list li{display:flex;justify-content:space-between;align-items:center;padding:9px 0;border-bottom:1px dashed var(--line);font-size:13.5px;gap:8px}
 .summary-list li .k{color:var(--ink-soft);flex-shrink:0}

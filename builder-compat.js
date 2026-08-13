@@ -1172,18 +1172,88 @@ function dvtRateOption(cat, item, sel, qty, baseline){
   };
 }
 
+/* ---------------------------------------------------------------
+   המלצה לפי סוג השימוש שהלקוח בחר
+   ---------------------------------------------------------------
+   ⚠️ זה **לא** חלק ממנוע התאימות. תאימות אומרת "נכנס / לא נכנס"
+   ועובדת על עובדות פיזיות; ההמלצה כאן אומרת "שווה לך בשביל מה
+   שאמרת שאתה עושה", וזו שאלה אחרת לגמרי. לכן היא בפונקציה נפרדת
+   ולא כחוק ב-DVT_RULES.
+
+   ⚠️ **הרף גבוה בכוונה.** תג "מומלץ לגיימינג" שמתנוסס על כל כרטיס
+   מסך בקטלוג לא אומר כלום ורק שוחק אמון. מסמנים רק פריט שבאמת מעל
+   הרף לשימוש הזה, ורק כשהשדה שעליו נשענים קיים בגיליון — שדה חסר
+   מחזיר null ולא ניחוש. */
+const DVT_USE_LABEL = {
+  gaming:   "מומלץ לגיימינג",
+  creative: "מומלץ לעריכה ויצירה",
+  office:   "מתאים לעבודה משרדית",
+  general:  "מתאים לשימוש כללי"
+};
+
+function dvtRecommendFor(cat, it, useCase){
+  if(!it || !useCase || !DVT_USE_LABEL[useCase]) return null;
+  const t    = Number(it.tier ?? it.t ?? 0);
+  const num  = f => dvtNumOf(it, f);
+  const gb   = num("capacityGb");
+  const ok   = () => DVT_USE_LABEL[useCase];
+
+  /* ⚠️ **ספק כוח לא מקבל תג המלצה בשום שימוש, בכוונה.** הרף הטבעי
+     (650W ומעלה) תפס 68 מתוך 77 הספקים בקטלוג — תג שמופיע על 88%
+     מהרשימה הוא רעש. וחשוב מזה: התאמת ספק לכרטיס המסך היא ממילא חוק
+     במנוע (`gpu-psu-wattage`), והוא מדויק יותר מכל רף גורף.
+     אותו שיקול הוציא את `storage` מ"משרדי" ומ"כללי": כל NVMe עונה,
+     ולכן אין שם מידע. */
+
+  if(useCase === "gaming"){
+    if(cat === "gpu")     return t >= 4 ? ok() : null;
+    if(cat === "cpu")     return (t >= 3 && (num("cores") || 0) >= 6) ? ok() : null;
+    if(cat === "ram")     return (gb >= 32 && (num("speedMhz") || 0) >= 6000) ? ok() : null;
+    if(cat === "storage") return (dvtIsNvmeDrive(it) && (num("pcieGen") || 0) >= 4 && gb >= 1000) ? ok() : null;
+    if(cat === "cooling") return (num("tdpRating") || 0) >= 180 ? ok() : null;
+    return null;
+  }
+  if(useCase === "creative"){
+    // עריכה נשענת על ליבות, זיכרון ואחסון מהיר — לא על ה-GPU לבדו
+    if(cat === "cpu")     return (num("cores") || 0) >= 12 ? ok() : null;
+    if(cat === "ram")     return gb >= 64 ? ok() : null;
+    if(cat === "storage") return (dvtIsNvmeDrive(it) && gb >= 2000) ? ok() : null;
+    if(cat === "gpu")     return (num("vramGb") || 0) >= 16 ? ok() : null;
+    return null;
+  }
+  if(useCase === "office"){
+    /* ⚠️ כאן ההמלצה הפוכה מהאינטואיציה: למשרד עדיף מעבד **עם** גרפיקה
+       מובנית, כי הוא חוסך כרטיס מסך לגמרי. תג על מעבד יקר בלי iGPU
+       היה דוחף את הלקוח בדיוק לכיוון הלא נכון. */
+    if(cat === "cpu")     return (dvtBoolOf(it, "hasIgpu") && t <= 3) ? ok() : null;
+    if(cat === "ram")     return (gb >= 8 && gb <= 16) ? ok() : null;
+    return null;
+  }
+  if(useCase === "general"){
+    if(cat === "cpu")     return (t >= 2 && t <= 3) ? ok() : null;
+    /* 16GB בדיוק ולא "16 ומעלה": הטווח הרחב תפס 125 מתוך 147 הזיכרונות,
+       וזה חוזר לאותו רעש. לשימוש כללי 16GB היא נקודת המתיקות — 64GB
+       זה כסף מבוזבז ולא "מומלץ". */
+    if(cat === "ram")     return gb === 16 ? ok() : null;
+    return null;
+  }
+  return null;
+}
+
 /* רשימה מדורגת: תואמים קודם, חסומים בסוף — בלי להסתיר כלום.
    ⚠️ בכוונה *לא* מסננים החוצה: לקוח שלא מוצא מוצר שהוא מכיר חושב
    שהאתר שבור. עדיף להראות אותו מסומן ועם הסבר למה הוא לא מתאים. */
-function dvtRankOptions(cat, items, sel, qty){
+function dvtRankOptions(cat, items, sel, qty, useCase){
   const baseline = dvtBaseline(cat, sel, qty);
   return (items || []).map(it => {
     const v = dvtRateOption(cat, it, sel, qty, baseline);
-    return Object.assign({}, it, { __compat: v });
+    return Object.assign({}, it, { __compat: v, __rec: dvtRecommendFor(cat, it, useCase) });
   }).sort((a,b) => {
     const rank = x => x.__compat.blocked ? 2 : (x.__compat.level === "warn" ? 1 : 0);
     const d = rank(a) - rank(b);
-    return d !== 0 ? d : 0;
+    if(d !== 0) return d;
+    // בתוך אותה רמת תאימות — המומלצים לשימוש שנבחר עולים למעלה
+    return (b.__rec ? 1 : 0) - (a.__rec ? 1 : 0);
   });
 }
 
