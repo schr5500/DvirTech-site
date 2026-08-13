@@ -140,6 +140,15 @@ function renderCheckoutPage(){
     </li>`).join("");
   renderAssemblyNotice(items);
   renderShippingOptions();
+  // ⚠️ אותו זיהוי בדיוק כמו ב-renderAssemblyNotice: פריט type:"build"
+  // הוא הרכבה שנבנתה בבונה, וההרכבה שלה כבר ניתנה ללא עלות.
+  cartHasBuild = items.some(i => i.type === "build");
+  // עגלה שהשתנתה מאז הביקור הקודם יכולה להשאיר בחירה שכבר לא מוצגת
+  // (למשל חבילה שנבחרה לפני שנוספה הרכבה מהבונה) — מסננים כדי שלא
+  // יישלח לשרת מפתח שהלקוח כבר לא רואה על המסך.
+  const allowed = servicesForCart().map(s => s.key);
+  selectedServices = selectedServices.filter(k => allowed.indexOf(k) !== -1);
+  renderServiceOptions();
   cartSubtotal = cartTotalOf(items);
   document.getElementById("checkoutTotalPrice").textContent = cartSubtotal.toLocaleString() + " ₪";
   renderCheckoutTotals();
@@ -148,15 +157,25 @@ function renderCheckoutPage(){
 /* ⚠️ **חייב להישאר תואם ל-SHIPPING_OPTIONS_ ב-4-payment-api.gs.**
    המחיר שנגבה בפועל נלקח **מהשרת**; מה שכאן הוא תצוגה בלבד. אם שני
    הצדדים ייפרדו, הלקוח יראה סכום אחד וייגבה ממנו אחר — ולכן כל שינוי
-   מחיר חייב להיעשות בשני הקבצים. */
+   מחיר חייב להיעשות בשני הקבצים.
+
+   באיסוף עצמי השדה etaHe/etaEn מחזיק **הערת מקום ותיאום** במקום זמן
+   אספקה: אין מה להבטיח תאריך משלוח למי שבא לקחת, ומה שהוא צריך לדעת
+   זה איפה ואיך. אין כתובת חנות קבועה (הרכבות מתבצעות אצל דביר) —
+   לכן אותה נוסחה שמופיעה בעמוד "צור קשר": איסוף בתיאום מראש. */
 const DVT_SHIPPING = [
+  { key:"pickup",   he:"איסוף עצמי",  en:"Self pickup",       price:0,  etaHe:"באר שבע — בתיאום מראש", etaEn:"Be'er Sheva — by prior arrangement" },
   { key:"standard", he:"משלוח רגיל", en:"Standard delivery", price:0,  etaHe:"3-5 ימי עסקים", etaEn:"3-5 business days" },
   { key:"express",  he:"משלוח מהיר", en:"Express delivery",  price:49, etaHe:"עד 2 ימי עסקים", etaEn:"Up to 2 business days" }
 ];
 let shippingKey = "standard";
 
+function shippingOption(){
+  return DVT_SHIPPING.find(s => s.key === shippingKey) || null;
+}
+
 function shippingPrice(){
-  const o = DVT_SHIPPING.find(s => s.key === shippingKey);
+  const o = shippingOption();
   return o ? o.price : 0;
 }
 
@@ -181,12 +200,123 @@ function onShippingChange(key){
   renderCheckoutTotals();
 }
 
+/* ==================== שירותים נוספים ====================
+   ⚠️ **מקור המחירים הוא PRICE_LIST ב-CRM+SUPPLIERS/2-pricelist-picker.gs**
+   — המחירון שדביר עובד איתו ביומן העבודות. זה פרויקט Apps Script אחר
+   ואי אפשר לקרוא ממנו בזמן ריצה, ולכן זה עותק. ⚠️ **שינוי מחיר חייב
+   לקרות בשלושה מקומות:** שם (מקור האמת), ב-SERVICE_OPTIONS_ ב-
+   4-payment-api.gs (מה שנגבה בפועל) וכאן (מה שמוצג).
+
+   כמו במשלוח — הדפדפן שולח **רק מפתחות** והשרת מתמחר. המחירים כאן הם
+   לתצוגה בלבד; אי אפשר לקנות שירות ב-0 ₪ על ידי עריכת הדף.
+
+   לא כל המחירון מוצג: "נסיעה בלבד" ו"אבחון תקלה" הם שלב בקריאת שירות
+   טלפונית ולא משהו שקונים בעגלה, ו"ביקור בית — עד 30 דק'" הושמט כי
+   הוא חופף ל"התקנת מחשב בעמדת הלקוח" (שכולל את אותה הגעה, רק עם
+   תוצר מוגדר) — שתי שורות שנראות כמעט זהות רק מבלבלות בבחירה.
+
+   group = שירותים שחופפים זה לזה; בחירה באחד מבטלת את השני, אחרת
+   הלקוח משלם פעמיים על אותה עבודה (השרת דוחה צירוף כזה ממילא).
+   includesAssembly = החבילה כוללת הרכבה — ראה servicesForCart(). */
+const DVT_SERVICES = [
+  { key:"win11-license",     he:"התקנת Windows 11 + רישיון",         en:"Windows 11 install + license",      price:300, group:"os" },
+  { key:"win11-own-license", he:"התקנת Windows (יש לי רישיון)",      en:"Windows install (I have a license)", price:200, group:"os" },
+  { key:"data-transfer",     he:"העברת נתונים / גיבוי",              en:"Data transfer / backup",            price:200 },
+  { key:"clean-thermal",     he:"ניקוי פנימי + משחה תרמית",          en:"Internal cleaning + thermal paste",  price:150 },
+  { key:"remote-support",    he:"תמיכה מרחוק (שעה)",                 en:"Remote support (1 hour)",           price:120 },
+  { key:"onsite-setup",      he:"התקנת מחשב בעמדת הלקוח",            en:"On-site PC setup",                  price:400,
+    noteHe:"כולל הגעה עד 30 דק' נסיעה", noteEn:"Includes travel of up to 30 minutes" },
+  { key:"bundle-new-pc",     he:"חבילה: מחשב חדש — הכל כלול",        en:"Bundle: new PC — all included",     price:700, group:"os", includesAssembly:true,
+    noteHe:"הרכבה + Windows + רישיון + התקנה", noteEn:"Assembly + Windows + license + setup" }
+];
+
+let selectedServices = [];   // מפתחות בלבד — זה גם מה שנשלח לשרת
+let cartHasBuild = false;    // נקבע ב-renderCheckoutPage לפי תוכן העגלה
+
+/* ⚠️ **השקלול מול הבונה.** מי שסיים הרכבה בבונה קיבל שורת
+   `assembly-included` בעגלה — הרכבה ללא עלות. להציע לו אחר כך חבילה
+   שכוללת הרכבה זה לגבות אותו פעמיים על אותה עבודה, והוא גם ישלם יותר:
+   "חבילה: מחשב חדש" ב-700 מול "התקנת Windows 11 + רישיון" ב-300 שזה
+   כל מה שבאמת חסר לו. לכן במצב הזה מוצגות רק ההתקנות הבודדות. */
+function servicesForCart(){
+  return DVT_SERVICES.filter(s => !(cartHasBuild && s.includesAssembly));
+}
+
+function servicesTotal(){
+  return selectedServices.reduce((sum, key) => {
+    const o = DVT_SERVICES.find(s => s.key === key);
+    return sum + (o ? o.price : 0);
+  }, 0);
+}
+
+function renderServiceOptions(){
+  const host = document.getElementById("servicesOptions");
+  if(!host) return;
+
+  document.getElementById("servicesTitle").textContent = tr("שירותים נוספים","Add-on services");
+  document.getElementById("servicesHint").textContent = cartHasBuild
+    ? tr("ההרכבה כבר כלולה בהזמנה שלך ללא עלות, אז מופיעות כאן ההתקנות הבודדות בלבד. כל שירות מתואם איתך בטלפון אחרי ההזמנה.",
+         "Assembly is already included in your order at no cost, so only the standalone installs are listed. Every service is scheduled with you by phone after checkout.")
+    : tr("אופציונלי — אפשר גם לדלג. כל שירות מתואם איתך בטלפון אחרי ההזמנה.",
+         "Optional — feel free to skip. Every service is scheduled with you by phone after checkout.");
+
+  host.innerHTML = servicesForCart().map(s => {
+    const on = selectedServices.indexOf(s.key) !== -1;
+    return `
+    <label class="svc-opt${on ? " is-on" : ""}">
+      <input type="checkbox" ${on ? "checked" : ""}
+             onchange="onServiceToggle('${s.key}', this.checked)">
+      <span class="svc-name">${tr(s.he, s.en)}</span>
+      <span class="svc-price">+${s.price.toLocaleString()} ₪</span>
+      ${s.noteHe ? `<span class="svc-note">${tr(s.noteHe, s.noteEn)}</span>` : ""}
+    </label>`;
+  }).join("");
+
+  renderServicesCounter();
+}
+
+/* המונה בכותרת הוא כל מה שרואים כשהאזור סגור — בלעדיו אי אפשר לדעת
+   שנבחר שם משהו בלי לפתוח אותו שוב. */
+function renderServicesCounter(){
+  const el = document.getElementById("servicesCount");
+  if(!el) return;
+  const n = selectedServices.length;
+  el.classList.toggle("is-on", n > 0);
+  if(!n){ el.textContent = tr("אופציונלי","Optional"); return; }
+  const label = n === 1
+    ? tr("שירות אחד","1 service")
+    : (n + " " + tr("שירותים","services"));
+  el.textContent = label + " · " + servicesTotal().toLocaleString() + " ₪";
+}
+
+function onServiceToggle(key, on){
+  const opt = DVT_SERVICES.find(s => s.key === key);
+  if(!opt) return;
+
+  if(on){
+    // שירות מאותה קבוצה כבר נבחר? מחליפים אותו במקום להוסיף — שתי דרכים
+    // להתקין Windows (או חבילה שכוללת Windows) הן אותה עבודה.
+    if(opt.group){
+      selectedServices = selectedServices.filter(k => {
+        const o = DVT_SERVICES.find(s => s.key === k);
+        return !o || o.group !== opt.group;
+      });
+    }
+    selectedServices.push(key);
+  }else{
+    selectedServices = selectedServices.filter(k => k !== key);
+  }
+  renderServiceOptions();
+  renderCheckoutTotals();
+}
+
 function renderCheckoutTotals(){
   const count = parseInt(document.getElementById("installmentsCount").value, 10) || 1;
   const shipCost = shippingPrice();
-  /* ⚠️ העמלה מחושבת על הסכום **כולל משלוח** — זה מה שנגבה בפועל
-     בכרטיס, וכך בדיוק מחשב createPayment_ בצד השרת. */
-  const base = Math.round((cartSubtotal + shipCost) * 100) / 100;
+  const svcCost = servicesTotal();
+  /* ⚠️ העמלה מחושבת על הסכום **כולל משלוח וכולל שירותים** — זה מה
+     שנגבה בפועל בכרטיס, וכך בדיוק מחשב createPayment_ בצד השרת. */
+  const base = Math.round((cartSubtotal + shipCost + svcCost) * 100) / 100;
   const pct = installmentFeePct(count);
   const fee = Math.round(base * (pct / 100) * 100) / 100;
   const grandTotal = Math.round((base + fee) * 100) / 100;
@@ -195,8 +325,21 @@ function renderCheckoutTotals(){
   if(shipRow){
     shipRow.style.display = shipCost > 0 ? "block" : "none";
     if(shipCost > 0){
-      document.getElementById("shipLabel").textContent = tr("משלוח מהיר","Express delivery");
+      // שם האפשרות שנבחרה בפועל ולא טקסט קבוע — יש יותר מאפשרות אחת
+      // בתשלום, ושורה שכתוב בה "משלוח מהיר" כשנבחר משהו אחר היא שקר.
+      const o = shippingOption();
+      document.getElementById("shipLabel").textContent = o ? tr(o.he, o.en) : tr("משלוח","Delivery");
       document.getElementById("shipValue").textContent = shipCost.toLocaleString() + " ₪";
+    }
+  }
+
+  const svcRow = document.getElementById("servicesRow");
+  if(svcRow){
+    svcRow.style.display = svcCost > 0 ? "block" : "none";
+    if(svcCost > 0){
+      document.getElementById("servicesRowLabel").textContent =
+        tr("שירותים נוספים","Add-on services") + " (" + selectedServices.length + ")";
+      document.getElementById("servicesRowValue").textContent = svcCost.toLocaleString() + " ₪";
     }
   }
 
@@ -307,7 +450,9 @@ async function submitCheckout(){
         lines: lines,
         installments: installments,
         // רק המפתח נשלח. המחיר נקבע בשרת — ראה SHIPPING_OPTIONS_.
-        shipping: shippingKey
+        shipping: shippingKey,
+        // אותו דבר לשירותים: מפתחות בלבד, השרת מתמחר (SERVICE_OPTIONS_).
+        services: selectedServices
       })
     });
     const data = await res.json();

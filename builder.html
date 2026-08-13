@@ -17,6 +17,22 @@
 <link rel="preconnect" href="https://script.googleusercontent.com" crossorigin>
 <link rel="stylesheet" href="style.css">
 <!-- ריצת הרכיב של הבונה (פורמט DesignCode). חייב להיטען ראשון. -->
+<!-- ⚠️ חייב לרוץ **לפני** support.js.
+     הרנטיים של כלי העיצוב שממנו יוצא הדף מושך את ה-HTML של הדף פעם
+     שנייה (`fetch(location.href)` ב-boot) כדי לקרוא את התבנית, ובדרך
+     מריץ שוב את הסקריפטים החיצוניים. התוצאה היא
+     `SyntaxError: Identifier 'DVT_LEVEL_RANK' has already been declared`
+     בקונסולה בכל טעינה, ועוד בקשת רשת מיותרת של 65KB.
+
+     ⚠️ פונקציונלית זה לא שבר כלום — ההרצה השנייה נופלת מיד וההגדרות
+     מההרצה הראשונה נשארות — אבל שגיאה קבועה בקונסולה מסתירה שגיאות
+     אמיתיות כשמנפים.
+
+     `__resources` היא מפת משאבים מוטמעים. אובייקט ריק הוא "truthy"
+     ולכן מדלג על השליפה הכפולה, וכל שאר השימושים בה (CDN, גיליונות
+     סגנון, רכיבים) עושים `res[url]` שמחזיר undefined ונופלים בחזרה
+     להתנהגות הרגילה בדיוק. -->
+<script>window.__resources = window.__resources || {};</script>
 <script src="builder-assets/support.js"></script>
 </head>
 <body>

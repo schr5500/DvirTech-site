@@ -460,6 +460,34 @@ nav a.active::after{transform:scaleX(1)}
 .ship-opt .ship-price{font-weight:700;font-size:13.5px;color:var(--blue,#1B6FE0);white-space:nowrap}
 .ship-opt .ship-eta{grid-column:2;font-size:11.5px;color:var(--ink-soft);margin-top:-2px}
 
+/* בורר השירותים הנוספים בדף התשלום. ⚠️ מקופל (<details>) ולא רשימה
+   פתוחה — דביר ביקש מפורשות שזה "לא יתפוס את כל הדף": שבע שורות
+   פתוחות מעל כפתור התשלום נקראות כמו מכשול, וזו תוספת אופציונלית ולא
+   שלב בהזמנה. <details> מקורי ולא JS כדי שזה יעבוד גם עם מקלדת/קורא
+   מסך בלי קוד נוסף. המונה בכותרת קיים כדי שגם כשסגור רואים מה נבחר. */
+.svc-box{border:1px solid var(--line);border-radius:12px;background:var(--surface-2)}
+.svc-box[open]{border-color:#C7DDFC;background:var(--surface)}
+.svc-summary{display:flex;align-items:center;gap:9px;padding:11px 13px;cursor:pointer;
+  list-style:none;font-size:13.5px}
+.svc-summary::-webkit-details-marker{display:none}
+.svc-summary:hover .svc-title{color:var(--blue)}
+.svc-title{font-weight:700}
+.svc-count{margin-inline-start:auto;font-size:11.5px;color:var(--ink-soft)}
+.svc-count.is-on{color:var(--blue);font-weight:700}
+.svc-chev{font-size:13px;line-height:1;color:var(--ink-soft);transition:transform .15s}
+.svc-box[open] .svc-chev{transform:rotate(180deg)}
+.svc-hint{font-size:11.5px;color:var(--ink-soft);line-height:1.7;margin:0 13px 9px}
+.svc-opts{display:grid;gap:6px;padding:0 13px 12px}
+.svc-opt{display:grid;grid-template-columns:auto 1fr auto;align-items:center;gap:3px 9px;
+  background:var(--surface);border:1px solid var(--line);border-radius:10px;padding:9px 11px;
+  cursor:pointer;transition:border-color .15s,background .15s}
+.svc-opt:hover{border-color:var(--blue)}
+.svc-opt.is-on{border-color:var(--blue);background:rgba(27,111,224,.05)}
+.svc-opt input{margin:0;accent-color:var(--blue)}
+.svc-opt .svc-name{font-size:13px;font-weight:600}
+.svc-opt .svc-price{font-size:13px;font-weight:700;color:var(--blue);white-space:nowrap}
+.svc-opt .svc-note{grid-column:2/-1;font-size:11px;color:var(--ink-soft);line-height:1.5}
+
 .summary-list{list-style:none;padding:0;margin:0 0 14px}
 .summary-list li{display:flex;justify-content:space-between;align-items:center;padding:9px 0;border-bottom:1px dashed var(--line);font-size:13.5px;gap:8px}
 .summary-list li .k{color:var(--ink-soft);flex-shrink:0}

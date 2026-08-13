@@ -630,6 +630,39 @@ function renderChips(){
     : "";
 }
 
+/* ==================== תמונת הכרטיס ====================
+   תמונת מוצר אמיתית (עמודת image בגיליון) גוברת תמיד. בלעדיה מוצג ממלא
+   מקום מעוצב — איור הקטגוריה מ-sprite.js ושם היצרן — ולא ריבוע ריק
+   ולא "אין תמונה". עמודת image מתמלאת בהדרגה מהסנכרון מול הספק, כלומר
+   תמיד יהיו כרטיסים בלי תמונה, וממלא המקום הוא מצב קבוע שצריך להיראות
+   מכוון. העיצוב עצמו (.dvt-ph) יושב ב-products.css.
+
+   ⚠️ ממלא המקום ממלא בדיוק את אותה תיבה (132px) שהתמונה ממלאת, ולכן
+   שורה מעורבת של כרטיסים עם ועם בלי תמונה לא "קופצת" בגובה.
+
+   ⚠️ האיור לפי it._realCat ולא currentCat: בתצוגת "הכל" currentCat הוא
+   "all" (לא קטגוריה אמיתית, אין לה איור משלה), וכל פריט צריך את האיור
+   של הקטגוריה האמיתית שלו ולא את אותו איור לכולם.
+
+   ⚠️ היצרן בלבד ולא שם הדגם: השם כבר מודפס כשורה נפרדת מתחת לתיבה,
+   וחזרה עליו בתוך התמונה הופכת כרטיס נקי לצפוף. */
+function shopArt(it){
+  const icon = (typeof dvtIcon === "function") ? dvtIcon(it._realCat) : "ic-case";
+  const brand = it.brand ? `<span class="dvt-ph-brand">${escHtml(it.brand)}</span>` : "";
+  const ph = `<span class="dvt-ph" aria-hidden="true">
+      <svg class="dvt-ph-ic"><use href="#${escHtml(icon)}"/></svg>${brand}
+    </span>`;
+
+  /* ⚠️ ממלא המקום נכתב לפני ה-img ויושב מתחתיו, לא במקומו: כך הוא מוצג
+     כבר בזמן הטעינה העצלה, ו-onerror על כתובת שבורה מסיר רק את ה-img
+     וחושף אותו בחזרה — במקום אייקון תמונה שבורה של הדפדפן. onload
+     מסתיר אותו כשהתמונה עלתה, כדי שלא יציץ מבעד ל-PNG שקוף. */
+  return it.image
+    ? ph + `<img src="${escHtml(it.image)}" alt="" loading="lazy"
+            onload="this.parentNode.classList.add('dvt-art-on')" onerror="this.remove()">`
+    : ph;
+}
+
 function renderGrid(){
   const items = filteredItems();
   const grid = document.getElementById("productGrid");
@@ -674,15 +707,6 @@ function renderGrid(){
     note.style.display = anyImg ? "" : "none";
   }
 
-  // תמונת מוצר אמיתית (עמודת image בגיליון) גוברת תמיד. בלעדיה מוצג
-  // איור הקטגוריה מ-sprite.js, כדי שלכרטיס תמיד יהיה חלק חזותי.
-  // ⚠️ האיור לפי it._realCat ולא currentCat: בתצוגת "הכל" currentCat
-  // הוא "all" (לא קטגוריה אמיתית, אין לה איור משלה), וכל פריט צריך
-  // את האיור של הקטגוריה האמיתית שלו, לא את אותו איור לכולם.
-  const art = it => it.image
-    ? `<img src="${it.image}" alt="" loading="lazy">`
-    : `<svg aria-hidden="true"><use href="#${typeof dvtIcon === "function" ? dvtIcon(it._realCat) : "ic-case"}"/></svg>`;
-
   // תג הקטגוריה מוצג רק בתצוגת "הכל" — כשמסתכלים על קטגוריה אחת ממילא
   // ברור מה רואים, והתג היה רק רעש חוזר על עצמו.
   const catTag = it => currentCat === "all"
@@ -702,7 +726,7 @@ function renderGrid(){
     <a class="p-card${stock(it) ? "" : " p-card--oos"}" href="${href(it)}">
       ${!stock(it) ? `<span class="p-oos-badge">${tr("אזל המלאי","Out of stock")}</span>`
         : dvtIsOnSale(it) ? `<span class="p-sale-badge">-${dvtDiscountPct(it)}%</span>` : ""}
-      <div class="p-art">${art(it)}</div>
+      <div class="p-art">${shopArt(it)}</div>
       ${catTag(it)}
       ${it.brand ? `<div class="p-brand">${it.brand}</div>` : ""}
       <h4 class="p-name">${itemName(it)}</h4>

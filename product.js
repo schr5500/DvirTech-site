@@ -26,10 +26,14 @@ const PD_MAX_QTY = 20;  // התקרה שהשרת אוכף על שורה בעגל
    ⚠️ tier מוסתר בכוונה. הוא נגזר אצלנו מהמחיר (ENRICH_TIER_BANDS) ולא
    מגיע משום יצרן — הוא ציון פנימי שהבונה מאזן לפיו הרכבה. להציג אותו
    כשורה במפרט היה מציג הערכה שלנו כנתון של היצרן. */
+/* ⚠️ warranty מוסתר כאן כי הוא מוצג בתיבת המחיר (pdWarrantyHtml) ולא
+   בטבלה. בלי זה הוא היה נופל לשארית שבסוף pdSpecRows ומודפס עם התווית
+   "warranty" — facetLabel מחזיר את המפתח עצמו כשאין לו תרגום. */
 const PD_HIDDEN_FIELDS = new Set([
   "id","name","nameEn","spec","specEn","price","oldPrice","saleEndsAt",
   "inStock","stock","brand","image","images","_realCat","icon",
-  "desc","descEn","label","labelEn","shopOnly","tier","radiatorSupport"
+  "desc","descEn","label","labelEn","shopOnly","tier","radiatorSupport",
+  "warranty"
 ]);
 
 const pdNis = v => Number(v).toLocaleString("he-IL") + " ₪";
@@ -63,33 +67,49 @@ function pdFindAnywhere(catalog, id){
 }
 
 /* ==================== תמונה ====================
-   ⚠️ עמודת image עדיין לא קיימת ב-API. הדף לא ממציא כתובות ולא מציג
-   תמונת קטגוריה גנרית במקום המוצר — תמונה של "כרטיס מסך כלשהו" בדף של
-   דגם מסוים היא בדיוק מה שגורם ללקוח לחשוב שהוא ראה את המוצר שקנה.
-   עד שהעמודה תגיע מוצג placeholder עם שם המוצר, וברגע שתגיע היא תופיע
-   כאן לבד בלי שינוי קוד. */
-function pdArt(it, cat){
-  const ph = `<span class="pd-ph">
-      <svg aria-hidden="true"><use href="#${dvtIcon(cat)}"/></svg>
-      <span class="pd-ph-name">${pdEsc(itemName(it))}</span>
+   ⚠️ הדף לא ממציא כתובות ולא מציג תמונת קטגוריה גנרית במקום המוצר —
+   תמונה של "כרטיס מסך כלשהו" בדף של דגם מסוים היא בדיוק מה שגורם
+   ללקוח לחשוב שהוא ראה את המוצר שקנה. מוצר בלי עמודת image מקבל ממלא
+   מקום מעוצב (איור הקטגוריה + היצרן והדגם), שנראה כמו בחירה ולא כמו
+   תמונה שלא נטענה. עיצוב ה-.dvt-ph יושב ב-products.css.
+
+   ⚠️ סדר השכבות: ממלא המקום נכתב *לפני* ה-img ויושב מתחתיו, ולא
+   מוחלף בו. שלוש תוצאות שכולן רצויות:
+   • בזמן הטעינה רואים את ממלא המקום ולא ריבוע ריק.
+   • onerror מסיר רק את ה-img — כתובת שבורה בגיליון חוזרת לממלא המקום
+     ולא משאירה אייקון שבור של הדפדפן.
+   • onload מסמן את המסגרת ומסתיר את ממלא המקום, כדי שלא יציץ מבעד
+     לתמונת PNG שקופה. */
+function pdPlaceholder(it, cat, withName){
+  const brand = it.brand ? `<span class="dvt-ph-brand">${pdEsc(it.brand)}</span>` : "";
+  const name  = withName ? `<span class="dvt-ph-name">${pdEsc(itemName(it))}</span>` : "";
+  // aria-hidden: השם והיצרן כבר מוקראים מהכותרת ומשורת היצרן שליד
+  // התמונה. בלי זה קורא מסך היה שומע את שם המוצר פעמיים ברצף.
+  return `<span class="dvt-ph" aria-hidden="true">
+      <svg class="dvt-ph-ic"><use href="#${dvtIcon(cat)}"/></svg>
+      ${brand}${name}
     </span>`;
-  // ה-placeholder יושב *מתחת* לתמונה ולא במקומה: כך הוא מוצג גם בזמן
-  // הטעינה, וכתובת שבורה בגיליון רק מסירה את ה-img וחושפת אותו שוב.
+}
+
+/* ה-onload/onerror נכתבים כמחרוזת אחת: הטמפלייט מוזרק דרך innerHTML,
+   ואין כאן צומת אמיתי לתלות בו addEventListener בזמן הבנייה. */
+const PD_IMG_HOOKS =
+  `onload="this.parentNode.classList.add('dvt-art-on')" onerror="this.remove()"`;
+
+function pdArt(it, cat){
+  const ph = pdPlaceholder(it, cat, true);
   return it.image
-    ? ph + `<img src="${pdEsc(it.image)}" alt="${pdEsc(itemName(it))}" onerror="this.remove()">`
+    ? ph + `<img src="${pdEsc(it.image)}" alt="${pdEsc(itemName(it))}" ${PD_IMG_HOOKS}>`
     : ph;
 }
 
-/* תמונונת ברצועת "מוצרים דומים" — שם השם כבר מופיע מתחת לכרטיס, ולכן
-   ה-placeholder הוא האיור בלבד. */
+/* תמונונת ברצועת "מוצרים דומים" — שם המוצר כבר מופיע מתחת לכרטיס,
+   ולכן ממלא המקום כאן מציג את היצרן בלבד ולא חוזר על השם. */
 function pdThumbArt(it, cat){
+  const ph = pdPlaceholder(it, cat, false);
   return it.image
-    ? `<img src="${pdEsc(it.image)}" alt="${pdEsc(itemName(it))}" loading="lazy"
-            onerror="pdThumbFail(this,'${pdEsc(dvtIcon(cat))}')">`
-    : `<svg aria-hidden="true"><use href="#${dvtIcon(cat)}"/></svg>`;
-}
-function pdThumbFail(img, iconId){
-  img.outerHTML = `<svg aria-hidden="true"><use href="#${iconId}"/></svg>`;
+    ? ph + `<img src="${pdEsc(it.image)}" alt="${pdEsc(itemName(it))}" loading="lazy" ${PD_IMG_HOOKS}>`
+    : ph;
 }
 
 /* ==================== מפרט טכני ====================
@@ -432,6 +452,49 @@ function pdMaxQty(){
   return (left && left > 0) ? Math.min(PD_MAX_QTY, left) : PD_MAX_QTY;
 }
 
+/* ==================== אחריות ====================
+   עמודת warranty בגיליון היא טקסט חופשי כפי שהספק מנסח אותו ("אחריות
+   במעבדת מור לוי" · "אחריות יבואן"), ולא מספר חודשים — ולכן היא מוצגת
+   כמו שהיא ולא מפורקת ליחידות. warrantyMonths, שקיים במחשבים ומחשבים
+   ניידים, נשאר שדה נפרד בטבלת המפרט.
+
+   ⚠️ מוצג רק כשיש ערך. מוצר בלי אחריות בגיליון לא מקבל שורה ריקה ולא
+   "לא ידוע" — הצהרה על אחריות היא התחייבות מול לקוח, וניחוש כאן גרוע
+   בהרבה משתיקה.
+
+   ⚠️ אין תרגום לאנגלית: הטקסט מגיע בעברית מהספק, ותרגום מכונה של תנאי
+   אחריות הוא בדיוק הסוג של דיוק שאסור להמציא. */
+/* גם מספר מתקבל: מי שיקליד "36" בעמודה התכוון לכתוב משהו, ולבלוע
+   ערך שהוקלד ביד גרוע מלהציג אותו. אובייקט (תא שעוצב כתאריך) נדחה —
+   הוא היה מודפס כ-[object Object]. */
+function pdWarrantyText(it){
+  const raw = it && it.warranty;
+  if(typeof raw === "string")  return raw.trim();
+  if(typeof raw === "number")  return String(raw);
+  return "";
+}
+
+function pdWarrantyHtml(it){
+  const txt = pdWarrantyText(it);
+  if(!txt) return "";
+  return `<div class="pd-warranty">
+      <svg class="ui-ic"><use href="#ui-shield"/></svg>
+      <span>${pdEsc(txt)}</span>
+    </div>`;
+}
+
+/* השורה הקבועה שמתחת למחיר. ⚠️ כשיש למוצר טקסט אחריות משלו מהספק,
+   "כולל אחריות יבואן רשמי" יורד ממנה: שתי אמירות אחריות זו ליד זו,
+   אחת גנרית ואחת ספציפית, סותרות זו את זו כשהספציפית אומרת משהו אחר
+   ("אחריות במעבדת מור לוי" איננה אחריות יבואן). מה שנשאר הוא התשלומים,
+   שנכון תמיד. */
+function pdPriceNote(it){
+  return pdWarrantyText(it)
+    ? tr("עד 12 תשלומים", "Up to 12 installments")
+    : tr("כולל אחריות יבואן רשמי · עד 12 תשלומים",
+         "Official importer warranty · up to 12 installments");
+}
+
 function pdStockHtml(it){
   if(!pdInStock(it)){
     return `<div class="pd-stock pd-stock--out">${tr("אזל מהמלאי","Out of stock")}</div>`;
@@ -500,9 +563,9 @@ function pdRenderBody(){
             ${onSale ? `<span class="pd-price-was">${pdNis(dvtOldPrice(it))}</span>
                         <span class="pd-save">-${dvtDiscountPct(it)}%</span>` : ""}
           </div>
-          <div class="pd-price-note">${tr("כולל אחריות יבואן רשמי · עד 12 תשלומים",
-                                          "Official importer warranty · up to 12 installments")}</div>
+          <div class="pd-price-note">${pdPriceNote(it)}</div>
           ${pdStockHtml(it)}
+          ${pdWarrantyHtml(it)}
           <!-- סה"כ מתעדכן חי לפי הכמות. מוסתר בכמות 1, כי אז הוא רק
                חוזר על המחיר שמעליו. -->
           <div class="pd-total" id="pdTotalBox" hidden>

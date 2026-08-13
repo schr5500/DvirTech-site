@@ -322,6 +322,16 @@
 .pd-price { font-family: 'Rubik', sans-serif; font-weight: 800; font-size: 30px; color: var(--blue, #1b6fe0); }
 .pd-price-note { font-size: 12.5px; color: var(--ink-soft, #5f7590); margin-top: 4px; }
 
+/* ---------- אחריות (עמודת warranty בגיליון) ----------
+   טקסט חופשי כפי שהספק מנסח אותו. יושב בתוך תיבת המחיר כי שם הלקוח
+   מחליט, אבל בטורקיז ובגוף רגיל ולא כתג צעקני — זו הרגעה, לא מבצע.
+   אותו טורקיז של "במלאי", כי שניהם עונים על אותה שאלה: אפשר לסמוך.
+   ⚠️ מוצג רק כשיש ערך — ראו pdWarrantyHtml ב-product.js. */
+.pd-warranty{display:flex;align-items:flex-start;gap:8px;margin-top:10px;
+  padding:8px 11px;border-radius:10px;background:rgba(18,131,108,.07);
+  font-size:13px;font-weight:600;line-height:1.5;color:var(--teal-dark,#12836C)}
+.pd-warranty .ui-ic{width:16px;height:16px;flex:none;margin-top:2px}
+
 .pd-buy { display: flex; align-items: center; gap: 12px; margin-bottom: 22px; flex-wrap: wrap; }
 .pd-qty { display: inline-flex; align-items: center; gap: 4px; background: #fff;
   border: 1.5px solid var(--line, #e2eaf2); border-radius: var(--radius-sm, 11px); padding: 4px; }
@@ -394,21 +404,104 @@
 .pd-wa:hover{color:var(--blue,#1B6FE0)}
 
 /* =====================================================================
+   ממלא מקום לתמונת מוצר (.dvt-ph)
+   =====================================================================
+   ⚠️ למה זה קיים בכלל: עמודת image בגיליון מתמלאת בהדרגה מהסנכרון מול
+   הספק, ולכן בכל רגע נתון חלק מהמוצרים בלי תמונה — וזה מצב קבוע, לא
+   תקלה זמנית. ממלא המקום חייב להיראות כמו בחירה עיצובית ולא כמו כשל
+   טעינה, אחרת קטלוג חצי-מצולם נראה שבור.
+
+   שלושה כללים שמחזיקים את זה:
+   1. אין טקסט "אין תמונה" ואין אייקון שבור — מה שמוצג הוא איור
+      הקטגוריה ושם היצרן/הדגם, בדיוק כמו לוחית מותג על מדף.
+   2. הוא ממלא את *אותה* תיבה שהתמונה הייתה ממלאת (inset:0), ולכן
+      הרשת לא קופצת בין כרטיס מצולם לכרטיס בלי תמונה.
+   3. רקע גרדיאנט מותג עדין ולא אפור מת — אפור קורא כ"חסר", ותכלת/טורקיז
+      קורא כ"ריק בכוונה". ⚠️ זה בדיוק הגרדיאנט שכבר יושב על ‎.p-art
+      ועל ‎.cat-art, ולא גוון חדש: כך התיבה נראית זהה בין כרטיס מצולם
+      לכרטיס בלי תמונה, ורק התוכן שבתוכה משתנה.
+
+   ⚠️ אותה מחלקה משמשת בדף המוצר, ברשת המוצרים וברצועות, וזה מקור אחד
+   לעיצוב במקום שלוש גרסאות שנפרדות בזמן.
+   ⚠️ index.html טוען רק את style.css ולא את הקובץ הזה, ולכן home.js
+   מזריק עותק מצומצם של הכללים האלה בעצמו. שינוי כאן — לעדכן גם שם. */
+.dvt-ph{
+  --ph-fs: 11px; --ph-op: 1;
+  position:absolute; inset:0; z-index:0;
+  display:flex; flex-direction:column; align-items:center; justify-content:center;
+  gap:9px; padding:12px; text-align:center; overflow:hidden;
+  background:linear-gradient(155deg,#F3F8FF,#EFFBF8);
+}
+/* נגיעת אור רכה בפינה העליונה — מה שמפריד "רקע מעוצב" מ"מלבן צבוע".
+   מונח מתחת לתוכן ומחוץ לזרימה, כדי שלא יזיז את המרכוז. */
+.dvt-ph::before{
+  content:""; position:absolute; inset:0; pointer-events:none;
+  background:radial-gradient(120% 90% at 22% 0%, rgba(255,255,255,.85), transparent 62%);
+}
+.dvt-ph > *{position:relative}
+
+/* ⚠️ אין כאן color: איורי ic-* ב-sprite.js הם איורים צבעוניים מלאים עם
+   גרדיאנטים משלהם, ולא אייקוני קו על currentColor — צביעה מבחוץ פשוט
+   לא הייתה עושה כלום. השליטה היחידה שיש עליהם היא העוצמה (--ph-op).
+   ⚠️ המידה נכתבת בכל משטח בנפרד ובסלקטור של שתי מחלקות, כי הכללים
+   הקיימים ‎.p-art svg / .pd-art svg / .deal-art svg ספציפיים יותר
+   ממחלקה בודדת והיו דורסים כל מידה שנקבעת כאן. */
+.dvt-ph-ic{flex:none; opacity:var(--ph-op)}
+
+/* היצרן הוא העוגן הטיפוגרפי: קצר, אותיות גדולות ומרווחות — נקרא
+   כלוחית מותג ולא כהודעת שגיאה. */
+.dvt-ph-brand{
+  font-family:'Rubik',sans-serif; font-weight:700;
+  font-size:var(--ph-fs); letter-spacing:.14em; text-transform:uppercase;
+  color:var(--blue,#1B6FE0); opacity:.72; line-height:1.3;
+  max-width:100%; overflow:hidden; text-overflow:ellipsis; white-space:nowrap;
+}
+/* שם הדגם מוצג רק איפה שהוא לא חוזר על עצמו מיד מתחת לתיבה (דף המוצר).
+   בכרטיס ברשת השם ממילא מודפס כשורה נפרדת, ולכן שם מוצג היצרן בלבד. */
+.dvt-ph-name{
+  font-size:13px; font-weight:700; line-height:1.5;
+  color:var(--ink-soft,#6B7A8D); max-width:34ch;
+  display:-webkit-box; -webkit-line-clamp:3; -webkit-box-orient:vertical; overflow:hidden;
+}
+/* ⚠️ התמונה מונחת *מעל* ממלא המקום ולא במקומו. כך הוא מוצג כבר בזמן
+   הטעינה (במיוחד עם loading="lazy"), וכתובת שבורה שנופלת ל-onerror
+   מסירה רק את ה-img וחושפת אותו בחזרה — בלי ריבוע ריק ובלי אייקון
+   שבור של הדפדפן. onload מסתיר אותו כשהתמונה באמת עלתה, כדי שרקע
+   הגרדיאנט של התיבה יישאר גלוי מסביב לתמונה שמוצגת ב-contain. */
+.dvt-art-on .dvt-ph{display:none}
+
+/* =====================================================================
    דף מוצר — תמונה, מלאי ומחיר מבצע
    ===================================================================== */
 
-/* ---------- מסגרת התמונה ----------
-   ⚠️ ה-placeholder לא מחליף את התמונה אלא יושב מתחתיה. כך הוא מוצג
-   כבר בזמן הטעינה, וכתובת שבורה בגיליון (onerror מסיר את ה-img) חושפת
-   אותו בחזרה במקום להשאיר ריבוע שבור. */
 .pd-art-frame{position:relative}
+/* רקע לבן על התמונה עצמה: המסגרת בדף המוצר לבנה ממילא, וזה מבטיח
+   שגם PNG שקוף לא יחשוף את האיור שמאחוריו אם onload לא הספיק לרוץ. */
 .pd-art-frame img{position:relative;z-index:1;background:#fff}
 
-.pd-ph{position:absolute;inset:0;display:flex;flex-direction:column;
-  align-items:center;justify-content:center;gap:12px;padding:22px;text-align:center}
-.pd-art-frame .pd-ph svg{width:76px;height:76px;color:var(--blue,#1B6FE0);opacity:.28}
-.pd-ph-name{font-size:13.5px;font-weight:700;line-height:1.5;
-  color:var(--ink-soft,#6B7A8D);max-width:36ch}
+/* ⚠️ בתיבה הגדולה האיור מוחלש בכוונה (--ph-op) ומתפקד כסימן מים.
+   בגודל הזה איור צבעוני מלא של "כרטיס מסך כלשהו" מתחיל להיקרא כתמונת
+   המוצר עצמו, וזה בדיוק מה שאסור — הלקוח צריך לדעת שהוא לא ראה את
+   הפריט. בכרטיסים הקטנים ההפך נכון: שם האיור קטן, ברור שהוא אמבלמה,
+   והחלשה שלו רק הייתה מרוקנת את הכרטיס. */
+.pd-art .dvt-ph{--ph-fs:12px; --ph-op:.34; gap:14px; padding:24px}
+.pd-art .dvt-ph-ic{width:118px; height:118px}
+
+/* תיבת האיור בכרטיס ברשת ובכרטיס ברצועה — צריכות position:relative
+   כדי שממלא המקום יוכל להימתח עליהן. ‎.deal-art מוגדר ב-style.css
+   (משותף לדף הבית), ולכן כאן רק התוספת ולא הגדרה מחדש. */
+.p-art{position:relative}
+.p-art > img{position:relative;z-index:1}
+.p-art .dvt-ph{--ph-fs:10.5px; gap:8px}
+.p-art .dvt-ph-ic{width:62px; height:62px}
+
+/* ⚠️ ‎.deal-art מגיע מ-style.css עם רקע אפרפר שטוח (--surface-2). כאן הוא
+   מיושר לאותו גרדיאנט של שאר תיבות התמונה באתר, אחרת רצועת "מוצרים
+   דומים" הייתה התיבה היחידה בדף עם רקע אחר. */
+.deal-art{position:relative; background:linear-gradient(155deg,#F3F8FF,#EFFBF8)}
+.deal-art > img{position:relative;z-index:1}
+.deal-art .dvt-ph{--ph-fs:10px; gap:7px}
+.deal-art .dvt-ph-ic{width:54px; height:54px}
 
 /* ---------- מלאי ----------
    שורה קצרה מתחת למחיר. "נותרו X" מוצג רק במלאי נמוך — מספר גדול לא

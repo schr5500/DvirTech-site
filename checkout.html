@@ -62,6 +62,23 @@
         <div id="shippingOptions" class="ship-opts"></div>
       </div>
 
+      <!-- שירותים נוספים. ⚠️ <details> מקופל, בכוונה: זו תוספת
+           אופציונלית ולא שלב בהזמנה, ורשימה פתוחה של שבעה שירותים מעל
+           כפתור התשלום נקראת כמו מכשול/upsell אגרסיבי. המונה בכותרת
+           מראה מה נבחר גם כשהאזור סגור. המחירים מגיעים מ-DVT_SERVICES
+           ב-checkout.js (תצוגה) ונגבים לפי SERVICE_OPTIONS_ ב-
+           4-payment-api.gs — ומקור האמת לשניהם הוא PRICE_LIST ב-
+           CRM+SUPPLIERS/2-pricelist-picker.gs. -->
+      <details class="svc-box" id="servicesBox" style="margin:18px 0 12px">
+        <summary class="svc-summary">
+          <span class="svc-title" id="servicesTitle"></span>
+          <span class="svc-count" id="servicesCount"></span>
+          <span class="svc-chev" aria-hidden="true">⌄</span>
+        </summary>
+        <p class="svc-hint" id="servicesHint"></p>
+        <div id="servicesOptions" class="svc-opts"></div>
+      </details>
+
       <div style="margin:18px 0 12px">
         <label class="field-label" style="margin-bottom:6px;display:block" id="installmentsLabel"></label>
         <select id="installmentsCount" onchange="renderCheckoutTotals()">
@@ -74,6 +91,9 @@
 
       <ul class="summary-list" id="shipRow" style="display:none;margin-bottom:8px">
         <li><span class="k" id="shipLabel"></span><span class="v" id="shipValue">0 ₪</span></li>
+      </ul>
+      <ul class="summary-list" id="servicesRow" style="display:none;margin-bottom:8px">
+        <li><span class="k" id="servicesRowLabel"></span><span class="v" id="servicesRowValue">0 ₪</span></li>
       </ul>
       <ul class="summary-list" id="feeRow" style="display:none;margin-bottom:8px">
         <li><span class="k" id="feeLabel"></span><span class="v" id="feeValue">0 ₪</span></li>

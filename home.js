@@ -78,21 +78,79 @@ const HOME_CAT_IMAGE = {
   peripherals: "images/categories/peripherals.jpg"
 };
 
+/* ==================== ממלא מקום לתמונה ====================
+   ⚠️ index.html טוען רק את style.css, בלי products.css שבו יושב עיצוב
+   ‎.dvt-ph — ולכן הכללים ההכרחיים מוזרקים כאן. זה עותק מצומצם *מכוון*
+   של אותו עיצוב, כדי שכרטיס בדף הבית וכרטיס בחנות ייראו זהים; שינוי
+   כאן מחייב שינוי מקביל ב-products.css ולהפך. */
+/* ⚠️ המידה של האיור נכתבת בסלקטור עמוק במיוחד: הכללים הקיימים
+   ‎.cat-card .cat-art svg ו-.deal-art svg ב-style.css ספציפיים יותר
+   ממחלקה בודדת, והיו דורסים כל width שנקבע על ‎.dvt-ph-ic לבדו. */
+const HOME_PH_CSS = `
+.cat-card .cat-art{position:relative}
+.deal-art{position:relative;background:linear-gradient(155deg,#F3F8FF,#EFFBF8)}
+.cat-card .cat-art > img,.deal-art > img{position:relative;z-index:1}
+.dvt-ph{--ph-fs:10px;position:absolute;inset:0;z-index:0;
+  display:flex;flex-direction:column;align-items:center;justify-content:center;
+  gap:7px;padding:12px;text-align:center;overflow:hidden;
+  background:linear-gradient(155deg,#F3F8FF,#EFFBF8)}
+.dvt-ph::before{content:"";position:absolute;inset:0;pointer-events:none;
+  background:radial-gradient(120% 90% at 22% 0%,rgba(255,255,255,.85),transparent 62%)}
+.dvt-ph > *{position:relative}
+.dvt-ph-ic{flex:none}
+.dvt-ph-brand{font-family:'Rubik',sans-serif;font-weight:700;font-size:var(--ph-fs);
+  letter-spacing:.14em;text-transform:uppercase;color:var(--blue,#1B6FE0);
+  opacity:.72;line-height:1.3;max-width:100%;overflow:hidden;
+  text-overflow:ellipsis;white-space:nowrap}
+.deal-art .dvt-ph-ic{width:54px;height:54px}
+.cat-card .cat-art .dvt-ph-ic{width:58px;height:58px}
+.dvt-art-on .dvt-ph{display:none}`;
+
+function injectPlaceholderCss(){
+  if(document.getElementById("homePhCss")) return;
+  const st = document.createElement("style");
+  st.id = "homePhCss";
+  st.textContent = HOME_PH_CSS;
+  document.head.appendChild(st);
+}
+
+/* ⚠️ התמונה מונחת *מעל* ממלא המקום ולא במקומו. כך הוא נראה כבר בזמן
+   הטעינה, onerror על כתובת שבורה מסיר רק את ה-img וחושף אותו בחזרה
+   (במקום אייקון תמונה שבורה של הדפדפן), ו-onload מסתיר אותו כשהתמונה
+   באמת עלתה כדי שלא יציץ מבעד ל-PNG שקוף. */
+const HOME_IMG_HOOKS =
+  `loading="lazy" decoding="async"
+   onload="this.parentNode.classList.add('dvt-art-on')" onerror="this.remove()"`;
+
 function catArt(cat){
   const src = HOME_CAT_IMAGE[cat];
-  return src
-    ? `<img src="${src}" alt="" loading="lazy" decoding="async">`
-    : `<svg aria-hidden="true"><use href="#${dvtIcon(cat)}"/></svg>`;
+  // כרטיס *קטגוריה* — ממלא המקום הוא האיור בלבד. אין כאן יצרן ואין דגם,
+  // וכל טקסט היה רק חוזר על שם הקטגוריה שמודפס מיד מתחת.
+  const ph = `<span class="dvt-ph" aria-hidden="true">
+      <svg class="dvt-ph-ic"><use href="#${escHtml(dvtIcon(cat))}"/></svg>
+    </span>`;
+  return src ? ph + `<img src="${escHtml(src)}" alt="" ${HOME_IMG_HOOKS}>` : ph;
 }
 
 /* תמונה לכרטיס *מוצר* (רצועת המבצעים), להבדיל מכרטיס קטגוריה.
-   סדר העדיפויות: תמונת המוצר עצמו (עמודת image בגיליון) ← תמונת
-   הקטגוריה ← איור SVG. כרגע אין עדיין עמודת image, ולכן בפועל מוצגת
-   תמונת הקטגוריה — וזו הסיבה ששני מוצרים מאותה קטגוריה נראים אותו
-   דבר. ברגע שתתווסף העמודה, כל מוצר יקבל את התמונה שלו בלי שינוי קוד. */
+   ⚠️ בעבר מוצר בלי תמונה נפל לתמונת הקטגוריה, וזו הייתה טעות: תמונה
+   של "כרטיס מסך כלשהו" על כרטיס של דגם מסוים גורמת ללקוח לחשוב שהוא
+   ראה את המוצר שהוא קונה. זה בדיוק מה ש-pdArt בדף המוצר סירב לעשות,
+   וכאן זה גם עקף את "תמונות להמחשה בלבד" — התווית מוצגת רק כשיש תמונת
+   מוצר אמיתית, ולכן תמונות הקטגוריה הוצגו בלי שום הסתייגות.
+   עכשיו: תמונת המוצר עצמו, ואם אין — ממלא המקום המעוצב, אותו אחד
+   שמוצג בחנות ובדף המוצר. */
 function productArt(cat, item){
-  if(item && item.image) return `<img src="${item.image}" alt="" loading="lazy" decoding="async">`;
-  return catArt(cat);
+  const icon = dvtIcon((item && item._realCat) || cat);
+  // היצרן בלבד: שם הדגם ממילא מודפס בשורה נפרדת מתחת לתיבה.
+  const brand = (item && item.brand)
+    ? `<span class="dvt-ph-brand">${escHtml(item.brand)}</span>` : "";
+  const ph = `<span class="dvt-ph" aria-hidden="true">
+      <svg class="dvt-ph-ic"><use href="#${escHtml(icon)}"/></svg>${brand}
+    </span>`;
+  return (item && item.image)
+    ? ph + `<img src="${escHtml(item.image)}" alt="" ${HOME_IMG_HOOKS}>`
+    : ph;
 }
 
 // פריטי-דמה ("ללא כרטיס מסך") הם בחירה בבונה ולא מוצר שנמכר.
@@ -295,6 +353,7 @@ async function loadHome(){
   });
 }
 
+injectPlaceholderCss();
 applyI18n();
 initCarousels();
 loadHome();
