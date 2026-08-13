@@ -106,13 +106,19 @@
   const ALL_CATS = D.CATS.slice();
   const ALL_NEEDED = Array.isArray(D.NEEDED) ? D.NEEDED.slice() : [];
 
+  /* ⚠️ עריכה *בתוך* המערך ולא השמה של מערך חדש. builder.html מצלם
+     `const CATS = DATA.CATS` בטעינה, ולכן `D.CATS = ...` היה מנתק אותו:
+     קטגוריה שהגיליון מילא רק בתשובת השרת לא הייתה מקבלת לשונית גם
+     אחרי רנדר מחדש, ואף אחד לא היה מבין למה. */
+  function replaceInPlace(arr, next){ arr.length = 0; next.forEach(x => arr.push(x)); }
+
   function hideDemoCats(){
     const keep = k => !DEMO_ONLY.includes(k) || liveFilled.has(k);
-    D.CATS = ALL_CATS.filter(c => keep(c.key));
+    replaceInPlace(D.CATS, ALL_CATS.filter(c => keep(c.key)));
     DEMO_ONLY.forEach(c => {
       if(!liveFilled.has(c) && D.CATALOG[c]) delete D.CATALOG[c];
     });
-    if(ALL_NEEDED.length) D.NEEDED = ALL_NEEDED.filter(keep);
+    if(ALL_NEEDED.length) replaceInPlace(D.NEEDED, ALL_NEEDED.filter(keep));
   }
   hideDemoCats();
 

@@ -191,6 +191,39 @@ function dvtCaseFits(supportedList, moboFF){
   });
 }
 
+/* היררכיית תקני **ספק כוח** — נפרדת מזו של לוח האם בכוונה.
+   ---------------------------------------------------------------
+   ⚠️ כאן includes פשוט מייצר שתי טעויות הפוכות, ושתיהן עולות כסף:
+
+   1. **SFX-L הוא SFX שהתארך ב-30mm** (100mm מול 130mm עומק). מארז
+      שמצהיר "SFX,SFX-L" מקבל את שניהם; מארז שמצהיר SFX **בלבד** לא
+      מקבל SFX-L — הוא פשוט לא נכנס בכלוב. זו ההבחנה שהמנוע פספס.
+   2. **ספק SFX נכנס למארז ATX** דרך בראקט מתאם שמגיע בקופסה של כמעט
+      כל ספק SFX. חסימה שם היא חסימת מכירה תקינה, ולכן זו הערה.
+
+   TFX ו-Flex לעומת זאת הם תקני OEM עם תבנית ברגים וצורה משלהם —
+   הם לא נכנסים למארז ATX וכן ראויים לחסימה.
+
+   מחזיר "fits" (נכנס כמו שהוא) · "bracket" (נכנס עם מתאם) · "no". */
+const DVT_PSU_FF_CANON = {
+  "atx":"atx", "atx12v":"atx", "ps2":"atx", "atxps2":"atx", "standardatx":"atx",
+  "sfx":"sfx", "sfxl":"sfxl", "sfxlarge":"sfxl",
+  "tfx":"tfx", "flex":"flex", "flexatx":"flex"
+};
+function dvtPsuFF(v){
+  const k = String(v == null ? "" : v).toLowerCase().replace(/[\s\-_.]/g, "");
+  return DVT_PSU_FF_CANON[k] || k;
+}
+function dvtPsuFits(supportedList, psuFF){
+  const want = dvtPsuFF(psuFF);
+  const list = (supportedList || []).map(dvtPsuFF).filter(Boolean);
+  if(!list.length || !want) return "fits";          // בלי נתון לא חוסמים
+  if(list.includes(want)) return "fits";
+  if(want === "sfx"  && list.includes("sfxl")) return "fits";   // הכלוב הארוך מקבל גם קצר
+  if((want === "sfx" || want === "sfxl") && list.includes("atx")) return "bracket";
+  return "no";
+}
+
 /* תמיכת רדיאטור: או אובייקט {front,top,...}, או עמודות נפרדות
    radiatorFrontMm / radiatorTopMm / radiatorRearMm בגיליון. */
 function dvtRadSupport(cs){
@@ -243,6 +276,23 @@ function dvtConnectors(v){
     else if(/\b(6|8)\s*(?:\+\s*2)?\s*(?:pin|פין)\b/.test(s)) pcie8 = 1;
   }
   return { pcie8, vhpwr };
+}
+
+/* כמה מחברי PCIe 8-פין דורש מתאם 12VHPWR של הכרטיס הזה.
+   ---------------------------------------------------------------
+   ⚠️ קודם היה כאן 3 קבוע, וזה חסם מכירות אמיתיות: RTX 5070 (250W)
+   מגיע עם מתאם 2×8 בקופסה, ונחסם מול כל ספק עם שני מחברי PCIe.
+   בכיוון השני 3 היה **מקל מדי** — RTX 5090 (575W) עבר עם מתאם 3×8
+   שמדורג ל-450W בלבד.
+
+   כל מחבר 8-פין מספק 150W, וזה בדיוק מדרגות ה-sense של התקן
+   (150/300/450/600W) ומה שהיצרנים שמים בקופסה בפועל:
+     5070 250W → 2×8 · 5070 Ti 300W → 2×8 · 5080 360W → 3×8 · 5090 575W → 4×8
+   בלי tdpWatts חוזרים ל-3 השמרני שהיה כאן קודם. */
+function dvtVhpwrAdapter8pin(gpu){
+  const w = dvtNumOf(gpu, "tdpWatts");
+  if(w === null || w <= 0) return 3;
+  return Math.max(1, Math.min(4, Math.ceil(w / 150)));
 }
 
 /* ---------------------------------------------------------------
@@ -483,6 +533,32 @@ const DVT_RULES = [
     }
   },
   {
+    /* ⚠️ needs מבקש במפורש ram.sticks ולא נשען על ברירת המחדל של
+       dvtMaxQty. שם "ריק = 1" הוא שמרנות נכונה כי היא רק *מרחיבה*
+       את התקרה; כאן היא הייתה מספרת ללקוח על תפוסת חריצים שאיש לא
+       מדד. 71 מוצרי זיכרון בקטלוג בלי הערך — עליהם החוק פשוט שותק. */
+    id:"mobo-ram-slots-full", cats:["mobo","ram"], on:"ram", level:"info",
+    needs:["mobo.ramSlots","ram.sticks"],
+    run:({mobo,ram,q}) => {
+      const slots = dvtNumOf(mobo,"ramSlots");
+      const used = q("ram") * Math.max(1, dvtNumOf(ram,"modules") || 1);
+      return (used === slots && slots > 1)
+        ? `הערכה תאכלס את כל ${slots} חריצי הזיכרון של ${mobo.name}. מבחינת ביצועים זה המצב הטוב ביותר, רק שים לב שהרחבה בעתיד תהיה החלפה של הערכה ולא הוספת מקל לידה.`
+        : null;
+    }
+  },
+  {
+    id:"ram-single-channel", cats:["mobo","ram"], on:"ram", level:"info",
+    needs:["mobo.ramSlots","ram.sticks"],
+    run:({mobo,ram,q}) => {
+      const used = q("ram") * Math.max(1, dvtNumOf(ram,"modules") || 1);
+      const slots = dvtNumOf(mobo,"ramSlots");
+      return (used === 1 && slots >= 2)
+        ? `נבחר מקל זיכרון אחד, כך שהזיכרון ירוץ בערוץ יחיד — כמחצית מרוחב הפס. שתי יחידות של חצי הנפח (למשל 2×8GB במקום 1×16GB) עולות בערך אותו דבר ונותנות יותר, במיוחד במשחקים ובגרפיקה מובנית.`
+        : null;
+    }
+  },
+  {
     id:"mobo-ram-capacity", cats:["mobo","ram"], on:"ram", level:"error",
     needs:["mobo.maxRamGb","ram.capacityGb"],
     run:({mobo,ram,q}) => {
@@ -599,12 +675,18 @@ const DVT_RULES = [
 
   /* ============ לוח אם ↔ ספק כוח ============ */
   {
-    id:"mobo-psu-eps", cats:["mobo","psu"], on:"psu", level:"error",
+    /* ⚠️ warn ולא error, וזה שינוי מכוון אחרי שהנתונים נכנסו לגיליון.
+       epsConnectors בלוח סופר **שקעים על הלוח** — לוח 8+4 נרשם 2 —
+       והמחבר השני בלוח צרכני הוא תוספת להאצה ולעומס ממושך, לא תנאי
+       לעלייה. מחשב עם כבל EPS אחד בלוח כזה עולה ורץ.
+       על הקטלוג של היום זה 30 לוחות × 4 ספקים בעלי EPS יחיד = 120
+       צמדים שהיו נחסמים למכירה בלי סיבה פיזית. */
+    id:"mobo-psu-eps", cats:["mobo","psu"], on:"psu", level:"warn",
     needs:["mobo.epsConnectors","psu.epsConnectors"],
     run:({mobo,psu}) => {
       const need = dvtNumOf(mobo,"epsConnectors"), have = dvtNumOf(psu,"epsConnectors");
       return need > have
-        ? `${mobo.name} דורש ${need} מחברי EPS 8-פין להזנת המעבד, ול-${psu.name} יש ${have}.`
+        ? `ל-${mobo.name} יש ${need} שקעי EPS להזנת המעבד ול-${psu.name} יש ${have} כבל${have>1?"ים":""}. המחשב יעלה ויעבוד ככה — השקע הנוסף נחוץ למעבד חזק בעומס ממושך או להאצה. אם זה הכיוון, שווה ספק עם ${need} מחברי EPS.`
         : null;
     }
   },
@@ -665,6 +747,24 @@ const DVT_RULES = [
     }
   },
   {
+    /* ⚠️ slotWidth בגיליון הוא מידה ולא ספירה: 2.5 ו-3.5 הם ערכים
+       אמיתיים ונפוצים (12 ו-7 כרטיסים בקטלוג). פיזית כרטיס 3.5 חוסם
+       ארבעה חריצים — הוא לא "נכנס בשלושה וחצי" — ולכן העיגול כלפי
+       מעלה, והשוואה מול הכמות ולא מול המידה הגולמית.
+       זו אזהרה ולא חסימה: הכרטיס נכנס, פשוט לא נשאר אחריו כלום. */
+    id:"gpu-case-slots-tight", cats:["gpu","case"], on:"case", level:"warn",
+    needs:["gpu.slotWidth","case.expansionSlots"],
+    run:({gpu,cs,q}) => {
+      const raw = dvtNumOf(gpu,"slotWidth") * q("gpu");
+      const used = Math.ceil(raw);
+      const bays = dvtNumOf(cs,"expansionSlots");
+      if(raw > bays) return null;                  // זו כבר שגיאה בחוק שמעל
+      return used >= bays
+        ? `כרטיס המסך חוסם בפועל ${used} מתוך ${bays} חריצי ההרחבה של ${cs.name}. הוא ייכנס, אבל לא יישאר מקום לכרטיס נוסף כמו רשת או כרטיס קול, והחריץ התחתון יהיה צמוד לרצפת המארז. אם תרצה להוסיף כרטיס בהמשך — כדאי מארז עם יותר חריצים.`
+        : null;
+    }
+  },
+  {
     id:"gpu-case-height", cats:["gpu","case"], on:"case", level:"error",
     needs:["gpu.heightMm","case.maxGpuHeightMm"],
     run:({gpu,cs}) => {
@@ -681,6 +781,9 @@ const DVT_RULES = [
        מקבל חשמל. זו תקלה נפוצה יותר מהספק עצמו. */
     id:"gpu-psu-connectors", cats:["gpu","psu"], on:"psu", level:"error",
     needs:["gpu.powerConnectors","psu.pcieConnectors"],
+    /* ⚠️ wants ולא needs: בלי tdpWatts הבדיקה עדיין רצה, רק עם ההנחה
+       השמרנית של מתאם 3×8 במקום מספר שנגזר מצריכת הכרטיס. */
+    wants:["gpu.tdpWatts"],
     run:({gpu,psu,q}) => {
       const need = dvtConnectors(dvtGet(gpu,"powerConnectors"));
       if(!need) return null;
@@ -688,11 +791,13 @@ const DVT_RULES = [
       const haveVhpwr = dvtBoolOf(psu,"has12vhpwr") === true ? 1 : 0;
       const n = q("gpu");
       if(need.vhpwr * n > 0 && !haveVhpwr){
-        // מתאם 3×8 → 12VHPWR הוא פתרון לגיטימי ומגיע בקופסה
-        if(have8 >= 3 * n){
+        // מתאם PCIe → 12VHPWR הוא פתרון לגיטימי ומגיע בקופסה, אבל
+        // מספר המחברים שהוא דורש נגזר מצריכת הכרטיס ולא קבוע.
+        const per = dvtVhpwrAdapter8pin(gpu);
+        if(have8 >= per * n){
           return null;
         }
-        return `${gpu.name} מוזן במחבר 12VHPWR. ל-${psu.name} אין מחבר כזה, וגם אין ${3*n} מחברי PCIe 8-פין למתאם.`;
+        return `${gpu.name} מוזן במחבר 12VHPWR. ל-${psu.name} אין מחבר כזה, וגם אין ${per*n} מחברי PCIe 8-פין למתאם שהכרטיס דורש. צריך ספק ATX 3.0 עם 12VHPWR, או ספק עם מספיק מחברי PCIe.`;
       }
       if(need.pcie8 * n > have8){
         return `${gpu.name} דורש ${need.pcie8 * n} מחברי PCIe 8-פין, ול-${psu.name} יש ${have8}.`;
@@ -758,11 +863,31 @@ const DVT_RULES = [
     id:"psu-case-form", cats:["psu","case"], on:"case", level:"error",
     needs:["psu.formFactor","case.supportedPsuFormFactors"],
     run:({psu,cs}) => {
-      const list = dvtArrOf(cs,"supportedPsuFormFactors").map(s => s.toLowerCase().replace(/[\s\-]/g,""));
+      const list = dvtArrOf(cs,"supportedPsuFormFactors");
       if(!list.length) return null;
-      const f = String(dvtGet(psu,"formFactor")).toLowerCase().replace(/[\s\-]/g,"");
-      return list.includes(f) ? null :
-        `${psu.name} הוא ${dvtGet(psu,"formFactor")} והמארז ${cs.name} מקבל ${list.join(", ")}.`;
+      const f = dvtGet(psu,"formFactor");
+      if(dvtPsuFits(list, f) !== "no") return null;
+      /* ההבחנה SFX מול SFX-L שווה משפט משלה: אלה לא שני תקנים שונים
+         אלא אותו תקן בשני עומקים, והלקוח צריך לדעת מה לחפש במקומו. */
+      if(dvtPsuFF(f) === "sfxl" && list.map(dvtPsuFF).includes("sfx")){
+        return `${psu.name} הוא SFX-L — עמוק ב-30mm מ-SFX רגיל — והמארז ${cs.name} מקבל SFX בלבד. הכלוב לא ייתן לו להיכנס. חפש ספק שכתוב עליו SFX ולא SFX-L.`;
+      }
+      return `${psu.name} הוא ${f} והמארז ${cs.name} מקבל ${list.join(", ")}. זה לא אותה תבנית הברגה.`;
+    }
+  },
+  {
+    /* ⚠️ מכוון להיות info ולא חסימה: בראקט המתאם מגיע בקופסה של כמעט
+       כל ספק SFX, וזו הרכבה שנמכרת כל יום. חסימה כאן הייתה פוסלת
+       מכירה תקינה — בדיוק הנזק שהמנוע הזה אמור למנוע. */
+    id:"psu-case-form-bracket", cats:["psu","case"], on:"case", level:"info",
+    needs:["psu.formFactor","case.supportedPsuFormFactors"],
+    run:({psu,cs}) => {
+      const list = dvtArrOf(cs,"supportedPsuFormFactors");
+      if(!list.length) return null;
+      const f = dvtGet(psu,"formFactor");
+      return dvtPsuFits(list, f) === "bracket"
+        ? `${psu.name} הוא ספק קטן (${f}) והמארז ${cs.name} בנוי לספק ATX. הוא מתחבר דרך בראקט המתאם שמגיע איתו — אני מוודא שהוא בקופסה לפני ההרכבה. ספק ATX רגיל היה נותן לך יותר וואטים לאותו מחיר.`
+        : null;
     }
   },
   {
@@ -771,6 +896,18 @@ const DVT_RULES = [
     run:({psu,cs}) => {
       const len = dvtNumOf(psu,"lengthMm"), max = dvtNumOf(cs,"maxPsuLengthMm");
       return len > max ? `הספק באורך ${len}mm והמארז ${cs.name} מקבל עד ${max}mm.` : null;
+    }
+  },
+  {
+    /* ⚠️ המידה במארז היא עד קצה הספק — היא לא מכילה את צרור הכבלים
+       שיוצא מאחוריו, וזה עוד 30-40mm בספק מודולרי. לכן זו אזהרה ולא
+       הערה: ההרכבה נסגרת, אבל בדחיסה של הכבלים. */
+    id:"psu-case-length-tight", cats:["psu","case"], on:"case", level:"warn",
+    needs:["psu.lengthMm","case.maxPsuLengthMm"],
+    run:({psu,cs}) => {
+      const len = dvtNumOf(psu,"lengthMm"), max = dvtNumOf(cs,"maxPsuLengthMm");
+      if(!(len <= max && max - len < 20)) return null;
+      return `הספק (${len}mm) כמעט ממלא את תא הספק במארז ${cs.name} (${max}mm) — נשארים ${max - len}mm לצרור הכבלים שיוצא מאחוריו. זה נסגר, אבל בדוחק; ספק קצר יותר או מארז שאפשר להזיז בו את כלוב הכוננים יקלו על ההרכבה.`;
     }
   },
 

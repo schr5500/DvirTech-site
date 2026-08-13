@@ -233,6 +233,30 @@
   display: flex; flex-direction: column; align-items: center; gap: 14px;
 }
 
+/* ---------- עימוד ----------
+   בלי כיוון מפורש: הרשימה יורשת את כיוון הדף, כך שב-RTL "הקודם" יושב
+   מימין ובאנגלית משמאל — בלי לגעת ב-HTML (ראו renderPager).
+   :empty מבטל גם את המרווח, אחרת קטגוריה עם עמוד אחד מקבלת 28px ריקים. */
+.pager {
+  display: flex; flex-wrap: wrap; justify-content: center; align-items: center;
+  gap: 6px; margin-top: 28px;
+}
+.pager:empty { margin-top: 0; }
+.pager-btn {
+  min-width: 38px; height: 38px; padding: 0 10px; cursor: pointer;
+  border: 1px solid rgba(15,23,42,.12); border-radius: 9px; background: #fff;
+  font: inherit; font-family: 'Rubik', sans-serif; font-size: 14px; font-weight: 600;
+  color: var(--ink, #0f172a); transition: background .15s, border-color .15s;
+}
+.pager-btn:hover:not(:disabled):not(.active) { background: #f8fafc; border-color: rgba(15,23,42,.28); }
+.pager-btn.active {
+  background: var(--ink, #0f172a); color: #fff; border-color: transparent; cursor: default;
+}
+/* חץ בקצה הרשימה נשאר במקומו ורק מעומעם — כפתור שנעלם מזיז את כל
+   שורת המספרים בכל מעבר עמוד. */
+.pager-btn:disabled { opacity: .35; cursor: default; }
+.pager-gap { padding: 0 2px; color: var(--ink-soft, #64748b); }
+
 /* ---------- מובייל: הסינון הופך למגירה ---------- */
 @media (max-width: 860px) {
   .shop-layout { grid-template-columns: 1fr; }
@@ -251,6 +275,8 @@
   .price-input { height: 32px; }
   .price-input::-webkit-slider-thumb { width: 24px; height: 24px; }
   .price-input::-moz-range-thumb    { width: 24px; height: 24px; }
+  /* יעד מגע נשאר 34px ומעלה גם כשהמספרים מתכווצים */
+  .pager-btn { min-width: 34px; height: 34px; padding: 0 8px; font-size: 13px; }
 }
 
 /* =====================================================================
@@ -364,3 +390,42 @@
 /* קישור וואטסאפ בשורת "שאלה על המוצר?" */
 .pd-wa{color:var(--teal-dark,#12836C);font-weight:700;text-decoration:underline;margin-inline-start:4px}
 .pd-wa:hover{color:var(--blue,#1B6FE0)}
+
+/* =====================================================================
+   דף מוצר — תמונה, מלאי ומחיר מבצע
+   ===================================================================== */
+
+/* ---------- מסגרת התמונה ----------
+   ⚠️ ה-placeholder לא מחליף את התמונה אלא יושב מתחתיה. כך הוא מוצג
+   כבר בזמן הטעינה, וכתובת שבורה בגיליון (onerror מסיר את ה-img) חושפת
+   אותו בחזרה במקום להשאיר ריבוע שבור. */
+.pd-art-frame{position:relative}
+.pd-art-frame img{position:relative;z-index:1;background:#fff}
+
+.pd-ph{position:absolute;inset:0;display:flex;flex-direction:column;
+  align-items:center;justify-content:center;gap:12px;padding:22px;text-align:center}
+.pd-art-frame .pd-ph svg{width:76px;height:76px;color:var(--blue,#1B6FE0);opacity:.28}
+.pd-ph-name{font-size:13.5px;font-weight:700;line-height:1.5;
+  color:var(--ink-soft,#6B7A8D);max-width:36ch}
+
+/* ---------- מלאי ----------
+   שורה קצרה מתחת למחיר. "נותרו X" מוצג רק במלאי נמוך — מספר גדול לא
+   אומר ללקוח כלום ורק מסגיר את גודל המלאי. */
+.pd-stock{display:flex;align-items:center;gap:8px;margin-top:8px;
+  font-size:13px;font-weight:700}
+.pd-stock::before{content:"";width:8px;height:8px;border-radius:50%;flex:none}
+.pd-stock--in{color:var(--teal-dark,#12836C)}
+.pd-stock--in::before{background:var(--teal-dark,#12836C)}
+.pd-stock--out{color:#B23B36}
+.pd-stock--out::before{background:#B23B36}
+.pd-stock-left{font-weight:600;color:var(--ink-soft,#6B7A8D)}
+
+/* ---------- מחיר ומבצע ---------- */
+.pd-price-row{display:flex;align-items:baseline;gap:10px;flex-wrap:wrap}
+.pd-price-was{font-size:15px;font-weight:600;color:#9AA8BA;text-decoration:line-through}
+.pd-save{background:#E4322B;color:#fff;font-family:'Rubik',sans-serif;font-weight:800;
+  font-size:12px;padding:3px 9px;border-radius:999px}
+
+/* ---------- הערה מתחת לטבלת המפרט ---------- */
+.pd-spec-note{margin:12px 2px 0;font-size:12.5px;line-height:1.6;
+  color:var(--ink-soft,#6B7A8D);max-width:75ch}

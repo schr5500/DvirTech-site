@@ -318,14 +318,17 @@
 
       <div style="margin-top:16px;display:flex;flex-direction:column;gap:14px;max-height:640px;overflow-y:auto;padding-inline-end:4px">
         <sc-for list="{{ options }}" as="o" hint-placeholder-count="6">
-          <div onClick="{{ o.pick }}" style="position:relative;display:flex;align-items:center;gap:13px;border:1.5px solid {{ o.bd }};background:{{ o.bg }};border-radius:16px;padding:17px 18px;cursor:pointer;transition:.15s;box-shadow:{{ o.shadow }}" style-hover="border-color:#C9DEF8;background:#FBFDFF">
+          <div onClick="{{ o.pick }}" aria-disabled="{{ o.aria }}" title="{{ o.reason }}" style="position:relative;display:flex;align-items:center;gap:13px;border:1.5px solid {{ o.bd }};background:{{ o.bg }};border-radius:16px;padding:17px 18px;cursor:{{ o.cursor }};opacity:{{ o.rowOp }};transition:.15s;box-shadow:{{ o.shadow }}" style-hover="border-color:#C9DEF8;background:#FBFDFF">
             <span style="position:absolute;inset-inline-start:0;top:16px;bottom:16px;width:3px;border-radius:3px;background:{{ o.accent }}"></span>
             <span style="width:22px;height:22px;border-radius:50%;border:1.5px solid {{ o.dotBd }};background:{{ o.dotBg }};display:grid;place-items:center;flex:none;color:#fff;font-size:12px;font-weight:900">{{ o.mark }}</span>
             <span style="flex:1;min-width:0">
               <span dir="auto" style="display:block;font-size:15px;font-weight:700;color:{{ o.nameColor }};line-height:1.35;letter-spacing:-.1px;direction:{{ o.dir }};text-align:right">{{ o.name }}</span>
+              <sc-if value="{{ o.badge }}" hint-placeholder-val="{{ false }}">
+                <span style="display:inline-flex;align-items:center;gap:4px;margin-top:6px;font-size:10.5px;font-weight:700;border-radius:999px;padding:3px 10px;color:{{ o.badgeFg }};background:{{ o.badgeBg }};border:1px solid {{ o.badgeBd }}">{{ o.badgeIcon }} {{ o.badge }}</span>
+              </sc-if>
               <span style="display:block;font-size:12.5px;color:#5F7590;margin-top:5px;line-height:1.5">{{ o.spec }}</span>
               <sc-if value="{{ o.note }}" hint-placeholder-val="{{ false }}">
-                <span style="display:flex;gap:5px;font-size:11.5px;color:#92650F;background:#FFF6EA;border-radius:8px;padding:6px 9px;margin-top:8px;line-height:1.45">⚠️ {{ o.note }}</span>
+                <span style="display:flex;gap:5px;font-size:11.5px;color:{{ o.noteFg }};background:{{ o.noteBg }};border-radius:8px;padding:6px 9px;margin-top:8px;line-height:1.45">{{ o.noteIcon }} {{ o.note }}</span>
               </sc-if>
               <span style="display:block;font-family:'Rubik',sans-serif;font-size:14.5px;font-weight:800;color:{{ o.priceColor }};margin-top:8px">{{ o.price }}</span>
             </span>
@@ -391,6 +394,20 @@ const DATA = (window.DVIR_BUILDER_DATA || {});
 const CATS = DATA.CATS, CATALOG = DATA.CATALOG, SERVICES = DATA.SERVICES,
       USE_CASES = DATA.USE_CASES, NEEDED = DATA.NEEDED;
 
+/* ארבע רמות ההתאמה שהבורר מציג, לפי level של מנוע ההתאמה:
+     error → סינון: אי-התאמה מוחלטת, לא ניתן לבחור
+     warn  → אזהרה חמורה: יגביל את המוצר בפועל
+     info  → אזהרה: יכול להגביל
+     fit   → מומלץ: נבדק מול מה שכבר נבחר ולא נמצאה בעיה
+   ⚠️ לכל רמה יש badge מילולי ולא רק צבע — לקוח שלא מבחין בגוונים
+   (או קורא מסך) חייב לדעת *למה* הפריט מסומן. */
+const OPT_LEVELS = {
+  error:{ badge:"לא מתאים",    icon:"⛔", fg:"#A81E17", bg:"#FDECEA", bd:"#F3BDB8", accent:"#E4322B" },
+  warn: { badge:"אזהרה חמורה", icon:"⚠️", fg:"#8A5A00", bg:"#FFF1DB", bd:"#F0C989", accent:"#F0A32B" },
+  info: { badge:"אזהרה",       icon:"ℹ️", fg:"#4A6076", bg:"#F1F5F9", bd:"#DDE6EF", accent:"#9FB3C8" },
+  fit:  { badge:"מומלץ",       icon:"✓",  fg:"#0C7A62", bg:"#EAFBF6", bd:"#B7EFE5", accent:"#2FC4B0" }
+};
+
 class Component extends DCLogic {
   state = {
     cat: "case",
@@ -406,6 +423,12 @@ class Component extends DCLogic {
     view: "3d",
     last: null
   };
+
+  /* ⚠️ builder-bridge.js קורא ל-__dvtBuilderRerender כשהקטלוג החי חוזר
+     מהשרת, אבל אף אחד לא הגדיר אותו — ולכן הבונה נשאר תקוע על מטמון
+     ה-localStorage עד רענון עמוד, כולל תוצאות ההתאמה שנגזרות ממנו. */
+  componentDidMount(){ window.__dvtBuilderRerender = () => this.forceUpdate(); }
+  componentWillUnmount(){ if(window.__dvtBuilderRerender) delete window.__dvtBuilderRerender; }
 
   meterTargets(){
     const pc = v => Math.min(100, Math.round(v));
@@ -499,19 +522,48 @@ class Component extends DCLogic {
     return dvtCheckBuild(this.selMap(), this.state.qty);
   }
 
-  /* ההערה שמוצגת על אפשרות ברשימה: מה ישתבש אם *היא* תיבחר.
-     ⚠️ dvtRateOption ולא dvtCheckBuild ידני: הוא משווה מול ההרכב בלי
-     הקטגוריה הזו ומחזיר רק ממצאים *חדשים*. קודם כאן הוצגה כל שגיאה
-     בהרכב, ולכן אם הלוח לא נכנס למארז — כל כרטיסי המסך ברשימה נצבעו
-     באדום עם הודעה שאין לה קשר אליהם. */
-  noteFor(cat, it){
-    if(typeof dvtRateOption !== "function") return null;
-    return dvtRateOption(cat, it, this.selMap(), this.state.qty).text;
+  /* דירוג כל האפשרויות בקטגוריה מול ההרכב הנוכחי: תואמים קודם,
+     חסומים בסוף, כל פריט עם __compat = { level, text, blocked }.
+
+     ⚠️ dvtRankOptions ולא dvtRateOption פר פריט: הוא מחשב את ה-baseline
+     ("מה כבר שבור בהרכב בלי הקטגוריה הזו") פעם אחת לרשימה במקום
+     פעמיים לכל פריט. ב-139 לוחות אם זה ההבדל בין 139 הרצות של טבלת
+     החוקים ל-278 בכל רנדר.
+
+     ⚠️ ההשוואה מול ההרכב *בלי* הקטגוריה הנבדקת היא מה שמונע את המצב
+     שבו לוח שלא נכנס למארז צובע באדום את כל כרטיסי המסך.
+
+     התוצאה נשמרת עד שהבחירה, הכמות או הקטלוג משתנים — החלפת תצוגה
+     תלת-ממדית או שבב שימוש לא אמורה להריץ את מנוע ההתאמה מחדש. */
+  ratedOptions(cat){
+    const list = CATALOG[cat] || [];
+    const key = cat + "|" + JSON.stringify(this.state.sel) + "|" + JSON.stringify(this.state.qty);
+    const c = this.__rated;
+    if(c && c.key === key && c.src === list) return c.list;
+    const rated = (typeof dvtRankOptions === "function")
+      ? dvtRankOptions(cat, list, this.selMap(), this.state.qty)
+      : list.map(it => Object.assign({}, it, { __compat:{ level:"ok", text:null, blocked:false } }));
+    this.__rated = { key, src: list, list: rated };
+    return rated;
   }
-  /* חסום = יש שגיאה שהבחירה הזו *גורמת*. לשימוש עתידי בסימון הרשימה. */
-  blockedFor(cat, it){
-    if(typeof dvtRateOption !== "function") return false;
-    return dvtRateOption(cat, it, this.selMap(), this.state.qty).blocked;
+
+  /* אילו קטגוריות *שכבר נבחרו* באמת מסננות את הרשימה הזו.
+     ⚠️ נגזר מטבלת החוקים ולא כתוב ידנית, כדי שחוק חדש ב-builder-compat.js
+     ישתקף כאן בלי לגעת בקובץ הזה — וכדי ש"מומלץ" לא יתנוסס על פריט
+     שלא נבדק מול כלום (אביזרים, למשל, שאין להם אף חוק). */
+  filterOn(cat){
+    /* try ולא typeof: DVT_RULES הוא const, ובקריאה לפני ש-builder-compat.js
+       רץ הוא ב-TDZ ו-typeof עצמו זורק. בלי המנוע פשוט אין סימון. */
+    let rules = null;
+    try{ rules = DVT_RULES; }catch(e){ /* המנוע לא נטען */ }
+    if(!Array.isArray(rules)) return [];
+    const out = new Set();
+    rules.forEach(r => {
+      const cs = r.cats || [];
+      if(cs.indexOf(cat) < 0) return;
+      cs.forEach(x => { if(x !== cat && this.state.sel[x]) out.add(x); });
+    });
+    return [...out];
   }
   tier(cat){ const it = this.item(cat); return it ? it.t : 0; }
   pick(cat, id){
@@ -661,25 +713,59 @@ class Component extends DCLogic {
         return acc;
       }, {}),
       searchPh: "חפש " + (CATS.find(c => c.key === st.cat) || {}).label + "…",
-      filterNote: st.cat === "mobo" && this.item("cpu") ? "מציג רק לוחות אם תואמים לסוקט LGA1700 של המעבד שנבחר"
-        : st.cat === "gpu" && this.item("case") ? "מסונן לפי אורך מקסימלי במארז וספק הכוח שנבחר" : null,
-      options: (CATALOG[st.cat] || []).map(it => {
-        const on = st.sel[st.cat] === it.id;
-        return { name: it.name, spec: it.spec, note: this.noteFor(st.cat, it), dir: this.dirOf(it.name),
-          price: it.price === 0 ? "כלול" : this.money(it.price) + " ₪",
-          priceColor: it.price === 0 ? "#0E9C8A" : (on ? "#0E4C97" : "#0E2A47"),
-          nameColor: on ? "#0E4C97" : "#0E2A47",
-          bd: on ? "#1B6FE0" : "transparent",
-          bg: on ? "#fff" : "#FAFCFE",
-          shadow: on ? "0 8px 22px rgba(27,111,224,.13)" : "none",
-          accent: on ? "#2FC4B0" : "transparent",
-          imgOp: on ? "1" : "0.72",
-          dotBd: on ? "#1B6FE0" : "#CBD8E6", dotBg: on ? "#1B6FE0" : "#fff",
-          mark: on ? "✓" : "",
-          imgUrl: this.thumbOf(st.cat, it),
-          imgSize: this.renderOf(st.cat, it) ? "86%" : "cover",
-          pick: () => this.pick(st.cat, it.id) };
-      })
+      /* ⚠️ קודם ישב כאן טקסט קבוע מהעיצוב ("תואמים לסוקט LGA1700") —
+         הוא הופיע גם כשהמעבד היה AM5, וגם כששום דבר לא סונן בפועל.
+         עכשיו הוא נגזר ממה שנבחר וממה שהמנוע חסם בפועל. */
+      filterNote: (() => {
+        const by = this.filterOn(st.cat);
+        if(!by.length) return null;
+        const rated = this.ratedOptions(st.cat);
+        if(!rated.length) return null;
+        const bad = rated.filter(x => x.__compat && x.__compat.blocked).length;
+        const names = by.map(k => (CATS.find(c => c.key === k) || {}).label || k).join(" · ");
+        return bad
+          ? `לפי ${names} שבחרת: ${rated.length - bad} מתוך ${rated.length} מתאימים. ${bad} מוצגים מושבתים עם הסיבה.`
+          : `לפי ${names} שבחרת: כל ${rated.length} האפשרויות מתאימות.`;
+      })(),
+      options: (() => {
+        const by = this.filterOn(st.cat);
+        return this.ratedOptions(st.cat).map(it => {
+          const on = st.sel[st.cat] === it.id;
+          const r = it.__compat || {};
+          const bad = !!r.blocked;
+          /* "מומלץ" רק כשהיה מול מה לבדוק. בבונה ריק כל הפריטים היו
+             מקבלים תו ירוק שאין מאחוריו שום בדיקה — וזה גרוע מלא לסמן. */
+          const lv = bad ? "error"
+            : (r.level === "warn" || r.level === "info") ? r.level
+            : by.length ? "fit" : null;
+          const L = lv ? OPT_LEVELS[lv] : null;
+          return { name: it.name, spec: it.spec, note: r.text || null, dir: this.dirOf(it.name),
+            badge: L ? L.badge : null, badgeIcon: L ? L.icon : "",
+            badgeFg: L ? L.fg : "", badgeBg: L ? L.bg : "", badgeBd: L ? L.bd : "",
+            noteFg: L ? L.fg : "#92650F", noteBg: L ? L.bg : "#FFF6EA",
+            noteIcon: L ? L.icon : "⚠️",
+            /* פריט חסום נשאר ברשימה, מושבת ועם הסיבה — ולא נעלם.
+               לקוח שלא מוצא מוצר שהוא מכיר מסיק שהחנות לא מוכרת אותו. */
+            aria: bad ? "true" : null,
+            reason: r.text || "",
+            cursor: bad ? "not-allowed" : "pointer",
+            rowOp: bad ? "0.62" : "1",
+            price: it.price === 0 ? "כלול" : this.money(it.price) + " ₪",
+            priceColor: it.price === 0 ? "#0E9C8A" : (on ? "#0E4C97" : "#0E2A47"),
+            nameColor: on ? "#0E4C97" : (bad ? "#7A5B58" : "#0E2A47"),
+            bd: on ? "#1B6FE0" : (bad ? "#F3BDB8" : "transparent"),
+            bg: on ? "#fff" : (bad ? "#FEF8F7" : "#FAFCFE"),
+            shadow: on ? "0 8px 22px rgba(27,111,224,.13)" : "none",
+            accent: on ? "#2FC4B0" : (L ? L.accent : "transparent"),
+            imgOp: bad ? "0.4" : (on ? "1" : "0.72"),
+            dotBd: on ? "#1B6FE0" : (bad ? "#E4322B" : "#CBD8E6"),
+            dotBg: on ? "#1B6FE0" : (bad ? "#E4322B" : "#fff"),
+            mark: on ? "✓" : (bad ? "✕" : ""),
+            imgUrl: this.thumbOf(st.cat, it),
+            imgSize: this.renderOf(st.cat, it) ? "86%" : "cover",
+            pick: () => { if(bad) return; this.pick(st.cat, it.id); } };
+        });
+      })()
     };
   }
 }

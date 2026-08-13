@@ -19,14 +19,19 @@
    "הצג הכל" או מתוצאות חיפוש) אמור לראות הכל, לא קטגוריה שרירותית.
    אחריה המוצרים השלמים — זה מה שרוב הלקוחות מחפשים — ואז הרכיבים
    הבודדים. services לא מופיע כאן: שירות נלווה נמכר יחד עם הרכבה,
-   לא כפריט מדף. */
+   לא כפריט מדף.
+
+   מחשבים ניידים יושבים ליד המחשבים המוכנים כי זו אותה החלטת קנייה,
+   ומאווררי מארז / רשת אלחוטית / משחה תרמית באים אחרי המארז — הם
+   נלווים להרכבה עצמה. אביזרים נלווים אחרונים: זו קטגוריית "ועוד". */
 /* ⚠️ קטגוריה שלא רשומה כאן לא קיימת מבחינת הדף: initPage נופל ל-"הכל"
    וגם התפריט העליון לא יוכל להוביל אליה. כל קטגוריה וירטואלית חדשה
    ב-DVT_VIRTUAL_CATS חייבת להופיע גם ברשימה הזו. */
 const SHOP_CATEGORY_ORDER = [
-  "all", "sale", "readyPc",
+  "all", "sale", "readyPc", "laptop",
   "monitor", "keyboard", "mouse", "headset", "webcam", "peripherals",
-  "cpu", "gpu", "mobo", "ram", "storage", "cooling", "psu", "case"
+  "cpu", "gpu", "mobo", "ram", "storage", "cooling", "psu", "case",
+  "caseFans", "wifi", "paste", "extras"
 ];
 
 /* ==================== הגדרת הסינונים ====================
@@ -36,11 +41,13 @@ const SHOP_CATEGORY_ORDER = [
          "bool"  — כן/לא
    הסינון תמיד נבנה מהערכים שקיימים *בפועל* בנתונים, אז שדה ריק
    בגיליון פשוט לא מייצר קבוצת סינון — אין קבוצות ריקות באתר. */
+/* ⚠️ "all" ו-"sale" לא מופיעות כאן בכוונה: הן מערבבות קטגוריות, ורשימת
+   הסינונים שלהן נבנית מהפריטים שבדף — ראו facetKeysFor(). */
 const FACETS = {
-  // "brand" הוא השדה היחיד שקיים בעקביות בכל קטגוריה — בדיוק בשביל זה
-  // הוא הסינון היחיד שהגיוני להציג כשהתצוגה מערבבת קטגוריות שונות.
-  all:         ["brand"],
   readyPc:     ["brand", "useCase", "ramGb", "storageGb", "warrantyMonths"],
+  // נייד נמכר לפי המסך לא פחות מאשר לפי המעבד, ולכן גודל/רזולוציה/רענון
+  // נכנסים לסינון — בניגוד למחשב מוכן, שהמסך שלו נקנה בנפרד.
+  laptop:      ["brand", "useCase", "sizeInch", "ramGb", "storageGb", "resolution", "refreshHz", "os", "warrantyMonths"],
   // מסכים הם תת-קבוצה של ציוד היקפי, ולכן אותם שדות בלי subType —
   // כאן כולם מסכים ממילא, וקבוצת סינון עם ערך יחיד לא מסננת כלום.
   monitor:     ["brand", "sizeInch", "refreshHz", "resolution", "panel", "connection"],
@@ -52,11 +59,71 @@ const FACETS = {
   storage:     ["brand", "driveType", "capacityGb", "pcieGen"],
   cooling:     ["brand", "type", "radiatorMm", "heightMm"],
   psu:         ["brand", "wattage"],
-  "case":      ["brand", "supportedFormFactors", "maxGpuLengthMm"]
+  "case":      ["brand", "supportedFormFactors", "maxGpuLengthMm"],
+  caseFans:    ["brand", "sizeMm", "fans", "argb", "pwm", "hubIncluded"],
+  wifi:        ["brand", "netType", "busType", "wifiStandard", "speedMbps", "bluetooth"],
+  paste:       ["brand", "grams", "conductivity", "electricallyConductive"],
+  // subType ראשון: "כבל" ו"דיסק חיצוני" הם מוצרים שונים לגמרי, וזה
+  // מה שמפריד ביניהם. compatibleWith לא נכנס — טקסט חופשי מייצר קבוצת
+  // סינון עם ערך אחד לכל מוצר.
+  extras:      ["subType", "brand", "argb", "lengthCm"]
 };
 
 /* FACET_LABELS / VALUE_LABELS / FACET_UNITS עברו ל-search-core.js
    כדי שגם דף המוצר ישתמש באותן תוויות. */
+
+/* ---------------------------------------------------------------------
+   השלמת תוויות לשדות של הקטגוריות שנוספו לחנות
+   ---------------------------------------------------------------------
+   מפתח בלי תווית מוצג בסינון בשמו הגולמי ("busType") באמצע דף עברי.
+   מרחיבים כאן את אותן מפות שב-search-core.js במקום להעתיק אותן — שני
+   עותקים של אותה מפה מתפצלים עם הזמן. נכתב רק מפתח שחסר, כך שתווית
+   שכבר קיימת שם ממשיכה לנצח; כשהתוויות יעברו לשם, הבלוק הזה נמחק. */
+const SHOP_FACET_LABELS = {
+  fans:                  { he: "מאווררים בערכה",  en: "Fans in kit" },
+  sizeMm:                { he: "גודל מאוורר",     en: "Fan size" },
+  argb:                  { he: "תאורת ARGB",      en: "ARGB lighting" },
+  pwm:                   { he: "בקרת PWM",        en: "PWM control" },
+  hubIncluded:           { he: "כולל האב",        en: "Hub included" },
+  busType:               { he: "סוג חיבור",       en: "Interface" },
+  netType:               { he: "סוג רשת",         en: "Network type" },
+  wifiStandard:          { he: "תקן WiFi",        en: "WiFi standard" },
+  speedMbps:             { he: "מהירות רשת",      en: "Network speed" },
+  bluetooth:             { he: "Bluetooth",       en: "Bluetooth" },
+  grams:                 { he: "כמות",            en: "Amount" },
+  conductivity:          { he: "מוליכות תרמית",   en: "Thermal conductivity" },
+  electricallyConductive:{ he: "מוליך חשמל",      en: "Electrically conductive" },
+  lengthCm:              { he: "אורך",            en: "Length" }
+};
+const SHOP_FACET_UNITS = { sizeMm: "mm", speedMbps: "Mbps", grams: "g", conductivity: "W/m·K", lengthCm: "cm" };
+const SHOP_VALUE_LABELS = {
+  // "סטודנטים" קיים רק בניידים ולכן לא היה ברשימת הייעודים של מחשב מוכן
+  useCase: { student: { he: "לסטודנטים", en: "Student" } },
+  subType: {
+    cable:         { he: "כבלים",              en: "Cables" },
+    "case-glass":  { he: "דופן זכוכית",        en: "Glass panel" },
+    "gpu-bracket": { he: "תומך לכרטיס מסך",    en: "GPU bracket" },
+    adapter:       { he: "מתאמים",             en: "Adapters" },
+    hub:           { he: "מפצלים",             en: "Hubs" }
+  },
+  netType: {
+    wifi:       { he: "אלחוטי",          en: "WiFi" },
+    ethernet:   { he: "רשת קווית",       en: "Ethernet" },
+    "wifi+bt":  { he: "אלחוטי + Bluetooth", en: "WiFi + Bluetooth" }
+  }
+};
+
+Object.keys(SHOP_FACET_LABELS).forEach(k => {
+  if(!FACET_LABELS[k]) FACET_LABELS[k] = SHOP_FACET_LABELS[k];
+});
+Object.keys(SHOP_FACET_UNITS).forEach(k => {
+  if(FACET_UNITS[k] === undefined) FACET_UNITS[k] = SHOP_FACET_UNITS[k];
+});
+Object.keys(SHOP_VALUE_LABELS).forEach(facet => {
+  if(!VALUE_LABELS[facet]) VALUE_LABELS[facet] = {};
+  const src = SHOP_VALUE_LABELS[facet], dst = VALUE_LABELS[facet];
+  Object.keys(src).forEach(v => { if(dst[v] === undefined) dst[v] = src[v]; });
+});
 
 /* ==================== state ==================== */
 let SHOP_CATALOG = null;
@@ -64,6 +131,17 @@ let currentCat = null;
 let activeFilters = {};      // { facetKey: Set(values) }
 let searchTerm = "";
 let sortMode = "priceAsc";
+
+/* ==================== עימוד ====================
+   1,269 כרטיסי מוצר בבת אחת מקפיאים את הדפדפן בגלילה. 48 לעמוד מתחלק
+   בלי שארית ל-2/3/4 עמודות, כך שהשורה האחרונה אף פעם לא חצי ריקה.
+   ⚠️ העימוד חותך *רק* את מה שמוצג. המסננים, המונים וסקאלת המחירים
+   ממשיכים להיגזר מכל הקטגוריה (ראו buildFacetData/priceBounds) — אחרת
+   סינון בעמוד 1 היה מסתיר תוצאות שיושבות בעמוד 3. קודם מסננים, ורק
+   בסוף חותכים לעמוד. */
+const PAGE_SIZE = 48;
+let currentPage = 1;
+
 /* טווח המחירים שנבחר. null = הקצה לא הוזז, כלומר אין הגבלה מהצד הזה —
    כך אפשר להבדיל בין "המשתמש בחר בדיוק את המחיר הגבוה ביותר" לבין
    "המשתמש לא נגע בכלל", וה-chip לא קופץ סתם. */
@@ -71,6 +149,16 @@ let priceRange = { min: null, max: null };
 
 /* ==================== helpers ==================== */
 /* L / facetLabel / valueLabel / itemName / itemSpec — ב-search-core.js */
+
+/* רינדור אחד קורא ל-sellableItems עשרות פעמים (רצועת הקטגוריות, המונים,
+   סקאלת המחירים, הרשימה), וכל קריאה על "הכל" בונה 1,269 עותקים מחדש.
+   המטמון נמחק רק כשהקטלוג עצמו מתחלף — קטלוג חדש עם מטמון ישן פירושו
+   מחירים ומלאי מיושנים על המסך, ולכן שתי ההשמות עוברות דרך setShopCatalog. */
+let _sellableCache = {};
+function setShopCatalog(catalog){
+  SHOP_CATALOG = catalog;
+  _sellableCache = {};
+}
 
 // פריטי-דמה ("ללא כרטיס מסך", "ללא שירות") הם בחירה בבונה, לא מוצר
 // שנמכר — הם לא אמורים להופיע בחנות בכלל.
@@ -81,6 +169,16 @@ let priceRange = { min: null, max: null };
 // לדעת לאיזה SKU אמיתי (category:id) להוסיף לעגלה ואיזה איור להציג —
 // "all" עצמה איננה קטגוריה אמיתית ואין לה משמעות בשרת או בבונה.
 function sellableItems(cat){
+  if(_sellableCache[cat]) return _sellableCache[cat];
+  const items = buildSellableItems_(cat);
+  // ⚠️ המטמון מחזיר את *אותו* מערך לכל הקוראים. כל מי שממיין או מסנן
+  // חייב לעבוד על עותק (filter/map מחזירים חדש, sort לא) — אחרת מיון
+  // בדף אחד היה משנה את הסדר לכולם.
+  _sellableCache[cat] = items;
+  return items;
+}
+
+function buildSellableItems_(cat){
   // "מבצעים" — פסאודו־קטגוריה: כל המוצרים שיש להם oldPrice גבוה מהמחיר
   // הנוכחי בגיליון, מכל הקטגוריות. אין לה קיום בשרת ולא בבונה, בדיוק
   // כמו "הכל", ולכן _realCat נשמר מהפריט המקורי.
@@ -174,19 +272,59 @@ function itemMatchesFilters(item, exceptKey){
 
 /* ניקוד ההתאמה של פריט למונח החיפוש הנוכחי. הלוגיקה עצמה יושבת
    ב-search-core.js ומשותפת עם תיבת החיפוש בהדר, כדי ששתיהן ידרגו
-   בדיוק אותו דבר. */
+   בדיוק אותו דבר.
+
+   הניקוד נשמר על הפריט: buildFacetData שואל אותו פעם לכל קבוצת סינון
+   (בתצוגת "הכל" זה עשרות פעמים לאותו פריט), והמיון שואל אותו שוב בכל
+   השוואה. המפתח כולל את השפה כי תווית הקטגוריה משתתפת בניקוד — בלעדיה
+   מעבר לאנגלית באמצע חיפוש היה משאיר את הדירוג העברי. */
 function itemSearchScore(item){
   if(!searchTerm) return 0;
-  const cat = item._realCat || currentCat;
-  return dvtItemScore(item, catLabel(cat), searchTerm);
+  const key = LANG + "|" + searchTerm;
+  if(item._scoreKey !== key){
+    item._scoreKey = key;
+    item._score = dvtItemScore(item, catLabel(item._realCat || currentCat), searchTerm);
+  }
+  return item._score;
+}
+
+/* תצוגה מעורבת = פסאודו־קטגוריה שמאחדת כמה קטגוריות אמיתיות ("הכל",
+   "מבצעים"). אין לה שורה ב-FACETS כי הסינונים שלה תלויים במה שנחת בדף. */
+function isMixedView(){ return currentCat === "all" || currentCat === "sale"; }
+
+/* אילו שדות הופכים לקבוצות סינון בתצוגה הנוכחית.
+   בתצוגה מעורבת מאחדים את הסינונים של הקטגוריות שהפריטים באמת מגיעים
+   מהן, לפי _realCat: אם בדף יש מעבדים וגם מארזים — יופיעו גם "תושבת"
+   וגם "לוחות אם נתמכים", ולא רק יצרן. מקודם הוצג יצרן בלבד, וכל שאר
+   המידע שכבר יושב על הפריטים פשוט לא היה נגיש.
+   brand ראשון כי הוא השדה היחיד שקיים בעקביות בכל קטגוריה, ואחריו
+   הסינונים לפי סדר הקטגוריות בחנות — כך הסרגל לא מקפץ בין רינדורים.
+   שדה שאין לו ערכים בנתונים נופל ממילא ב-buildFacetData, כך שדף שיש
+   בו רק מעבדים לא מקבל קבוצות ריקות של מארזים.
+   ⚠️ שדה בעל אותו שם בשתי קטגוריות מתאחד לקבוצה אחת (formFactor של לוח
+   אם ושל ספק כוח) — בתצוגה מעורבת זו התנהגות נכונה: הסימון מצמצם את
+   שתיהן יחד, בדיוק כמו שהמונה מראה. */
+function facetKeysFor(items){
+  if(!isMixedView()) return FACETS[currentCat] || ["brand"];
+
+  const cats = new Set();
+  items.forEach(it => cats.add(it._realCat || currentCat));
+  const keys = ["brand"];
+  SHOP_CATEGORY_ORDER.forEach(c => {
+    if(!cats.has(c)) return;
+    (FACETS[c] || []).forEach(k => { if(keys.indexOf(k) === -1) keys.push(k); });
+  });
+  return keys;
 }
 
 /* המונה ליד כל ערך מחושב מול שאר הסינונים הפעילים אבל *לא* מול
    הקבוצה של עצמו — כך שאפשר לסמן כמה יצרנים יחד והמספרים נשארים
    הגיוניים, בדיוק כמו בחנויות הגדולות. */
 function buildFacetData(){
+  // ⚠️ כל הקטגוריה ולא רק העמוד המוצג: מונה שנגזר מעמוד 1 היה מסתיר
+  // מוצרים שיושבים בעמוד 3.
   const items = sellableItems(currentCat);
-  const keys = FACETS[currentCat] || ["brand"];
+  const keys = facetKeysFor(items);
   const out = [];
 
   keys.forEach(key => {
@@ -255,8 +393,11 @@ function renderCatStrip(){
   }).join("");
 }
 
+// התפריט הזה חי רק עד שההדר האחיד (site-header.js) מחליף את ה-headbar,
+// ומשם והלאה האלמנט לא קיים — ראו ההערה ב-loadShop.
 function renderNavMenu(){
   const menu = document.getElementById("navProductsMenu");
+  if(!menu) return;
   menu.innerHTML = shopCategories().map(cat =>
     `<button onclick="selectCategory('${cat}');closeNavMenu()">${catLabel(cat)}</button>`
   ).join("");
@@ -373,7 +514,8 @@ function onPriceInput(which){
 
   setPriceSide_("min", lo, b);
   setPriceSide_("max", hi, b);
-  syncPriceUI_(b);
+  resetPage();          // בלי updateUrl: כתיבה לכתובת בכל צעד של גרירה
+  syncPriceUI_(b);      // נחסמת בדפדפנים. הכתובת מתעדכנת ב-onPriceCommit.
   renderChips();
   renderGrid();
 }
@@ -403,6 +545,7 @@ function onPriceBox(which, raw){
     setPriceSide_(which, capped, b);
   }
 
+  resetPage();
   renderAll();          // הקלדה היא סוף פעולה, אז מרעננים גם את המונים
 }
 
@@ -411,6 +554,7 @@ function onPriceCommit(){ renderAll(); }
 
 function clearPriceFilter(){
   priceRange = { min: null, max: null };
+  resetPage();
   renderAll();
 }
 
@@ -491,11 +635,24 @@ function renderGrid(){
   const grid = document.getElementById("productGrid");
   const empty = document.getElementById("emptyState");
 
-  document.getElementById("resultCount").textContent =
-    items.length + " " + (items.length === 1 ? tr("מוצר","product") : tr("מוצרים","products"));
+  // ⚠️ החיתוך לעמוד קורה כאן, *אחרי* הסינון והמיון. currentPage נצבט
+  // לגבולות גם כאן ולא רק בפעולות המשתמש, כי ?page= מגיע מהכתובת ויכול
+  // להצביע על עמוד שכבר לא קיים (קישור ישן, קטלוג שהתעדכן).
+  const pages = Math.max(1, Math.ceil(items.length / PAGE_SIZE));
+  currentPage = Math.min(pages, Math.max(1, currentPage));
+  const from = (currentPage - 1) * PAGE_SIZE;
+  const pageItems = items.slice(from, from + PAGE_SIZE);
+
+  // המונה הוא תמיד סך *כל* התוצאות; טווח העמוד נוסף לידו רק כשיש יותר
+  // מעמוד אחד, כדי שלא ייראה כאילו נשארו 48 מוצרים בלבד.
+  const countText = items.length + " " + (items.length === 1 ? tr("מוצר","product") : tr("מוצרים","products"));
+  document.getElementById("resultCount").textContent = pages > 1
+    ? countText + " · " + tr("מוצגים ","Showing ") + (from + 1) + "–" + (from + pageItems.length)
+    : countText;
 
   if(!items.length){
     grid.innerHTML = "";
+    renderPager(1);
     empty.style.display = "block";
     empty.innerHTML = `${tr("לא נמצאו מוצרים שמתאימים לסינון.","No products match these filters.")}
       <button class="btn btn-secondary" onclick="clearAllFilters()">${tr("נקה סינונים","Clear filters")}</button>`;
@@ -527,7 +684,7 @@ function renderGrid(){
      משהו שאי אפשר לקנות. */
   const stock = it => (typeof dvtInStock === "function") ? dvtInStock(it) : true;
 
-  grid.innerHTML = items.map(it => `
+  grid.innerHTML = pageItems.map(it => `
     <a class="p-card${stock(it) ? "" : " p-card--oos"}" href="${href(it)}">
       ${!stock(it) ? `<span class="p-oos-badge">${tr("אזל המלאי","Out of stock")}</span>`
         : dvtIsOnSale(it) ? `<span class="p-sale-badge">-${dvtDiscountPct(it)}%</span>` : ""}
@@ -544,13 +701,105 @@ function renderGrid(){
         : `<button class="btn btn-primary" disabled
               onclick="event.preventDefault();event.stopPropagation()">${tr("אזל המלאי","Out of stock")}</button>`}
     </a>`).join("");
+
+  renderPager(pages);
 }
+
+/* ==================== עימוד ====================
+   אילו מספרים מוצגים: תמיד הראשון והאחרון, ותמיד שכן אחד מכל צד של
+   הנוכחי. בקטגוריה עם 27 עמודים רשימה מלאה לא נכנסת לשורה במובייל,
+   ולכן פער של יותר מעמוד אחד מקוצר ל-"…" (null ברשימה).
+   שכן אחד ולא שניים: זה מה שנכנס בשורה אחת גם במסך צר. */
+function pagerNumbers(cur, pages){
+  const nums = [];
+  const add = n => { if(n >= 1 && n <= pages && nums.indexOf(n) === -1) nums.push(n); };
+  add(1); add(cur - 1); add(cur); add(cur + 1); add(pages);
+  nums.sort((a,b) => a - b);
+
+  const out = [];
+  nums.forEach((n, i) => {
+    // "…" רק כשבאמת דילגנו. פער של עמוד אחד — עדיף להראות את העמוד עצמו
+    // מאשר שלוש נקודות שתופסות את אותו מקום ולא ניתן ללחוץ עליהן.
+    if(i && n - nums[i-1] === 2) out.push(n - 1);
+    else if(i && n - nums[i-1] > 2) out.push(null);
+    out.push(n);
+  });
+  return out;
+}
+
+/* ⚠️ הכיוון: הדף כולו RTL, כך שהאיבר הראשון שנכתב יושב מימין. "הקודם"
+   נכתב ראשון ולכן נוחת מימין עם חץ שמצביע ימינה — ובאנגלית, כשהדף
+   מתהפך ל-LTR, אותו איבר נוחת משמאל ולכן גם החץ מתהפך. */
+function renderPager(pages){
+  const wrap = document.getElementById("pager");
+  if(!wrap) return;
+  if(pages < 2){ wrap.innerHTML = ""; return; }
+
+  wrap.setAttribute("aria-label", tr("עימוד","Pagination"));
+  const step = (n, glyph, label) => `<button class="pager-btn" ${n < 1 || n > pages ? "disabled" : ""}
+      onclick="goToPage(${n})" aria-label="${label}">${glyph}</button>`;
+
+  const nums = pagerNumbers(currentPage, pages).map(n => n === null
+    ? `<span class="pager-gap" aria-hidden="true">…</span>`
+    : `<button class="pager-btn ${n === currentPage ? "active" : ""}"
+         ${n === currentPage ? 'aria-current="page"' : ""}
+         onclick="goToPage(${n})">${n}</button>`).join("");
+
+  wrap.innerHTML =
+    step(currentPage - 1, tr("›","‹"), tr("העמוד הקודם","Previous page")) +
+    nums +
+    step(currentPage + 1, tr("‹","›"), tr("העמוד הבא","Next page"));
+}
+
+/* מעבר עמוד לא נוגע בסינון — רק חותך מחדש את אותה רשימה מסוננת. */
+function goToPage(n){
+  const target = Math.max(1, n);
+  if(target === currentPage) return;
+  currentPage = target;            // renderGrid צובט לגבול העליון
+  renderGrid();
+  updateUrl();
+  scrollToResults_();
+}
+
+/* גלילה לראש הרשימה ולא לראש הדף: אחרי מעבר עמוד רוצים לראות את המוצר
+   הראשון, אבל גם להשאיר את סרגל הכלים (מיון, מונה) בשדה הראייה.
+   ה-header דביק, ולכן משאירים לו מקום. */
+function scrollToResults_(){
+  const main = document.querySelector(".shop-main");
+  if(!main) return;
+  const top = main.getBoundingClientRect().top + window.scrollY - 80;
+  window.scrollTo({ top: Math.max(0, top), behavior: "smooth" });
+}
+
+/* מספר העמוד יושב בכתובת כדי שרענון, "חזור" ושיתוף קישור ינחתו על אותו
+   עמוד. שאר הפרמטרים נשמרים כמו שהם: ?q= והסינון המוכן מראש
+   (?cat=readyPc&useCase=gaming) נקראים רק בטעינה, ומחיקה שלהם כאן
+   הייתה משנה את התוצאות בדיוק אחרי הרענון. עמוד 1 לא נרשם — כתובת
+   נקייה היא זו שמשותפת בפועל. */
+function updateUrl(){
+  try{
+    const p = new URLSearchParams(location.search);
+    p.set("cat", currentCat);
+    if(currentPage > 1) p.set("page", String(currentPage));
+    else p.delete("page");
+    const next = location.pathname + "?" + p.toString();
+    // ⚠️ כתיבה רק כשמשהו באמת השתנה: renderAll רץ על כל הקשה בתיבת
+    // החיפוש, ודפדפנים חוסמים replaceState שנקרא עשרות פעמים ברצף.
+    if(next === location.pathname + location.search) return;
+    history.replaceState(null, "", next);
+  }catch(e){}
+}
+
+/* כל שינוי בסינון, בחיפוש או במיון מחזיר לעמוד 1 — עמוד 4 של תוצאה
+   שהצטמצמה ל-12 פריטים הוא מסך ריק שנראה כמו תקלה. */
+function resetPage(){ currentPage = 1; }
 
 function renderAll(){
   renderCatStrip();
   renderFilters();
   renderChips();
   renderGrid();
+  updateUrl();          // אחרי renderGrid: שם currentPage נצבט לגבולות
 }
 
 /* ==================== actions ==================== */
@@ -567,13 +816,17 @@ function selectCategory(cat){
   activeFilters = {};
   priceRange = { min: null, max: null };   // טווח של קטגוריה אחת לא רלוונטי לאחרת
   searchTerm = "";
+  resetPage();                             // עמוד 3 של קטגוריה אחרת הוא רשימה ריקה
   document.getElementById("filterSearch").value = "";
+  // כתובת נקייה: סינון מוכן מראש (?useCase=gaming) שייך לקטגוריה שממנה
+  // באנו, ולא לזו שנבחרה עכשיו. updateUrl שב-renderAll ימלא את השאר.
   try{ history.replaceState(null, "", "?cat=" + encodeURIComponent(cat)); }catch(e){}
   renderAll();
   window.scrollTo({ top: 0, behavior: "smooth" });
 }
 
 function toggleFilter(key, value, on){
+  resetPage();
   if(!activeFilters[key]) activeFilters[key] = new Set();
   if(on) activeFilters[key].add(value);
   else{
@@ -587,24 +840,29 @@ function clearAllFilters(){
   activeFilters = {};
   priceRange = { min: null, max: null };
   searchTerm = "";
+  resetPage();
   document.getElementById("filterSearch").value = "";
   renderAll();
 }
 function clearSearch(){
   searchTerm = "";
+  resetPage();
   document.getElementById("filterSearch").value = "";
   renderAll();
 }
-function onSearchInput(v){ searchTerm = v.trim(); renderAll(); }
-function onSortChange(v){ sortMode = v; renderGrid(); }
+function onSearchInput(v){ searchTerm = v.trim(); resetPage(); renderAll(); }
+// מיון מסדר מחדש את כל התוצאות, ולכן "הזול ביותר" חייב להיות בעמוד 1
+function onSortChange(v){ sortMode = v; resetPage(); renderGrid(); updateUrl(); }
 function toggleGroup(btn){ btn.parentElement.classList.toggle("open"); }
 
 function openFilters(){ document.getElementById("filtersPanel").classList.add("show"); document.body.style.overflow="hidden"; }
 function closeFilters(){ document.getElementById("filtersPanel").classList.remove("show"); document.body.style.overflow=""; }
 
 function closeNavMenu(){
-  document.getElementById("navProductsDrop").classList.remove("open");
-  document.getElementById("navProducts").setAttribute("aria-expanded","false");
+  const drop = document.getElementById("navProductsDrop");
+  const btn = document.getElementById("navProducts");
+  if(drop) drop.classList.remove("open");
+  if(btn) btn.setAttribute("aria-expanded","false");
 }
 
 /* SKU בפורמט "<קטגוריה>:<id>" — בדיוק כמו הבונה, כך שהתמחור בצד שרת
@@ -657,7 +915,7 @@ function setLang(lang){
 async function loadShop(){
   renderShopStaticText();
   try{
-    SHOP_CATALOG = await dvtGetCatalog();
+    setShopCatalog(await dvtGetCatalog());
   }catch(e){
     document.getElementById("productGrid").innerHTML =
       `<div class="empty-state">${tr(
@@ -686,12 +944,18 @@ async function loadShop(){
 
   /* סינון מוכן מראש מהכתובת, למשל ?cat=readyPc&useCase=gaming — כך
      שבאנר "מחשבי גיימינג" בדף הבית נוחת על מחשבי הגיימינג בלבד ולא
-     על כל המחשבים המוכנים. כל שדה שמוגדר כסינון לקטגוריה נתמך. */
-  (FACETS[currentCat] || []).forEach(key => {
+     על כל המחשבים המוכנים. כל שדה שמוגדר כסינון לקטגוריה נתמך, וגם
+     בתצוגה מעורבת — שם הרשימה נבנית מהפריטים שבדף (facetKeysFor). */
+  facetKeysFor(sellableItems(currentCat)).forEach(key => {
     const v = params.get(key);
     if(v === null || v === "") return;
     activeFilters[key] = new Set(v.split(",").map(s => s.trim()).filter(Boolean));
   });
+
+  /* ?page= — כדי שרענון ושיתוף קישור ינחתו על אותו עמוד. הצביטה לגבול
+     העליון נעשית ב-renderGrid, אחרי שידוע כמה תוצאות באמת יש. */
+  const wantedPage = parseInt(params.get("page"), 10);
+  currentPage = wantedPage > 1 ? wantedPage : 1;
 
   renderNavMenu();
   renderAll();
@@ -699,17 +963,24 @@ async function loadShop(){
   // הדף נפתח מהמטמון מיידית; אם הרענון ברקע גילה שינוי אמיתי, מרעננים
   // את התצוגה בלי להפריע לסינון או לגלילה הנוכחיים.
   dvtOnCatalogRefresh(fresh => {
-    SHOP_CATALOG = fresh;
+    setShopCatalog(fresh);
     renderNavMenu();
     renderAll();
   });
 
+  /* ⚠️ תפריט "מוצרים" של הדף הזה קיים רק עד ש-site-header.js בונה את
+     ההדר האחיד ומחליף את כל תוכן ה-headbar. משם והלאה האלמנטים האלה
+     כבר לא בעמוד, ולכן כל גישה אליהם מוגנת — בלי ההגנה הזו טעינה ראשונה
+     (בלי מטמון, כשההדר כבר נבנה) נפלה כאן והרשימה כולה לא הוצגה. */
   const drop = document.getElementById("navProductsDrop");
-  document.getElementById("navProducts").onclick = function(){
-    const open = drop.classList.toggle("open");
-    this.setAttribute("aria-expanded", open ? "true" : "false");
-  };
-  document.addEventListener("click", e => { if(!drop.contains(e.target)) closeNavMenu(); });
+  const btn = document.getElementById("navProducts");
+  if(drop && btn){
+    btn.onclick = function(){
+      const open = drop.classList.toggle("open");
+      this.setAttribute("aria-expanded", open ? "true" : "false");
+    };
+    document.addEventListener("click", e => { if(!drop.contains(e.target)) closeNavMenu(); });
+  }
 }
 
 loadShop();

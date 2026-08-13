@@ -20,11 +20,20 @@ const NAV_CATALOG_GROUPS = [
     // ⚠️ תת-קטגוריות ולא מוצרים ספציפיים: הקישור מוביל לרשימה מסוננת
     // (?useCase=gaming), כך שכשיתווספו עוד מחשבי גיימינג הם יופיעו שם
     // מעצמם. קודם זה הצביע ישירות על מוצר בודד.
-    cats: ["readyPc", "use:gaming", "use:creative", "use:office", "use:server"] },
+    // מחשבים ניידים אחרי תת-הקטגוריות ולא באמצען: ארבע השורות שמעליו
+    // הן פילוח של "מחשבים מוכנים", והנייד הוא קטגוריה עומדת בפני עצמה.
+    cats: ["readyPc", "use:gaming", "use:creative", "use:office", "use:server", "laptop"] },
   { title: ["ציוד היקפי",  "Peripherals"],
     cats: ["monitor", "keyboard", "mouse", "headset", "webcam"] },
   { title: ["רכיבי חומרה", "Components"],
-    cats: ["cpu", "gpu", "mobo", "ram", "storage", "cooling", "psu", "case"] }
+    // מאווררי מארז, רשת אלחוטית ומשחה תרמית באים אחרי המארז — הם
+    // נלווים להרכבה ולא רכיב שבוחרים ראשון.
+    cats: ["cpu", "gpu", "mobo", "ram", "storage", "cooling", "psu", "case",
+           "caseFans", "wifi", "paste"] },
+  // אביזרים נלווים (כבלים, מפצלים, דיסקים חיצוניים) אינם רכיב הרכבה
+  // ואינם ציוד היקפי, ולכן קבוצה משלהם ולא דחיפה לאחת הקיימות.
+  { title: ["אביזרים",     "Accessories"],
+    cats: ["extras"] }
 ];
 
 /* קישורי הניווט הראשי — זהים בכל דף, באותו סדר תמיד. */
