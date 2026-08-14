@@ -99,13 +99,11 @@ const SHOP_FACET_UNITS = { sizeMm: "mm", speedMbps: "Mbps", grams: "g", conducti
 const SHOP_VALUE_LABELS = {
   // "סטודנטים" קיים רק בניידים ולכן לא היה ברשימת הייעודים של מחשב מוכן
   useCase: { student: { he: "לסטודנטים", en: "Student" } },
-  subType: {
-    cable:         { he: "כבלים",              en: "Cables" },
-    "case-glass":  { he: "דופן זכוכית",        en: "Glass panel" },
-    "gpu-bracket": { he: "תומך לכרטיס מסך",    en: "GPU bracket" },
-    adapter:       { he: "מתאמים",             en: "Adapters" },
-    hub:           { he: "מפצלים",             en: "Hubs" }
-  },
+  /* ⚠️ תוויות ה-subType של האביזרים **עברו ל-site-header.js**
+     (SH_SUBTYPE_LABELS) והן נמזגות לכאן למטה. הן היו כאן, אבל התפריט
+     הראשי נבנה בכל דף באתר בזמן ש-products.js נטען רק ב-products.html —
+     ולכן התפריט הציג "case-glass" באנגלית באמצע תפריט עברי. עותק שני
+     של אותה מפה היה מתפצל ביום שמישהו יתקן רק אחד מהם. */
   netType: {
     wifi:       { he: "אלחוטי",          en: "WiFi" },
     ethernet:   { he: "רשת קווית",       en: "Ethernet" },
@@ -125,12 +123,47 @@ Object.keys(SHOP_VALUE_LABELS).forEach(facet => {
   Object.keys(src).forEach(v => { if(dst[v] === undefined) dst[v] = src[v]; });
 });
 
+/* תוויות ה-subType של האביזרים מגיעות מ-site-header.js, שנטען לפני
+   הקובץ הזה בכל דף. אותה מפה בדיוק מזינה את תפריט "מוצרים" ואת סרגל
+   הסינון בחנות — כך שתת-קטגוריה בתפריט ותיבת סימון בסרגל תמיד נקראות
+   אותו דבר. ⚠️ מוגן ב-typeof: אם הקובץ לא נטען, החנות ממשיכה לעבוד
+   ומציגה את הערך הגולמי במקום ליפול. */
+if(typeof SH_SUBTYPE_LABELS === "object" && SH_SUBTYPE_LABELS){
+  if(!VALUE_LABELS.subType) VALUE_LABELS.subType = {};
+  Object.keys(SH_SUBTYPE_LABELS).forEach(v => {
+    if(VALUE_LABELS.subType[v] === undefined) VALUE_LABELS.subType[v] = SH_SUBTYPE_LABELS[v];
+  });
+}
+
 /* ==================== state ==================== */
 let SHOP_CATALOG = null;
 let currentCat = null;
 let activeFilters = {};      // { facetKey: Set(values) }
 let searchTerm = "";
 let sortMode = "priceAsc";
+
+/* ---------------------------------------------------------------------
+   "רק במלאי" — דלוק כברירת מחדל
+   ---------------------------------------------------------------------
+   36% מהקטלוג אזל (454 מתוך 1,271). קטגוריה שרובה כרטיסים אפורים עם
+   "אזל המלאי" נראית כמו חנות סגורה, והשאלה הראשונה של הלקוח היא
+   "אז מה כן במלאי?".
+
+   ⚠️ **הם לא נמחקים מהאתר.** לקוח שמחפש דגם מסוים ולא מוצא אותו מסיק
+   שאנחנו לא מוכרים אותו בכלל — זה בדיוק הנימוק שמתועד ב-builder-compat.js
+   לגבי רכיבים חסומים בבונה, ודף המוצר של מוצר שאזל נשאר חי וזמין
+   (ראה pdSeo ב-product.js: availability=OutOfStock ולא הסתרה).
+   לכן: הסתרה עם **מונה גלוי** ולחיצה אחת להצגה, ולא סינון שקט.
+
+   ⚠️ הבדיקה עצמה היא dvtInStock מ-search-core.js — אותה פונקציה שבודקת
+   את כפתור הקנייה, את העגלה ואת הבונה. בדיקה שנייה משלנו כאן הייתה
+   נפרדת ממנה ביום הראשון שמישהו יוסיף מילה לרשימת "אזל". */
+let onlyInStock = true;
+
+/* מפתח דמה לקבוצת הסינון הזו. הוא לא שדה על הפריט ולא נכנס
+   ל-activeFilters — הוא רק מאפשר ל-itemMatchesFilters לדעת שהיא
+   מבקשת ספירה *של* מסנן המלאי ולכן אסור לה להחיל אותו על עצמו. */
+const STOCK_FACET_KEY = "inStock";
 
 /* ==================== עימוד ====================
    1,269 כרטיסי מוצר בבת אחת מקפיאים את הדפדפן בגלילה. 48 לעמוד מתחלק
@@ -178,7 +211,37 @@ function sellableItems(cat){
   return items;
 }
 
+/* קבוצת תפריט ("g:computers") — פסאודו-קטגוריה בדיוק כמו "all", אבל
+   מצומצמת לקטגוריות שמתחת לכותרת אחת בתפריט "מוצרים". ההגדרה מגיעה
+   מ-site-header.js (SH_NAV_GROUPS_BY_KEY) ולא משוכפלת כאן — כותרת
+   התפריט והדף שהיא מובילה אליו חייבים להסכים תמיד.
+   ⚠️ מוגן: אם site-header.js לא נטען, מחזיר null ו-initPage נופל
+   ל-"הכל" במקום להציג דף ריק. */
+function shopGroup_(cat){
+  if(typeof cat !== "string" || cat.slice(0, 2) !== "g:") return null;
+  if(typeof SH_NAV_GROUPS_BY_KEY === "undefined") return null;
+  return SH_NAV_GROUPS_BY_KEY[cat.slice(2)] || null;
+}
+
 function buildSellableItems_(cat){
+  const grp = shopGroup_(cat);
+  if(grp){
+    /* ⚠️ חובה לנכות כפילויות: קבוצת "ציוד היקפי" מכילה גם את הקטגוריות
+       הווירטואליות (מסך/עכבר/מקלדת) וגם את peripherals עצמה, ושתיהן
+       מחזירות את אותם פריטים עם אותו `_realCat`. בלי הניכוי כל מסך היה
+       מופיע פעמיים — בדיוק הבאג ש-"all" נמנע ממנו בדילוג על וירטואליות. */
+    const seen = new Set();
+    const out = [];
+    grp.cats.forEach(c => {
+      sellableItems(c).forEach(it => {
+        const k = (it._realCat || c) + ":" + it.id;
+        if(seen.has(k)) return;
+        seen.add(k);
+        out.push(it);
+      });
+    });
+    return out;
+  }
   // "מבצעים" — פסאודו־קטגוריה: כל המוצרים שיש להם oldPrice גבוה מהמחיר
   // הנוכחי בגיליון, מכל הקטגוריות. אין לה קיום בשרת ולא בבונה, בדיוק
   // כמו "הכל", ולכן _realCat נשמר מהפריט המקורי.
@@ -257,8 +320,16 @@ function itemMatchesPrice(item){
   return true;
 }
 
+/* עטיפה ל-dvtInStock: בדף שנטען בלי search-core.js אין מלאי לבדוק,
+   ואז עדיף להראות הכל מאשר להסתיר את כל החנות. */
+function shopInStock(item){
+  return (typeof dvtInStock === "function") ? dvtInStock(item) : true;
+}
+
 function itemMatchesFilters(item, exceptKey){
   if(!itemMatchesPrice(item)) return false;
+  // ⚠️ לפני שאר הסינונים: זה המסנן שקובע כמה תוצאות יש בכלל
+  if(onlyInStock && exceptKey !== STOCK_FACET_KEY && !shopInStock(item)) return false;
   for(const key in activeFilters){
     if(key === exceptKey) continue;
     const chosen = activeFilters[key];
@@ -290,7 +361,9 @@ function itemSearchScore(item){
 
 /* תצוגה מעורבת = פסאודו־קטגוריה שמאחדת כמה קטגוריות אמיתיות ("הכל",
    "מבצעים"). אין לה שורה ב-FACETS כי הסינונים שלה תלויים במה שנחת בדף. */
-function isMixedView(){ return currentCat === "all" || currentCat === "sale"; }
+function isMixedView(){
+  return currentCat === "all" || currentCat === "sale" || !!shopGroup_(currentCat);
+}
 
 /* אילו שדות הופכים לקבוצות סינון בתצוגה הנוכחית.
    בתצוגה מעורבת מאחדים את הסינונים של הקטגוריות שהפריטים באמת מגיעים
@@ -356,6 +429,15 @@ function buildFacetData(){
   return out;
 }
 
+/* כמה מוצרים המסנן הזה מסתיר *כרגע* — כלומר מוצרים שעברו את כל שאר
+   הסינונים ונפלו רק על המלאי. ⚠️ לא "כמה אזלו בקטגוריה": מספר שלא
+   מתייחס לסינון הפעיל היה מבטיח 40 מוצרים ומציג 3 בלחיצה. */
+function oosHiddenCount(){
+  if(!onlyInStock) return 0;
+  return sellableItems(currentCat)
+    .filter(it => !shopInStock(it) && itemMatchesFilters(it, STOCK_FACET_KEY)).length;
+}
+
 function filteredItems(){
   const items = sellableItems(currentCat).filter(it => itemMatchesFilters(it, null));
   const sorters = {
@@ -380,12 +462,22 @@ function filteredItems(){
 // "זיכרון RAM" ולא "זיכרון" של הבונה.
 function catLabel(cat){
   if(cat === "sale") return tr("מבצעים", "Deals");
+  const grp = shopGroup_(cat);
+  if(grp) return tr(grp.title[0], grp.title[1]);
   return dvtCatLabel(cat, SHOP_CATALOG ? SHOP_CATALOG[cat] : null);
 }
 
 function renderCatStrip(){
   const strip = document.getElementById("catStrip");
-  strip.innerHTML = shopCategories().map(cat => {
+  /* קבוצה אינה חלק מסרגל הקטגוריות הקבוע — היא לא תת-קטגוריה אלא חתך
+     רחב יותר, ולכן היא נוספת כלשונית זמנית רק כשנמצאים בה. בלי זה
+     לקוח שנחת מהתפריט על "מחשבים" ראה סרגל שבו שום לשונית לא מסומנת
+     ולא היה לו רמז איפה הוא נמצא. */
+  const grpPill = shopGroup_(currentCat)
+    ? `<button class="cat-pill active">${catLabel(currentCat)} <span class="cat-pill-n">${
+         sellableItems(currentCat).length}</span></button>`
+    : "";
+  strip.innerHTML = grpPill + shopCategories().map(cat => {
     const n = sellableItems(cat).length;
     return `<button class="cat-pill ${cat===currentCat?"active":""}" onclick="selectCategory('${cat}')">
       ${catLabel(cat)} <span class="cat-pill-n">${n}</span>
@@ -558,17 +650,52 @@ function clearPriceFilter(){
   renderAll();
 }
 
+/* קבוצת המלאי — ראשונה בסרגל ותמיד פתוחה. משתמשת באותן מחלקות של כל
+   קבוצת סינון אחרת, כך שהיא לא דורשת שורת CSS חדשה ונראית כמו חלק
+   מהסרגל ולא כמו תוספת. המונה מציג כמה מוצרים יש בכל צד, בדיוק כמו
+   בשאר הקבוצות. */
+function renderStockGroup(){
+  const items = sellableItems(currentCat);
+  const inN  = items.filter(it => shopInStock(it) && itemMatchesFilters(it, STOCK_FACET_KEY)).length;
+  const outN = items.filter(it => !shopInStock(it) && itemMatchesFilters(it, STOCK_FACET_KEY)).length;
+  // אין מה להציע כשאין אף מוצר שאזל — תיבת סימון שלא משנה כלום היא רעש
+  if(!outN) return "";
+
+  return `
+    <div class="filter-group open">
+      <button class="filter-group-head" onclick="toggleGroup(this)">
+        <span>${tr("מלאי","Availability")}</span>
+        <span class="chev">▾</span>
+      </button>
+      <div class="filter-group-body">
+        <label class="filter-row">
+          <input type="checkbox" ${onlyInStock ? "checked" : ""}
+                 onchange="setOnlyInStock(this.checked)">
+          <span class="filter-row-label">${tr("רק במלאי","In stock only")}</span>
+          <span class="filter-row-count">${inN}</span>
+        </label>
+        <label class="filter-row ${onlyInStock ? "dim" : ""}">
+          <input type="checkbox" ${onlyInStock ? "" : "checked"}
+                 onchange="setOnlyInStock(!this.checked)">
+          <span class="filter-row-label">${tr("כולל מוצרים שאזלו","Include out of stock")}</span>
+          <span class="filter-row-count">${outN}</span>
+        </label>
+      </div>
+    </div>`;
+}
+
 function renderFilters(){
   const wrap = document.getElementById("filterGroups");
   const groups = buildFacetData();
   const priceHtml = renderPriceGroup();
+  const stockHtml = renderStockGroup();
 
-  if(!groups.length && !priceHtml){
+  if(!groups.length && !priceHtml && !stockHtml){
     wrap.innerHTML = `<p class="no-filters">${tr("אין סינונים לקטגוריה הזו.","No filters for this category.")}</p>`;
     return;
   }
 
-  wrap.innerHTML = priceHtml + groups.map((g, gi) => {
+  wrap.innerHTML = stockHtml + priceHtml + groups.map((g, gi) => {
     const chosen = activeFilters[g.key];
     // ברירת מחדל: 3 הקבוצות הראשונות פתוחות, השאר מקופלות — אחרת
     // הסרגל ארוך מדי וקשה לסרוק אותו בעין.
@@ -625,9 +752,22 @@ function renderChips(){
     // הזרקה ל-innerHTML, אחרת קישור זדוני מריץ קוד בדף.
     chips.push(`<button class="chip" onclick="clearSearch()">"${escHtml(searchTerm)}" <span class="chip-x">✕</span></button>`);
   }
-  wrap.innerHTML = chips.length
-    ? chips.join("") + `<button class="chip chip-clear" onclick="clearAllFilters()">${tr("נקה הכל","Clear all")}</button>`
+  /* ⚠️ הודעת המלאי **מחוץ** לרשימת ה-chips: היא אינה סינון שהמשתמש
+     הפעיל אלא ברירת מחדל של החנות, ואם היא הייתה נספרת כ-chip הכפתור
+     "נקה הכל" היה מופיע בכל דף גם כשאין שום סינון פעיל. */
+  const hidden = oosHiddenCount();
+  const stockNote = hidden
+    /* ⚠️ לא ‎.chip-x‎ על "הצג": המחלקה הזו מעמעמת ל-60% ומקטינה ל-11px —
+       זה נכון ל-✕ של ביטול סינון, אבל קריאה לפעולה שנראית מעומעמת
+       נקראת כמו כפתור מושבת. קו תחתון, בלי שורת CSS חדשה. */
+    ? `<button class="chip" onclick="setOnlyInStock(false)">${
+         tr(`${hidden} מוצרים שאזלו מוסתרים`, `${hidden} out-of-stock hidden`)
+       } <u>${tr("הצג","Show")}</u></button>`
     : "";
+
+  wrap.innerHTML = (chips.length
+    ? chips.join("") + `<button class="chip chip-clear" onclick="clearAllFilters()">${tr("נקה הכל","Clear all")}</button>`
+    : "") + stockNote;
 }
 
 /* ==================== תמונת הכרטיס ====================
@@ -687,8 +827,17 @@ function renderGrid(){
     grid.innerHTML = "";
     renderPager(1);
     empty.style.display = "block";
-    empty.innerHTML = `${tr("לא נמצאו מוצרים שמתאימים לסינון.","No products match these filters.")}
-      <button class="btn btn-secondary" onclick="clearAllFilters()">${tr("נקה סינונים","Clear filters")}</button>`;
+    /* ⚠️ כשכל התוצאות נפלו דווקא על המלאי, "נקה סינונים" לא יעזור —
+       הוא לא נוגע במסנן המלאי. במקרה הזה מציעים בדיוק את הפעולה שכן
+       תפתור, אחרת הלקוח נשאר מול מסך ריק עם כפתור שלא עושה כלום. */
+    const hidden = oosHiddenCount();
+    empty.innerHTML = hidden
+      ? `${tr(`כל המוצרים שמתאימים לסינון אזלו מהמלאי (${hidden}).`,
+              `All ${hidden} matching products are out of stock.`)}
+         <button class="btn btn-secondary" onclick="setOnlyInStock(false)">${
+           tr("הצג מוצרים שאזלו","Show out-of-stock products")}</button>`
+      : `${tr("לא נמצאו מוצרים שמתאימים לסינון.","No products match these filters.")}
+         <button class="btn btn-secondary" onclick="clearAllFilters()">${tr("נקה סינונים","Clear filters")}</button>`;
     return;
   }
   empty.style.display = "none";
@@ -707,9 +856,10 @@ function renderGrid(){
     note.style.display = anyImg ? "" : "none";
   }
 
-  // תג הקטגוריה מוצג רק בתצוגת "הכל" — כשמסתכלים על קטגוריה אחת ממילא
-  // ברור מה רואים, והתג היה רק רעש חוזר על עצמו.
-  const catTag = it => currentCat === "all"
+  // תג הקטגוריה מוצג רק בתצוגה שמערבבת קטגוריות ("הכל", "מבצעים",
+  // קבוצת תפריט) — כשמסתכלים על קטגוריה אחת ממילא ברור מה רואים,
+  // והתג היה רק רעש חוזר על עצמו.
+  const catTag = it => isMixedView()
     ? `<div class="p-cat-tag">${catLabel(it._realCat)}</div>` : "";
 
   // כל הכרטיס מוביל לדף המוצר, חוץ מכפתור "הוסף לעגלה" שעוצר את
@@ -874,12 +1024,23 @@ function toggleFilter(key, value, on){
   renderAll();
 }
 
+/* ⚠️ לא נוגע ב-onlyInStock. "נקה הכל" מנקה את מה שהמשתמש בחר, ומסנן
+   המלאי הוא ברירת המחדל של החנות ולא בחירה שלו — לחיצה על "נקה" שהייתה
+   מציפה פתאום 454 כרטיסים אפורים היא בדיוק ההפך ממה שהכפתור מבטיח. */
 function clearAllFilters(){
   activeFilters = {};
   priceRange = { min: null, max: null };
   searchTerm = "";
   resetPage();
   document.getElementById("filterSearch").value = "";
+  renderAll();
+}
+
+function setOnlyInStock(on){
+  const next = !!on;
+  if(next === onlyInStock) return;
+  onlyInStock = next;
+  resetPage();          // עמוד 3 של רשימה שהתרחבה/הצטמצמה הוא מסך אחר לגמרי
   renderAll();
 }
 function clearSearch(){
@@ -967,8 +1128,13 @@ async function loadShop(){
   if(!cats.length) return;
 
   const params = new URLSearchParams(location.search);
+  /* ⚠️ קבוצה נבדקת בנפרד: היא לגיטימית ככתובת אבל לא נמצאת ב-
+     shopCategories() (שם יושבות רק הלשוניות הקבועות). קבוצה שאין בה
+     אף מוצר נדחית ונופלת ל-"הכל" — קישור לרשימה ריקה נראה כמו אתר שבור. */
   const wanted = params.get("cat");
-  currentCat = cats.indexOf(wanted) > -1 ? wanted : cats[0];
+  const wantedGrp = shopGroup_(wanted);
+  currentCat = (wantedGrp && sellableItems(wanted).length) ? wanted
+             : (cats.indexOf(wanted) > -1 ? wanted : cats[0]);
 
   // ?q= מגיע מהחיפוש הכלל-אתרי בהדר (site-search.js) — מציב את מילת
   // החיפוש כאילו המשתמש הקליד אותה כאן, כולל בתיבה עצמה, כך שאפשר גם

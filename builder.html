@@ -156,27 +156,30 @@
         </sc-for>
       </ul>
 
-      <div style="margin-top:16px;border-radius:14px;padding:14px 15px;background:#F7FAFD;border:1px solid #EDF2F8">
-        <div style="font-size:12.5px;font-weight:700;color:#0E2A47;margin-bottom:9px">שירותים נוספים</div>
-        <sc-for list="{{ services }}" as="sv" hint-placeholder-count="2">
-          <label style="display:flex;align-items:center;gap:9px;padding:5px 0;cursor:pointer" onClick="{{ sv.toggle }}">
-            <span style="width:19px;height:19px;border-radius:6px;border:1.5px solid {{ sv.bd }};background:{{ sv.bg }};color:#fff;display:grid;place-items:center;font-size:11px;font-weight:900;flex:none">{{ sv.mark }}</span>
-            <span style="flex:1;font-size:12.5px;color:#0E2A47">{{ sv.label }}</span>
-            <span style="font-size:12px;font-weight:700;color:{{ sv.priceColor }}">{{ sv.price }}</span>
-          </label>
-        </sc-for>
-      </div>
+      <!-- ⚠️ מקטע "שירותים נוספים" (התקנת Windows וכו') הוסר מכאן בכוונה.
+           כל מחירון השירותים מרוכז עכשיו בדף התשלום (DVT_SERVICES
+           ב-checkout.js), כדי שיהיה מקום אחד שבו מוגדר מחיר לשירות —
+           שתי רשימות מחירים לאותו שירות בשני דפים מתפצלות בעדכון הראשון.
+           בנוסף, שירות שנספר גם בסה"כ של הבונה וגם בדף התשלום היה מחייב
+           פעמיים.
+           ⚠️ ההרכבה ללא עלות **לא** ירדה איתם: היא לא שירות שנבחר אלא
+           הטבה אוטומטית — cart.js מוסיף את שורת `assembly-included`
+           ב-0 ₪ יחד עם ההרכבה, ודף התשלום מזהה לפיה שהלקוח בנה מחשב
+           שלם. ראה state.services בסקריפט למטה. -->
 
       <div style="margin-top:18px;background:#F7FAFD;border:1px solid #EDF2F8;border-radius:16px;padding:17px 17px 16px;display:flex;align-items:flex-end;justify-content:space-between;gap:8px">
-        <span style="font-size:13px;color:#5F7590;line-height:1.4">סה"כ<br><span style="font-size:11px;color:#5F7590">כולל מע"מ</span></span>
+        <!-- ⚠️ לא "כולל מע״מ": עוסק פטור אינו גובה מע״מ ואינו רשאי להציג
+             מחיר כך. "מחיר סופי" נכון גם עובדתית וגם חוקית. ראה ההערה
+             המלאה ב-support.html. -->
+        <span style="font-size:13px;color:#5F7590;line-height:1.4">סה"כ<br><span style="font-size:11px;color:#5F7590">מחיר סופי</span></span>
         <span style="font-family:'Rubik',sans-serif;font-size:34px;font-weight:800;line-height:1;color:#0B2C4D;letter-spacing:-.5px">{{ total }} ₪</span>
       </div>
 
-      <button style="display:flex;align-items:center;justify-content:center;gap:10px;border:none;cursor:pointer;font-family:'Heebo',sans-serif;font-weight:700;font-size:15.5px;border-radius:14px;padding:16px 18px;width:100%;margin-top:16px;background:linear-gradient(100deg,#1B6FE0,#2FC4B0);color:#fff;box-shadow:0 10px 24px rgba(27,111,224,.22);transition:.18s" style-hover="box-shadow:0 14px 30px rgba(27,111,224,.28);filter:brightness(1.04)">
+      <button id="finishBuildBtn" onClick="{{ finishBuild }}" style="display:flex;align-items:center;justify-content:center;gap:10px;border:none;cursor:pointer;font-family:'Heebo',sans-serif;font-weight:700;font-size:15.5px;border-radius:14px;padding:16px 18px;width:100%;margin-top:16px;background:linear-gradient(100deg,#1B6FE0,#2FC4B0);color:#fff;box-shadow:0 10px 24px rgba(27,111,224,.22);transition:.18s" style-hover="box-shadow:0 14px 30px rgba(27,111,224,.28);filter:brightness(1.04)">
         המשך לסיכום והרכבה
         <svg viewBox="0 0 24 24" style="width:17px;height:17px;fill:none;stroke:currentColor;stroke-width:2;stroke-linecap:round;stroke-linejoin:round"><path d="M14 6l-6 6 6 6"></path></svg>
       </button>
-      <button style="display:flex;align-items:center;justify-content:center;gap:9px;cursor:pointer;font-family:'Heebo',sans-serif;font-weight:700;font-size:14px;border-radius:14px;padding:13px 18px;width:100%;margin-top:10px;background:#fff;color:#0C8467;border:1.5px solid #BDE6D8;transition:.18s" style-hover="background:#F2FBF8;border-color:#8FD6C1">
+      <button onClick="{{ sendWhatsapp }}" style="display:flex;align-items:center;justify-content:center;gap:9px;cursor:pointer;font-family:'Heebo',sans-serif;font-weight:700;font-size:14px;border-radius:14px;padding:13px 18px;width:100%;margin-top:10px;background:#fff;color:#0C8467;border:1.5px solid #BDE6D8;transition:.18s" style-hover="background:#F2FBF8;border-color:#8FD6C1">
         <svg viewBox="0 0 24 24" style="width:16px;height:16px;fill:currentColor"><path d="M17.5 14.4c-.3-.2-1.7-.9-2-1-.3-.1-.5-.2-.7.1-.2.3-.7 1-.9 1.2-.2.2-.3.2-.6.1-.3-.2-1.2-.5-2.3-1.4-.9-.8-1.4-1.7-1.6-2-.2-.3 0-.5.1-.6l.5-.6c.1-.2.2-.3.3-.5 0-.2 0-.4 0-.5 0-.2-.7-1.6-.9-2.2-.2-.6-.5-.5-.7-.5h-.6c-.2 0-.5.1-.8.4-.3.3-1 1-1 2.5s1.1 2.9 1.2 3.1c.2.2 2.1 3.2 5.1 4.5.7.3 1.3.5 1.7.6.7.2 1.4.2 1.9.1.6-.1 1.7-.7 2-1.4.2-.7.2-1.3.2-1.4-.1-.1-.3-.2-.6-.3zM12 2C6.5 2 2 6.5 2 12c0 1.8.5 3.4 1.3 4.9L2 22l5.3-1.4c1.4.8 3 1.2 4.7 1.2 5.5 0 10-4.5 10-10S17.5 2 12 2z"></path></svg>
         שליחת ההרכבה בוואטסאפ
       </button>
@@ -336,6 +339,17 @@
         <div style="margin-top:11px;font-size:11.5px;color:#0E9C8A;background:#F0FDFA;border:1px solid #B7EFE5;padding:7px 11px;border-radius:9px;line-height:1.5">{{ filterNote }}</div>
       </sc-if>
 
+      <!-- ⚠️ מונה המוצרים שהוסתרו. חלק מהפיצ'ר ולא קישוט: כל עוד
+           HIDE_INCOMPATIBLE=true הרשימה מתקצרת בשקט, והשורה הזו היא
+           ההסבר היחיד ללקוח שרואה 12 לוחות אם במקום 139 — ודרך החזרה
+           לרשימה המלאה בלי לרענן דף או לבטל בחירות. -->
+      <sc-if value="{{ hiddenNote }}" hint-placeholder-val="{{ false }}">
+        <div style="margin-top:11px;display:flex;align-items:center;gap:9px;flex-wrap:wrap;font-size:11.5px;color:#91690C;background:#FFFBEC;border:1px solid #F5E3B0;padding:8px 11px;border-radius:9px;line-height:1.5">
+          <span style="flex:1;min-width:120px">{{ hiddenNote }}</span>
+          <button onClick="{{ toggleHidden }}" style="flex:none;border:1px solid #E8CE8A;background:#fff;color:#8A5A00;border-radius:8px;padding:5px 11px;font-family:'Heebo',sans-serif;font-size:11.5px;font-weight:700;cursor:pointer;transition:.15s" style-hover="background:#FFF6E2;border-color:#DDBE6C">{{ hiddenAction }}</button>
+        </div>
+      </sc-if>
+
       <div style="margin-top:16px;display:flex;flex-direction:column;gap:14px;max-height:640px;overflow-y:auto;padding-inline-end:4px">
         <sc-for list="{{ options }}" as="o" hint-placeholder-count="6">
           <div onClick="{{ o.pick }}" aria-disabled="{{ o.aria }}" title="{{ o.reason }}" style="position:relative;display:flex;align-items:center;gap:13px;border:1.5px solid {{ o.bd }};background:{{ o.bg }};border-radius:16px;padding:17px 18px;cursor:{{ o.cursor }};opacity:{{ o.rowOp }};transition:.15s;box-shadow:{{ o.shadow }}" style-hover="border-color:#C9DEF8;background:#FBFDFF">
@@ -391,7 +405,7 @@
         </span>
         <span>
           <span style="display:block;font-size:13px;font-weight:700;color:#0E2A47">אחריות מלאה</span>
-          <span style="display:block;font-size:11.5px;color:#5F7590">עד 3 שנות אחריות</span>
+          <span style="display:block;font-size:11.5px;color:#5F7590">לפי תנאי היצרן</span>
         </span>
       </div>
       <div style="display:flex;align-items:center;gap:12px;padding:18px 20px;border-inline-start:1px solid #EDF2F8">
@@ -417,22 +431,51 @@
 </x-dc>
 <script type="text/x-dc" data-dc-script data-props="{&quot;$preview&quot;:{&quot;width&quot;:1440,&quot;height&quot;:1180},&quot;stageBg&quot;:{&quot;editor&quot;:&quot;color&quot;,&quot;default&quot;:&quot;#0A2036&quot;,&quot;tsType&quot;:&quot;string&quot;,&quot;options&quot;:[&quot;#0A2036&quot;,&quot;#0E2E4E&quot;,&quot;#0B1220&quot;,&quot;#101822&quot;],&quot;section&quot;:&quot;תצוגה תלת-ממדית&quot;}}">
 const DATA = (window.DVIR_BUILDER_DATA || {});
-const CATS = DATA.CATS, CATALOG = DATA.CATALOG, SERVICES = DATA.SERVICES,
+const CATS = DATA.CATS, CATALOG = DATA.CATALOG,
       USE_CASES = DATA.USE_CASES, NEEDED = DATA.NEEDED;
+/* ⚠️ DATA.SERVICES כבר לא נצרך כאן — מקטע "שירותים נוספים" הוסר מהבונה
+   וכל מחירון השירותים מרוכז בדף התשלום (DVT_SERVICES ב-checkout.js).
+   ריכוז אחד = מחיר אחד; שתי רשימות מחירים לאותו שירות בשני דפים הן
+   בדיוק הדרך שבה הן מתחילות להתפצל. */
 
 /* ארבע רמות ההתאמה שהבורר מציג, לפי level של מנוע ההתאמה:
      error → סינון: אי-התאמה מוחלטת, לא ניתן לבחור
      warn  → אזהרה חמורה: יגביל את המוצר בפועל
      info  → אזהרה: יכול להגביל
      fit   → מומלץ: נבדק מול מה שכבר נבחר ולא נמצאה בעיה
+
+   ⚠️ הצבע נושא משמעות ולא רק אסתטיקה:
+     אדום  = חסום · צהוב/כתום = אזהרה · ירוק = המלצה.
+   ⚠️ `info` היה קודם **אפור** (#F1F5F9/#9FB3C8) — אזהרה בגוון אפור
+   נקראת כ"מידע ניטרלי" או, גרוע מזה, כפריט מושבת, והלקוח פשוט לא
+   עוצר לקרוא אותה. שתי רמות האזהרה צריכות להיות באותה משפחת צבע
+   ולהיבדל בעוצמה: `warn` ענבר מלא, `info` צהוב בהיר יותר.
    ⚠️ לכל רמה יש badge מילולי ולא רק צבע — לקוח שלא מבחין בגוונים
    (או קורא מסך) חייב לדעת *למה* הפריט מסומן. */
 const OPT_LEVELS = {
   error:{ badge:"לא מתאים",    icon:"⛔", fg:"#A81E17", bg:"#FDECEA", bd:"#F3BDB8", accent:"#E4322B" },
   warn: { badge:"אזהרה חמורה", icon:"⚠️", fg:"#8A5A00", bg:"#FFF1DB", bd:"#F0C989", accent:"#F0A32B" },
-  info: { badge:"אזהרה",       icon:"ℹ️", fg:"#4A6076", bg:"#F1F5F9", bd:"#DDE6EF", accent:"#9FB3C8" },
+  info: { badge:"אזהרה",       icon:"⚠️", fg:"#91690C", bg:"#FFFBEC", bd:"#F5E3B0", accent:"#F7CE6B" },
   fit:  { badge:"מומלץ",       icon:"✓",  fg:"#0C7A62", bg:"#EAFBF6", bd:"#B7EFE5", accent:"#2FC4B0" }
 };
+
+/* ⚠️ **שינוי מדיניות מכוון.** קודם פריט שאינו מתאים פיזית להרכבה נשאר
+   ברשימה מושבת ואפור, עם הסיבה בטקסט. הנימוק היה: "לקוח שלא מוצא מוצר
+   שהוא מכיר חושב שהחנות לא מוכרת אותו". דביר החליט הפוך — להסתיר.
+
+   שתי הגישות, כדי שאפשר יהיה לחזור אחורה בלי לשחזר את הדיון:
+     HIDE_INCOMPATIBLE = false → כל הקטלוג מוצג, החסומים בסוף הרשימה
+       ומושבתים. יתרון: הלקוח רואה שהמוצר קיים בחנות. חיסרון: הוא
+       גולל דרך עשרות פריטים שאי אפשר לבחור.
+     HIDE_INCOMPATIBLE = true  → החסומים נשמטים מהרשימה. יתרון: כל מה
+       שמוצג ניתן לבחירה. חיסרון: הרשימה מתקצרת בלי הסבר —
+       ⚠️ ולכן **המונה מתחת לחיפוש הוא חלק מהפיצ'ר ולא קישוט**: הוא
+       אומר כמה מוצרים הוסתרו ולמה, ומאפשר להציג אותם בכל זאת. בלי
+       המונה זו בדיוק התקלה שהגישה הישנה ניסתה למנוע (12 לוחות אם
+       במקום 139, בלי שום רמז למה).
+   ⚠️ הפריט ה*נבחר* לעולם לא מוסתר, גם אם בחירה מאוחרת יותר חסמה אותו —
+   אחרת הוא מופיע בסיכום ההרכבה אבל נעלם מהרשימה שבה בחרו אותו. */
+const HIDE_INCOMPATIBLE = true;
 
 class Component extends DCLogic {
   state = {
@@ -443,10 +486,23 @@ class Component extends DCLogic {
        ב-builder-bridge.js (window.__DVT_SAVED_BUILD). */
     sel: (window.__DVT_SAVED_BUILD && window.__DVT_SAVED_BUILD.sel) || {},
     qty: (window.__DVT_SAVED_BUILD && window.__DVT_SAVED_BUILD.qty) || { cpu:1, ram:1, storage:1 },
-    services: (window.__DVT_SAVED_BUILD && window.__DVT_SAVED_BUILD.services) || ["assembly"],
+    /* ⚠️ **לא להסיר.** מקטע "שירותים נוספים" ירד מהבונה (השירותים נבחרים
+       ונמכרים בדף התשלום), אבל "assembly" הוא לא "שירות שנבחר" — הוא
+       הסימן להטבת ההרכבה ללא עלות שנלווית להרכבה שנבנתה כאן. הוא נשמר
+       ב-localStorage דרך dvtSaveBuild ומועבר ל-dvtBuilderAddToCart, ומולו
+       cart.js מוסיף את שורת `assembly-included` ב-0 ₪; דף התשלום מזהה
+       לפיה שהלקוח בנה מחשב שלם (ראה servicesForCart ב-checkout.js).
+       ⚠️ קבוע ולא נטען מההרכבה השמורה: לקוח שסימן בעבר "התקנת Windows"
+       בבונה היה נשאר עם בחירה שכבר אין ממשק לבטל, והשירות היה מוצע לו
+       שוב בדף התשלום. */
+    services: ["assembly"],
     useCase: "gaming",
     chips: ["Fortnite"],
     view: "3d",
+    /* "הצג בכל זאת את המוצרים שהוסתרו" — ראה HIDE_INCOMPATIBLE.
+       מכוון לכלל הקטגוריות ולא לקטגוריה הנוכחית: לקוח שביקש לראות הכל
+       מתכוון לזה גם בלשונית הבאה. */
+    showHidden: false,
     last: null
   };
 
@@ -577,6 +633,53 @@ class Component extends DCLogic {
     return rated;
   }
 
+  /* ⚠️ **לא כל `blocked` הוא "לא מתאים למה שבחרת".** מנוע ההתאמה מסמן
+     ב-error גם *חוסרים* בהרכבה: "אין גרפיקה מובנית ולא נבחר כרטיס מסך",
+     "המעבד מגיע בלי גוף קירור וקירור עדיין לא נבחר". החוסרים האלה
+     נפתרים מעצמם ברגע שהלקוח יבחר את הרכיב החסר — הם לא אומרים שום דבר
+     על הפריט מול הבחירות הקיימות.
+
+     בבונה ריק 39 מתוך 48 המעבדים מסומנים כך (נמדד על הקטלוג החי).
+     הסתרה לפי `blocked` בלבד הייתה פותחת את הדף עם 9 מעבדים, מתחתם
+     "39 מוצרים הוסתרו כי אינם מתאימים לבחירה שלך" — כשהלקוח עוד לא בחר
+     דבר. לכן ההסתרה מותנית ב-issue.cat: קטגוריה ש**כבר נבחרה** היא מה
+     שהופך את הפריט ל"לא מתאים לבחירה שלך". פריט שחסום רק בגלל מה שעוד
+     לא נבחר נשאר ברשימה, מסומן ועם הסיבה — בדיוק כמו קודם. */
+  conflictsWithChoice(o){
+    const c = o.__compat;
+    if(!c || !c.blocked) return false;
+    return (c.issues || []).some(i => i.level === "error" && i.cat && this.state.sel[i.cat]);
+  }
+
+  /* מקור האמת היחיד ל"מה מוצג ומה הוסתר" בקטגוריה: גם הרשימה עצמה, גם
+     ההערה על הסינון וגם המונה נגזרים מהחזרה הזו.
+     ⚠️ בכוונה לא שלוש ספירות נפרדות — ברגע שמישהו ישנה תנאי אחד בלבד,
+     המונה יבטיח "3 הוסתרו" והרשימה תציג משהו אחר, וזה בדיוק סוג הפער
+     שהלקוח מרגיש בו אבל לא יודע לתאר.
+
+       rated       — כל הקטלוג בקטגוריה, מדורג
+       list        — מה שבאמת מוצג
+       blocked     — כמה פריטים חסומים יש בסך הכל
+       conflicting — כמה מהם מתנגשים בבחירות קיימות, כלומר מועמדים
+                     להסתרה. נספר תמיד, גם כשההסתרה כבויה, כדי שהמונה
+                     יוכל לדווח גם במצב "הצג אותם בכל זאת"
+       hidden      — כמה באמת נשמטו מהרשימה עכשיו */
+  splitOptions(cat){
+    const rated = this.ratedOptions(cat);
+    const blocked = rated.filter(o => o.__compat && o.__compat.blocked);
+    // הפריט שנבחר בפועל אף פעם לא נעלם — הוא מוצג בסיכום ההרכבה
+    const selId = this.state.sel[cat];
+    const conflicting = blocked.filter(o => o.id !== selId && this.conflictsWithChoice(o));
+    const drop = (HIDE_INCOMPATIBLE && !this.state.showHidden) ? conflicting : [];
+    return {
+      rated,
+      list: drop.length ? rated.filter(o => drop.indexOf(o) < 0) : rated,
+      blocked: blocked.length,
+      conflicting: conflicting.length,
+      hidden: drop.length
+    };
+  }
+
   /* אילו קטגוריות *שכבר נבחרו* באמת מסננות את הרשימה הזו.
      ⚠️ נגזר מטבלת החוקים ולא כתוב ידנית, כדי שחוק חדש ב-builder-compat.js
      ישתקף כאן בלי לגעת בקובץ הזה — וכדי ש"מומלץ" לא יתנוסס על פריט
@@ -625,7 +728,12 @@ class Component extends DCLogic {
     const chosen = CATS.filter(c => st.sel[c.key]);
     let total = 0;
     CATS.forEach(c => { const it = this.item(c.key); if(it) total += it.price * (st.qty[c.key] || 1); });
-    SERVICES.forEach(s => { if(st.services.includes(s.id)) total += s.price; });
+    /* ⚠️ השירותים כבר לא נספרים כאן. הם נבחרים ומתומחרים בדף התשלום
+       בלבד, ולכן חיבור שלהם גם לסה"כ של הבונה היה מחייב את הלקוח
+       פעמיים על אותו שירות (הבונה נכנס לעגלה כמחיר אחד). */
+
+    // מה מוצג בבורר הקטגוריה הנוכחית, וכמה הוסתר — ראה splitOptions
+    const view = this.splitOptions(st.cat);
 
     const targets = this.meterTargets();
     const meters = [
@@ -684,16 +792,43 @@ class Component extends DCLogic {
           dec: () => this.bump(c.key, -1)
         };
       }),
-      services: SERVICES.map(s => {
-        const on = st.services.includes(s.id);
-        return { label: s.label, mark: on ? "✓" : "", bg: on ? "#1B6FE0" : "#fff", bd: on ? "#1B6FE0" : "#D7E1EC",
-          price: s.price === 0 ? "כלול" : this.money(s.price) + " ₪",
-          priceColor: s.price === 0 ? "#0E9C8A" : "#1B6FE0",
-          toggle: () => this.setState(x => ({ services: x.services.includes(s.id) ? x.services.filter(i => i !== s.id) : x.services.concat(s.id) })) };
-      }),
       total: this.money(total),
       missingText: missing.length ? missing.join(", ") : null,
       clearAll: () => this.setState({ sel:{}, last:null }),
+
+      /* ⚠️ **הכפתור "המשך לסיכום והרכבה" לא היה מחובר לכלום.**
+         בתבנית הזו לחיצות נקשרות דרך `onClick="{{ handler }}"`, ולכפתור
+         הזה פשוט לא היה אחד — כלומר **אי אפשר היה לקנות הרכבה מהבונה
+         בכלל.** `window.dvtBuilderAddToCart` הוגדר ב-builder-bridge.js
+         ולא נקרא משום מקום.
+
+         ⚠️ חוסמים כשחסר רכיב ליבה: הוספת "מחשב" בלי מעבד לעגלה יוצרת
+         הזמנה שאי אפשר לספק. NEEDED מגדיר את המינימום. */
+      finishBuild: () => {
+        if (missing.length) {
+          alert("חסר עדיין: " + missing.join(", "));
+          return;
+        }
+        if (typeof window.dvtBuilderAddToCart !== "function") {
+          console.error("builder-bridge.js לא נטען — אי אפשר להוסיף לעגלה");
+          return;
+        }
+        window.dvtBuilderAddToCart(this.selMap(), st.qty, [], total);
+        window.location.href = "checkout.html";
+      },
+
+      /* שליחת ההרכבה בוואטסאפ — גם לו לא היה קישור. */
+      sendWhatsapp: () => {
+        const lines = CATS.map(c => {
+          const it = this.item(c.key);
+          if (!it) return null;
+          const q = st.qty[c.key] || 1;
+          return c.label + ": " + it.name + (q > 1 ? " ×" + q : "");
+        }).filter(Boolean);
+        const msg = "היי דביר, הרכבתי מחשב בבונה:\n\n" + lines.join("\n") +
+                    "\n\nסה\"כ: " + this.money(total) + " ₪";
+        window.open("https://wa.me/972502000373?text=" + encodeURIComponent(msg), "_blank");
+      },
 
       view3d: st.view === "3d" ? { bg:"#1B6FE0", fg:"#fff", bd:"transparent" } : { bg:"rgba(255,255,255,.06)", fg:"rgba(255,255,255,.72)", bd:"rgba(255,255,255,.16)" },
       viewIn: st.view === "in" ? { bg:"#1B6FE0", fg:"#fff", bd:"transparent" } : { bg:"rgba(255,255,255,.06)", fg:"rgba(255,255,255,.72)", bd:"rgba(255,255,255,.16)" },
@@ -748,18 +883,42 @@ class Component extends DCLogic {
          עכשיו הוא נגזר ממה שנבחר וממה שהמנוע חסם בפועל. */
       filterNote: (() => {
         const by = this.filterOn(st.cat);
-        if(!by.length) return null;
-        const rated = this.ratedOptions(st.cat);
-        if(!rated.length) return null;
-        const bad = rated.filter(x => x.__compat && x.__compat.blocked).length;
+        if(!by.length || !view.rated.length) return null;
         const names = by.map(k => (CATS.find(c => c.key === k) || {}).label || k).join(" · ");
-        return bad
-          ? `לפי ${names} שבחרת: ${rated.length - bad} מתוך ${rated.length} מתאימים. ${bad} מוצגים מושבתים עם הסיבה.`
-          : `לפי ${names} שבחרת: כל ${rated.length} האפשרויות מתאימות.`;
+        if(!view.blocked) return `לפי ${names} שבחרת: כל ${view.rated.length} האפשרויות מתאימות.`;
+        /* כמה חסומים עדיין מוצגים ברשימה. גם כשההסתרה פעילה זה בדרך כלל
+           לא 0: פריט שחסום רק בגלל רכיב שעדיין לא נבחר ("אין גרפיקה
+           מובנית ולא נבחר כרטיס מסך") נשאר מוצג בכוונה — ראה
+           conflictsWithChoice. מי שכן הוסתר נספר במונה שמתחת. */
+        const shown = view.blocked - view.hidden;
+        return `לפי ${names} שבחרת: ${view.rated.length - view.blocked} מתוך ${view.rated.length} מתאימים.` +
+               (shown ? ` ${shown} מוצגים מושבתים עם הסיבה.` : "");
       })(),
+
+      /* ⚠️ המונה של המוצרים שהוסתרו — ראה HIDE_INCOMPATIBLE.
+         הוא נשאר גלוי גם אחרי שהלקוח ביקש להציג אותם, כדי שיהיה ברור
+         שהרשימה שהוא רואה עכשיו כוללת פריטים שלא ניתן לבחור, ואיך
+         לחזור אחורה. */
+      hiddenNote: (() => {
+        if(view.hidden){
+          if(!view.list.length)
+            return `כל ${view.rated.length} האפשרויות בקטגוריה הזו אינן מתאימות לבחירה שלך והוסתרו`;
+          return view.hidden === 1
+            ? "מוצר אחד הוסתר כי אינו מתאים לבחירה שלך"
+            : `${view.hidden} מוצרים הוסתרו כי אינם מתאימים לבחירה שלך`;
+        }
+        if(HIDE_INCOMPATIBLE && st.showHidden && view.conflicting)
+          return view.conflicting === 1
+            ? "מוצר אחד שאינו מתאים לבחירה שלך מוצג כרגע"
+            : `${view.conflicting} מוצרים שאינם מתאימים לבחירה שלך מוצגים כרגע`;
+        return null;
+      })(),
+      hiddenAction: view.hidden ? "הצג אותם בכל זאת" : "הסתר אותם",
+      toggleHidden: () => this.setState(s => ({ showHidden: !s.showHidden })),
+
       options: (() => {
         const by = this.filterOn(st.cat);
-        return this.ratedOptions(st.cat).map(it => {
+        return view.list.map(it => {
           const on = st.sel[st.cat] === it.id;
           const r = it.__compat || {};
           const bad = !!r.blocked;
@@ -781,8 +940,14 @@ class Component extends DCLogic {
             badgeFg: L ? L.fg : "", badgeBg: L ? L.bg : "", badgeBd: L ? L.bd : "",
             noteFg: L ? L.fg : "#92650F", noteBg: L ? L.bg : "#FFF6EA",
             noteIcon: L ? L.icon : "⚠️",
-            /* פריט חסום נשאר ברשימה, מושבת ועם הסיבה — ולא נעלם.
-               לקוח שלא מוצא מוצר שהוא מכיר מסיק שהחנות לא מוכרת אותו. */
+            /* ⚠️ הסימון של פריט חסום נשאר גם אחרי מעבר להסתרה
+               (HIDE_INCOMPATIBLE): פריט חסום עדיין *יכול* להגיע לכאן —
+               כשהלקוח לחץ "הצג אותם בכל זאת", וכשזה הפריט שכבר נבחר
+               ובחירה מאוחרת יותר חסמה אותו. בשני המקרים הוא מוצג מושבת
+               ועם הסיבה, בדיוק כמו בהתנהגות הקודמת.
+               ⚠️ הנימוק של ההתנהגות הקודמת ("לקוח שלא מוצא מוצר שהוא
+               מכיר מסיק שהחנות לא מוכרת אותו") לא בוטל — הוא נענה על ידי
+               המונה שמתחת לחיפוש, לא על ידי השארת הפריטים ברשימה. */
             aria: bad ? "true" : null,
             reason: r.text || "",
             cursor: bad ? "not-allowed" : "pointer",
@@ -820,6 +985,7 @@ class Component extends DCLogic {
 
 <script src="sprite.js"></script>
 <script src="i18n.js"></script>
+<script src="site-content.js"></script>
 <script src="search-core.js"></script>
 <script src="site-search.js"></script>
 <script src="site-header.js"></script>

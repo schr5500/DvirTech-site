@@ -276,7 +276,7 @@ nav a.active::after{transform:scaleX(1)}
 .cat-card .cat-art svg{width:60px;height:60px}
 /* תמונת קטגוריה אמיתית (מוגדרת ב-HOME_CAT_IMAGE ב-home.js) גוברת על
    האיור — אותו כלל שחל על תמונת מוצר בכרטיסי החנות. */
-.cat-card .cat-art img{width:100%;height:100%;object-fit:contain;padding:8px}
+.cat-card .cat-art img{width:100%;height:100%;object-fit:contain;padding:11px}
 .cat-card b{font-size:13px;font-weight:600;color:var(--ink);font-family:'Heebo',sans-serif}
 
 /* ---------- באנרים שיווקיים ---------- */
@@ -385,9 +385,15 @@ nav a.active::after{transform:scaleX(1)}
   box-shadow:var(--shadow-s);
   display:flex;flex-direction:column;position:relative;text-decoration:none;transition:transform .2s,box-shadow .2s,border-color .2s}
 .deal:hover{transform:translateY(-4px);box-shadow:var(--shadow);border-color:#C9DEF8}
-.deal-art{height:110px;border-radius:12px;background:var(--surface-2);display:grid;place-items:center;margin-bottom:12px;overflow:hidden}
+/* ⚠️ הרקע כאן הוא הגרדיאנט ולא ‎--surface-2 האפור. תמונת מוצר מוצגת
+   ‎contain ולכן כמעט תמיד נשארים שוליים סביבה — ועל אפור שטוח השוליים
+   האלה נקראים כ"התמונה לא נטענה עד הסוף", בעוד שעל הגרדיאנט התכלכל
+   של שאר תיבות התמונה באתר הם נקראים כמסגרת. עד עכשיו התיקון הזה היה
+   משוכפל פעמיים בחוץ (‎.deal-art ב-products.css והזרקת הכללים ב-home.js)
+   כי כאן נשאר האפור; מקור אחד עדיף על שני עוקפים. */
+.deal-art{height:110px;border-radius:12px;background:linear-gradient(155deg,#F3F8FF,#EFFBF8);display:grid;place-items:center;margin-bottom:12px;overflow:hidden}
 .deal-art svg{width:70px;height:70px}
-.deal-art img{width:100%;height:100%;object-fit:contain;padding:9px}
+.deal-art img{width:100%;height:100%;object-fit:contain;padding:12px}
 .deal-cat{font-size:11px;color:var(--ink-soft);margin-bottom:3px}
 .deal-name{font-size:13px;font-weight:600;color:var(--ink);line-height:1.45;min-height:38px}
 .deal-foot{margin-top:auto;padding-top:11px;display:flex;align-items:flex-end;justify-content:space-between;gap:8px}
@@ -718,6 +724,29 @@ footer a{color:#C4D7E8}
 [dir="rtl"] .cart-panel{--cart-from:-102%}
 [dir="ltr"] .cart-panel{--cart-from:102%}
 
+/* ---------- סגירה מונפשת, סימטרית לפתיחה ----------
+   ⚠️ עד כאן הסגירה הייתה רק הסרת ‎.show, כלומר ‎display:none מיידי —
+   וזה מבטל *כל* אנימציית יציאה, כי אלמנט שיצא מהתצוגה לא מנפיש כלום.
+   התוצאה: המגירה נכנסת בהחלקה ונעלמת בפריים אחד. המצב ‎.closing מחזיק
+   את השכבה מוצגת עוד רגע (‎display:block) ובו-זמנית מוריד את האטימות
+   דרך ה-transition הקיים ומחליק את המגירה החוצה; ‎closeCart מסיר אותו
+   ב-animationend (עם setTimeout כגיבוי) ואז ‎display:none נכנס לתוקף.
+   ⚠️ אותו ‎--cart-from משמש לשני הכיוונים, ולכן היציאה תמיד חוזרת אל
+   הצד שממנו המגירה נכנסה — גם ב-RTL וגם ב-LTR. */
+.cart-overlay.closing{display:block;opacity:0}
+.cart-overlay.closing .cart-panel{
+  animation:cartSlideOut .26s cubic-bezier(.4,.05,.7,.2) forwards}
+@keyframes cartSlideOut{from{transform:translateX(0)}to{transform:translateX(var(--cart-from))}}
+
+/* בהעדפת "פחות אנימציות": המגירה פשוט מופיעה ונעלמת. ⚠️ ‎.closing חייב
+   להיות ‎display:none כאן, אחרת השכבה נתקעת מוצגת עד שה-JS מסיר אותה. */
+@media(prefers-reduced-motion:reduce){
+  .cart-overlay{transition:none}
+  .cart-panel{animation:none}
+  .cart-overlay.closing{display:none}
+  .cart-overlay.closing .cart-panel{animation:none}
+}
+
 /* כותרת דביקה עם הגרדיאנט של המותג */
 .cart-panel-head{position:sticky;top:0;z-index:2;display:flex;align-items:center;
   justify-content:space-between;gap:10px;padding:20px 22px;
@@ -807,9 +836,13 @@ a.cart-item-link:hover{color:var(--blue);text-decoration:underline}
 
 /* ---------- תפריט "קטלוג" (mega menu) ---------- */
 .navcat{position:relative;display:inline-flex}
+/* ⚠️ ‎.navcat-btn הוא היום ‎<a href="products.html?cat=all"> ולא ‎<button>
+   (ראו wireCatalogMenu ב-site-header.js): לחיצה על "מוצרים" עצמו מובילה
+   לכל המוצרים, והתפריט נפתח בהצבעה ובפוקוס. ‎text-decoration:none נדרש
+   מרגע שזה קישור; שאר ההצהרות נשארו כדי שהמראה יהיה זהה לכפתור הקודם. */
 .navcat-btn{display:inline-flex;align-items:center;gap:5px;background:none;border:none;
   cursor:pointer;font-family:'Heebo',sans-serif;font-size:inherit;font-weight:inherit;
-  color:inherit;padding:0;line-height:inherit}
+  color:inherit;padding:0;line-height:inherit;text-decoration:none}
 .navcat-chev{width:10px;height:7px;fill:none;stroke:currentColor;stroke-width:1.8;
   stroke-linecap:round;stroke-linejoin:round;transition:transform .2s}
 .navcat:hover .navcat-chev,.navcat.open .navcat-chev{transform:rotate(180deg)}
@@ -825,6 +858,12 @@ a.cart-item-link:hover{color:var(--blue);text-decoration:underline}
   opacity:0;visibility:hidden;pointer-events:none;transition:opacity .18s ease,transform .18s ease}
 .navcat:hover .navcat-menu,.navcat.open .navcat-menu,.navcat:focus-within .navcat-menu{
   opacity:1;visibility:visible;pointer-events:auto;transform:translate(-50%,0)}
+/* ⚠️ ‎.dismissed הוא מה שמאפשר ל-Escape לעבוד בכלל. אחרי Escape הפוקוס
+   חוזר לקישור "מוצרים" — והוא בתוך ‎.navcat, כך ש-‎:focus-within היה פותח
+   את התפריט מחדש מיד. הכלל הזה חייב לבוא *אחרי* שלושת הבוררים שלמעלה:
+   הספציפיות זהה (שלוש מחלקות), ולכן רק הסדר בקובץ מכריע.
+   ‎site-header.js מסיר את המחלקה בהצבעה הבאה או בחץ למטה. */
+.navcat.dismissed .navcat-menu{opacity:0;visibility:hidden;pointer-events:none;transform:translate(-50%,8px)}
 /* גשר בלתי נראה בין הכפתור לתפריט — בלי זה התפריט נסגר כשהעכבר עובר במרווח */
 .navcat-menu::before{content:"";position:absolute;top:-14px;inset-inline:0;height:14px}
 
@@ -833,6 +872,14 @@ a.cart-item-link:hover{color:var(--blue);text-decoration:underline}
 .navcat-h{font-family:'Rubik',sans-serif;font-size:12px;font-weight:800;
   color:var(--blue);letter-spacing:.4px;padding-bottom:7px;margin-bottom:7px;
   border-bottom:2px solid var(--blue-soft,#EAF3FF)}
+/* כותרת קבוצה שהיא קישור: נשארת נראית כמו כותרת (זו עדיין כותרת ולא
+   פריט ברשימה), אבל מסמנת שאפשר ללחוץ — החץ נדלק ומופיע ריחוף. */
+a.navcat-h--link{display:flex;align-items:baseline;justify-content:space-between;
+  text-decoration:none;cursor:pointer;transition:color .14s,border-color .14s}
+a.navcat-h--link span{opacity:0;transition:opacity .14s;font-weight:700}
+a.navcat-h--link:hover{color:var(--blue-strong,#0B57A4);border-bottom-color:currentColor}
+a.navcat-h--link:hover span{opacity:1}
+a.navcat-h--link:focus-visible{outline:2px solid var(--blue);outline-offset:3px;border-radius:4px}
 .navcat-link{display:flex;align-items:center;justify-content:space-between;gap:10px;
   padding:7px 9px;border-radius:9px;text-decoration:none;color:var(--ink);
   font-size:13.5px;font-weight:500;transition:background .14s,color .14s}
@@ -945,13 +992,21 @@ a.cart-item-link:hover{color:var(--blue);text-decoration:underline}
    site-header.js — כך שהתפריט לא "קופץ" בין דפים. */
 header.site-header--blue{background:#0B2C4D;border-bottom-color:rgba(255,255,255,.12)}
 header.site-header--blue .brand-logo{filter:brightness(0) invert(1)}
-header.site-header--blue #mainNav a,
+/* ⚠️⚠️ ‎`#mainNav > a` ולא ‎`#mainNav a` — הכוכבית החשובה כאן.
+   תפריט "מוצרים" (‎.navcat-menu) יושב *בתוך* ‎#mainNav, והקישורים שבו הם
+   ‎<a> לכל דבר. עם סלקטור הצאצא הרחב הצבע הבהיר של ההדר הכהה (#DCE8F4)
+   דלף גם אליהם — ספציפיות (1,1,2) מול (0,1,0) של ‎.navcat-link — כך
+   שבדף "צור קשר" כל שמות הקטגוריות הופיעו בלבן-תכלת על רקע התפריט
+   הלבן, כלומר כמעט בלתי קריאים. זו הייתה התלונה "הכתב מאוד דהוי".
+   הבורר הישיר מצבע רק את קישורי הניווט עצמם, והתפריט הנפתח נשאר עם
+   הצבעים שלו מ-‎.navcat-link (‎--ink על לבן) בכל דף. */
+header.site-header--blue #mainNav > a,
 header.site-header--blue .navcat-btn{color:#DCE8F4}
-header.site-header--blue #mainNav a:hover,
+header.site-header--blue #mainNav > a:hover,
 header.site-header--blue .navcat-btn:hover,
-header.site-header--blue #mainNav a.active,
+header.site-header--blue #mainNav > a.active,
 header.site-header--blue .navcat-btn.active{color:#fff}
-header.site-header--blue #mainNav a.active::after{background:#5AA9F5}
+header.site-header--blue #mainNav > a.active::after{background:#5AA9F5}
 header.site-header--blue .head-search{background:rgba(255,255,255,.10);border-color:rgba(255,255,255,.18)}
 header.site-header--blue .head-search input{color:#fff}
 header.site-header--blue .head-search input::placeholder{color:rgba(220,232,244,.65)}

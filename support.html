@@ -1,0 +1,77 @@
+<!DOCTYPE html>
+<html lang="he" dir="rtl">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>DvirTech — שירות ותמיכה</title>
+<meta name="description" content="שירותי הרכבה, התקנת Windows, אבחון תקלות, ביקורי בית ותמיכה מרחוק — עם מחירון גלוי וטופס פנייה קצר לכל שירות.">
+<script>
+  (function(){
+    var saved = "he";
+    try { saved = localStorage.getItem("dvirtech_lang") || "he"; } catch(e) {}
+    document.documentElement.lang = saved;
+    document.documentElement.dir = saved === "he" ? "rtl" : "ltr";
+  })();
+</script>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link href="https://fonts.googleapis.com/css2?family=Rubik:wght@400;500;600;700;800;900&family=Heebo:wght@300;400;500;700&display=swap" rel="stylesheet">
+<link rel="stylesheet" href="style.css">
+<link rel="stylesheet" href="support.css">
+</head>
+<body>
+
+<!-- ההדר נבנה כולו ב-site-header.js מאותו מקור כמו בשאר הדפים. -->
+<header>
+  <div class="wrap headbar"></div>
+</header>
+
+<div class="wrap sup-wrap">
+
+  <h1 class="sup-h1" data-he="שירות ותמיכה" data-en="Service &amp; Support"></h1>
+  <p class="sup-lede"
+     data-he="הרכבה, מערכת הפעלה, תיקונים וביקורי בית — עם המחיר כתוב מראש. בוחרים את השירות, עונים על כמה שאלות קצרות, והפנייה מגיעה אליי מסודרת בוואטסאפ."
+     data-en="Assembly, operating systems, repairs and home visits — with the price stated up front. Pick a service, answer a few short questions, and the request reaches me on WhatsApp, all in order."></p>
+
+  <!-- ⚠️ המחירים כאן הם המחירון של דביר (PRICE_LIST ב-2-pricelist-picker.gs).
+       שינוי מחיר שם מחייב עדכון גם ב-SUP_SERVICES שב-support.js.
+       ⚠️ **אסור לכתוב "כולל מע״מ".** DvirTech הוא עוסק פטור: הוא אינו
+       גובה מע״מ ואינו רשאי להציג מחיר כ"כולל מע״מ" — זו הצגה לא נכונה
+       כלפי הלקוח וגם חריגה ממעמד העוסק. הניסוח הנכון הוא "זה מה
+       שתשלם", בלי להזכיר מע״מ בכלל. (המע״מ ב-11-catalog.gs הוא דבר
+       אחר לגמרי: מה ש**דביר** משלם לספק, לא מה שהלקוח משלם לו.) -->
+  <p class="sup-lede-note"
+     data-he="המחירים הם מחיר השירות עצמו — זה מה שתשלם, בלי תוספות. חלקים או רישיונות שנרכשים בנפרד אינם כלולים, ואם מתברר שהעבודה שונה ממה שתיארת — נעדכן ביחד לפני שמתחילים."
+     data-en="Prices are for the service itself — that is what you pay, with nothing added. Parts or licenses bought separately are not included, and if the job turns out different from what you described, we'll agree on it together before starting."></p>
+
+  <nav class="sup-cats" id="supCats" aria-label="קטגוריות שירות"></nav>
+
+  <div id="supCatalog"></div>
+
+  <!-- הטופס נפתח רק אחרי בחירת שירות, ומכיל רק את השאלות של אותו שירות. -->
+  <section class="panel sup-form" id="supForm" hidden aria-live="polite"></section>
+
+  <p class="sup-foot-note"
+     data-he="לא מצאת את מה שחיפשת? אפשר פשוט לכתוב לי בוואטסאפ ונבין ביחד מה צריך."
+     data-en="Didn't find what you were looking for? Just message me on WhatsApp and we'll work out what's needed."></p>
+
+</div>
+
+<footer class="footer-top-gap">
+  <span class="footer-logo-crop"><img class="footer-logo" src="images/logo-dvirtech-transparent.png" alt="DvirTech"></span>
+  <span id="footerText"></span>
+  <div class="footer-legal">
+    <a href="about.html" id="footerAboutLink"></a>
+    <a href="contact.html" id="footerContactLink"></a>
+    <a href="terms.html" id="footerTermsLink"></a>
+  </div>
+</footer>
+
+<script src="sprite.js"></script>
+<script src="i18n.js"></script>
+<script src="site-content.js"></script>
+<script src="search-core.js"></script>
+<script src="site-header.js"></script>
+<script src="support.js"></script>
+<script src="cart.js"></script>
+</body>
+</html>
