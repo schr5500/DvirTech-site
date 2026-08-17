@@ -228,7 +228,19 @@
   /* ---------- gallery strip ---------- */
   .strip{display:grid;grid-template-columns:repeat(3,1fr);gap:14px;margin-top:34px}
   .strip figure{margin:0;border:1px solid var(--line);border-radius:14px;overflow:hidden;background:#fff;box-shadow:var(--shadow-s)}
-  .strip img{width:100%;aspect-ratio:1/1;object-fit:cover}
+  /* ⚠️⚠️ ‎height:auto חובה כאן, ולא ניקוי קוסמטי. למאפייני ‎width/height
+     של ‎<img> יש מיפוי ל-CSS ("presentational hints"), וכל הצהרת height
+     של המחבר גוברת עליהם — אבל **אם אין** הצהרה כזו, ה-height מהמאפיין
+     נכנס לתוקף. אז לרוחב ולגובה יש ערך מוחלט, ‎aspect-ratio מתעלמים
+     ממנו לגמרי, והתמונה נמתחה לגובה הפיקסלים שכתוב במאפיין (למשל 875)
+     ברוחב עמודה של ~207 — פס אנכי ארוך במקום ריבוע. ‎.shot img לא סבל
+     מזה רק כי שם כן מוצהר ‎height:100%. */
+  .strip img{width:100%;height:auto;aspect-ratio:1/1;object-fit:cover}
+  /* ⚠️ חריג יחיד ל-cover: רינדור מוצר על רקע נקי, שחייב להיכנס שלם.
+     הרקע כאן הוא אותו לבן של ‎.strip figure, ולכן השוליים שנוצרים
+     מ-contain לא נקראים כתקלה אלא כמסגרת מוצר. */
+  .strip figure.strip--render{background:#fff}
+  .strip figure.strip--render img{object-fit:contain;padding:14px}
   .strip figcaption{font-size:14px;color:var(--body);padding:12px 14px;line-height:1.55}
 
   /* ---------- services ---------- */
@@ -612,7 +624,13 @@
 
       <div class="reveal">
         <figure class="shot shot--tall" style="margin:0">
-          <img src="https://images.unsplash.com/photo-1721332154191-ba5f1534266e?fm=jpg&q=70&w=800&auto=format&fit=crop" alt="טכנאי עובד על רכיבי מחשב" loading="lazy" width="800" height="1066">
+          <!-- ⚠️ קובץ מקומי ולא Unsplash. אותה תמונה בדיוק כבר יושבת
+               בתיקייה שלנו (‎LandingPage/assets/preview/about.jpg, 800×1067),
+               ולכן הקישור החיצוני היה תלות מיותרת שנופלת בכל חסימה,
+               מצב לא-מקוון או האטה של הספק — ואז הדף מוצג בלי תמונות.
+               הממדים 800×1067 הם בדיוק ‎3:4 של ‎.shot--tall, כלומר
+               ‎object-fit:cover לא חותך כאן כלום. -->
+          <img src="LandingPage/assets/preview/about.jpg" alt="ידיים עובדות על מחשב נייד פתוח עם מברג מדויק" loading="lazy" width="800" height="1067">
           <figcaption>בשיחה הראשונה עוד לא מחליטים כלום. רק מבינים.</figcaption>
         </figure>
       </div>
@@ -653,18 +671,28 @@
       </div>
     </div>
 
-    <!-- רצועת תמונות placeholder. עדיף להחליף בתמונות אמיתיות מהעבודה של דביר -->
+    <!-- ⚠️⚠️ שלוש התמונות כאן היו קישורי Unsplash חיצוניים ("placeholder"),
+         והן הוחלפו בקבצים שכבר קיימים בתיקיות של האתר. שתי סיבות:
+         1. תמונה שנטענת משרת זר נעלמת בכל חסימה/נפילה/גלישה איטית, וזה
+            בדיוק המצב שבו "חסרות התמונות" בדף הזה.
+         2. ‎LandingPage/assets/preview הוא חומר הגלם שלנו.
+         ⚠️ מתוך אותה תיקייה נלקחו רק קובצי העבודה. יש שם גם צילומים
+         אישיים ומשפחתיים (‎checkA/checkB/img2967/zoom_arm) — אלה **לא**
+         תמונות אתר ואסור להעלות אותן לדף ציבורי. -->
     <div class="strip reveal">
-      <figure>
-        <img src="https://images.unsplash.com/photo-1756576630180-653cbd594433?fm=jpg&q=75&w=700&auto=format&fit=crop" alt="מחשב גיימינג מותאם אישית עם תאורת RGB" loading="lazy" width="700" height="700">
+      <!-- ⚠️ strip--render: הרינדור של המארז הוא תמונת מוצר על רקע נקי,
+           ו-‎object-fit:cover בריבוע היה חותך ממנו כשליש לרוחב. כאן, ורק
+           כאן, התמונה נכנסת שלמה. -->
+      <figure class="strip--render">
+        <img src="images/contact/pc-render.png" alt="מחשב נייח מותאם אישית עם תאורת RGB כחולה" loading="lazy" width="1000" height="672">
         <figcaption>מפרט שנבנה לפי מה שאתה עושה, לא לפי מה שיפה בקטלוג.</figcaption>
       </figure>
       <figure>
-        <img src="https://images.unsplash.com/photo-1709102884400-b50ca1a12bc3?fm=jpg&q=70&w=700&auto=format&fit=crop" alt="טכנאי מטפל במחשב נייד" loading="lazy" width="700" height="700">
+        <img src="LandingPage/assets/preview/strip2.jpg" alt="פירוק מחשב נייד לצורך שדרוג והחלפת רכיבים" loading="lazy" width="700" height="875">
         <figcaption>תיקון, שדרוג ובדיקות עומק למחשב קיים.</figcaption>
       </figure>
       <figure>
-        <img src="https://images.unsplash.com/photo-1654593405070-d7b7eec8476a?fm=jpg&q=70&w=700&auto=format&fit=crop" alt="אדם עובד מול מחשב בעמדה מסודרת" loading="lazy" width="700" height="700">
+        <img src="LandingPage/assets/preview/call.jpg" alt="אדם עובד מול מחשב בעמדה מסודרת" loading="lazy" width="900" height="506">
         <figcaption>התקנה והגדרה אצלך, עד שהכול עובד באמת.</figcaption>
       </figure>
     </div>
@@ -916,21 +944,7 @@
   </div>
 </section>
 
-<footer>
-  <div class="wrap--wide">
-    <img class="foot__logo" src="images/logo-dvirtech-transparent.png" alt="DvirTech">
-    <nav>
-      <a href="#services">השירותים</a>
-      <a href="#faq">שאלות נפוצות</a>
-      <a href="products.html?cat=all">חנות</a>
-      <a href="contact.html">צור קשר</a>
-      <a href="terms.html">תקנון</a>
-    </nav>
-    <span><a href="https://wa.me/972502000373">שיחת ייעוץ חינם בוואטסאפ</a>
-      <span class="credit">התמונות בעמוד זמניות ומיועדות להחלפה בתמונות אמיתיות מהעבודות של דביר.</span>
-    </span>
-  </div>
-</footer>
+<footer></footer>
 
 <div class="dock">
   <a class="cta" href="https://wa.me/972502000373?text=%D7%94%D7%99%D7%99%20%D7%93%D7%91%D7%99%D7%A8%2C%20%D7%90%D7%A9%D7%9E%D7%97%20%D7%9C%D7%AA%D7%90%D7%9D%20%D7%A9%D7%99%D7%97%D7%AA%20%D7%99%D7%99%D7%A2%D7%95%D7%A5%20%D7%A7%D7%A6%D7%A8%D7%94">
@@ -968,5 +982,7 @@
     }
   })();
 </script>
+<script src="site-content.js"></script>
+<script src="site-footer.js"></script>
 </body>
 </html>

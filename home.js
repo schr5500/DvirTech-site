@@ -104,7 +104,16 @@ const HOME_PH_CSS = `
   text-overflow:ellipsis;white-space:nowrap}
 .deal-art .dvt-ph-ic{width:54px;height:54px}
 .cat-card .cat-art .dvt-ph-ic{width:58px;height:58px}
-.dvt-art-on .dvt-ph{display:none}`;
+.dvt-art-on .dvt-ph{display:none}
+
+/* ⚠️ הבהוב השלד — אותו כלל בדיוק כמו ‎.p-card--skel‎ ב-products.css,
+   מוזרק כאן כי home.html לא טוען את products.css. בלי ההבהוב השלד
+   נקרא כ"תיבות אפורות ריקות" ולא כ"בדרך". */
+@keyframes dvtSkelPulse{0%,100%{opacity:1}50%{opacity:.55}}
+.cat-card--skel .cat-art,.cat-card--skel .sk-line{animation:dvtSkelPulse 1.4s ease-in-out infinite}
+.cat-card--skel .sk-line{display:block;height:12px;background:#EDF2F8;border-radius:6px}
+@media (prefers-reduced-motion:reduce){
+  .cat-card--skel .cat-art,.cat-card--skel .sk-line{animation:none}}`;
 
 function injectPlaceholderCss(){
   if(document.getElementById("homePhCss")) return;
@@ -160,13 +169,21 @@ function homeSellable(cat){
   if(dvtIsVirtualCat(cat)) return dvtVirtualItems(HOME_CATALOG, cat);
   const g = HOME_CATALOG[cat];
   if(!g) return [];
-  return (g.items || []).filter(dvtIsSellable);
+  return (g.items || []).filter(it => dvtIsSellable(it, cat));
 }
+
+/* ⚠️ **"קנייה לפי קטגוריה" מציג מדפים, לא כל לשונית בגיליון.**
+   הסעיף האוטומטי (extra) נועד שקטגוריה חדשה תופיע מעצמה — אבל הוא
+   גרר פנימה גם מאווררי מארז, משחה תרמית ורשת אלחוטית, שהם אביזרי
+   הרכבה ולא קטגוריית קנייה (דביר, 17.08.2026: "אלו לא קטגוריות").
+   הם עדיין נגישים דרך תפריט "מוצרים" ובחנות — רק לא בקרוסלת הבית. */
+const HOME_CATEGORY_EXCLUDE = ["services", "caseFans", "wifi", "paste", "all", "sale"];
 
 function homeCategories(){
   const known = HOME_CATEGORY_ORDER.filter(c => homeSellable(c).length);
   const extra = Object.keys(HOME_CATALOG)
-    .filter(c => c !== "services" && HOME_CATEGORY_ORDER.indexOf(c) === -1 && homeSellable(c).length);
+    .filter(c => HOME_CATEGORY_EXCLUDE.indexOf(c) === -1 &&
+                 HOME_CATEGORY_ORDER.indexOf(c) === -1 && homeSellable(c).length);
   return known.concat(extra);
 }
 
@@ -289,16 +306,43 @@ function setupDealMarquee(row){
   setTimeout(start, 250);
 }
 
-/* מצב ביניים בזמן טעינה — כדי שהרצועות לא יקפצו מריק למלא */
+/* מצב ביניים בזמן טעינה — כדי שהרצועות לא יקפצו מריק למלא.
+
+   ⚠️ ההמתנה כאן היא 10–13 שניות בביקור ראשון (זמן תשובת getCatalog,
+   ראה 4-payment-api.gs), ולכן השלד הוא לא קישוט: בלעדיו דף הבית הוא
+   שטח ריק לאורך כל הזמן הזה.
+
+   ⚠️ נוסף `aria-live` עם טקסט מפורש: קורא-מסך לא "רואה" תיבות אפורות,
+   ובלי ההודעה הדף שותק לגמרי עד שהנתונים נוחתים. השלדים עצמם מוסתרים
+   ממנו — 14 תיבות ריקות אינן מידע. */
 function renderSkeleton(){
   const sk = n => Array.from({length:n}, () => `
-    <div class="cat-card" style="pointer-events:none;opacity:.55">
-      <div class="cat-art"></div><b style="display:block;height:12px;background:#EDF2F8;border-radius:6px"></b>
+    <div class="cat-card cat-card--skel" aria-hidden="true" style="pointer-events:none">
+      <div class="cat-art"></div><b class="sk-line"></b>
     </div>`).join("");
   const c = document.getElementById("catRow");
   const d = document.getElementById("dealRow");
   if(c) c.innerHTML = sk(7);
   if(d) d.innerHTML = sk(7);
+  setHomeStatus(tr("טוען מוצרים…", "Loading products…"));
+}
+
+/* אזור הכרזה יחיד לדף הבית. נוצר ב-JS (ולא ב-home.html) כדי שהקובץ
+   היחיד שצריך לתחזק את מצב הטעינה יהיה זה. */
+function setHomeStatus(text){
+  let el = document.getElementById("homeStatus");
+  if(!el){
+    const anchor = document.getElementById("catRow");
+    if(!anchor || !anchor.parentNode) return;
+    el = document.createElement("p");
+    el.id = "homeStatus";
+    el.setAttribute("role", "status");
+    el.setAttribute("aria-live", "polite");
+    el.style.cssText = "margin:6px 2px;font-size:13.5px;font-weight:600;color:var(--ink-soft,#5F7590)";
+    anchor.parentNode.insertBefore(el, anchor);
+  }
+  el.textContent = text || "";
+  el.style.display = text ? "" : "none";
 }
 
 function renderLoadError(){
@@ -338,9 +382,11 @@ async function loadHome(){
     HOME_CATALOG = await dvtGetCatalog();
   }catch(e){
     console.error("[home] getCatalog failed:", e);
+    setHomeStatus("");
     renderLoadError();
     return;
   }
+  setHomeStatus("");   // הנתונים כאן — ההודעה כבר לא נכונה
   renderCategories();
   renderDeals();
 

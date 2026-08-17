@@ -1,0 +1,281 @@
+<!DOCTYPE html>
+<!--
+  =====================================================================
+  DvirTech — מדיניות פרטיות · הערה פנימית (לא מוצגת לגולש)
+  =====================================================================
+  הדף נוסח על ידי מודל שפה, מתוך הקוד עצמו: כל קביעה עובדתית כאן
+  (מה נאסף, לאן נשלח, מה נשמר ומה לא קיים) אומתה מול המימוש בפועל —
+  checkout.js, cart.js, i18n.js, builder-bridge.js, search-core.js,
+  site-footer.js ו-4-payment-api.gs (16.08.2026).
+
+  ⚠️ **הוא אינו ייעוץ משפטי וטרם נבדק על ידי עו"ד** — בדיוק כמו התקנון
+  (ראה DVT-TERMS-REVIEW.md). לפני השקה נדרש אישור עו"ד ישראלי, בפרט
+  להתאמה המלאה לתיקון 13 לחוק הגנת הפרטיות (בתוקף מ-14.08.2025).
+
+  ⚠️ אם התנהלות האתר משתנה — נוספת אנליטיקה, רשימת דיוור, מסד נתונים,
+  מפתח localStorage חדש או ספק חיצוני חדש — חובה לעדכן את הדף הזה
+  באותו שינוי עצמו. דף פרטיות שמתאר מציאות שכבר לא נכונה גרוע יותר
+  מאשר אין דף בכלל.
+  =====================================================================
+-->
+<html lang="he" dir="rtl">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>DvirTech — מדיניות פרטיות</title>
+<script>
+  (function(){
+    var saved = "he";
+    try { saved = localStorage.getItem("dvirtech_lang") || "he"; } catch(e) {}
+    document.documentElement.lang = saved;
+    document.documentElement.dir = saved === "he" ? "rtl" : "ltr";
+  })();
+</script>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link href="https://fonts.googleapis.com/css2?family=Rubik:wght@400;500;600;700;800;900&family=Heebo:wght@300;400;500;700&display=swap" rel="stylesheet">
+<link rel="stylesheet" href="style.css">
+<style>
+  .pv-section{margin-bottom:26px}
+  .pv-section h2{font-size:17px;margin:0 0 10px;color:var(--navy-900)}
+  .pv-section p{font-size:14.5px;line-height:1.85;color:var(--ink);margin:0 0 10px}
+  .pv-section p:last-child{margin-bottom:0}
+  .pv-section ul{margin:0 0 10px;padding-inline-start:22px}
+  .pv-section li{font-size:14.5px;line-height:1.85;color:var(--ink);margin-bottom:6px}
+
+  /* תיבת "בקצרה" — התמצית בשפה פשוטה, לפני הפירוט. */
+  .pv-brief{
+    border:1px solid var(--line);border-inline-start:4px solid var(--teal);
+    background:#fff;border-radius:12px;padding:16px 18px;margin:0 0 26px;
+  }
+  .pv-brief ul{margin:0;padding-inline-start:20px}
+  .pv-brief li{font-size:14.5px;line-height:1.9;color:var(--ink)}
+
+  /* שמות מפתחות localStorage — טקסט טכני לטיני בתוך עמוד RTL. */
+  .pv-section code{
+    direction:ltr;unicode-bidi:embed;
+    background:var(--line-soft);border:1px solid var(--line);border-radius:6px;
+    padding:1px 6px;font-size:13px;color:var(--navy-900);
+    overflow-wrap:anywhere;
+  }
+</style>
+</head>
+<body>
+
+<header>
+  <div class="wrap headbar">
+    <a class="brand" href="home.html" aria-label="DvirTech — לדף הבית"><img class="brand-logo" src="images/logo-dvirtech-transparent.png" alt="DvirTech"></a>
+    <nav>
+      <a href="home.html" id="navHome"></a>
+      <a href="products.html?cat=readyPc" id="navReady"></a>
+      <a href="products.html?cat=peripherals" id="navPeripherals"></a>
+      <a href="products.html?cat=gpu" id="navComponents"></a>
+      <a href="builder.html" id="navBuilder"></a>
+      <a href="support.html" id="navLab"></a>
+      <a href="why-dvirtech.html" id="navWhy"></a>
+      <a href="contact.html" id="navContact"></a>
+    </nav>
+    <div class="lang-switch">
+      <button class="lang-btn" data-lang="he" onclick="setLang('he')">עברית</button>
+      <button class="lang-btn" data-lang="en" onclick="setLang('en')">English</button>
+    </div>
+  </div>
+</header>
+
+<div class="wrap" style="max-width:760px;padding-top:44px;padding-bottom:70px">
+  <h1 data-he="מדיניות פרטיות" data-en="Privacy Policy" style="font-size:28px;margin:0 0 4px">מדיניות פרטיות</h1>
+  <p data-he="עודכן לאחרונה: אוגוסט 2026" data-en="Last updated: August 2026" style="color:var(--ink-soft);font-size:13px;margin:0 0 22px">עודכן לאחרונה: אוגוסט 2026</p>
+
+  <!-- ==================== 1. מבוא ==================== -->
+  <div class="pv-section">
+    <h2 data-he="1. מי אנחנו ומה המסמך הזה" data-en="1. Who we are and what this document is">1. מי אנחנו ומה המסמך הזה</h2>
+    <p data-he="מדיניות פרטיות זו מסבירה, בשפה פשוטה, איזה מידע נאסף באתר DvirTech, מה נעשה בו ומהן הזכויות שלכם. האתר מופעל על ידי דביר פרץ, עוסק פטור מס׳ 322999582 (״בית העסק״), הפועל בהתאם לחוק הגנת הפרטיות, התשמ״א-1981, לרבות תיקון מס׳ 13 שנכנס לתוקף ביום 14.08.2025."
+       data-en="This privacy policy explains, in plain language, what information the DvirTech website collects, what is done with it, and what your rights are. The site is operated by Dvir Peretz, exempt dealer no. 322999582 (the Business), acting in accordance with the Israeli Privacy Protection Law, 1981, including Amendment 13, in force since 14.08.2025.">מדיניות פרטיות זו מסבירה, בשפה פשוטה, איזה מידע נאסף באתר DvirTech, מה נעשה בו ומהן הזכויות שלכם. האתר מופעל על ידי דביר פרץ, עוסק פטור מס׳ 322999582 (״בית העסק״), הפועל בהתאם לחוק הגנת הפרטיות, התשמ״א-1981, לרבות תיקון מס׳ 13 שנכנס לתוקף ביום 14.08.2025.</p>
+    <p data-he="העיקרון המנחה פשוט: האתר אוסף כמה שפחות. אין באתר חשבונות משתמש ואין הרשמה, ואפשר לגלוש בו מבלי למסור שום פרט אישי. פרטים נמסרים רק כשאתם בוחרים למסור אותם — בביצוע הזמנה או בפנייה אלינו."
+       data-en="The guiding principle is simple: the site collects as little as possible. There are no user accounts and no registration, and you can browse without providing any personal details. Details are provided only when you choose to — when placing an order or contacting us.">העיקרון המנחה פשוט: האתר אוסף כמה שפחות. אין באתר חשבונות משתמש ואין הרשמה, ואפשר לגלוש בו מבלי למסור שום פרט אישי. פרטים נמסרים רק כשאתם בוחרים למסור אותם — בביצוע הזמנה או בפנייה אלינו.</p>
+  </div>
+
+  <!-- ==================== 2. בקצרה ==================== -->
+  <div class="pv-section">
+    <h2 data-he="2. בקצרה" data-en="2. In short">2. בקצרה</h2>
+    <div class="pv-brief">
+      <ul>
+        <li data-he="אין עוגיות (Cookies), אין Google Analytics ואין פיקסלים פרסומיים." data-en="No cookies, no Google Analytics, no advertising pixels.">אין עוגיות (Cookies), אין Google Analytics ואין פיקסלים פרסומיים.</li>
+        <li data-he="העגלה, השפה וההרכבה שלכם נשמרות בדפדפן שלכם בלבד — לא אצלנו." data-en="Your cart, language and saved build are stored only in your own browser — not with us.">העגלה, השפה וההרכבה שלכם נשמרות בדפדפן שלכם בלבד — לא אצלנו.</li>
+        <li data-he="פרטי הזמנה (שם, טלפון, מייל, כתובת) משמשים אך ורק לביצוע ההזמנה." data-en="Order details (name, phone, email, address) are used solely to fulfil your order.">פרטי הזמנה (שם, טלפון, מייל, כתובת) משמשים אך ורק לביצוע ההזמנה.</li>
+        <li data-he="פרטי כרטיס האשראי מוזנים רק בדף התשלום המאובטח של SUMIT — הם לא עוברים דרך האתר ולא נשמרים בו." data-en="Card details are entered only on SUMIT's secure payment page — they never pass through or get stored by this site.">פרטי כרטיס האשראי מוזנים רק בדף התשלום המאובטח של SUMIT — הם לא עוברים דרך האתר ולא נשמרים בו.</li>
+        <li data-he="אין רשימת דיוור ואין הודעות פרסומת." data-en="No mailing list and no advertising messages.">אין רשימת דיוור ואין הודעות פרסומת.</li>
+      </ul>
+    </div>
+  </div>
+
+  <!-- ==================== 3. בלי עוגיות ובלי מעקב ==================== -->
+  <div class="pv-section">
+    <h2 data-he="3. גלישה באתר — בלי עוגיות ובלי מעקב" data-en="3. Browsing — no cookies, no tracking">3. גלישה באתר — בלי עוגיות ובלי מעקב</h2>
+    <p data-he="האתר אינו משתמש בעוגיות (Cookies) כלל — לא עוגיות משלו ולא עוגיות של צד שלישי. אין באתר Google Analytics, אין Google Ads, אין פיקסל של פייסבוק ואין שום כלי מעקב, מדידה או פרסום אחר. האתר אינו בונה פרופיל גלישה, אינו מזהה מבקרים ואינו משתף מידע עם רשתות פרסום."
+       data-en="The site does not use cookies at all — neither its own nor third-party ones. There is no Google Analytics, no Google Ads, no Facebook pixel, and no tracking, measurement or advertising tool of any kind. The site does not build browsing profiles, does not identify visitors, and does not share information with advertising networks.">האתר אינו משתמש בעוגיות (Cookies) כלל — לא עוגיות משלו ולא עוגיות של צד שלישי. אין באתר Google Analytics, אין Google Ads, אין פיקסל של פייסבוק ואין שום כלי מעקב, מדידה או פרסום אחר. האתר אינו בונה פרופיל גלישה, אינו מזהה מבקרים ואינו משתף מידע עם רשתות פרסום.</p>
+  </div>
+
+  <!-- ==================== 4. אחסון מקומי ==================== -->
+  <div class="pv-section">
+    <h2 data-he="4. אחסון מקומי בדפדפן (Local Storage)" data-en="4. Local storage in your browser">4. אחסון מקומי בדפדפן (Local Storage)</h2>
+    <p data-he="כדי שהאתר יעבוד בצורה נוחה, הוא שומר כמות קטנה של נתונים באחסון המקומי (Local Storage) של הדפדפן — במכשיר שלכם בלבד. הנתונים האלה לא נשלחים אלינו ולא לאף גורם אחר, ואינם משמשים לזיהוי או למעקב. אלה הנתונים שנשמרים בפועל:"
+       data-en="To make the site convenient to use, it keeps a small amount of data in your browser's local storage — on your device only. This data is never sent to us or to anyone else, and is not used to identify or track you. This is what is actually stored:">כדי שהאתר יעבוד בצורה נוחה, הוא שומר כמות קטנה של נתונים באחסון המקומי (Local Storage) של הדפדפן — במכשיר שלכם בלבד. הנתונים האלה לא נשלחים אלינו ולא לאף גורם אחר, ואינם משמשים לזיהוי או למעקב. אלה הנתונים שנשמרים בפועל:</p>
+    <ul>
+      <li><code>dvirtech_lang</code> <span data-he="— שפת התצוגה שבחרתם (עברית או אנגלית)." data-en="— your chosen display language (Hebrew or English).">— שפת התצוגה שבחרתם (עברית או אנגלית).</span></li>
+      <li><code>dvirtech_cart_items_v1</code> <span data-he="— תכולת עגלת הקניות שלכם." data-en="— the contents of your shopping cart.">— תכולת עגלת הקניות שלכם.</span></li>
+      <li><code>dvirtech_build_v1</code> <span data-he="— ההרכבה שנשמרה בבונה המחשבים, כדי שתוכלו להמשיך מאיפה שהפסקתם." data-en="— the build saved in the PC Builder, so you can pick up where you left off.">— ההרכבה שנשמרה בבונה המחשבים, כדי שתוכלו להמשיך מאיפה שהפסקתם.</span></li>
+      <li><code>dvirtech_catalog_v1</code> <span data-he="— עותק זמני (מטמון) של קטלוג המוצרים, כדי שהאתר ייטען מהר. אינו מכיל שום מידע אישי." data-en="— a temporary cached copy of the product catalog, so the site loads fast. Contains no personal information.">— עותק זמני (מטמון) של קטלוג המוצרים, כדי שהאתר ייטען מהר. אינו מכיל שום מידע אישי.</span></li>
+    </ul>
+    <p data-he="אפשר למחוק את הנתונים האלה בכל רגע דרך ניקוי נתוני האתר בהגדרות הדפדפן. האתר ימשיך לעבוד — פשוט בלי העגלה וההעדפות ששמרתם."
+       data-en="You can delete this data at any time by clearing the site's data in your browser settings. The site will keep working — just without your saved cart and preferences.">אפשר למחוק את הנתונים האלה בכל רגע דרך ניקוי נתוני האתר בהגדרות הדפדפן. האתר ימשיך לעבוד — פשוט בלי העגלה וההעדפות ששמרתם.</p>
+  </div>
+
+  <!-- ==================== 5. שירותים חיצוניים בטעינה ==================== -->
+  <div class="pv-section">
+    <h2 data-he="5. שירותים חיצוניים בטעינת האתר" data-en="5. External services used to load the site">5. שירותים חיצוניים בטעינת האתר</h2>
+    <p data-he="כמו כל אתר, גם האתר הזה נטען משרתים. בזמן הטעינה הדפדפן שלכם פונה לשירותים הבאים, וכל אחד מהם מקבל באופן טכני את הנתונים הסטנדרטיים של כל בקשת אינטרנט (כגון כתובת IP וסוג הדפדפן):"
+       data-en="Like any website, this site is served from servers. While loading, your browser contacts the following services, each of which technically receives the standard data of any web request (such as your IP address and browser type):">כמו כל אתר, גם האתר הזה נטען משרתים. בזמן הטעינה הדפדפן שלכם פונה לשירותים הבאים, וכל אחד מהם מקבל באופן טכני את הנתונים הסטנדרטיים של כל בקשת אינטרנט (כגון כתובת IP וסוג הדפדפן):</p>
+    <ul>
+      <li data-he="GitHub Pages — השירות שמארח את קובצי האתר." data-en="GitHub Pages — the service hosting the site's files.">GitHub Pages — השירות שמארח את קובצי האתר.</li>
+      <li data-he="Google Fonts — טעינת הגופנים שבהם האתר משתמש." data-en="Google Fonts — loads the fonts the site uses.">Google Fonts — טעינת הגופנים שבהם האתר משתמש.</li>
+      <li data-he="Google Apps Script — השרת שממנו נטען קטלוג המוצרים ושדרכו נשלחות הזמנות." data-en="Google Apps Script — the server the product catalog is loaded from and orders are sent through.">Google Apps Script — השרת שממנו נטען קטלוג המוצרים ושדרכו נשלחות הזמנות.</li>
+    </ul>
+    <p data-he="בית העסק אינו מקבל, אינו רואה ואינו שומר את נתוני הגלישה הטכניים האלה. כל שירות כפוף למדיניות הפרטיות שלו."
+       data-en="The Business does not receive, see or store this technical browsing data. Each service is governed by its own privacy policy.">בית העסק אינו מקבל, אינו רואה ואינו שומר את נתוני הגלישה הטכניים האלה. כל שירות כפוף למדיניות הפרטיות שלו.</p>
+  </div>
+
+  <!-- ==================== 6. פרטים שנמסרים בהזמנה ==================== -->
+  <div class="pv-section">
+    <h2 data-he="6. אילו פרטים נמסרים בביצוע הזמנה" data-en="6. What details you provide when ordering">6. אילו פרטים נמסרים בביצוע הזמנה</h2>
+    <p data-he="בדף התשלום תתבקשו למלא: שם מלא; מספר טלפון; כתובת דוא״ל (לא חובה — משמשת לשליחת הקבלה); ואם אתם רוכשים כעסק — שם העסק או החברה, כדי שהקבלה תופק על שמו. אם בחרתם משלוח, תתבקשו גם כתובת: עיר, רחוב ומספר בית, ובאופן לא חובה — דירה, קומה או קוד כניסה. בבחירת איסוף עצמי לא נאספת כתובת כלל."
+       data-en="On the checkout page you will be asked for: your full name; phone number; email address (optional — used to send you the receipt); and, if buying as a business, the business or company name so the receipt is issued under it. If you choose delivery, you will also be asked for an address: city, street and house number, and optionally an apartment, floor or entry code. If you choose self-pickup, no address is collected at all.">בדף התשלום תתבקשו למלא: שם מלא; מספר טלפון; כתובת דוא״ל (לא חובה — משמשת לשליחת הקבלה); ואם אתם רוכשים כעסק — שם העסק או החברה, כדי שהקבלה תופק על שמו. אם בחרתם משלוח, תתבקשו גם כתובת: עיר, רחוב ומספר בית, ובאופן לא חובה — דירה, קומה או קוד כניסה. בבחירת איסוף עצמי לא נאספת כתובת כלל.</p>
+    <p data-he="לצד הפרטים האלה נשמרים פרטי ההזמנה עצמה — המוצרים והשירותים שנבחרו, אופן המשלוח ומספר התשלומים."
+       data-en="Alongside these details, the order itself is recorded — the products and services chosen, the delivery method and the number of installments.">לצד הפרטים האלה נשמרים פרטי ההזמנה עצמה — המוצרים והשירותים שנבחרו, אופן המשלוח ומספר התשלומים.</p>
+  </div>
+
+  <!-- ==================== 7. לאן הפרטים מגיעים ==================== -->
+  <div class="pv-section">
+    <h2 data-he="7. לאן הפרטים מגיעים ומי מקבל אותם" data-en="7. Where your details go and who receives them">7. לאן הפרטים מגיעים ומי מקבל אותם</h2>
+    <p data-he="פרטי ההזמנה נשלחים משרת ההזמנות של האתר (Google Apps Script) אל SUMIT — ספקית הסליקה והחשבוניות הישראלית שאיתה עובד בית העסק — לצורך פתיחת דף תשלום מאובטח והפקת קבלה. פרטי הלקוח וההזמנה נשמרים במערכת SUMIT, המשמשת את בית העסק לניהול ההזמנות והלקוחות; לאתר עצמו אין מסד נתונים משלו, והוא אינו שומר את הפרטים בשום מקום נוסף. כתובת המשלוח נרשמת על גבי מסמך העסקה, כדי שיהיה ברור לאן ההזמנה נשלחת."
+       data-en="Your order details are sent from the site's order server (Google Apps Script) to SUMIT — the Israeli payment and invoicing provider the Business works with — to open a secure payment page and issue a receipt. Customer and order details are stored in SUMIT's system, which serves as the Business's order and customer management system; the site itself has no database of its own and stores the details nowhere else. The delivery address is recorded on the transaction document so it is clear where the order ships to.">פרטי ההזמנה נשלחים משרת ההזמנות של האתר (Google Apps Script) אל SUMIT — ספקית הסליקה והחשבוניות הישראלית שאיתה עובד בית העסק — לצורך פתיחת דף תשלום מאובטח והפקת קבלה. פרטי הלקוח וההזמנה נשמרים במערכת SUMIT, המשמשת את בית העסק לניהול ההזמנות והלקוחות; לאתר עצמו אין מסד נתונים משלו, והוא אינו שומר את הפרטים בשום מקום נוסף. כתובת המשלוח נרשמת על גבי מסמך העסקה, כדי שיהיה ברור לאן ההזמנה נשלחת.</p>
+    <p data-he="לאחר תשלום מוצלח, SUMIT שולחת אליכם את הקבלה בדוא״ל (אם מסרתם כתובת דוא״ל), ובית העסק מקבל הודעת דוא״ל על ההזמנה — מספר ההזמנה והסכום — לתיבת הדוא״ל העסקית שלו."
+       data-en="After a successful payment, SUMIT emails you the receipt (if you provided an email address), and the Business receives an order notification email — the order number and amount — to its business mailbox.">לאחר תשלום מוצלח, SUMIT שולחת אליכם את הקבלה בדוא״ל (אם מסרתם כתובת דוא״ל), ובית העסק מקבל הודעת דוא״ל על ההזמנה — מספר ההזמנה והסכום — לתיבת הדוא״ל העסקית שלו.</p>
+    <p data-he="מעבר לכך, מידע מועבר רק כשהדבר נדרש לביצוע העסקה עצמה — למשל לחברת שילוח לצורך המשלוח — או כשהדין מחייב זאת. המידע אינו נמכר ואינו מועבר לצד שלישי לצורכי שיווק, לעולם."
+       data-en="Beyond that, information is shared only where required to carry out the transaction itself — for example with a courier company for delivery — or where the law requires it. Your information is never sold and never shared with third parties for marketing.">מעבר לכך, מידע מועבר רק כשהדבר נדרש לביצוע העסקה עצמה — למשל לחברת שילוח לצורך המשלוח — או כשהדין מחייב זאת. המידע אינו נמכר ואינו מועבר לצד שלישי לצורכי שיווק, לעולם.</p>
+  </div>
+
+  <!-- ==================== 8. פרטי אשראי ואבטחה ==================== -->
+  <div class="pv-section">
+    <h2 data-he="8. פרטי כרטיס אשראי ואבטחת מידע" data-en="8. Card details and data security">8. פרטי כרטיס אשראי ואבטחת מידע</h2>
+    <p data-he="פרטי כרטיס האשראי מוזנים אך ורק בדף התשלום המאובטח של SUMIT. הם אינם עוברים דרך האתר או דרך שרת ההזמנות שלו בשום שלב, ובית העסק אינו רואה, אינו מקבל ואינו שומר אותם — אף פעם."
+       data-en="Card details are entered only on SUMIT's secure payment page. They never pass through this site or its order server at any stage, and the Business never sees, receives or stores them.">פרטי כרטיס האשראי מוזנים אך ורק בדף התשלום המאובטח של SUMIT. הם אינם עוברים דרך האתר או דרך שרת ההזמנות שלו בשום שלב, ובית העסק אינו רואה, אינו מקבל ואינו שומר אותם — אף פעם.</p>
+    <p data-he="התקשורת עם האתר ועם שרת ההזמנות מוצפנת (HTTPS). ומעבר לכול — ההגנה הטובה ביותר על מידע היא פשוט לא לאסוף אותו, וזה העיקרון שעל פיו האתר בנוי."
+       data-en="Communication with the site and its order server is encrypted (HTTPS). And above all — the best protection for data is simply not collecting it, which is the principle this site is built on.">התקשורת עם האתר ועם שרת ההזמנות מוצפנת (HTTPS). ומעבר לכול — ההגנה הטובה ביותר על מידע היא פשוט לא לאסוף אותו, וזה העיקרון שעל פיו האתר בנוי.</p>
+  </div>
+
+  <!-- ==================== 9. וואטסאפ, הודעות ודיוור ==================== -->
+  <div class="pv-section">
+    <h2 data-he="9. וואטסאפ, הודעות ודיוור" data-en="9. WhatsApp, messages and marketing">9. וואטסאפ, הודעות ודיוור</h2>
+    <p data-he="כפתורי הוואטסאפ באתר הם קישורים בלבד: לחיצה עליהם פותחת את וואטסאפ אצלכם, ושום מידע אינו נשלח עד שאתם בוחרים לשלוח הודעה בעצמכם. פנייה בוואטסאפ, בטלפון או בדוא״ל נשמרת אצל בית העסק לצורך הטיפול בפנייה ובהזמנות שלכם."
+       data-en="The WhatsApp buttons on the site are plain links: clicking one opens WhatsApp on your device, and no information is sent until you choose to send a message yourself. Messages you send via WhatsApp, phone or email are kept by the Business in order to handle your inquiry and orders.">כפתורי הוואטסאפ באתר הם קישורים בלבד: לחיצה עליהם פותחת את וואטסאפ אצלכם, ושום מידע אינו נשלח עד שאתם בוחרים לשלוח הודעה בעצמכם. פנייה בוואטסאפ, בטלפון או בדוא״ל נשמרת אצל בית העסק לצורך הטיפול בפנייה ובהזמנות שלכם.</p>
+    <p data-he="בית העסק אינו מנהל רשימת דיוור ואינו שולח הודעות פרסומת. ההודעות היחידות שתקבלו הן תפעוליות — קבלה ועדכונים הנוגעים להזמנה שלכם."
+       data-en="The Business does not maintain a mailing list and does not send advertising messages. The only messages you will receive are operational — your receipt and updates about your order.">בית העסק אינו מנהל רשימת דיוור ואינו שולח הודעות פרסומת. ההודעות היחידות שתקבלו הן תפעוליות — קבלה ועדכונים הנוגעים להזמנה שלכם.</p>
+  </div>
+
+  <!-- ==================== 10. משך שמירה ==================== -->
+  <div class="pv-section">
+    <h2 data-he="10. כמה זמן המידע נשמר" data-en="10. How long information is kept">10. כמה זמן המידע נשמר</h2>
+    <p data-he="פרטי הזמנות ומסמכי עסקה נשמרים למשך התקופה הנדרשת לפי דין — לרבות חובות שמירת רשומות לפי דיני המס — ולצורכי תיעוד, אחריות וטיפול בפניות. בתום התקופה הם נמחקים או נשמרים באופן שאינו מזהה, אלא אם הדין מחייב אחרת."
+       data-en="Order details and transaction documents are kept for the period required by law — including record-keeping duties under tax law — and for documentation, warranty and support purposes. At the end of that period they are deleted or retained in a non-identifying form, unless the law requires otherwise.">פרטי הזמנות ומסמכי עסקה נשמרים למשך התקופה הנדרשת לפי דין — לרבות חובות שמירת רשומות לפי דיני המס — ולצורכי תיעוד, אחריות וטיפול בפניות. בתום התקופה הם נמחקים או נשמרים באופן שאינו מזהה, אלא אם הדין מחייב אחרת.</p>
+  </div>
+
+  <!-- ==================== 11. הזכויות שלך ==================== -->
+  <div class="pv-section">
+    <h2 data-he="11. הזכויות שלכם" data-en="11. Your rights">11. הזכויות שלכם</h2>
+    <p data-he="על פי חוק הגנת הפרטיות, לרבות תיקון 13, עומדות לכם בין היתר הזכויות הבאות:"
+       data-en="Under the Privacy Protection Law, including Amendment 13, you have, among others, the following rights:">על פי חוק הגנת הפרטיות, לרבות תיקון 13, עומדות לכם בין היתר הזכויות הבאות:</p>
+    <ul>
+      <li data-he="עיון — לקבל מידע על הנתונים השמורים אודותיכם." data-en="Access — to know what data is kept about you.">עיון — לקבל מידע על הנתונים השמורים אודותיכם.</li>
+      <li data-he="תיקון — לבקש לתקן מידע שאינו נכון, שלם או מעודכן." data-en="Correction — to have inaccurate, incomplete or outdated data corrected.">תיקון — לבקש לתקן מידע שאינו נכון, שלם או מעודכן.</li>
+      <li data-he="מחיקה — לבקש למחוק מידע, בכפוף למידע שחובה לשמור לפי דין (למשל מסמכי עסקה)." data-en="Deletion — to have data deleted, subject to records the law requires keeping (such as transaction documents).">מחיקה — לבקש למחוק מידע, בכפוף למידע שחובה לשמור לפי דין (למשל מסמכי עסקה).</li>
+    </ul>
+    <p data-he="כדי לממש זכות, פנו אלינו בפרטי ההתקשרות שבסעיף 12 — הבקשה תטופל בהקדם וללא עלות. עומדת לכם גם הזכות לפנות בתלונה לרשות להגנת הפרטיות."
+       data-en="To exercise a right, contact us using the details in section 12 — your request will be handled promptly and free of charge. You also have the right to lodge a complaint with the Israeli Privacy Protection Authority.">כדי לממש זכות, פנו אלינו בפרטי ההתקשרות שבסעיף 12 — הבקשה תטופל בהקדם וללא עלות. עומדת לכם גם הזכות לפנות בתלונה לרשות להגנת הפרטיות.</p>
+  </div>
+
+  <!-- ==================== 12. עדכונים ויצירת קשר ==================== -->
+  <div class="pv-section">
+    <h2 data-he="12. עדכוני המדיניות ויצירת קשר" data-en="12. Policy updates and contact">12. עדכוני המדיניות ויצירת קשר</h2>
+    <p data-he="מדיניות זו משקפת את האתר כפי שהוא במועד העדכון המצוין למעלה. אם אופן איסוף המידע ישתנה — למשל אם יתווספו בעתיד כלי מדידה או רשימת דיוור — המדיניות תעודכן בהתאם והשינוי יצוין בעמוד זה. הנוסח המחייב הוא הנוסח המפורסם באתר במועד השימוש."
+       data-en="This policy reflects the site as it is on the date stated above. If the way information is collected changes — for example, if measurement tools or a mailing list are added in the future — this policy will be updated accordingly and the change noted on this page. The binding version is the one published on the site at the time of use.">מדיניות זו משקפת את האתר כפי שהוא במועד העדכון המצוין למעלה. אם אופן איסוף המידע ישתנה — למשל אם יתווספו בעתיד כלי מדידה או רשימת דיוור — המדיניות תעודכן בהתאם והשינוי יצוין בעמוד זה. הנוסח המחייב הוא הנוסח המפורסם באתר במועד השימוש.</p>
+    <p data-he="בכל שאלה בענייני פרטיות, או למימוש זכויותיכם: דביר פרץ · DvirTech · עוסק פטור 322999582 · טלפון/וואטסאפ 050-200-0373 · דוא״ל schr5500@gmail.com."
+       data-en="For any privacy question, or to exercise your rights: Dvir Peretz · DvirTech · exempt dealer 322999582 · phone/WhatsApp 050-200-0373 · email schr5500@gmail.com.">בכל שאלה בענייני פרטיות, או למימוש זכויותיכם: דביר פרץ · DvirTech · עוסק פטור 322999582 · טלפון/וואטסאפ 050-200-0373 · דוא״ל schr5500@gmail.com.</p>
+    <p>
+      <span data-he="ראו גם את " data-en="See also the ">ראו גם את </span><a href="terms.html" data-he="תקנון האתר" data-en="Site Terms">תקנון האתר</a><span data-he=" (סעיף 10 — פרטיות ואבטחת מידע) ואת עמוד " data-en=" (section 10 — privacy and data security) and the ">‎ (סעיף 10 — פרטיות ואבטחת מידע) ואת עמוד </span><a href="contact.html" data-he="צור קשר" data-en="Contact">צור קשר</a><span data-he="." data-en=" page.">.</span>
+    </p>
+  </div>
+</div>
+
+<footer></footer>
+
+<script src="sprite.js"></script>
+<script src="i18n.js"></script>
+<script src="site-content.js"></script>
+<script src="search-core.js"></script>
+<script src="site-header.js"></script>
+<script src="site-footer.js"></script>
+<script>
+/* =====================================================================
+   privacy.html — סקריפט הדף (מוטמע: הדף הזה הוא קובץ אחד, אין privacy.js)
+   =====================================================================
+   התרגום הצהרתי — data-he / data-en על כל אלמנט — בדיוק כמו ב-contact.html
+   וב-support.html. ההדר נבנה מחדש בהחלפת שפה (כמו contactRebuildHeader),
+   והפוטר מתחלף לבד דרך המשגיח של site-footer.js.
+   ⚠️ חייב לרוץ לפני cart.js — hookCartIntoLangSwitch שם עוטף את setLang. */
+function privacyApplyI18n(){
+  document.querySelectorAll("[data-he]").forEach(el => {
+    const v = el.getAttribute(LANG === "en" ? "data-en" : "data-he");
+    if(v != null && el.textContent !== v) el.textContent = v;
+  });
+
+  // תיבת החיפוש שההדר בונה משתמשת ב-placeholder נפרד
+  document.querySelectorAll("[data-ph-he]").forEach(el => {
+    const v = el.getAttribute(LANG === "en" ? "data-ph-en" : "data-ph-he");
+    if(v != null && el.placeholder !== v) el.placeholder = v;
+  });
+
+  // הניווט הסטטי (לפני שההדר המשותף נבנה) — עם הגנות null, כמו בתקנון
+  ["navHome","navReady","navPeripherals","navComponents","navBuilder","navLab","navWhy","navContact"].forEach(id => {
+    const e = document.getElementById(id);
+    if(e) e.textContent = t(id);
+  });
+
+  const title = tr("DvirTech — מדיניות פרטיות", "DvirTech — Privacy Policy");
+  if(document.title !== title) document.title = title;
+
+  document.querySelectorAll(".lang-btn").forEach(b => b.classList.toggle("active", b.dataset.lang === LANG));
+}
+
+/* buildSiteHeader נועל את עצמו עם shBuilt; בהחלפת שפה משחררים ובונים שוב —
+   הטקסטים שם נוצרים דרך shTr לפי LANG ברגע הבנייה. */
+function privacyRebuildHeader(){
+  const header = document.querySelector("header");
+  if(!header || typeof buildSiteHeader !== "function") return;
+  delete header.dataset.shBuilt;
+  const bar = header.querySelector(".headbar");
+  if(bar) bar.innerHTML = "";
+  buildSiteHeader();
+}
+
+function setLang(lang){
+  if(lang === LANG) return;
+  setLangCore(lang);
+  privacyRebuildHeader();
+  privacyApplyI18n();
+}
+
+privacyApplyI18n();
+</script>
+<script src="cart.js"></script>
+</body>
+</html>

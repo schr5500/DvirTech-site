@@ -1,0 +1,417 @@
+/* =====================================================================
+   DvirTech — שירות ותמיכה (support.html)
+   =====================================================================
+   הצבעים, הפאנל, הכפתורים ושדות הטופס (.field-label, .validation-msg,
+   .btn, .btn-accent) מגיעים מ-style.css. אין כאן אף צבע קשיח שלא נגזר
+   מהמשתנים של המותג, למעט #fff על רקע צבעוני.
+
+   ⚠️ מה הדף הזה צריך לפתור, ולמה העיצוב נראה כמו שהוא נראה:
+   דביר אמר על הגרסה הקודמת "פשוט טקסט עמוס ולא מובן כמעט ובכלל".
+   הבעיה לא הייתה כמות השירותים אלא שכל 20 הכרטיסים נראו זהים, המחיר
+   לא בלט, ולא היה שום סימן ויזואלי למה שנבחר. שלושת הפתרונות כאן:
+     1. היררכיה — כרטיס פתיחה אחד עם הצעדים, ואז רשת כרטיסים שבה
+        המחיר גדול ובצבע נפרד מהכותרת.
+     2. סימון גלוי — צ'קבוקס אמיתי בכל כרטיס, וטבעת כחולה סביב כרטיס
+        מסומן. הבחירה נראית בלי לקרוא מילה.
+     3. פעולה כפולה בכל כרטיס — סימון (מצטבר) וכפתור וואטסאפ (מיידי,
+        לשירות הזה בלבד). שני משטחים נפרדים בכרטיס כדי שלא יתחלפו.
+
+   ⚠️ RTL: כל מה שקשור לפריסה משתמש ב-inline-start/end. היוצא מן הכלל
+   היחיד הוא שני "גליפים" שמצוירים מגבולות — ה-✓ בצ'קבוקס והחץ ב-
+   <summary>. שם נשארו border-top/left/right *פיזיים* בכוונה, כי גליף
+   שמתהפך בין עברית לאנגלית מצייר צורה אחרת לגמרי, לא תמונת ראי.
+===================================================================== */
+
+/* גובה ההדר הדביק של האתר. support.js מודד אותו בפועל ודורס את הערך —
+   הערך כאן הוא רק ברירת מחדל סבירה לרגע שלפני המדידה. */
+:root{ --sup-headh:85px }
+
+.sup-wrap{max-width:1060px;padding-top:30px;padding-bottom:64px}
+
+/* ---------- כרטיס הפתיחה ---------- */
+.sup-hero{position:relative;overflow:hidden;background:var(--surface);
+  border:1px solid var(--line);border-radius:var(--radius);
+  padding:26px 26px 22px;margin:0 0 18px;box-shadow:var(--shadow-s)}
+/* הילה רכה בצבעי המותג בפינה. דקורטיבית בלבד — pointer-events:none כדי
+   שלא תבלע לחיצות על הטקסט שמתחתיה. */
+.sup-hero::before{content:"";position:absolute;top:-90px;inset-inline-end:-90px;
+  width:260px;height:260px;border-radius:50%;background:var(--grad);
+  opacity:.10;pointer-events:none}
+.sup-hero>*{position:relative}
+
+.sup-eyebrow{display:inline-block;font-family:'Rubik',sans-serif;font-size:11.5px;
+  font-weight:700;letter-spacing:.03em;color:var(--blue-dark);background:var(--blue-soft);
+  border-radius:999px;padding:5px 12px;margin-bottom:13px}
+.sup-h1{font-size:33px;margin:0 0 10px;line-height:1.2}
+.sup-lede{font-size:15.5px;line-height:1.75;color:var(--ink-soft);margin:0 0 18px;max-width:64ch}
+
+.sup-steps{display:grid;grid-template-columns:repeat(3,1fr);gap:10px;
+  list-style:none;margin:0 0 16px;padding:0}
+.sup-steps li{display:flex;align-items:center;gap:10px;
+  background:var(--surface-2);border:1px solid var(--line-soft);
+  border-radius:var(--radius-sm);padding:11px 13px;
+  font-size:12.8px;font-weight:600;line-height:1.45}
+.sup-step-n{flex:none;width:24px;height:24px;border-radius:50%;
+  background:var(--grad);color:#fff;font-family:'Rubik',sans-serif;
+  font-size:12.5px;font-weight:700;display:flex;align-items:center;justify-content:center}
+
+.sup-lede-note{font-size:12.5px;line-height:1.7;color:var(--ink-soft);margin:0;max-width:80ch;
+  border-inline-start:3px solid var(--teal);background:var(--surface-2);
+  border-radius:var(--radius-sm);padding:11px 13px}
+
+/* ---------- רצועת קטגוריות ----------
+   20 שירותים הם גלילה ארוכה בטלפון, ולכן קיצור דרך לכל קטגוריה.
+   נדבקת מתחת להדר כדי שהיא תישאר זמינה גם באמצע הרשימה.
+   ⚠️ ה-header של האתר הוא sticky top:0 z-index:30 — בלי ההיסט הזה
+   הרצועה נעלמת מתחתיו. */
+/* ⚠️ flex-wrap:nowrap מפורש: style.css מגדיר nav{flex-wrap:wrap} לתפריט
+   הראשי, וה-<nav> הזה יורש ממנו. בלי הביטול הרצועה נשברת לשתי שורות
+   במקום לגלול לצדדים. */
+.sup-cats{display:flex;flex-wrap:nowrap;gap:8px;overflow-x:auto;padding:11px 0 12px;margin:0 0 6px;
+  position:sticky;top:var(--sup-headh);z-index:6;background:var(--bg);
+  box-shadow:0 1px 0 var(--line-soft);
+  -webkit-overflow-scrolling:touch;scrollbar-width:none}
+.sup-cats::-webkit-scrollbar{display:none}
+.sup-chip{flex:none;display:inline-flex;align-items:center;gap:7px;
+  border:1.5px solid var(--line);background:var(--surface);color:var(--ink-soft);
+  font-family:'Heebo',sans-serif;font-size:13px;font-weight:600;
+  padding:8px 15px;border-radius:999px;cursor:pointer;transition:.15s;white-space:nowrap}
+.sup-chip:hover{border-color:var(--blue);color:var(--blue);background:var(--blue-soft)}
+.sup-chip:focus-visible{outline:2px solid var(--blue);outline-offset:2px}
+/* הקטגוריה שבמסך כרגע — נצבעת מ-supInit דרך IntersectionObserver. */
+.sup-chip.is-cur{border-color:var(--blue);background:var(--blue);color:#fff}
+.sup-chip-n{font-family:'Rubik',sans-serif;font-size:11px;font-weight:700;opacity:.7}
+/* מונה השירותים שנבחרו בקטגוריה. מופיע רק כשיש בחירה בקטגוריה. */
+.sup-chip-on{font-family:'Rubik',sans-serif;font-size:10.5px;font-weight:800;color:#fff;
+  background:var(--teal-dark);border-radius:999px;min-width:17px;height:17px;
+  display:inline-flex;align-items:center;justify-content:center;padding:0 5px}
+
+/* ---------- קטגוריה ---------- */
+/* ההדר הדביק *וגם* רצועת הקטגוריות הדביקה מכסים את ראש הקטגוריה בקפיצה
+   אליה — לכן שניהם נכנסים ל-scroll-margin. */
+.sup-sec{margin:0 0 28px;scroll-margin-top:calc(var(--sup-headh) + 72px)}
+.sup-sec-h{font-size:19px;margin:0 0 10px;display:flex;align-items:center;gap:10px}
+.sup-sec-c{font-family:'Heebo',sans-serif;font-size:11.5px;font-weight:700;
+  color:var(--ink-soft);background:var(--surface-2);border:1px solid var(--line);
+  border-radius:999px;padding:3px 10px;white-space:nowrap}
+.sup-sec-h::after{content:"";flex:1;height:1px;background:var(--line)}
+.sup-note{font-size:12.5px;line-height:1.7;color:var(--ink-soft);margin:0 0 14px;max-width:82ch;
+  border-inline-start:3px solid var(--teal);background:var(--surface);
+  border-radius:var(--radius-sm);padding:10px 13px}
+
+/* ---------- כרטיס שירות ---------- */
+.sup-grid{display:grid;gap:13px;grid-template-columns:repeat(auto-fill,minmax(292px,1fr))}
+.sup-card{display:flex;flex-direction:column;overflow:hidden;
+  background:var(--surface);border:1.5px solid var(--line);border-radius:var(--radius);
+  box-shadow:var(--shadow-s);
+  transition:border-color .16s ease, box-shadow .18s ease, transform .18s ease}
+.sup-card:hover{border-color:#C9DEF8;box-shadow:var(--shadow);transform:translateY(-2px)}
+.sup-card.is-on{border-color:var(--blue);box-shadow:0 0 0 3px var(--blue-soft), var(--shadow-s)}
+
+/* ⚠️ <label> ולא כרטיס-שהוא-כפתור. בכרטיס יש עכשיו *שתי* פעולות
+   (סימון וּוואטסאפ), ולכן אזור לחיץ אחד שעוטף את הכל היה מפעיל את
+   הפעולה הלא נכונה. ה-label נותן שטח נגיעה גדול לסימון, ונגישות
+   מקלדת מגיעה מהצ'קבוקס האמיתי שבתוכו — בלי role/tabindex ידניים. */
+.sup-pick{display:grid;grid-template-columns:auto 1fr;gap:6px 12px;align-items:start;
+  padding:15px 16px 13px;cursor:pointer;flex:1;transition:background .16s ease}
+.sup-card.is-on .sup-pick{background:var(--blue-soft)}
+/* הצ'קבוקס עצמו מוסתר חזותית אך נשאר במיקוד ובעץ הנגישות. */
+.sup-tick{position:absolute;width:1px;height:1px;margin:-1px;padding:0;
+  overflow:hidden;clip:rect(0 0 0 0);white-space:nowrap;border:0}
+.sup-box{grid-column:1;grid-row:1;flex:none;width:22px;height:22px;margin-top:1px;
+  border:2px solid var(--line);border-radius:7px;background:var(--surface);
+  display:flex;align-items:center;justify-content:center;transition:.15s}
+/* ✓ מצויר משני גבולות פיזיים — ראו ההערה על גליפים בראש הקובץ. */
+.sup-box::after{content:"";width:11px;height:6px;margin-top:-3px;
+  border:2px solid #fff;border-top:0;border-right:0;
+  transform:rotate(-45deg) scale(.4);opacity:0;transition:.15s}
+.sup-tick:checked + .sup-box{border-color:var(--blue);background:var(--blue)}
+.sup-tick:checked + .sup-box::after{opacity:1;transform:rotate(-45deg) scale(1)}
+.sup-tick:focus-visible + .sup-box{outline:2px solid var(--blue);outline-offset:3px}
+
+.sup-head{grid-column:2;grid-row:1;display:flex;align-items:baseline;justify-content:space-between;gap:10px}
+.sup-card-t{font-family:'Rubik',sans-serif;font-size:15.5px;font-weight:700;
+  margin:0;line-height:1.4;color:var(--ink)}
+.sup-price{flex:none;font-family:'Rubik',sans-serif;font-size:17.5px;font-weight:800;
+  color:var(--blue-dark);white-space:nowrap}
+.sup-price.is-free{color:var(--teal-dark)}
+.sup-card-d{grid-column:2;grid-row:2;font-size:12.5px;line-height:1.65;color:var(--ink-soft);margin:0}
+
+.sup-card-f{display:flex;align-items:center;justify-content:space-between;gap:10px;
+  padding:10px 14px;border-top:1px solid var(--line-soft);background:var(--surface-2)}
+.sup-qn{font-size:11.5px;font-weight:600;color:var(--ink-soft);line-height:1.4}
+.sup-wa{flex:none;display:inline-flex;align-items:center;gap:7px;
+  border:1.5px solid var(--line);background:var(--surface);color:var(--wa-2);
+  font-family:'Heebo',sans-serif;font-size:12.5px;font-weight:700;
+  padding:8px 14px;border-radius:999px;cursor:pointer;transition:.15s;white-space:nowrap}
+.sup-wa:hover{background:var(--wa-2);border-color:var(--wa-2);color:#fff}
+.sup-wa:focus-visible{outline:2px solid var(--wa-2);outline-offset:2px}
+.sup-wa-ic{width:15px;height:15px;fill:currentColor;flex:none}
+/* אותו אייקון בכפתור השליחה הגדול שבתחתית הלוח. */
+.btn .sup-wa-ic{width:18px;height:18px}
+
+/* ---------- לוח הפנייה ---------- */
+.sup-panel{margin-top:10px;padding:22px;scroll-margin-top:calc(var(--sup-headh) + 16px)}
+.sup-panel-head{display:flex;align-items:center;justify-content:space-between;gap:12px;
+  padding-bottom:14px;margin-bottom:16px;border-bottom:1px solid var(--line)}
+.sup-kicker{font-size:11.5px;font-weight:700;color:var(--ink-soft);margin:0 0 3px;letter-spacing:.03em}
+.sup-panel-t{font-size:20px;margin:0;line-height:1.3}
+/* ⚠️ מונה שירותים, לא סכום. הדף הזה אינו עגלה: סכום מוצג היה גורם
+   לפנייה להיראות כמו הזמנה שאושרה, והשירותים לא נמכרים כאן. */
+.sup-count{flex:none;font-family:'Rubik',sans-serif;font-size:12.5px;font-weight:700;
+  color:var(--blue-dark);background:var(--blue-soft);border-radius:999px;
+  padding:6px 13px;white-space:nowrap}
+.sup-panel-meta{flex:none;display:flex;align-items:center;gap:9px}
+.sup-clear{border:1.5px solid var(--line);background:var(--surface);color:var(--ink-soft);
+  font-family:'Heebo',sans-serif;font-size:12px;font-weight:600;
+  padding:6px 13px;border-radius:999px;cursor:pointer;transition:.15s;white-space:nowrap}
+.sup-clear:hover{border-color:var(--red);color:var(--red);background:var(--red-bg)}
+.sup-empty{margin:0;font-size:13.5px;line-height:1.8;color:var(--ink-soft);text-align:center;
+  background:var(--surface-2);border:1px dashed var(--line);
+  border-radius:var(--radius-sm);padding:22px 18px}
+
+.sup-picked{margin:0 0 4px}
+.sup-item{border:1.5px solid var(--line);border-radius:var(--radius-sm);
+  background:var(--surface-2);margin-bottom:11px;overflow:hidden}
+.sup-item-h{display:flex;align-items:center;gap:10px;padding:11px 13px;background:var(--surface)}
+/* ה-"+" שרואים כאן הוא בדיוק הסימן שייצא בהודעת הוואטסאפ. */
+.sup-plus{flex:none;font-family:'Rubik',sans-serif;font-size:17px;font-weight:800;
+  color:var(--teal-dark);line-height:1}
+.sup-item-n{flex:1;min-width:0;font-size:14px;font-weight:700;line-height:1.4}
+.sup-item-p{flex:none;font-family:'Rubik',sans-serif;font-size:14px;font-weight:800;
+  color:var(--blue-dark);white-space:nowrap}
+.sup-item-x{flex:none;width:28px;height:28px;padding:0;border-radius:50%;
+  border:1px solid var(--line);background:var(--surface);color:var(--ink-soft);
+  font-family:'Heebo',sans-serif;font-size:13px;line-height:1;cursor:pointer;transition:.15s}
+.sup-item-x:hover{border-color:var(--red);color:var(--red);background:var(--red-bg)}
+
+.sup-item-q{border-top:1px dashed var(--line)}
+.sup-item-q>summary{list-style:none;cursor:pointer;padding:10px 13px;
+  font-size:12.5px;font-weight:600;color:var(--blue-dark);
+  display:flex;align-items:center;gap:8px}
+.sup-item-q>summary::-webkit-details-marker{display:none}
+/* חץ מצויר מגבולות פיזיים — ראו ההערה על גליפים בראש הקובץ. */
+.sup-item-q>summary::before{content:"";flex:none;width:7px;height:7px;
+  border:1.6px solid currentColor;border-top:0;border-left:0;
+  transform:rotate(45deg) translate(-1px,-1px);transition:transform .18s ease}
+.sup-item-q[open]>summary::before{transform:rotate(-135deg) translate(-2px,-2px)}
+.sup-item-q>summary:focus-visible{outline:2px solid var(--blue);outline-offset:-2px;border-radius:6px}
+.sup-item-qs{padding:2px 13px 14px}
+
+.sup-q{margin-bottom:14px}
+.sup-q:last-child{margin-bottom:0}
+.sup-q .field-label{line-height:1.5}
+.sup-req{color:var(--red)}
+.sup-hint{font-size:11.5px;line-height:1.6;color:var(--ink-soft);margin:0 0 6px}
+
+/* שדות: אותו מראה כמו .checkout-field input ב-style.css, רק שכאן זה חל
+   גם על select ועל textarea. */
+.sup-in{width:100%;padding:10px 12px;border-radius:var(--radius-sm);
+  border:1.5px solid var(--line);background:var(--surface);color:var(--ink);
+  font-family:'Heebo',sans-serif;font-size:13.5px;line-height:1.6}
+.sup-in:focus{outline:none;border-color:var(--blue);box-shadow:0 0 0 3px var(--blue-soft)}
+.sup-ta{resize:vertical;min-height:74px}
+
+/* בחירה מרובה — צ'יפים במקום רשימת צ'קבוקסים, נוח יותר לאצבע. */
+.sup-opts{display:flex;flex-wrap:wrap;gap:8px}
+.sup-opt{display:inline-flex;align-items:center;gap:7px;cursor:pointer;
+  border:1.5px solid var(--line);background:var(--surface);border-radius:999px;
+  padding:8px 13px;font-size:13px;font-weight:600;transition:.15s}
+.sup-opt:hover{border-color:var(--blue)}
+.sup-opt input{margin:0;width:15px;height:15px;accent-color:var(--blue);cursor:pointer}
+.sup-opt:has(input:checked){border-color:var(--blue);background:var(--blue-soft);color:var(--blue-dark)}
+
+.sup-contact{margin-top:20px;padding-top:16px;border-top:1px solid var(--line)}
+.sup-sub-h{font-size:15px;margin:0 0 4px}
+.sup-sub-note{font-size:12px;color:var(--ink-soft);margin:0 0 13px;line-height:1.6}
+.sup-fields{display:grid;grid-template-columns:1fr 1fr;gap:0 14px}
+.sup-fields .sup-q.is-wide{grid-column:1 / -1}
+
+/* תצוגה מקדימה של ההודעה — מה שנשלח בפועל, מילה במילה. */
+.sup-preview{margin-top:14px;border:1px solid var(--line);
+  border-radius:var(--radius-sm);background:var(--surface-2)}
+.sup-preview>summary{list-style:none;cursor:pointer;padding:10px 13px;
+  font-size:12.5px;font-weight:600;color:var(--ink-soft)}
+.sup-preview>summary::-webkit-details-marker{display:none}
+.sup-preview>summary:focus-visible{outline:2px solid var(--blue);outline-offset:-2px;border-radius:6px}
+.sup-pre{margin:0;padding:0 13px 13px;white-space:pre-wrap;overflow-wrap:anywhere;
+  font-family:'Heebo',sans-serif;font-size:12.5px;line-height:1.85;color:var(--ink)}
+
+.sup-send-note{font-size:11.5px;line-height:1.6;color:var(--ink-soft);margin:9px 0 0;text-align:center}
+.sup-fallback{margin:12px 0 0;text-align:center;font-size:13px;font-weight:600}
+.sup-fallback a{color:var(--wa-2);text-decoration:underline}
+
+.sup-foot-note{font-size:13px;color:var(--ink-soft);margin:26px 0 0;text-align:center}
+
+/* ---------- קיצור דרך צף ----------
+   ⚠️ inset-inline-start ולא end: cart.js מזריק כפתור עגלה צף
+   (.cart-fab, bottom:24px, inset-inline-end:24px, z-index:90) לכל דף
+   באתר, כולל כאן. שני כפתורים צפים באותה פינה = אחד מהם לא לחיץ. */
+.sup-jump{position:fixed;bottom:24px;inset-inline-start:24px;z-index:80;
+  display:inline-flex;align-items:center;gap:9px;border:none;cursor:pointer;
+  font-family:'Heebo',sans-serif;font-size:13.5px;font-weight:700;color:#fff;
+  background:var(--grad);border-radius:999px;padding:13px 20px;
+  box-shadow:var(--shadow-lg);transition:transform .2s cubic-bezier(.34,1.56,.64,1), filter .2s ease}
+.sup-jump[hidden]{display:none}
+.sup-jump:hover{transform:translateY(-3px);filter:brightness(1.06)}
+.sup-jump:focus-visible{outline:2px solid var(--blue-dark);outline-offset:3px}
+.sup-jump-n{font-family:'Rubik',sans-serif;font-size:12px;font-weight:800;
+  background:rgba(255,255,255,.24);border-radius:999px;
+  min-width:22px;height:22px;display:inline-flex;align-items:center;justify-content:center;padding:0 6px}
+
+/* ---------- מובייל ----------
+   רוב הגלישה. כרטיס אחד בשורה, כותרות קטנות יותר, ומרווחים שלא
+   דוחפים את הכפתור מתחת לקיפול. */
+@media (max-width:720px){
+  .sup-steps{grid-template-columns:1fr}
+  .sup-fields{grid-template-columns:1fr}
+}
+@media (max-width:620px){
+  .sup-wrap{padding-top:20px;padding-bottom:40px}
+  .sup-hero{padding:20px 18px 18px}
+  .sup-h1{font-size:25px}
+  .sup-lede{font-size:14.5px}
+  .sup-grid{grid-template-columns:1fr}
+  .sup-sec-h{font-size:17.5px}
+  .sup-panel{padding:17px}
+  .sup-panel-head{flex-direction:column;align-items:flex-start;gap:8px}
+  .sup-panel-t{font-size:18px}
+  /* טקסט קטן יותר אבל שטח נגיעה גדול יותר — צ'יפ של 37px נמוך מדי לאצבע. */
+  .sup-opt{font-size:12.5px;padding:10px 12px}
+  .sup-card-f{flex-wrap:wrap}
+  .sup-wa{flex:1;justify-content:center;padding:10px 14px}
+  .sup-jump{bottom:16px;inset-inline-start:16px;padding:12px 17px;font-size:13px}
+}
+
+@media (prefers-reduced-motion:reduce){
+  .sup-card,.sup-jump,.sup-box,.sup-box::after,.sup-item-q>summary::before{transition:none}
+  .sup-card:hover,.sup-jump:hover{transform:none}
+}
+
+/* ===================== DvirTech Care =====================
+   ⚠️ **הצבע נושא מידע, לא קישוט.** שלושת המסלולים נבדלים ברקע ולא רק
+   בטקסט, כך שהדירוג נקרא במבט אחד: CARE אפור-כחלחל שקט → PLUS כחול
+   רווי עם הרמה למעלה → PRO כהה עם זהב. לקוח שלא קורא אף מילה עדיין
+   מבין מי העליון.
+   ⚠️ PLUS קיבל רקע כחול ממשי ולא לבן-עם-נגיעה: בגרסה הראשונה הוא
+   נבלע בין השניים ולא "החזיק" את מעמד האמצע.
+   ⚠️ כל הריווח לוגי (inline-start/end) — הדף הזה חי גם ב-RTL וגם ב-LTR. */
+.care{margin:46px 0 8px}
+.care-head{text-align:center;margin-bottom:26px}
+.care-kicker{font-family:'Rubik',sans-serif;font-size:11.5px;font-weight:800;
+  letter-spacing:1.4px;color:var(--teal-dark,#0E9C8A);text-transform:uppercase;margin:0 0 8px}
+.care-h2{font-family:'Rubik',sans-serif;font-size:26px;font-weight:800;margin:0 0 9px}
+.care-lede{font-size:14.5px;line-height:1.75;color:var(--ink-soft,#5F7590);max-width:620px;margin:0 auto}
+
+.care-tiers{display:grid;grid-template-columns:repeat(3,1fr);gap:16px;align-items:stretch}
+@media(max-width:860px){.care-tiers{grid-template-columns:1fr;gap:26px}}
+
+.care-tier{border-radius:16px;padding:24px 20px 20px;position:relative;display:flex;
+  flex-direction:column;border:1px solid var(--line,#E2EAF2);background:#fff;
+  box-shadow:0 1px 3px rgba(14,42,71,.06),0 8px 24px rgba(14,42,71,.05);
+  transition:transform .18s,box-shadow .18s}
+.care-tier:hover{transform:translateY(-3px)}
+
+.care-tier--care{--c:#4E7BA8;--ci:#31536F;
+  background:linear-gradient(170deg,#FBFDFF 0%,#EFF5FB 100%);border-color:#DAE6F2}
+.care-tier--plus{--c:#1B6FE0;--ci:#0B4382;
+  background:linear-gradient(168deg,#E8F3FF 0%,#D6E9FF 100%);border-color:#A8CFF7;
+  box-shadow:0 2px 10px rgba(27,111,224,.16),0 20px 44px rgba(27,111,224,.18)}
+.care-tier--pro{--c:#F0B537;--ci:#FFD173;color:#EAF2FB;
+  background:linear-gradient(165deg,#123A60 0%,#0B2C4D 62%,#0A2440 100%);
+  border-color:#1E4C79;box-shadow:0 2px 10px rgba(11,44,77,.30),0 22px 46px rgba(11,44,77,.32)}
+@media(min-width:861px){
+  .care-tier--plus{transform:translateY(-8px)}
+  .care-tier--plus:hover{transform:translateY(-11px)}
+}
+
+.care-rank{position:absolute;top:-13px;inset-inline-start:20px;display:inline-flex;
+  align-items:center;gap:6px;padding:5px 12px;border-radius:999px;
+  font-family:'Rubik',sans-serif;font-size:10.5px;font-weight:800;letter-spacing:.6px;
+  color:#fff;white-space:nowrap}
+.care-tier--care .care-rank{background:#5B86B4}
+.care-tier--plus .care-rank{background:linear-gradient(100deg,#1B6FE0,#2FC4B0)}
+.care-tier--pro  .care-rank{background:linear-gradient(100deg,#E7A320,#F5CE63);color:#3B2A05}
+.care-rank svg{width:13px;height:13px;fill:currentColor;flex:none}
+
+.care-top{display:flex;align-items:center;gap:10px;margin-bottom:4px}
+.care-badge{width:38px;height:38px;border-radius:11px;display:grid;place-items:center;flex:none}
+.care-tier--care .care-badge{background:#E1EDF9}
+.care-tier--plus .care-badge{background:#fff;box-shadow:0 1px 4px rgba(27,111,224,.18)}
+.care-tier--pro  .care-badge{background:rgba(240,181,55,.16);border:1px solid rgba(240,181,55,.35)}
+.care-badge svg{width:20px;height:20px;fill:var(--c)}
+.care-tier--pro .care-badge svg{fill:var(--ci)}
+
+.care-n{font-family:'Rubik',sans-serif;font-size:20px;font-weight:900;letter-spacing:.6px;margin:0}
+.care-tier--pro .care-n{color:#fff}
+.care-for{font-size:12.5px;color:var(--ink-soft,#5F7590);margin:2px 0 16px;min-height:34px;line-height:1.55}
+.care-tier--plus .care-for{color:#3D6491}
+.care-tier--pro  .care-for{color:#A9C4DD}
+
+.care-price{display:flex;align-items:baseline;gap:5px;margin:0 0 2px}
+.care-price b{font-family:'Rubik',sans-serif;font-size:34px;font-weight:900;line-height:1}
+.care-tier--pro .care-price b{color:#fff}
+.care-price span{font-size:13px;color:var(--ink-soft,#5F7590)}
+.care-tier--pro .care-price span{color:#A9C4DD}
+.care-year{font-size:12px;color:var(--ink-soft,#5F7590);margin:0 0 17px}
+.care-tier--pro .care-year{color:#A9C4DD}
+
+.care-tier ul{list-style:none;padding:0;margin:0 0 18px;font-size:13.2px;line-height:1.55}
+.care-tier li{display:flex;gap:8px;padding:7px 0;align-items:flex-start;
+  border-bottom:1px dashed rgba(14,42,71,.10)}
+.care-tier--pro li{border-bottom-color:rgba(255,255,255,.10)}
+.care-tier li:last-child{border-bottom:0}
+.care-tier li::before{content:"✓";color:var(--c);font-weight:900;font-size:12px;line-height:1.5;flex:none}
+.care-tier--pro li::before{color:var(--ci)}
+
+.care-cta{margin-top:auto;display:block;text-align:center;text-decoration:none;
+  font-family:'Rubik',sans-serif;font-size:13px;font-weight:700;padding:12px 16px;border-radius:10px}
+.care-tier--care .care-cta{background:#fff;border:1px solid #CBDCEC;color:var(--ci)}
+.care-tier--plus .care-cta{background:linear-gradient(100deg,#1B6FE0,#2FC4B0);color:#fff}
+.care-tier--pro  .care-cta{background:linear-gradient(100deg,#E7A320,#F5CE63);color:#2A1E05}
+
+.care-more{text-align:center;margin:26px 0 0}
+.care-more-btn{font-family:'Rubik',sans-serif;font-size:13px;font-weight:700;background:#fff;
+  border:1px solid var(--line,#E2EAF2);border-radius:10px;padding:11px 22px;
+  color:var(--blue-dark,#0E4C97);cursor:pointer;display:inline-flex;align-items:center;gap:8px}
+.care-more-btn::after{content:"▾";font-size:11px;transition:transform .18s}
+.care-more-btn[aria-expanded="true"]::after{transform:rotate(180deg)}
+
+.care-table-wrap{margin-top:18px;background:#fff;border:1px solid var(--line,#E2EAF2);
+  border-radius:16px;overflow-x:auto}
+.care-table-wrap table{border-collapse:collapse;width:100%;min-width:580px;font-size:13.4px}
+.care-table-wrap caption{text-align:start;padding:17px 20px 3px;
+  font-family:'Rubik',sans-serif;font-size:15px;font-weight:800}
+.care-table-wrap thead th{background:var(--surface-2,#F7FAFD);font-family:'Rubik',sans-serif;
+  font-weight:800;font-size:12.5px;padding:12px 14px;border-bottom:1px solid var(--line,#E2EAF2);
+  text-align:center}
+.care-table-wrap thead th:first-child{text-align:start;color:var(--ink-soft,#5F7590)}
+.care-table-wrap th.c-care{color:#31536F}
+.care-table-wrap th.c-plus{color:#0B4382;background:#EAF4FF}
+.care-table-wrap th.c-pro {color:#8A6100;background:#FFFAF0}
+.care-table-wrap tbody th{text-align:start;font-weight:500;padding:11px 14px;
+  border-bottom:1px solid var(--line-soft,#EDF2F8)}
+.care-table-wrap tbody td{text-align:center;padding:11px 14px;
+  border-bottom:1px solid var(--line-soft,#EDF2F8)}
+.care-table-wrap td.c-plus{background:#F5FAFF}
+.care-table-wrap td.c-pro {background:#FFFDF7;font-weight:600}
+.care-table-wrap tbody tr:last-child th,.care-table-wrap tbody tr:last-child td{border-bottom:0}
+.care-fine{font-size:11.8px;line-height:1.75;color:var(--ink-soft,#5F7590);
+  padding:14px 20px 18px;border-top:1px solid var(--line-soft,#EDF2F8);margin:0}
+.care-fine b{color:var(--ink,#0E2A47)}
+
+/* =====================================================================
+   מעבר רספונסיבי — תוספות מובייל (support.html)
+   =====================================================================
+   חלק מהמעבר הרספונסיבי הכלל-אתרי (ראו ההסבר בסוף style.css). הדף הזה
+   כבר נבנה מובייל-ראשון, ולכן התוספות כאן קטנות. */
+@media (max-width:620px){
+  /* ⚠️ 16px בשדות הטופס: פונט קטן יותר גורם ל-iOS לבצע זום אוטומטי
+     בפוקוס, והדף "קופץ" בכל נגיעה בשדה. חל על input/select/textarea
+     של טופס הפנייה (כולם .sup-in). */
+  .sup-in{font-size:16px}
+}
+/* גלילת מגע חלקה בטבלת ההשוואה של Care — הטבלה כבר יושבת בתוך מיכל
+   גלילה משלה (‎.care-table-wrap{overflow-x:auto}), זו רק התנהגות
+   האינרציה במגע. */
+.care-table-wrap{-webkit-overflow-scrolling:touch}

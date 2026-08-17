@@ -50,7 +50,7 @@
       <a href="products.html?cat=peripherals" data-he="ציוד היקפי" data-en="Peripherals"></a>
       <a href="products.html?cat=gpu" data-he="רכיבים" data-en="Components"></a>
       <a href="builder.html" data-he="בניית מחשב" data-en="PC Builder"></a>
-      <a href="coming-soon.html?service=support" data-he="שירות ותמיכה" data-en="Service & Support"></a>
+      <a href="support.html" data-he="שירות ותמיכה" data-en="Service & Support"></a>
       <a href="why-dvirtech.html" data-he="למה DvirTech?" data-en="Why DvirTech?"></a>
       <a href="contact.html" data-he="צור קשר" data-en="Contact"></a>
     </nav>
@@ -109,7 +109,7 @@
 <div class="wrap">
   <div class="trust-strip">
     <div><svg class="ui-ic" aria-hidden="true"><use href="#ui-truck"/></svg>
-      <span><b data-he="משלוח מהיר" data-en="Fast delivery"></b><span data-he="2-5 ימי עסקים" data-en="2-5 business days"></span></span></div>
+      <span><b data-he="משלוח מהיר" data-en="Fast delivery"></b><span data-dvt="shipping.expressDays" data-he="2-5 ימי עסקים" data-en="2-5 business days"></span></span></div>
     <div><svg class="ui-ic" aria-hidden="true"><use href="#ui-shield"/></svg>
       <span><b data-he="אחריות ושירות" data-en="Warranty & service"></b><span data-he="על כל המוצרים" data-en="On every product"></span></span></div>
     <div><svg class="ui-ic" aria-hidden="true"><use href="#ui-lock"/></svg>
@@ -156,15 +156,23 @@
       <div class="promo-txt">
         <b data-he="בנה את המחשב שלך" data-en="Build your own PC"></b>
         <span data-he="בחר רכיבים, התאמה אישית מלאה, ומחשב בדיוק בשבילך." data-en="Pick your parts, full customization, a PC built exactly for you."></span>
+        <!-- ⚠️ הטבה אמיתית ולא סיסמה: מי שמרכיב דרך הבונה מקבל את
+             ההרכבה ב-0 ₪ (assembly-included / CLI-4004), והיא מופיעה
+             כשורה נפרדת בקבלה. הניסוח חייב להישאר "עם הבונה" — ההטבה
+             **אינה** חלה על רכישת רכיבים בודדים בנפרד (תקנון §6.4). -->
+        <span class="promo-badge" data-he="הרכבה ללא עלות עם הבונה" data-en="Free assembly with the Builder"></span>
         <span class="go" data-he="התחל לבנות" data-en="Start building"></span>
       </div>
     </a>
 
     <a class="promo promo--dark promo--photo" style="--promo-img:url('images/promo-service.jpg')"
-       href="coming-soon.html?service=support">
+       href="support.html">
       <div class="promo-txt">
         <b data-he="תיקון ושדרוג" data-en="Repair & upgrade"></b>
-        <span data-he="אבחון, שדרוג והתקנה עד הבית." data-en="Diagnosis, upgrades and on-site setup."></span>
+        <!-- ⚠️ "התקנה עד הבית" הוסר: ביקור בית תלוי במרחק ובזמינות ואי
+             אפשר להתחייב עליו מראש מדף הבית. הניסוח החדש מבטיח בדיוק
+             מה שנעשה תמיד — נבדק ומתואם — ולא שירות שאולי לא נוכל לתת. -->
+        <span data-he="אבחון תקלה, שדרוג רכיבים והתקנת מערכת — בתיאום אישי." data-en="Fault diagnosis, component upgrades and OS installation — arranged personally."></span>
         <span class="go" data-he="לשירות ותמיכה" data-en="Service & support"></span>
       </div>
     </a>
@@ -192,63 +200,42 @@
 
 <!-- ======================= יצרנים ======================= -->
 <div class="wrap">
+  <!-- ⚠️ **כל מותג כאן חייב להיות מותג שבאמת נמכר באתר.** הרשימה
+       הקודמת כללה את MSI, ובקטלוג יש **אפס** מוצרי MSI — הצהרה לא
+       נכונה ללקוח ולגוגל. הרשימה הנוכחית נבדקה מול הקטלוג החי
+       (16.08.2026) והמספרים הם כמות המוצרים בפועל:
+         Gigabyte 276 · Corsair 118 · Antec 113 · ASUS 80 · Lenovo 74
+         Kingston 60 · Western Digital 55 · Intel 36
+       ⚠️ לפני שמוסיפים מותג — לוודא שיש לו מוצרים. הקישור מוביל
+       לסינון לפי אותו מותג, כך שמותג בלי מוצרים ייתן דף ריק והלקוח
+       יראה מיד שמשהו לא נכון.
+       ⚠️ טקסט ולא לוגואים: לוגו יצרן הוא סימן מסחר, ואין לנו רישיון
+       שימוש בקבצי הלוגו עצמם. פס מותגים טקסטואלי הוא מה שחנויות
+       אמיתיות עושות, והוא גם נשאר חד בכל רזולוציה ולא מוסיף בקשות
+       רשת לדף שכבר איטי. -->
   <div class="brand-strip">
-    <span>intel</span><span>AMD</span><span>NVIDIA</span><span>ASUS</span>
-    <span>MSI</span><span>GIGABYTE</span><span>CORSAIR</span><span>SAMSUNG</span>
+    <a href="products.html?cat=all&brand=Gigabyte">GIGABYTE</a>
+    <a href="products.html?cat=all&brand=Corsair">CORSAIR</a>
+    <a href="products.html?cat=all&brand=Antec">ANTEC</a>
+    <a href="products.html?cat=all&brand=ASUS">ASUS</a>
+    <a href="products.html?cat=all&brand=Lenovo">LENOVO</a>
+    <a href="products.html?cat=all&brand=Kingston">KINGSTON</a>
+    <a href="products.html?cat=all&brand=Western%20Digital">WD</a>
+    <a href="products.html?cat=all&brand=Intel">INTEL</a>
   </div>
 </div>
 
 <!-- הריווח מהתוכן מגיע מ-.footer-top-gap ב-style.css ולא מ-style inline:
      margin-top inline גובר על margin-top:auto של ה-sticky footer, וזה
      בדיוק מה שהשאיר כאן רווח מתחת לפוטר במסך גבוה. -->
-<footer class="footer-top-gap">
-  <div class="wrap">
-    <div class="footer-grid">
-      <div>
-        <span class="footer-logo-crop"><img class="footer-logo" src="images/logo-dvirtech-transparent.png" alt="DvirTech"></span>
-        <p data-he="שירותי מחשוב ותמיכה טכנית. מחשבים בהתאמה אישית, תיקון, שדרוג והתקנה עד הבית והמשרד." data-en="Computing services and technical support. Custom PCs, repair, upgrades and on-site installation."></p>
-      </div>
-      <div>
-        <h4 data-he="החנות" data-en="Shop"></h4>
-        <ul>
-          <li><a href="products.html?cat=readyPc" data-he="מחשבים מוכנים" data-en="Ready-Made PCs"></a></li>
-          <li><a href="products.html?cat=gpu" data-he="רכיבים" data-en="Components"></a></li>
-          <li><a href="products.html?cat=peripherals" data-he="ציוד היקפי" data-en="Peripherals"></a></li>
-          <li><a href="builder.html" data-he="בונה המחשבים" data-en="PC Builder"></a></li>
-        </ul>
-      </div>
-      <div>
-        <h4 data-he="שירות" data-en="Service"></h4>
-        <ul>
-          <li><a href="coming-soon.html?service=support" data-he="תיקון ושדרוג" data-en="Repair & upgrade"></a></li>
-          <li><a href="coming-soon.html?service=support" data-he="שירותי IT לעסק" data-en="Business IT"></a></li>
-          <li><a href="contact.html" data-he="התקנה עד הבית" data-en="On-site installation"></a></li>
-          <li><a href="contact.html" data-he="ייעוץ חינם" data-en="Free consultation"></a></li>
-        </ul>
-      </div>
-      <div>
-        <h4 data-he="מידע" data-en="Info"></h4>
-        <ul>
-          <li><a href="why-dvirtech.html" data-he="למה DvirTech?" data-en="Why DvirTech?"></a></li>
-          <li><a href="about.html" data-he="אודות" data-en="About"></a></li>
-          <li><a href="contact.html" data-he="צור קשר" data-en="Contact"></a></li>
-          <li><a href="terms.html" data-he="תקנון" data-en="Terms"></a></li>
-        </ul>
-      </div>
-    </div>
-    <span id="footerText"></span>
-    <div class="footer-legal">
-      <a href="about.html" id="footerAboutLink"></a>
-      <a href="contact.html" id="footerContactLink"></a>
-      <a href="terms.html" id="footerTermsLink"></a>
-    </div>
-  </div>
-</footer>
+<footer></footer>
 
 <script src="sprite.js"></script>
 <script src="i18n.js"></script>
+<script src="site-content.js"></script>
 <script src="search-core.js"></script>
 <script src="site-header.js"></script>
+<script src="site-footer.js"></script>
 <script src="home.js"></script>
 <script src="site-search.js"></script>
 <script src="cart.js"></script>

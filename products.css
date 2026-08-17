@@ -203,13 +203,40 @@
   border-color: #c9def8;
 }
 /* אזור התמונה. אם למוצר יש תמונה אמיתית היא מוצגת contain כדי לא
-   להיחתך; אחרת נכנס איור הקטגוריה מ-sprite.js. */
+   להיחתך; אחרת נכנס איור הקטגוריה מ-sprite.js.
+
+   ⚠️ ‎contain ולא ‎cover — וזה לא עניין של טעם. תמונות הספק מגיעות
+   כ-600×500 (‎/cache/w_600,h_500,mode_pad/‎) והתיבה כאן היא 132px בגובה
+   ויחס אחר לגמרי; ‎cover היה ממלא את התיבה ומוריד את הקצוות של המוצר,
+   כלומר מארז בלי חלק עליון וכרטיס מסך בלי מאווררים.
+   ⚠️ הריפוד הוא מה שקובע כמה "קטנה" התמונה בתוך המסגרת: עם 14px
+   התמונה כבר לא נוגעת בקצה העליון והתחתון, ובמבט מהיר על הרשת זה
+   ההבדל בין "תמונה בתוך מסגרת" ל"תמונה שנחתכה במסגרת". הרקע שנחשף
+   מסביב הוא בכוונה הגרדיאנט של התיבה עצמה ולא לבן — כך שוליים
+   נקראים כמרווח מעוצב ולא כשטח ריק. */
 .p-art {
   height: 132px; border-radius: 12px; margin-bottom: 4px;
   background: linear-gradient(155deg, #f3f8ff, #effbf8);
   display: grid; place-items: center; overflow: hidden;
 }
-.p-art img { width: 100%; height: 100%; object-fit: contain; padding: 10px; }
+/* 🔴 **הבאג שחתך את כל התמונות באתר — אל תסירו את min-height.**
+   פריט בתוך grid/flex מקבל `min-height:auto` כברירת מחדל, ו-auto פירושו
+   "לא קטן מגודל התוכן". לתמונה 600×500 ברוחב 251 גודל התוכן הוא 209px
+   גובה — כלומר `min-height` **דרס את `height:100%`** (132px), האלמנט
+   יצא 214px, והמסגרת עם `overflow:hidden` חתכה ממנו 82px. זה 38%
+   מהתמונה, בתחתית, בכל כרטיס באתר.
+
+   ⚠️ `object-fit:contain` **אינו** מגן מפני זה: הוא קובע איך הביטמאפ
+   יושב בתוך תיבת האלמנט, ולא מונע מתיבת האלמנט לגלוש מההורה. לכן
+   הבאג נראה כמו "תמונה חתוכה" למרות ש-contain מוגדר נכון.
+
+   ⚠️ זה גם מסביר למה זה "חוזר" אחרי סנכרון: כל עוד התמונות היו לוגו
+   קטן (w_100) גודל התוכן היה קטן מהמסגרת והבאג לא הופיע. ברגע
+   שהתמונות הפכו ל-600×500 אמיתיות — הוא נחשף בכל הקטלוג בבת אחת. */
+.p-art img {
+  width: 100%; height: 100%; min-width: 0; min-height: 0;
+  object-fit: contain; padding: 14px;
+}
 .p-art svg { width: 76px; height: 76px; }
 .p-brand {
   font-size: 11px; font-weight: 800; letter-spacing: .04em; text-transform: uppercase;
@@ -229,6 +256,47 @@
   color: var(--blue, #1b6fe0); font-family: 'Rubik', sans-serif;
 }
 .p-card .btn { width: 100%; margin-top: 8px; }
+
+/* =====================================================================
+   שלד טעינה (skeleton)
+   =====================================================================
+   ⚠️ למה זה קיים: הביקור הראשון באתר מחכה לתשובת getCatalog, ובזמן הזה
+   ‎#productGrid‎ היה **ריק לגמרי** — כותרת, סרגל סינון ריק, ושטח לבן.
+   זה לא נקרא כ"טוען", זה נקרא כ"האתר שבור", והמשתמש עוזב לפני שהנתונים
+   בכלל הגיעו. השלד תופס בדיוק את המקום של הרשת האמיתית, כך שכשהמוצרים
+   נוחתים שום דבר לא קופץ (אין layout shift).
+
+   ⚠️ הכרטיסים כאן הם `div` ולא `a` בכוונה — אין לאן ללחוץ עדיין,
+   ו-`aria-hidden` מוציא את כולם מקורא המסך. ההודעה הקולית האמיתית
+   יושבת ב-‎#resultCount‎ עם aria-live. */
+.p-card--skel {
+  display: flex; flex-direction: column; gap: 7px; padding: 14px;
+  background: #fff; border: 1px solid var(--line, #e2eaf2);
+  border-radius: var(--radius, 16px); pointer-events: none;
+}
+.p-card--skel .sk-art {
+  height: 132px; border-radius: 12px; margin-bottom: 4px;
+  background: linear-gradient(155deg, #f3f8ff, #effbf8);
+}
+.p-card--skel .sk-line { height: 11px; border-radius: 6px; background: #EDF2F8; }
+.p-card--skel .sk-line.sk-sm    { width: 38%; height: 9px; }
+.p-card--skel .sk-line.sk-lg    { width: 88%; height: 13px; margin-top: 2px; }
+.p-card--skel .sk-line.sk-md    { width: 66%; }
+.p-card--skel .sk-line.sk-price { width: 46%; height: 17px; margin-top: 6px; background: #E4EDF9; }
+.p-card--skel .sk-btn { height: 38px; border-radius: 10px; background: #EDF2F8; margin-top: 8px; }
+
+/* הבהוב עדין — מסמן "בעבודה" בלי למשוך את העין מהתוכן שנוחת.
+   ⚠️ מכובה למי שביקש פחות תנועה (prefers-reduced-motion); השלד עצמו
+   נשאר, רק בלי האנימציה. */
+@keyframes dvtSkelPulse { 0%,100% { opacity: 1 } 50% { opacity: .55 } }
+.p-card--skel .sk-art,
+.p-card--skel .sk-line,
+.p-card--skel .sk-btn { animation: dvtSkelPulse 1.4s ease-in-out infinite; }
+@media (prefers-reduced-motion: reduce) {
+  .p-card--skel .sk-art,
+  .p-card--skel .sk-line,
+  .p-card--skel .sk-btn { animation: none; }
+}
 
 .empty-state {
   padding: 40px 20px; text-align: center; color: var(--ink-soft, #64748b);
@@ -305,7 +373,13 @@
   aspect-ratio: 4 / 3; display: grid; place-items: center; overflow: hidden;
   box-shadow: var(--shadow-s, 0 2px 10px rgba(14,42,71,.05));
 }
-.pd-art img { width: 100%; height: 100%; object-fit: contain; padding: 24px; }
+/* ⚠️ אותו כלל כמו ברשת: ‎contain, וריפוד שמרחיק את התמונה מהמסגרת.
+   כאן התיבה גדולה (יחס 4:3) ולכן 28px, אחרת המוצר נראה דחוס לשוליים. */
+/* אותו באג בדיוק כמו ב-.p-art — ראה ההסבר שם. */
+.pd-art img {
+  width: 100%; height: 100%; min-width: 0; min-height: 0;
+  object-fit: contain; padding: 28px;
+}
 .pd-art svg { width: 140px; height: 140px; }
 
 .pd-cat-link { display: inline-block; font-size: 12.5px; font-weight: 700;
@@ -524,3 +598,33 @@
 /* ---------- הערה מתחת לטבלת המפרט ---------- */
 .pd-spec-note{margin:12px 2px 0;font-size:12.5px;line-height:1.6;
   color:var(--ink-soft,#6B7A8D);max-width:75ch}
+
+/* =====================================================================
+   מעבר רספונסיבי — תוספות מובייל (products.html + product.html)
+   =====================================================================
+   חלק מהמעבר הרספונסיבי הכלל-אתרי (ראו ההסבר בסוף style.css). תוספות
+   בלבד, בסוף הקובץ: מעל הרוחבים האלה שום דבר לא משתנה. */
+
+/* ---------- טבלת המפרט וטקסטים ארוכים בלי שבירה (עד 860px) ----------
+   ⚠️ ערכי מפרט מהספק כוללים לפעמים מחרוזת לטינית ארוכה בלי רווחים
+   (מק"ט, קישור, שם דגם). מילה כזו לא נשברת לשורה, מרחיבה את תא הטבלה,
+   והטבלה — שרוחבה נקבע מהתוכן — דוחפת את כל הדף לרוחב. ‎overflow-wrap
+   שובר את המחרוזת בתוך התא, כך שהטבלה נשארת ברוחב העמוד בלי לגלול.
+   אותו כלל לשם המוצר בכרטיס ובכותרת דף המוצר — RTL עם טוקנים לטיניים
+   ארוכים נחתך באותה צורה. */
+@media (max-width:860px){
+  .pd-spec th,.pd-spec td{overflow-wrap:anywhere}
+  .p-name,.pd-title{overflow-wrap:anywhere}
+  /* ⚠️ 16px בשדות קלט במגירת הסינון — פונט קטן יותר גורם ל-iOS לבצע
+     זום אוטומטי בפוקוס והמגירה "קופצת". */
+  .filter-search,.price-field-input{font-size:16px}
+}
+
+/* ---------- רשת המוצרים בטלפון צר (עד 400px) ----------
+   ⚠️ minmax(160px,1fr)‎ מפספס בדיוק ב-1px שני טורים ברוחב 375
+   (335px פנויים מול 2×160+16=336), כך שאייפון/פיקסל רגילים קיבלו טור
+   בודד עם כרטיסי ענק וגלילה אין-סופית. עם 150px נכנסים שני טורים —
+   המראה המקובל של חנות בטלפון. במסכים רחבים מזה אין שינוי. */
+@media (max-width:400px){
+  .product-grid{grid-template-columns:repeat(auto-fill,minmax(150px,1fr));gap:10px}
+}

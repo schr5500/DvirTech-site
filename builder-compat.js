@@ -101,8 +101,114 @@ function dvtPsuConn(psu){
     else if(/\bcpu\b|eps/.test(s))                     out.eps   += n;
     else if(/pcie|pci-e|vga|gpu/.test(s))              out.pcie8 += n;
     else if(/sata/.test(s))                            out.sata  += n;
+    /* ⚠️ הגיליון כותב את מחבר ה-12VHPWR גם כ-"1x12V" חשוף — נמדד על
+       45 ספקים בקטלוג החי. בלי הענף הזה ספק "3xPCIe8pin,1x12V" נראה
+       כאילו אין לו 12VHPWR, ו-RTX 5090 (שדורש מתאם 4×8) היה נחסם
+       עליו בטעות. הבדיקה קפדנית — מקטע שכולו "מספר x 12v" — כדי לא
+       לתפוס "ATX12V"/"EPS12V" שהם שמות תקן, לא מחברים. */
+    else if(/^\s*\d+\s*[x×*]?\s*12v\s*$/.test(s))      out.vhpwr += n;
   });
   return out;
+}
+
+/* זיהוי iGPU לפי הדגם שבשם המוצר — לא ניחוש, חוקי הסיומות של היצרנים.
+   ---------------------------------------------------------------
+   ⚠️ הדרישה המפורשת של דביר: "מעבד 14900K דורש כרטיס מסך" היא שגיאה
+   שאסור שתקרה (ל-K יש UHD770). הטבלה בגיליון (hasIgpu) היא מקור האמת
+   הראשון; הפונקציה הזו נכנסת רק כשהעמודה ריקה — מעבדים חדשים שנכנסו
+   למחירון לפני שטבלת ENRICH_CPU ב-13-enrich-specs.gs הכירה אותם
+   (נמדד מול הקטלוג החי: 5 מעבדים כאלה, למשל Ultra 5 250KF Plus).
+
+   החוקים, כפי שדביר ניסח אותם:
+   · Intel: סיומת F/KF = בלי iGPU (14900KF, 12400F). בלי F = יש.
+   · AMD: סיומת G = iGPU חזק. דורות 7000/8000/9000 = iGPU בסיסי,
+     **חוץ** מסיומת F (7500F/8400F/8700F = אין). דורות 5000 ומטה =
+     אין, אלא אם G. Threadripper = אין.
+   הצהרה מפורשת בשם ("no GPU", "Radeon Graphics", "UHD770") גוברת
+   על כל היסק מסיומת. שם שלא מסתדר עם אף חוק → undefined, והעמודה
+   מופיעה בדוח החוסרים — לא ממציאים. */
+function dvtCpuIgpuFromName(name){
+  const n = String(name == null ? "" : name);
+  if(!n) return undefined;
+  if(/\bno\s*GPU\b|ללא\s*ליבה\s*גרפית|בלי\s*ליבה\s*גרפית/i.test(n)) return false;
+  if(/Radeon\s*(?:Graphics|\d{3}M)|Vega\s*\d|UHD\s*\d{3}|Intel\s*Graphics/i.test(n)) return true;
+  // Intel — דורש קידומת i3/i5/i7/i9 או Core Ultra כדי לא לתפוס מספרים אקראיים
+  let m = n.match(/\b(?:i[3579][\s-]?|Ultra\s*[3579]\s*(?:processors?\s*)?)(\d{3,5})\s*(KS|KF|K|F|T|S)?\b/i);
+  if(m) return !/^K?F$/i.test(m[2] || "");
+  if(/threadripper/i.test(n)) return false;
+  // AMD — "Ryzen 5 9600X" / "R5 5600X" / "Ryzen7 9850X3D"
+  m = n.match(/\b(?:Ryzen\s*|R)[3579]?\s*(\d{4})\s*(X3D|XT|GE|G|X|F)?\b/i);
+  if(m){
+    const suf = (m[2] || "").toUpperCase();
+    if(suf === "G" || suf === "GE") return true;
+    if(suf === "F") return false;
+    return Number(m[1][0]) >= 7;   // 7xxx/8xxx/9xxx = בסיסי · 5xxx ומטה = אין
+  }
+  return undefined;
+}
+
+/* "כולל קירור" — השם גובר על העמודה, בכיוון אחד בלבד.
+   ---------------------------------------------------------------
+   ⚠️ נמדד מול הקטלוג החי (16.08.2026): 20 מעבדים מסומנים בגיליון
+   coolerIncluded=TRUE בעוד שבשמם כתוב במפורש "Tray" / "no fan".
+   fixCoolerIncluded() ב-13-enrich-specs.gs מתקן את הגיליון, אבל עד
+   שהוא רץ (וגם אחרי — כל ייבוא ספקים חדש יכול להחזיר את הטעות) המנוע
+   חייב להגן על עצמו: מעבד כזה שיוצג כ"כולל קירור" ימכור מחשב שלא
+   נדלק. הביטוי חייב להישאר זהה לזה שב-13-enrich-specs.gs.
+   רק הכיוון "יש→אין" נדרס: שם ששותק לא ממציא קירור שאין. */
+const DVT_NO_COOLER_NAME_RE = /\bno\s*fans?\b|\bTray\b|\bno\s*cooler\b/i;
+function dvtCoolerIncluded(cpu){
+  if(!cpu) return null;
+  if(DVT_NO_COOLER_NAME_RE.test(String(cpu.name || ""))) return false;
+  return dvtBoolOf(cpu, "coolerIncluded");
+}
+
+/* אפשרות "קירור בסיסי שמגיע עם המעבד" — פריט סינתטי שהגשר מזריק
+   לרשימת הקירור (builder-bridge.js). כל בדיקת מידות/שקע/TDP חסרת
+   משמעות עבורו: הוא מגיע בקופסה של המעבד עצמו ומתאים לו בהגדרה. */
+function dvtIsStockCooler(c){
+  return !!(c && (c.stockCooler === true || c.id === "stock-cooler"));
+}
+
+/* מאווררים שמגיעים מותקנים במארז — נגזר מהשם, כי אין עמודה בגיליון.
+   "ANTEC 900 Full Tower 6PWM Fans" · "4x120mm ARGB" · "3 מאווררים".
+   שם ששותק מחזיר undefined — הערת מידע ולא חסימה, אז מותר להחמיץ. */
+function dvtCaseFansFromName(name){
+  const n = String(name == null ? "" : name);
+  if(!n) return undefined;
+  if(/ללא\s*מאווררים|\bNo\s*Fans?\b/i.test(n)) return 0;
+  let m = n.match(/(\d)\s*[x×]\s*\d{2,3}\s*mm/i)
+       || n.match(/\b(\d)\s*(?:PWM\s*|A?RGB\s*)*Fans?\b/i)
+       || n.match(/(\d)\s*מאווררים/);
+  if(!m) return undefined;
+  const c = Number(m[1]);
+  return (c >= 1 && c <= 9) ? c : undefined;
+}
+
+/* גדלי מאוורר של מארז — כולל תיקון שיבוש נתונים אמיתי מהגיליון.
+   ---------------------------------------------------------------
+   ⚠️ נמדד מול הקטלוג החי: 25 מארזים מחזיקים fanSizesMm=120140 —
+   מישהו הקליד "120,140" ו-Google Sheets בלע את הפסיק כמפריד אלפים
+   והפך את זה למספר אחד. בלי הפירוק כאן, ערכת 120mm הייתה נחסמת מול
+   מארז שתומך גם 120 וגם 140 — false positive על שליש מהקטלוג.
+   הפירוק חמדני מול רשימת הגדלים הקיימים בשוק; מה שלא מתפרק חוזר
+   להתנהגות הישנה (המחרוזת כמו שהיא). */
+function dvtFanSizeList(v){
+  const s = String(v == null ? "" : v).trim();
+  if(!s) return [];
+  if(/^\d+$/.test(s) && s.length > 3){
+    const KNOWN = ["200","140","120","92","80"];
+    const out = [];
+    let rest = s;
+    while(rest.length){
+      const hit = KNOWN.find(k => rest.indexOf(k) === 0);
+      if(!hit) return dvtArr(s).map(Number).filter(Number.isFinite);
+      out.push(Number(hit));
+      rest = rest.slice(hit.length);
+    }
+    return out;
+  }
+  return dvtArr(v).map(Number).filter(Number.isFinite);
 }
 
 const DVT_DERIVED = {
@@ -114,7 +220,15 @@ const DVT_DERIVED = {
   pcieConnectors:      it => { const c = dvtPsuConn(it); return (c && c.pcie8 > 0) ? c.pcie8 : undefined; },
   epsConnectors:       it => { const c = dvtPsuConn(it); return c ? c.eps : undefined; },
   has12vhpwr:          it => { const c = dvtPsuConn(it); return c ? c.vhpwr > 0 : undefined; },
-  sataPowerConnectors: it => { const c = dvtPsuConn(it); return (c && c.sata) ? c.sata : undefined; }
+  sataPowerConnectors: it => { const c = dvtPsuConn(it); return (c && c.sata) ? c.sata : undefined; },
+
+  /* עמודה ריקה בגיליון ≠ מנוע עיוור: מה שנגזר בוודאות מהשם משלים את
+     החסר. הגיליון, כשמלא, תמיד גובר (dvtGet בודק אותו קודם). */
+  hasIgpu:      it => dvtCpuIgpuFromName(it && it.name),
+  includedFans: it => dvtCaseFansFromName(it && it.name),
+  /* רק הכיוון הבטוח: שם שאומר במפורש Tray/no fan ⇒ אין קירור.
+     שם ששותק לא ממלא true — את זה רק הגיליון יודע. */
+  coolerIncluded: it => DVT_NO_COOLER_NAME_RE.test(String((it && it.name) || "")) ? false : undefined
 };
 
 function dvtGet(item, field){
@@ -225,14 +339,26 @@ function dvtPsuFits(supportedList, psuFF){
 }
 
 /* תמיכת רדיאטור: או אובייקט {front,top,...}, או עמודות נפרדות
-   radiatorFrontMm / radiatorTopMm / radiatorRearMm בגיליון. */
+   radiatorFrontMm / radiatorTopMm / radiatorRearMm בגיליון.
+
+   ⚠️ **באג אמיתי שנתפס בבדיקה הצולבת (golden) ותוקן כאן:** ה-API
+   מחזיר radiatorSupport לכל מארז — גם כשאין נתון, בצורת
+   {front:null, top:null}. Number(null) הוא 0 ב-JS, ולכן dvtNum(null)
+   החזיר 0 — והמנוע קרא "תומך עד 0mm" וחסם **כל** קירור נוזלי על כל
+   מארז שאין לו נתוני רדיאטור (17 מארזים בקטלוג החי). null חייב
+   להיות "לא ידוע" שמדלג, לא אפס שחוסם — זה בדיוק העיקרון המנחה
+   של הקובץ הזה. */
 function dvtRadSupport(cs){
   if(!cs) return null;
   const o = cs.radiatorSupport;
+  const val = (ov, col) => {
+    const v = (ov === null || ov === undefined || ov === "") ? null : dvtNum(ov);
+    return v ?? dvtNumOf(cs, col);
+  };
   const out = {
-    front: dvtNum(o && o.front) ?? dvtNumOf(cs, "radiatorFrontMm"),
-    top:   dvtNum(o && o.top)   ?? dvtNumOf(cs, "radiatorTopMm"),
-    rear:  dvtNum(o && o.rear)  ?? dvtNumOf(cs, "radiatorRearMm")
+    front: val(o && o.front, "radiatorFrontMm"),
+    top:   val(o && o.top,   "radiatorTopMm"),
+    rear:  val(o && o.rear,  "radiatorRearMm")
   };
   const any = out.front !== null || out.top !== null || out.rear !== null;
   return any ? out : null;
@@ -466,6 +592,7 @@ const DVT_RULES = [
     /* ⚠️ הבדיקה הכי מפוספסת בבוני מחשבים: גוף קירור בלי בראקט לשקע
        הנכון פשוט לא מתברג. */
     id:"cpu-cooling-socket", cats:["cpu","cooling"], on:"cooling", level:"error",
+    when:({cooling}) => !dvtIsStockCooler(cooling),
     needs:["cpu.socket","cooling.supportedSockets"],
     run:({cpu,cooling}) => {
       const list = dvtArrOf(cooling,"supportedSockets");
@@ -476,6 +603,7 @@ const DVT_RULES = [
   },
   {
     id:"cpu-cooling-tdp", cats:["cpu","cooling"], on:"cooling", level:"error",
+    when:({cooling}) => !dvtIsStockCooler(cooling),
     needs:["cpu.tdpWatts","cooling.coolerTdpWatts"],
     run:({cpu,cooling}) => {
       const need = dvtNumOf(cpu,"tdpWatts"), can = dvtNumOf(cooling,"coolerTdpWatts");
@@ -487,6 +615,7 @@ const DVT_RULES = [
   },
   {
     id:"cpu-cooling-tdp-tight", cats:["cpu","cooling"], on:"cooling", level:"warn",
+    when:({cooling}) => !dvtIsStockCooler(cooling),
     needs:["cpu.tdpWatts","cooling.coolerTdpWatts"],
     run:({cpu,cooling}) => {
       const need = dvtNumOf(cpu,"tdpWatts"), can = dvtNumOf(cooling,"coolerTdpWatts");
@@ -496,17 +625,44 @@ const DVT_RULES = [
     }
   },
   {
+    /* ⚠️ dvtCoolerIncluded ולא dvtBoolOf: העמודה בגיליון עדיין מחזיקה
+       TRUE שגוי על מעבדי Tray (ראה ההערה מעל DVT_NO_COOLER_NAME_RE).
+       בלי העקיפה, מעבד Tray היה מקבל "מגיע עם גוף קירור מהיצרן" —
+       והלקוח היה מוותר על קירור למחשב שלא נדלק בלעדיו. */
     id:"cpu-cooler-included", cats:["cpu","cooling"], on:"cooling", level:"info",
     needs:["cpu.coolerIncluded"],
-    run:({cpu,cooling}) => (dvtBoolOf(cpu,"coolerIncluded") === true && Number(cooling.price) > 0)
+    run:({cpu,cooling}) => (dvtCoolerIncluded(cpu) === true && Number(cooling.price) > 0)
       ? `${cpu.name} מגיע עם גוף קירור מהיצרן. הקירור שבחרת ישפר טמפרטורות ורעש, אבל הוא לא חובה.`
       : null
   },
   {
     id:"cpu-no-cooler", cats:["cpu"], on:"cooling", level:"error",
     needs:["cpu.coolerIncluded"],
-    run:({cpu,sel}) => (!sel.cooling && dvtBoolOf(cpu,"coolerIncluded") === false)
+    run:({cpu,sel}) => (!sel.cooling && dvtCoolerIncluded(cpu) === false)
       ? `${cpu.name} מגיע בלי גוף קירור, ועדיין לא נבחר קירור. חובה לבחור אחד.`
+      : null
+  },
+  {
+    /* אפשרות "קירור בסיסי שמגיע עם המעבד" (מוזרקת ב-builder-bridge.js)
+       חוקית **רק** כשלמעבד שנבחר באמת מצורף גוף קירור — זו דרישה
+       מפורשת של דביר. בלי מעבד, או עם מעבד Tray, היא חסומה. */
+    id:"cooling-stock-needs-cpu", cats:["cooling"], on:"cooling", level:"error",
+    when:({cooling}) => dvtIsStockCooler(cooling),
+    needs:[],
+    run:({cooling,sel}) => {
+      if(!sel.cpu) return `"${cooling.name}" זמין רק אחרי בחירת מעבד שמגיע עם גוף קירור בקופסה.`;
+      return dvtCoolerIncluded(sel.cpu) === true ? null :
+        `${sel.cpu.name} לא מגיע עם גוף קירור בקופסה — להרכב הזה חייבים קירור אמיתי.`;
+    }
+  },
+  {
+    /* ההודעה שדביר ביקש להצמיד לאפשרות הזו: קירור מהקופסה עובד, אבל
+       הוא הבסיס — שידע במה הוא בוחר. info, לא אזהרה: זו בחירה תקינה. */
+    id:"cooling-stock-basic", cats:["cpu","cooling"], on:"cooling", level:"info",
+    when:({cooling}) => dvtIsStockCooler(cooling),
+    needs:[],
+    run:({cpu}) => dvtCoolerIncluded(cpu) === true
+      ? `הקירור שמגיע עם ${cpu.name} בסיסי: שקט ומספיק לעבודה יומיומית, אבל בעומס ממושך גוף קירור ייעודי ישפר טמפרטורות ורעש.`
       : null
   },
 
@@ -573,6 +729,38 @@ const DVT_RULES = [
       const max = dvtNumOf(mobo,"maxRamSpeedMhz"), got = dvtNumOf(ram,"speedMhz");
       return got > max
         ? `הזיכרון מדורג ל-${got}MHz והלוח ${mobo.name} עד ${max}MHz. הוא יעבוד — במהירות של הלוח.`
+        : null;
+    }
+  },
+  {
+    /* ⚠️ דרישת דביר: מהירות ו-CL הם רף **איכות** — "חלש מדי יגביל
+       ביצועים" — לא חסימה. הרף לפי הפלטפורמה: DDR5 מתחת ל-5200
+       ו-DDR4 מתחת ל-3000 נקנים רק בגלל המחיר, והפער מורגש במיוחד
+       עם גרפיקה מובנית שנשענת על זיכרון המערכת. סוג הזיכרון חובה
+       בבדיקה — 3200MHz הוא איטי ל-DDR5 אבל הסטנדרט הבריא של DDR4. */
+    id:"ram-speed-weak", cats:["ram"], on:"ram", level:"warn",
+    needs:["ram.ramType","ram.speedMhz"],
+    run:({ram}) => {
+      const type = String(dvtGet(ram,"ramType") || "").toUpperCase().replace(/\s/g,"");
+      const spd = dvtNumOf(ram,"speedMhz");
+      if(spd === null) return null;
+      const floor = type === "DDR5" ? 5200 : type === "DDR4" ? 3000 : 0;
+      if(!floor || spd >= floor) return null;
+      return `${ram.name} רץ ב-${spd}MHz — איטי לתקן ${type}. זה יעבוד, אבל זיכרון איטי מגביל את המעבד ואת הגרפיקה המובנית; ${type === "DDR5" ? "5600-6000" : "3200-3600"}MHz עולה כמעט אותו דבר ונותן יותר.`;
+    }
+  },
+  {
+    /* CL לבדו לא אומר כלום — 6000 CL36 מהיר מ-4800 CL30. ההשוואה
+       הנכונה היא ההשהיה בפועל: CL/מהירות×2000 = ננו-שניות למילה
+       הראשונה. מעל 15ns זה הזיכרון שנראה טוב רק על האריזה. */
+    id:"ram-latency-weak", cats:["ram"], on:"ram", level:"info",
+    needs:["ram.speedMhz","ram.cl"],
+    run:({ram}) => {
+      const spd = dvtNumOf(ram,"speedMhz"), cl = dvtNumOf(ram,"cl");
+      if(!spd || !cl) return null;
+      const ns = (cl / spd) * 2000;
+      return ns > 15
+        ? `הצירוף של CL${cl} ב-${spd}MHz נותן ל-${ram.name} השהיה גבוהה (כ-${ns.toFixed(1)}ns). ערכה עם CL נמוך יותר באותה מהירות תרגיש חדה יותר, לרוב באותו מחיר.`
         : null;
     }
   },
@@ -696,7 +884,8 @@ const DVT_RULES = [
     /* ⚠️ תקלה אמיתית ונפוצה: גוף קירור אווירי גדול "יושב" מעל חריץ
        הזיכרון הראשון, וזיכרון עם גוף קירור גבוה לא נכנס תחתיו. */
     id:"ram-cooling-clearance", cats:["ram","cooling"], on:"cooling", level:"error",
-    when:({cooling}) => !dvtIsAio(cooling),      // רדיאטור לא נתלה מעל הזיכרון
+    // רדיאטור לא נתלה מעל הזיכרון, וקירור מהקופסה נמוך מכל מקל זיכרון
+    when:({cooling}) => !dvtIsAio(cooling) && !dvtIsStockCooler(cooling),
     needs:["ram.heightMm","cooling.ramClearanceMm"],
     run:({ram,cooling}) => {
       const h = dvtNumOf(ram,"heightMm"), clear = dvtNumOf(cooling,"ramClearanceMm");
@@ -706,7 +895,7 @@ const DVT_RULES = [
   },
   {
     id:"ram-cooling-clearance-tight", cats:["ram","cooling"], on:"cooling", level:"warn",
-    when:({cooling}) => !dvtIsAio(cooling),
+    when:({cooling}) => !dvtIsAio(cooling) && !dvtIsStockCooler(cooling),
     needs:["ram.heightMm","cooling.ramClearanceMm"],
     run:({ram,cooling}) => {
       const h = dvtNumOf(ram,"heightMm"), clear = dvtNumOf(cooling,"ramClearanceMm");
@@ -847,6 +1036,38 @@ const DVT_RULES = [
     }
   },
   {
+    /* ⚠️ במילים של דביר: "ספק כוח יכול להרוס את כל ה-BUILD". דרג 1-2
+       הוא הרבע התחתון של הקטלוג (נגזר מהמחיר או מוקלד בגיליון). לא
+       חוסמים — הספק עובד — אבל מזהירים, ורק כשההרכב באמת נשען עליו
+       (כרטיס מסך מדרג 4+ או צריכה מוערכת מעל 550W). בלי הסינון הזה
+       התג היה מופיע על כל מחשב משרדי זול והופך לרעש שאיש לא קורא. */
+    id:"psu-quality-tier", cats:["psu"], on:"psu", level:"warn",
+    needs:["psu.tier"],
+    wants:["gpu.tier","cpu.tdpWatts","gpu.tdpWatts"],
+    run:({psu,sel,qty}) => {
+      const t = Number(dvtGet(psu,"tier") ?? psu.t ?? 0);
+      if(!t || t > 2) return null;
+      const gpuT = Number((sel.gpu && (sel.gpu.tier ?? sel.gpu.t)) || 0);
+      const est = dvtEstimateWatts(sel, qty);
+      return (gpuT >= 4 || (est.known && est.watts >= 550))
+        ? `${psu.name} הוא ספק מהדרג הבסיסי, וההרכב הזה יקר ורגיש לאיכות ההזנה. ספק כוח חלש הוא הרכיב היחיד שיכול להרוס את כל שאר המחשב כשהוא נכשל — כאן שווה ספק איכותי עם דירוג 80+ Gold.`
+        : null;
+    }
+  },
+  {
+    /* 80+ White הוא רצפת היעילות. לא נבדק כשאין דירוג בגיליון —
+       "אין נתון" ≠ "ספק גרוע", והדירוג נגזר מהשם עבור 86% מהספקים. */
+    id:"psu-quality-eff", cats:["psu","gpu"], on:"psu", level:"info",
+    needs:["psu.efficiency","gpu.tdpWatts"],
+    run:({psu,gpu}) => {
+      const eff = String(dvtGet(psu,"efficiency") || "");
+      if(!/white/i.test(eff)) return null;
+      return (dvtNumOf(gpu,"tdpWatts") || 0) >= 180
+        ? `${psu.name} מדורג ${eff} — דירוג היעילות הנמוך ביותר. למחשב עם כרטיס מסך חזק עדיף 80+ Bronze ומעלה: פחות חום, פחות רעש, ויציבות לאורך זמן.`
+        : null;
+    }
+  },
+  {
     id:"psu-sata-power", cats:["psu","storage"], on:"psu", level:"error",
     when:({storage}) => dvtIsSataDrive(storage),
     needs:["psu.sataPowerConnectors"],
@@ -914,7 +1135,8 @@ const DVT_RULES = [
   /* ============ קירור ↔ מארז ============ */
   {
     id:"cooling-case-height", cats:["cooling","case"], on:"case", level:"error",
-    when:({cooling}) => !dvtIsAio(cooling),      // לרדיאטור אין "גובה מגדל"
+    // לרדיאטור אין "גובה מגדל", וקירור מהקופסה (עד ~70mm) נכנס בכל מארז
+    when:({cooling}) => !dvtIsAio(cooling) && !dvtIsStockCooler(cooling),
     needs:["cooling.heightMm","case.maxCoolerHeightMm"],
     run:({cooling,cs}) => {
       const h = dvtNumOf(cooling,"heightMm"), max = dvtNumOf(cs,"maxCoolerHeightMm");
@@ -923,7 +1145,7 @@ const DVT_RULES = [
   },
   {
     id:"cooling-case-height-tight", cats:["cooling","case"], on:"case", level:"warn",
-    when:({cooling}) => !dvtIsAio(cooling),
+    when:({cooling}) => !dvtIsAio(cooling) && !dvtIsStockCooler(cooling),
     needs:["cooling.heightMm","case.maxCoolerHeightMm"],
     run:({cooling,cs}) => {
       const h = dvtNumOf(cooling,"heightMm"), max = dvtNumOf(cs,"maxCoolerHeightMm");
@@ -990,11 +1212,28 @@ const DVT_RULES = [
     id:"case-fans-size", cats:["case","caseFans"], on:"caseFans", level:"error",
     needs:["case.fanSizesMm","caseFans.sizeMm"],
     run:({cs,fans}) => {
-      const sizes = dvtArrOf(cs,"fanSizesMm").map(Number).filter(Number.isFinite);
+      /* dvtFanSizeList ולא dvtArrOf: הגיליון מחזיק "120140" במקום
+         "120,140" (פסיק שנבלע כמפריד אלפים) על 25 מארזים — ראה את
+         ההערה על הפונקציה. dvtArrOf היה חוסם כאן ערכות תקינות. */
+      const sizes = dvtFanSizeList(dvtGet(cs,"fanSizesMm"));
       const want = dvtNumOf(fans,"sizeMm");
       if(!sizes.length || want === null) return null;
       return sizes.includes(want) ? null :
         `${fans.name} הם ${want}mm והמארז ${cs.name} מקבל ${sizes.join("/")}mm.`;
+    }
+  },
+  {
+    /* ⚠️ בקשת דביר: לציין מאווררים שכבר מותקנים במארז — הערה בלבד,
+       לא חסימה. אין עמודה בגיליון; הכמות נגזרת מהשם ("6PWM Fans",
+       "3x120mm"). needs ריק בכוונה: זו לא עמודת גיליון, ושם ששותק
+       לא צריך להופיע בדוח החוסרים — פשוט אין הערה. */
+    id:"case-included-fans", cats:["case"], on:"caseFans", level:"info",
+    needs:[],
+    run:({cs,sel}) => {
+      const n = dvtNumOf(cs,"includedFans");
+      if(!n) return null;
+      return `${cs.name} מגיע עם ${n} מאווררים מותקנים מראש` +
+             (sel.caseFans ? " — ערכת המאווררים שבחרת מתווספת אליהם." : " — ברוב ההרכבות אין צורך להוסיף ערכה.");
     }
   },
   {
@@ -1344,4 +1583,109 @@ function dvtScoreBuild(sel, qty){
   );
 
   return { topics: DVT_SCORE_TOPICS.map(x => ({ ...x, score: scores[x.key] })), overall };
+}
+
+/* =====================================================================
+   10. הסרה אוטומטית של רכיב שכבר לא מתאים
+   =====================================================================
+   דרישת דביר: אם שינוי ברכיב א' גורם לכך שרכיב ב' שכבר נבחר לא מתאים
+   יותר — רכיב ב' יוסר אוטומטית עם הודעה ברורה. לעולם לא משאירים הרכבה
+   שבורה בשקט: הלקוח שממשיך ממנה לתשלום מקבל מחשב שלא נדלק.
+
+   ⚠️ **רשימה סגורה של חוקים, בכוונה.** מסירים רק על התנגשות פיזית
+   בין שני רכיבים שנבחרו (שקע, תקן זיכרון, מידות, מחברים). שגיאות
+   "חסר רכיב" (מעבד F בלי כרטיס מסך) לא מסירות כלום — הן נפתרות
+   בבחירה, לא במחיקה. וחוקים תלויי-כמות (mobo-ram-slots) מוחרגים:
+   העלאת כמות לא אמורה להעיף את הלוח, ו-dvtMaxQty ממילא חוסם אותה. */
+const DVT_AUTO_REMOVE_RULES = new Set([
+  "cpu-mobo-socket", "mobo-ram-type", "mobo-case-form", "cpu-cooling-socket",
+  "gpu-case-length", "gpu-case-height", "cooling-case-height", "cooling-case-radiator",
+  "psu-case-form", "psu-case-length", "ram-cooling-clearance", "cpu-cooling-tdp",
+  "gpu-psu-connectors", "mobo-ram-capacity", "cooling-stock-needs-cpu"
+]);
+
+/* מי נשאר כשיש התנגשות: הרכיב המרכזי יותר. מעבד גובר על לוח, לוח על
+   מארז וכו' — כי סביר שהלקוח בחר את היקר/החשוב קודם ובנה סביבו. */
+const DVT_CAT_KEEP_ORDER = ["cpu","mobo","gpu","ram","case","psu","cooling","storage","caseFans","wifi","paste","extras"];
+
+function dvtInvalidateSelection(sel, qty, keepCat){
+  const cur = Object.assign({}, sel || {});
+  const removed = [];
+  const byId = {};
+  DVT_RULES.forEach(r => { byId[r.id] = r; });
+
+  /* לולאה כי הסרה יכולה לחשוף התנגשות הבאה בתור; הגבול מונע לולאה
+     אינסופית אם חוק עתידי יתנהג לא צפוי. */
+  for(let guard = 0; guard < 12; guard++){
+    const res = dvtCheckBuild(cur, qty);
+    const conflict = res.issues.find(i => {
+      if(i.level !== "error" || !DVT_AUTO_REMOVE_RULES.has(i.id)) return false;
+      const rule = byId[i.id];
+      return rule && (rule.cats || []).length > 0 && (rule.cats || []).every(c => !!cur[c]);
+    });
+    if(!conflict) break;
+    const cats = (byId[conflict.id].cats || []).filter(c => c !== keepCat);
+    const drop = cats.slice().sort((a,b) =>
+      DVT_CAT_KEEP_ORDER.indexOf(b) - DVT_CAT_KEEP_ORDER.indexOf(a))[0];
+    if(!drop || !cur[drop]) break;
+    removed.push({ cat: drop, item: cur[drop], reason: conflict.text, ruleId: conflict.id });
+    delete cur[drop];
+  }
+  return { sel: cur, removed };
+}
+
+/* =====================================================================
+   11. בדיקת עגלה — אותו מנוע, בלי הבונה (dvtCheckBuildCompat)
+   =====================================================================
+   לקוח שאסף רכיבים ידנית מהקטלוג מקבל הרכבה חינם בדף התשלום — ולכן
+   העגלה שלו חייבת לעבור את **אותו** מנוע בדיוק, לא בדיקה מקבילה
+   שתתפצל ממנו ביום שיתווסף חוק. הפונקציה טהורה: שורות עגלה + קטלוג
+   נכנסים, תוצאת dvtCheckBuild יוצאת. בלי DOM ובלי תלות בדף הבונה —
+   checkout.js טוען את הקובץ הזה לבדו.
+
+   items: [{sku:"cpu:CPU-1023", qty:1} | {type:"build", parts:[...]}]
+   catalog: {cpu:{items:[...]}, ...} — אם לא סופק, ננסה את מטמון
+   ה-localStorage שכל דפי האתר חולקים.
+
+   ⚠️ שני מוצרים *שונים* מאותה קטגוריה (שני מעבדים שונים בעגלה):
+   נבדק הראשון, והשני מדווח ב-duplicates — שהמסך יגיד את זה ללקוח
+   במקום לבדוק בשקט רק חצי עגלה. */
+function dvtCheckBuildCompat(items, catalog){
+  catalog = catalog || dvtCompatCatalogFromCache_();
+  const index = {};
+  if(catalog){
+    Object.keys(catalog).forEach(cat => {
+      const g = catalog[cat];
+      const list = (g && Array.isArray(g.items)) ? g.items : (Array.isArray(g) ? g : []);
+      list.forEach(it => { if(it && it.id !== undefined) index[cat + ":" + it.id] = { cat, it }; });
+    });
+  }
+  const sel = {}, qty = {}, unknown = [], duplicates = [];
+  const addSku = (sku, n) => {
+    const hit = index[String(sku)];
+    if(!hit){ unknown.push(String(sku)); return; }
+    if(!sel[hit.cat]){ sel[hit.cat] = hit.it; qty[hit.cat] = n; }
+    else if(String(sel[hit.cat].id) === String(hit.it.id)){ qty[hit.cat] += n; }
+    else duplicates.push({ cat: hit.cat, name: hit.it.name });
+  };
+  (items || []).forEach(i => {
+    if(!i) return;
+    // sku בלי נקודתיים ("assembly-included", שורות שירות) אינו מוצר קטלוג
+    if(typeof i.sku === "string" && i.sku.indexOf(":") > 0) addSku(i.sku, Math.max(1, Number(i.qty) || 1));
+    if(Array.isArray(i.parts)) i.parts.forEach(p => {
+      if(p && typeof p.sku === "string" && p.sku.indexOf(":") > 0) addSku(p.sku, Math.max(1, Number(p.qty) || 1));
+    });
+  });
+  const r = dvtCheckBuild(sel, qty);
+  return Object.assign(r, { sel, qty, unknown, duplicates });
+}
+
+function dvtCompatCatalogFromCache_(){
+  try{
+    if(typeof localStorage === "undefined") return null;
+    const raw = localStorage.getItem("dvirtech_catalog_v1");
+    if(!raw) return null;
+    const o = JSON.parse(raw);
+    return o && o.catalog ? o.catalog : null;
+  }catch(e){ return null; }
 }

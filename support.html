@@ -4,7 +4,7 @@
 <meta charset="UTF-8">
 <meta name="viewport" content="width=device-width, initial-scale=1.0">
 <title>DvirTech — שירות ותמיכה</title>
-<meta name="description" content="שירותי הרכבה, התקנת Windows, אבחון תקלות, ביקורי בית ותמיכה מרחוק — עם מחירון גלוי וטופס פנייה קצר לכל שירות.">
+<meta name="description" content="שירותי הרכבה, התקנת Windows, אבחון תקלות, ביקורי בית ותמיכה מרחוק — עם מחירון גלוי. מסמנים כמה שירותים ושולחים פנייה אחת מסודרת בוואטסאפ.">
 <script>
   (function(){
     var saved = "he";
@@ -27,28 +27,144 @@
 
 <div class="wrap sup-wrap">
 
-  <h1 class="sup-h1" data-he="שירות ותמיכה" data-en="Service &amp; Support"></h1>
-  <p class="sup-lede"
-     data-he="הרכבה, מערכת הפעלה, תיקונים וביקורי בית — עם המחיר כתוב מראש. בוחרים את השירות, עונים על כמה שאלות קצרות, והפנייה מגיעה אליי מסודרת בוואטסאפ."
-     data-en="Assembly, operating systems, repairs and home visits — with the price stated up front. Pick a service, answer a few short questions, and the request reaches me on WhatsApp, all in order."></p>
+  <!-- ⚠️ הכותרת, ההסבר ושלושת הצעדים יושבים בכרטיס אחד ולא כשלוש
+       פסקאות רצות. זו הייתה התלונה המרכזית של דביר על הגרסה הקודמת:
+       "פשוט טקסט עמוס". הצעדים מחליפים פסקת הסבר שלמה. -->
+  <section class="sup-hero">
+    <span class="sup-eyebrow" data-he="שירותי מחשבים" data-en="Computer services"></span>
 
-  <!-- ⚠️ המחירים כאן הם המחירון של דביר (PRICE_LIST ב-2-pricelist-picker.gs).
-       שינוי מחיר שם מחייב עדכון גם ב-SUP_SERVICES שב-support.js.
-       ⚠️ **אסור לכתוב "כולל מע״מ".** DvirTech הוא עוסק פטור: הוא אינו
-       גובה מע״מ ואינו רשאי להציג מחיר כ"כולל מע״מ" — זו הצגה לא נכונה
-       כלפי הלקוח וגם חריגה ממעמד העוסק. הניסוח הנכון הוא "זה מה
-       שתשלם", בלי להזכיר מע״מ בכלל. (המע״מ ב-11-catalog.gs הוא דבר
-       אחר לגמרי: מה ש**דביר** משלם לספק, לא מה שהלקוח משלם לו.) -->
-  <p class="sup-lede-note"
-     data-he="המחירים הם מחיר השירות עצמו — זה מה שתשלם, בלי תוספות. חלקים או רישיונות שנרכשים בנפרד אינם כלולים, ואם מתברר שהעבודה שונה ממה שתיארת — נעדכן ביחד לפני שמתחילים."
-     data-en="Prices are for the service itself — that is what you pay, with nothing added. Parts or licenses bought separately are not included, and if the job turns out different from what you described, we'll agree on it together before starting."></p>
+    <h1 class="sup-h1" data-he="שירות ותמיכה" data-en="Service &amp; Support"></h1>
 
-  <nav class="sup-cats" id="supCats" aria-label="קטגוריות שירות"></nav>
+    <p class="sup-lede"
+       data-he="הרכבה, מערכת הפעלה, תיקונים וביקורי בית — עם המחיר כתוב מראש. אפשר לסמן כמה שירותים ביחד ולשלוח פנייה אחת מסודרת בוואטסאפ."
+       data-en="Assembly, operating systems, repairs and home visits — with the price stated up front. Tick as many services as you need and send one tidy WhatsApp request."></p>
+
+    <ol class="sup-steps">
+      <li>
+        <span class="sup-step-n">1</span>
+        <span data-he="מסמנים ✓ כל שירות שמעניין" data-en="Tick ✓ every service you want"></span>
+      </li>
+      <li>
+        <span class="sup-step-n">2</span>
+        <span data-he="עונים על מה שרלוונטי" data-en="Answer what's relevant"></span>
+      </li>
+      <li>
+        <span class="sup-step-n">3</span>
+        <span data-he="שולחים הכל בהודעה אחת" data-en="Send it all in one message"></span>
+      </li>
+    </ol>
+
+    <!-- ⚠️ המחירים כאן הם המחירון של דביר (PRICE_LIST ב-2-pricelist-picker.gs).
+         שינוי מחיר שם מחייב עדכון גם ב-SUP_SERVICES שב-support.js.
+         ⚠️ **אסור לכתוב "כולל מע״מ".** DvirTech הוא עוסק פטור: הוא אינו
+         גובה מע״מ ואינו רשאי להציג מחיר כ"כולל מע״מ" — זו הצגה לא נכונה
+         כלפי הלקוח וגם חריגה ממעמד העוסק. הניסוח הנכון הוא "זה מה
+         שתשלם", בלי להזכיר מע״מ בכלל. (המע״מ ב-11-catalog.gs הוא דבר
+         אחר לגמרי: מה ש**דביר** משלם לספק, לא מה שהלקוח משלם לו.) -->
+    <p class="sup-lede-note"
+       data-he="המחירים הם מחיר השירות עצמו — זה מה שתשלם, בלי תוספות. חלקים או רישיונות שנרכשים בנפרד אינם כלולים, ואם מתברר שהעבודה שונה ממה שתיארת — נעדכן ביחד לפני שמתחילים. השירותים לא נרכשים כאן: כל פנייה נסגרת מולי אישית."
+       data-en="Prices are for the service itself — that is what you pay, with nothing added. Parts or licenses bought separately are not included, and if the job turns out different from what you described, we'll agree on it together before starting. Services aren't bought here: every request is settled with me personally."></p>
+  </section>
+
+  <nav class="sup-cats" id="supCats"></nav>
 
   <div id="supCatalog"></div>
 
-  <!-- הטופס נפתח רק אחרי בחירת שירות, ומכיל רק את השאלות של אותו שירות. -->
-  <section class="panel sup-form" id="supForm" hidden aria-live="polite"></section>
+  <!-- לוח הפנייה. תמיד גלוי — גם ריק — כדי שיהיה ברור לאן הבחירה הולכת. -->
+  <section class="panel sup-panel" id="supPanel"></section>
+
+  <!-- ================= DvirTech Care =================
+       ⚠️ **ממוקם אחרי לוח הפנייה ולפני הערת הסיום, בכוונה.** מי שגלל
+       עד לכאן כבר עבר על השירותים החד-פעמיים — זה בדיוק הרגע שבו
+       "מנוי שנתי" הופך לרלוונטי. דף נפרד היה מקבל אפס תנועה.
+       ⚠️ **המחירים כאן הם מציין-מקום** עד שהם ייקראו מהגיליון
+       (PRICE_LIST → קטגוריית "מנויים" ב-2-pricelist-picker.gs).
+       ⚠️ **אין כאן כפתור קנייה.** ההצטרפות בתיאום ובאישור העסק, לא
+       ברכישה ישירה — כך זה גם בתקנון. כפתור "הצטרפות" שמוביל לתשלום
+       היה סותר אותו. -->
+  <section class="care" id="care" aria-labelledby="careTitle">
+    <div class="care-head">
+      <p class="care-kicker">DvirTech Care</p>
+      <h2 class="care-h2" id="careTitle"
+         data-he="ליווי ותחזוקה שנתית" data-en="Annual care &amp; maintenance"></h2>
+      <!-- ⚠️ הניסוח נקבע ע"י דביר (17.08.2026) ותואם לתקנון: תקופה של
+           12 חודשים, תשלום אחד או פריסה — ולא "מנוי חודשי". ההבדל אינו
+           סמנטי: המכסות (שעות תמיכה, בדיקת תחזוקה) הן שנתיות, ומנוי
+           חודשי היה מאפשר לממש שנה שלמה של הטבות בחודש הראשון. -->
+      <p class="care-lede"
+         data-he="חבילת שירות לתקופה של 12 חודשים. ניתן לשלם בתשלום אחד או לפרוס את התשלום בהתאם לאפשרויות התשלום המוצעות. החבילה כוללת תמיכה, קדימות בשירות והנחות על שירותי DvirTech — היא אינה אחריות על חומרה ואינה מאריכה את אחריות היצרן."
+         data-en="A 12-month service plan. Payable in one payment or in installments, per the payment options offered. It includes support, service priority and discounts on DvirTech services — it is not a hardware warranty and does not extend the manufacturer's warranty."></p>
+    </div>
+
+    <div class="care-tiers">
+      <article class="care-tier care-tier--care">
+        <span class="care-rank"><svg viewBox="0 0 24 24" aria-hidden="true"><path d="M12 2 4 5v6c0 5 3.4 9.4 8 11 4.6-1.6 8-6 8-11V5l-8-3z"/></svg><span data-he="בסיסי" data-en="Essential"></span></span>
+        <div class="care-top">
+          <span class="care-badge"><svg viewBox="0 0 24 24" aria-hidden="true"><path d="M12 2 4 5v6c0 5 3.4 9.4 8 11 4.6-1.6 8-6 8-11V5l-8-3z"/></svg></span>
+          <h3 class="care-n">CARE</h3>
+        </div>
+        <p class="care-for" data-he="למי שרוצה מישהו לדבר איתו כשמשהו לא עובד." data-en="For anyone who wants someone to call when something breaks."></p>
+        <p class="care-price"><b>599</b><span data-he="₪ לשנה" data-en="₪ / year"></span></p>
+        <p class="care-year" data-he="או כ-50 ₪ לחודש בפריסה לתשלומים" data-en="or ~₪50 a month in installments"></p>
+        <ul>
+          <li data-he="תמיכה וייעוץ טכני" data-en="Technical support &amp; advice"></li>
+          <li data-he="קדימות רגילה" data-en="Standard priority"></li>
+          <li data-he="בדיקת תחזוקה פעם בשנה" data-en="One maintenance check a year"></li>
+          <li data-he="תמיכה מרחוק עד שעה בשנה" data-en="Up to 1 hour remote support a year"></li>
+          <li data-he="הנחה 5% על שירותים וביקורים" data-en="5% off services and visits"></li>
+          <li data-he="סיוע מול גורם האחריות" data-en="Help dealing with the warranty provider"></li>
+        </ul>
+        <a class="care-cta" href="#" data-care="CARE" data-he="לפרטים ולהצטרפות" data-en="Details &amp; joining"></a>
+      </article>
+
+      <article class="care-tier care-tier--plus">
+        <span class="care-rank"><svg viewBox="0 0 24 24" aria-hidden="true"><path d="M13 2 4 14h6l-1 8 9-12h-6l1-8z"/></svg><span data-he="הכי משתלם" data-en="Best value"></span></span>
+        <div class="care-top">
+          <span class="care-badge"><svg viewBox="0 0 24 24" aria-hidden="true"><path d="M13 2 4 14h6l-1 8 9-12h-6l1-8z"/></svg></span>
+          <h3 class="care-n">PLUS</h3>
+        </div>
+        <p class="care-for" data-he="למי שהמחשב הוא כלי עבודה ואי אפשר שיעמוד." data-en="For when the PC is a work tool and cannot sit idle."></p>
+        <p class="care-price"><b>799</b><span data-he="₪ לשנה" data-en="₪ / year"></span></p>
+        <p class="care-year" data-he="או כ-67 ₪ לחודש בפריסה לתשלומים" data-en="or ~₪67 a month in installments"></p>
+        <ul>
+          <li data-he="תמיכה וייעוץ טכני" data-en="Technical support &amp; advice"></li>
+          <li data-he="קדימות בינונית" data-en="Raised priority"></li>
+          <li data-he="בדיקת תחזוקה פעם בשנה" data-en="One maintenance check a year"></li>
+          <li data-he="תמיכה מרחוק עד 3 שעות בשנה" data-en="Up to 3 hours remote support a year"></li>
+          <li data-he="הנחה 10% על שירותים וביקורים" data-en="10% off services and visits"></li>
+          <li data-he="סיוע מול גורם האחריות" data-en="Help dealing with the warranty provider"></li>
+        </ul>
+        <a class="care-cta" href="#" data-care="PLUS" data-he="לפרטים ולהצטרפות" data-en="Details &amp; joining"></a>
+      </article>
+
+      <article class="care-tier care-tier--pro">
+        <span class="care-rank"><svg viewBox="0 0 24 24" aria-hidden="true"><path d="M12 2c3.5 2.4 5.5 6 5.5 10l2 2.4V19l-3.6-1.5A6 6 0 0 1 12 19a6 6 0 0 1-3.9-1.5L4.5 19v-4.6l2-2.4C6.5 8 8.5 4.4 12 2zm0 6a2 2 0 1 0 0 4 2 2 0 0 0 0-4z"/></svg><span data-he="המקיף ביותר" data-en="Most complete"></span></span>
+        <div class="care-top">
+          <span class="care-badge"><svg viewBox="0 0 24 24" aria-hidden="true"><path d="M12 2c3.5 2.4 5.5 6 5.5 10l2 2.4V19l-3.6-1.5A6 6 0 0 1 12 19a6 6 0 0 1-3.9-1.5L4.5 19v-4.6l2-2.4C6.5 8 8.5 4.4 12 2zm0 6a2 2 0 1 0 0 4 2 2 0 0 0 0-4z"/></svg></span>
+          <h3 class="care-n">PRO</h3>
+        </div>
+        <p class="care-for" data-he="לעסק קטן או לכמה מחשבים בבית." data-en="For a small business or several PCs at home."></p>
+        <p class="care-price"><b>1,099</b><span data-he="₪ לשנה" data-en="₪ / year"></span></p>
+        <p class="care-year" data-he="או כ-92 ₪ לחודש בפריסה לתשלומים" data-en="or ~₪92 a month in installments"></p>
+        <ul>
+          <li data-he="תמיכה וייעוץ טכני" data-en="Technical support &amp; advice"></li>
+          <li data-he="קדימות גבוהה" data-en="Highest priority"></li>
+          <li data-he="בדיקת תחזוקה פעמיים בשנה" data-en="Two maintenance checks a year"></li>
+          <li data-he="תמיכה מרחוק עד 5 שעות בשנה" data-en="Up to 5 hours remote support a year"></li>
+          <li data-he="הנחה 15% על שירותים וביקורים" data-en="15% off services and visits"></li>
+          <li data-he="סיוע מול גורם האחריות" data-en="Help dealing with the warranty provider"></li>
+        </ul>
+        <a class="care-cta" href="#" data-care="PRO" data-he="לפרטים ולהצטרפות" data-en="Details &amp; joining"></a>
+      </article>
+    </div>
+
+    <p class="care-more">
+      <button type="button" class="care-more-btn" id="careMoreBtn" aria-expanded="false" aria-controls="careTable"
+              data-he="פירוט מלא והשוואה בין המסלולים" data-en="Full details &amp; plan comparison"></button>
+    </p>
+
+    <div class="care-table-wrap" id="careTable" hidden></div>
+  </section>
 
   <p class="sup-foot-note"
      data-he="לא מצאת את מה שחיפשת? אפשר פשוט לכתוב לי בוואטסאפ ונבין ביחד מה צריך."
@@ -56,21 +172,18 @@
 
 </div>
 
-<footer class="footer-top-gap">
-  <span class="footer-logo-crop"><img class="footer-logo" src="images/logo-dvirtech-transparent.png" alt="DvirTech"></span>
-  <span id="footerText"></span>
-  <div class="footer-legal">
-    <a href="about.html" id="footerAboutLink"></a>
-    <a href="contact.html" id="footerContactLink"></a>
-    <a href="terms.html" id="footerTermsLink"></a>
-  </div>
-</footer>
+<!-- קיצור דרך צף אל לוח הפנייה. יושב בצד ההתחלה של השורה כי עגלת
+     הקניות הצפה (cart.js) תופסת את הצד השני בכל דף באתר. -->
+<button type="button" class="sup-jump" id="supJump" hidden></button>
+
+<footer></footer>
 
 <script src="sprite.js"></script>
 <script src="i18n.js"></script>
 <script src="site-content.js"></script>
 <script src="search-core.js"></script>
 <script src="site-header.js"></script>
+<script src="site-footer.js"></script>
 <script src="support.js"></script>
 <script src="cart.js"></script>
 </body>

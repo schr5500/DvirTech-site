@@ -1,8 +1,22 @@
 /* =====================================================================
    DvirTech — שירות ותמיכה (support.html)
    =====================================================================
-   מחליף את support.html בדף אמיתי: רשימת השירותים
-   מהמחירון + טופס פנייה שהשאלות בו משתנות לפי השירות שנבחר.
+   רשימת השירותים מהמחירון + לוח פנייה שהשאלות בו משתנות לפי מה שנבחר.
+
+   ⚠️ בחירה מרובה — האינטראקציה המרכזית של הדף
+   -------------------------------------------
+   אפשר לסמן ✓ כמה שירותים ולשלוח אותם בפנייה אחת, וגם ללחוץ "פנייה
+   בוואטסאפ" על כרטיס בודד ולשלוח רק אותו. ההודעה המשולבת מציגה כל
+   שירות בשורה משלו עם "+" בתחילתה, והתשובות שלו בשורות מתחתיו:
+
+       היי דביר, אני מעוניין בשירותים הבאים:
+       + אבחון תקלה — 150 ₪
+          • מה קורה? — המסך נשאר שחור
+       + ניקוי פנימי + משחה תרמית — 150 ₪
+
+   ⚠️ אין ולא יהיה כאן סכום, עגלה או תשלום. השירותים אינם נרכשים בדף
+   הזה — כל פנייה נסגרת מול דביר אישית. סכום בתחתית ההודעה היה הופך
+   פנייה להזמנה מאושרת, וזה בדיוק מה שאסור.
 
    ⚠️ מקור המחירים והמק"טים
    ------------------------
@@ -13,7 +27,7 @@
    data-key על הכרטיס הוא כבר המפתח שהשרת יודע לתרגם למק"ט SUMIT.
    מחיר שמשתנה במחירון — לעדכן גם כאן.
 
-   ⚠️ לא כל 23 השירותים שבמחירון מופיעים כאן. שלושה מהם הם תמחור פנימי
+   ⚠️ לא כל 24 השירותים שבמחירון מופיעים כאן. שלושה מהם הם תמחור פנימי
    ולא מוצר מדף, ולכן הושמטו במכוון:
      • CLI-4004 "הרכבה (כשקונים ממני חלקים)" ₪0 — הטבה אוטומטית שנוספת
        לעגלה דרך הבונה. כרטיס "לפנייה" ב-₪0 היה מזמין בקשות להרכבה
@@ -194,20 +208,15 @@ const SUP_SERVICES = [
           options:[["אחד","One"],["שניים","Two"],["שלושה ומעלה","Three or more"]] },
         SQ.when ] },
 
-  { key:"visit-60", sku:"CLI-4010", cat:"visit", price:350,
-    he:"ביקור בית — עד שעה נסיעה", en:"Home visit — up to 1 hour travel",
-    q:[ SQ.city,
-        { id:"visitIssue", type:"textarea", max:500,
-          he:"מה צריך לעשות בביקור?", en:"What needs to be done during the visit?",
-          phHe:"המחשב לא עולה / להתקין ציוד חדש / הרשת נופלת…",
-          phEn:"PC won't boot / install new gear / the network keeps dropping…" },
-        { id:"deviceCount", type:"select",
-          he:"כמה מחשבים או מכשירים?", en:"How many computers or devices?",
-          options:[["אחד","One"],["שניים","Two"],["שלושה ומעלה","Three or more"]] },
-        SQ.when ] },
-
-  { key:"visit-90", sku:"CLI-4011", cat:"visit", price:450,
-    he:"ביקור בית — עד שעה וחצי נסיעה", en:"Home visit — up to 1.5 hours travel",
+  { /* ⚠️ **שתי מדרגות בלבד — החלטת דביר 16.08.2026.** קודם היו שלוש
+       (30 דק' / שעה / שעה וחצי) ועוד "נסיעה בלבד". נסיעה של שעה ומעלה
+       אינה משתלמת — הזמן עולה יותר מהשירות — ולכן המדרגות מעל 45 דקות
+       בוטלו. אין "צור קשר לאזורים רחוקים" בכוונה: הבטחה מרומזת שאולי
+       כן נגיע גרועה מגבול ברור.
+       ⚠️ מק"ט CLI-4010 **ממוחזר** מ-"עד שעה נסיעה" — צריך לשנות את
+       השם והמחיר של אותו פריט ב-SUMIT ל-"עד 45 דק'" / 300 ₪. */
+    key:"visit-45", sku:"CLI-4010", cat:"visit", price:300,
+    he:"ביקור בית — עד 45 דק' נסיעה", en:"Home visit — up to 45 min travel",
     q:[ SQ.city,
         { id:"visitIssue", type:"textarea", max:500,
           he:"מה צריך לעשות בביקור?", en:"What needs to be done during the visit?",
@@ -312,6 +321,35 @@ const SUP_SERVICES = [
           options:[["לא — בשביל זה אני פונה","No — that's why I'm asking"],
                    ["יש לי ניחוש","I have a guess"],
                    ["כן, מישהו כבר אבחן","Yes, someone already diagnosed it"]] },
+        SQ.deskOrLaptop,
+        SQ.handover ] },
+
+  /* ⚠️ המחיר 80 ₪ **אושר על ידי דביר** (16.08.2026) — הוא הועלה ל-100
+     בטיוטה ואז הורד. חייב להישאר זהה לשלושת המקומות האחרים:
+     PRICE_LIST ב-2-pricelist-picker.gs · DVT_SERVICES ב-checkout.js ·
+     SERVICE_OPTIONS_ ב-4-payment-api.gs. שינוי באחד בלי השאר =
+     הלקוח רואה מחיר אחד ומשלם אחר.
+     ⚠️ מק"ט CLI-4024 **עדיין לא נוצר ב-SUMIT.** כאן זו פנייה בוואטסאפ
+     בלבד ולכן אין סיכון, אבל בקופה השורה תיפול עד שהמק"ט ייווצר. */
+  { key:"software-install", sku:"CLI-4024", cat:"support", price:80,
+    he:"התקנת תוכנות", en:"Software installation",
+    descHe:"מתקין ומגדיר את מה שאתה צריך — אופיס, דרייברים, אנטי-וירוס, תוכנות עבודה.",
+    descEn:"I install and set up what you need — Office, drivers, antivirus, work software.",
+    q:[ { id:"whatSoftware", type:"textarea", max:400,
+          he:"אילו תוכנות?", en:"Which software?",
+          phHe:"אופיס, כרום, אנטי-וירוס, תוכנת עריכה…",
+          phEn:"Office, Chrome, antivirus, an editing suite…" },
+        /* ⚠️ שאלת הרישיונות היא לא פורמליות: דביר אינו מספק רישיונות
+           לתוכנות צד שלישי, וההנחה השגויה הזו מתגלה בדרך כלל רק כשהוא
+           כבר מול המחשב. עדיף לברר את זה בפנייה. */
+        { id:"hasLicenses", type:"select",
+          he:"יש לך רישיונות לתוכנות האלה?", en:"Do you have licenses for them?",
+          hintHe:"רישיונות בתשלום אינם כלולים במחיר השירות.",
+          hintEn:"Paid licenses are not included in the service price.",
+          options:[["כן, יש לי","Yes, I have them"],
+                   ["רק לחלק","For some of them"],
+                   ["לא — צריך ייעוץ","No — I need advice"],
+                   ["רק תוכנות חינמיות","Free software only"]] },
         SQ.deskOrLaptop,
         SQ.handover ] },
 
@@ -451,23 +489,68 @@ const SUP_SERVICES = [
 ];
 
 /* ==================== מצב ==================== */
-let supSelectedKey = null;
+/* ⚠️ הבחירה היא **רשימה** ולא מפתח בודד, וזה כל השינוי המהותי בדף.
+   לקוח שצריך גם ניקוי פנימי וגם שדרוג רכיב לא אמור לשלוח שתי פניות
+   נפרדות ולא אמור לבחור אחד ולוותר על השני. הסדר נשמר לפי סדר הסימון
+   כדי שההודעה תצא באותו סדר שבו הלקוח חשב עליה.
+
+   supAnswers חי מעבר לרינדור מחדש של הלוח (וגם אחרי ביטול סימון), כך
+   ששירות שהוסר ואז הוחזר חוזר עם התשובות שכבר נכתבו בו. */
+let supPicked = [];
+const supAnswers = Object.create(null);            /* "svcKey|qid" -> string | string[] */
+const supContactState = { name:"", phone:"", email:"" };
+let supPanelSeen = false;                          /* האם לוח הפנייה במסך */
+let supSpyObs = null;
 
 function supSvc(key){ return SUP_SERVICES.find(s => s.key === key) || null; }
 function supName(s){ return supTr(s.he, s.en); }
 function supPriceLabel(p){
   return p === 0 ? supTr("חינם","Free") : p.toLocaleString() + " ₪";
 }
+function supAnsKey(key, qid){ return key + "|" + qid; }
+/* התווית להודעה — בלי הסיומת "(לא חובה)" שנועדה למסך בלבד. */
+function supQLabel(q){ return supTr(q.he, q.en).replace(/\s*\(לא חובה\)|\s*\(optional\)/g, ""); }
+function supCountLabel(n){
+  if(n === 1) return supTr("שירות אחד","1 service");
+  return supTr(n + " שירותים", n + " services");
+}
+/* האייקון מגיע מ-sprite.js (#ui-wa) שנטען לפני הקובץ הזה. שם המחלקה
+   *לא* מכיל "ui-" בכוונה: הכלל הגלובלי [class*="ui-"] use{fill:none}
+   ב-style.css היה מוחק את הצורה הממולאת הזו. */
+function supWaIcon(){
+  return `<svg class="sup-wa-ic" viewBox="0 0 24 24" aria-hidden="true"><use href="#ui-wa"></use></svg>`;
+}
 
 /* ==================== רינדור הקטלוג ==================== */
-function supRenderCatalog(){
+function supRenderCats(){
   const nav = document.getElementById("supCats");
-  const host = document.getElementById("supCatalog");
-  if(!nav || !host) return;
+  if(!nav) return;
+  nav.setAttribute("aria-label", supTr("קטגוריות שירות","Service categories"));
+  nav.innerHTML = SUP_CATS.map(c => {
+    const n = SUP_SERVICES.filter(s => s.cat === c.key).length;
+    return `<button type="button" class="sup-chip" data-jump="supcat-${supEsc(c.key)}" data-cat="${supEsc(c.key)}">
+        <span>${supEsc(supTr(c.he, c.en))}</span>
+        <span class="sup-chip-n" data-n="${n}">${n}</span>
+      </button>`;
+  }).join("");
+}
 
-  nav.innerHTML = SUP_CATS.map(c =>
-    `<button type="button" class="sup-chip" data-jump="supcat-${c.key}">${supEsc(supTr(c.he, c.en))}</button>`
-  ).join("");
+/* המונה על הצ'יפ מתחלף בין "כמה יש" ל"כמה סימנת" — כך רואים מרצועת
+   הקטגוריות לבד שנשארה בחירה בקטגוריה שכבר גללנו ממנה. */
+function supSyncCatBadges(){
+  document.querySelectorAll(".sup-chip").forEach(chip => {
+    const cat = chip.dataset.cat;
+    const badge = chip.querySelector(".sup-chip-n, .sup-chip-on");
+    if(!badge) return;
+    const on = SUP_SERVICES.filter(s => s.cat === cat && supPicked.indexOf(s.key) !== -1).length;
+    badge.className = on ? "sup-chip-on" : "sup-chip-n";
+    badge.textContent = on ? String(on) : badge.dataset.n;
+  });
+}
+
+function supRenderCatalog(){
+  const host = document.getElementById("supCatalog");
+  if(!host) return;
 
   host.innerHTML = SUP_CATS.map(c => {
     const list = SUP_SERVICES.filter(s => s.cat === c.key);
@@ -475,8 +558,11 @@ function supRenderCatalog(){
     const note = c.noteHe
       ? `<p class="sup-note">${supEsc(supTr(c.noteHe, c.noteEn))}</p>` : "";
     return `
-      <section class="sup-sec" id="supcat-${c.key}">
-        <h2 class="sup-sec-h">${supEsc(supTr(c.he, c.en))}</h2>
+      <section class="sup-sec" id="supcat-${supEsc(c.key)}">
+        <h2 class="sup-sec-h">
+          <span>${supEsc(supTr(c.he, c.en))}</span>
+          <span class="sup-sec-c">${supEsc(supCountLabel(list.length))}</span>
+        </h2>
         ${note}
         <div class="sup-grid">
           ${list.map(supCardHtml).join("")}
@@ -485,172 +571,245 @@ function supRenderCatalog(){
   }).join("");
 }
 
+/* ⚠️ בכרטיס יש שתי פעולות נפרדות ולכן שני משטחים נפרדים:
+     • ה-<label> העליון מסמן/מבטל — צ'קבוקס אמיתי, כך שהמקלדת עובדת
+       לבד ואין צורך ב-role="button" ידני כמו בגרסה הקודמת.
+     • כפתור הוואטסאפ בפס התחתון שולח *רק* את השירות הזה, מיד.
+   שתי הפעולות לא יכולות להתחלף בטעות כי הן לא חולקות אותו שטח לחיץ. */
 function supCardHtml(s){
-  const desc = s.descHe ? `<p class="sup-card-d">${supEsc(supTr(s.descHe, s.descEn))}</p>` : "";
-  /* הכרטיס כולו לחיץ (שטח נגיעה גדול בטלפון), ולכן הוא גם צריך להיות
-     נגיש מהמקלדת — role+tabindex+aria-pressed, ו-Enter/רווח מטופלים
-     ב-supInit. ה-.sup-cta הוא span ולא button בכוונה: כפתור בתוך אזור
-     לחיץ יוצר שני יעדי טאב לאותה פעולה. */
+  const on = supPicked.indexOf(s.key) !== -1;
+  const desc = s.descHe
+    ? `<span class="sup-card-d">${supEsc(supTr(s.descHe, s.descEn))}</span>` : "";
+  const qn = (s.q && s.q.length)
+    ? supTr(s.q.length + " שאלות קצרות", s.q.length + " quick questions")
+    : supTr("בלי שאלות","No questions");
+  const aria = supTr("הוספה לפנייה: ","Add to request: ") + supName(s) + " — " + supPriceLabel(s.price);
+
   return `
-    <article class="sup-card${s.key === supSelectedKey ? " is-on" : ""}"
-             role="button" tabindex="0" aria-pressed="${s.key === supSelectedKey ? "true" : "false"}"
+    <article class="sup-card${on ? " is-on" : ""}"
              data-key="${supEsc(s.key)}" data-sku="${supEsc(s.sku)}" data-price="${s.price}">
-      <h3 class="sup-card-t">${supEsc(supName(s))}</h3>
-      ${desc}
+      <label class="sup-pick">
+        <input type="checkbox" class="sup-tick" data-pick="${supEsc(s.key)}"
+               aria-label="${supEsc(aria)}"${on ? " checked" : ""}>
+        <span class="sup-box" aria-hidden="true"></span>
+        <span class="sup-head">
+          <span class="sup-card-t">${supEsc(supName(s))}</span>
+          <span class="sup-price${s.price === 0 ? " is-free" : ""}">${supEsc(supPriceLabel(s.price))}</span>
+        </span>
+        ${desc}
+      </label>
       <div class="sup-card-f">
-        <span class="sup-price${s.price === 0 ? " is-free" : ""}">${supEsc(supPriceLabel(s.price))}</span>
-        <span class="sup-cta">${supEsc(supTr("לפנייה","Request"))}</span>
+        <span class="sup-qn">${supEsc(qn)}</span>
+        <button type="button" class="sup-wa" data-quick="${supEsc(s.key)}">
+          ${supWaIcon()}<span>${supEsc(supTr("פנייה בוואטסאפ","Ask on WhatsApp"))}</span>
+        </button>
       </div>
     </article>`;
 }
 
-/* ==================== רינדור הטופס ==================== */
-/* ⚠️ פרטי הקשר נשמרים כשמחליפים שירות. מי שמילא שם וטלפון ואז שינה
-   דעה לגבי השירות לא אמור להקליד אותם שוב. */
-function supKeepContact(){
-  const g = id => { const e = document.getElementById(id); return e ? e.value : ""; };
-  return { name:g("supName"), phone:g("supPhone"), email:g("supEmail") };
+function supSyncCards(){
+  document.querySelectorAll(".sup-card").forEach(card => {
+    const on = supPicked.indexOf(card.dataset.key) !== -1;
+    card.classList.toggle("is-on", on);
+    const cb = card.querySelector(".sup-tick");
+    if(cb && cb.checked !== on) cb.checked = on;
+  });
 }
 
-function supQuestionHtml(q, idx){
-  const label = supEsc(supTr(q.he, q.en));
-  const hint  = q.hintHe ? `<p class="sup-hint">${supEsc(supTr(q.hintHe, q.hintEn))}</p>` : "";
-  const req   = q.opt ? "" : ` <span class="sup-req" aria-hidden="true">*</span>`;
-  const name  = `q_${q.id}`;
-  let control = "";
+/* ==================== רינדור לוח הפנייה ==================== */
+function supCtrlHtml(s, q, id){
+  const saved = supAnswers[supAnsKey(s.key, q.id)];
+  const arr   = Array.isArray(saved) ? saved : [];
+  const str   = Array.isArray(saved) ? "" : String(saved == null ? "" : saved);
+  const meta  = `id="${id}" data-ans="${supEsc(supAnsKey(s.key, q.id))}" data-qtype="${supEsc(q.type || "text")}"`;
+  const ph    = supEsc(q.phHe ? supTr(q.phHe, q.phEn) : "");
 
   if(q.type === "select"){
-    control = `<select class="sup-in" id="${name}" data-qid="${supEsc(q.id)}" data-qtype="select">
+    return `<select class="sup-in" ${meta}>
         <option value="">${supEsc(supTr("בחר…","Choose…"))}</option>
-        ${q.options.map(o => `<option value="${supEsc(supTr(o[0], o[1]))}">${supEsc(supTr(o[0], o[1]))}</option>`).join("")}
-      </select>`;
-  } else if(q.type === "textarea"){
-    control = `<textarea class="sup-in sup-ta" id="${name}" data-qid="${supEsc(q.id)}" data-qtype="textarea"
-        rows="3" maxlength="${q.max || 500}"
-        placeholder="${supEsc(q.phHe ? supTr(q.phHe, q.phEn) : "")}"></textarea>`;
-  } else if(q.type === "multi"){
-    control = `<div class="sup-opts" id="${name}" data-qid="${supEsc(q.id)}" data-qtype="multi">
-        ${q.options.map((o, i) => {
+        ${q.options.map(o => {
           const v = supTr(o[0], o[1]);
-          return `<label class="sup-opt"><input type="checkbox" value="${supEsc(v)}"><span>${supEsc(v)}</span></label>`;
+          return `<option value="${supEsc(v)}"${v === str ? " selected" : ""}>${supEsc(v)}</option>`;
+        }).join("")}
+      </select>`;
+  }
+  if(q.type === "textarea"){
+    return `<textarea class="sup-in sup-ta" ${meta} rows="3" maxlength="${q.max || 500}"
+        placeholder="${ph}">${supEsc(str)}</textarea>`;
+  }
+  if(q.type === "multi"){
+    return `<div class="sup-opts" ${meta}>
+        ${q.options.map(o => {
+          const v = supTr(o[0], o[1]);
+          return `<label class="sup-opt"><input type="checkbox" value="${supEsc(v)}"${
+            arr.indexOf(v) !== -1 ? " checked" : ""}><span>${supEsc(v)}</span></label>`;
         }).join("")}
       </div>`;
-  } else {
-    control = `<input class="sup-in" type="text" id="${name}" data-qid="${supEsc(q.id)}" data-qtype="text"
-        maxlength="${q.max || 120}" placeholder="${supEsc(q.phHe ? supTr(q.phHe, q.phEn) : "")}">`;
   }
+  return `<input class="sup-in" type="text" ${meta} maxlength="${q.max || 120}"
+      value="${supEsc(str)}" placeholder="${ph}">`;
+}
 
-  return `<div class="sup-q" data-q="${supEsc(q.id)}">
-      <label class="field-label" for="${name}">${idx + 1}. ${label}${req}</label>
+function supQuestionHtml(s, q, idx, strict){
+  const id    = "q_" + s.key + "_" + q.id;
+  const hint  = q.hintHe ? `<p class="sup-hint">${supEsc(supTr(q.hintHe, q.hintEn))}</p>` : "";
+  const req   = (!q.opt && strict) ? ` <span class="sup-req" aria-hidden="true">*</span>` : "";
+  return `<div class="sup-q">
+      <label class="field-label" for="${id}">${idx + 1}. ${supEsc(supTr(q.he, q.en))}${req}</label>
       ${hint}
-      ${control}
+      ${supCtrlHtml(s, q, id)}
     </div>`;
 }
 
-function supRenderForm(){
-  const box = document.getElementById("supForm");
+function supItemHtml(s, strict){
+  const qs = s.q || [];
+  const qHtml = qs.length ? `
+      <details class="sup-item-q"${strict ? " open" : ""}>
+        <summary>${supEsc(strict
+          ? supTr("כמה פרטים שיעזרו לי להגיע מוכן","A few details so I arrive prepared")
+          : supTr("פרטים על השירות הזה (לא חובה)","Details for this service (optional)"))}</summary>
+        <div class="sup-item-qs">${qs.map((q, i) => supQuestionHtml(s, q, i, strict)).join("")}</div>
+      </details>` : "";
+
+  return `
+    <div class="sup-item" data-item="${supEsc(s.key)}">
+      <div class="sup-item-h">
+        <span class="sup-plus" aria-hidden="true">+</span>
+        <span class="sup-item-n">${supEsc(supName(s))}</span>
+        <span class="sup-item-p">${supEsc(supPriceLabel(s.price))}</span>
+        <button type="button" class="sup-item-x" data-drop="${supEsc(s.key)}"
+                aria-label="${supEsc(supTr("הסרה מהפנייה: ","Remove from request: ") + supName(s))}">✕</button>
+      </div>
+      ${qHtml}
+    </div>`;
+}
+
+function supRenderPanel(){
+  const box = document.getElementById("supPanel");
   if(!box) return;
 
-  const s = supSvc(supSelectedKey);
-  if(!s){ box.hidden = true; box.innerHTML = ""; return; }
+  const services = supPicked.map(supSvc).filter(Boolean);
+  const n = services.length;
+  /* ⚠️ שירות אחד = פנייה ממוקדת, ולכן השאלות שלו נשארות חובה בדיוק כמו
+     בגרסה הקודמת. שניים ומעלה = רשימת רצונות, ואז 4 שאלות כפול 5
+     שירותים הן בדיוק הקיר שדביר התלונן עליו — לכן הן הופכות לרשות
+     והבלוקים נסגרים. הכלל נאמר במפורש על המסך כדי שלא יהיה קסם. */
+  /* ⚠️ **תמיד חובה — החלטת דביר, 16.08.2026.** בגרסה הקודמת שאלות
+     החובה התרככו כשנבחר יותר משירות אחד, כדי להוריד נטישה. דביר העדיף
+     את הצד השני של הטרייד-אוף במפורש: "אני צריך לקבל כמה שיותר מידע,
+     זה או שם או בטלפון, עדיף שיהיה שם ואני אתקשר וארחיב".
+     כלומר השיחה אינה מוחלפת — היא נעשית מוכנה. `strict` נשאר כפרמטר
+     ולא נמחק, כדי שאפשר יהיה לרכך שוב בשורה אחת אם הנטישה תתברר
+     כבעיה אמיתית ולא משוערת. */
+  const strict = true;
+  void n;
 
-  const keep = supKeepContact();
-
-  box.hidden = false;
-  box.innerHTML = `
-    <div class="sup-form-head">
+  const head = `
+    <div class="sup-panel-head">
       <div>
-        <p class="sup-form-kicker">${supEsc(supTr("הפנייה שלך בנושא","Your request about"))}</p>
-        <h2 class="sup-form-t">${supEsc(supName(s))}</h2>
+        <p class="sup-kicker">${supEsc(supTr("שלב אחרון","Last step"))}</p>
+        <h2 class="sup-panel-t">${supEsc(supTr("הפנייה שלך","Your request"))}</h2>
       </div>
-      <div class="sup-form-price">
-        <span class="sup-price${s.price === 0 ? " is-free" : ""}">${supEsc(supPriceLabel(s.price))}</span>
-        <button type="button" class="sup-change" id="supChangeBtn">${supEsc(supTr("שינוי שירות","Change service"))}</button>
+      <div class="sup-panel-meta">
+        <span class="sup-count">${supEsc(n ? supCountLabel(n) : supTr("לא נבחר שירות","No service picked"))}</span>
+        ${n ? `<button type="button" class="sup-clear" id="supClear">${supEsc(supTr("ניקוי","Clear"))}</button>` : ""}
       </div>
-    </div>
+    </div>`;
 
-    <div class="sup-qs">
-      ${s.q.map(supQuestionHtml).join("")}
-    </div>
+  const tail = `
+    <div class="validation-msg" id="supValidation" role="alert" style="display:none"></div>
+    <p class="sup-fallback" id="supFallback" hidden></p>`;
+
+  if(!n){
+    box.innerHTML = head + `
+      <p class="sup-empty">${supEsc(supTr(
+        "עוד לא סימנת שירות. אפשר לסמן ✓ על כמה שירותים שרוצים ולשלוח הכל בהודעה אחת, או ללחוץ “פנייה בוואטסאפ” על כרטיס בודד ולשלוח רק אותו.",
+        "Nothing ticked yet. Tick ✓ as many services as you need and send them in one message, or press “Ask on WhatsApp” on a single card to send just that one."))}</p>` + tail;
+    return;
+  }
+
+  const multiNote = strict ? "" : `<p class="sup-note">${supEsc(supTr(
+    "בחרת כמה שירותים, ולכן השאלות בכל שירות אינן חובה — ענה על מה שנוח, ואת השאר נשלים בשיחה.",
+    "You picked several services, so the questions under each one are optional — answer what's easy and we'll cover the rest by phone."))}</p>`;
+
+  box.innerHTML = head + `
+    <div class="sup-picked">${services.map(s => supItemHtml(s, strict)).join("")}</div>
+    ${multiNote}
 
     <div class="sup-contact">
       <h3 class="sup-sub-h">${supEsc(supTr("איך אחזור אליך?","How do I get back to you?"))}</h3>
-      <div class="sup-q">
-        <label class="field-label" for="supName">${supEsc(supTr("שם","Name"))} <span class="sup-req" aria-hidden="true">*</span></label>
-        <input class="sup-in" type="text" id="supName" autocomplete="name" maxlength="60">
-      </div>
-      <div class="sup-q">
-        <label class="field-label" for="supPhone">${supEsc(supTr("טלפון","Phone"))} <span class="sup-req" aria-hidden="true">*</span></label>
-        <input class="sup-in" type="tel" id="supPhone" autocomplete="tel" dir="ltr" maxlength="20" placeholder="050-0000000">
-      </div>
-      <div class="sup-q">
-        <label class="field-label" for="supEmail">${supEsc(supTr("אימייל (לא חובה)","Email (optional)"))}</label>
-        <input class="sup-in" type="email" id="supEmail" autocomplete="email" dir="ltr" maxlength="80">
+      <p class="sup-sub-note">${supEsc(supTr(
+        "שם וטלפון בלבד. הפרטים נוסעים בתוך ההודעה עצמה ולא נשמרים באתר.",
+        "Name and phone only. They travel inside the message itself and are never stored on the site."))}</p>
+      <div class="sup-fields">
+        <div class="sup-q">
+          <label class="field-label" for="supCName">${supEsc(supTr("שם","Name"))} <span class="sup-req" aria-hidden="true">*</span></label>
+          <input class="sup-in" type="text" id="supCName" autocomplete="name" maxlength="60" value="${supEsc(supContactState.name)}">
+        </div>
+        <div class="sup-q">
+          <label class="field-label" for="supCPhone">${supEsc(supTr("טלפון","Phone"))} <span class="sup-req" aria-hidden="true">*</span></label>
+          <input class="sup-in" type="tel" id="supCPhone" autocomplete="tel" dir="ltr" maxlength="20"
+                 placeholder="050-0000000" value="${supEsc(supContactState.phone)}">
+        </div>
+        <div class="sup-q is-wide">
+          <label class="field-label" for="supCEmail">${supEsc(supTr("אימייל (לא חובה)","Email (optional)"))}</label>
+          <input class="sup-in" type="email" id="supCEmail" autocomplete="email" dir="ltr" maxlength="80" value="${supEsc(supContactState.email)}">
+        </div>
       </div>
     </div>
 
-    <div class="validation-msg" id="supValidation" style="display:none"></div>
-
+    <details class="sup-preview">
+      <summary>${supEsc(supTr("תצוגה מקדימה של ההודעה","Preview the message"))}</summary>
+      <pre class="sup-pre" id="supPreview"></pre>
+    </details>
+    ${tail}
     <button type="button" class="btn btn-accent" id="supSendBtn">
-      ${supEsc(supTr("שליחת הפנייה בוואטסאפ","Send request on WhatsApp"))}
+      ${supWaIcon()}<span>${supEsc(supTr("שליחת הפנייה בוואטסאפ","Send the request on WhatsApp"))}</span>
+      <small>· ${supEsc(supCountLabel(n))}</small>
     </button>
     <p class="sup-send-note">${supEsc(supTr(
-      "הכפתור פותח וואטסאפ עם ההודעה מוכנה — רק ללחוץ שליחה. הפרטים לא נשמרים באתר.",
-      "The button opens WhatsApp with the message ready — just hit send. Nothing is stored on the site."))}</p>
-    <p class="sup-fallback" id="supFallback" hidden></p>`;
+      "הכפתור פותח וואטסאפ עם ההודעה מוכנה — רק ללחוץ שליחה. שום דבר לא נרכש כאן: נסגור ביחד לפני שמתחילים.",
+      "The button opens WhatsApp with the message ready — just hit send. Nothing is purchased here: we'll agree on it together before starting."))}</p>`;
 
-  document.getElementById("supName").value  = keep.name;
-  document.getElementById("supPhone").value = keep.phone;
-  document.getElementById("supEmail").value = keep.email;
-
-  document.getElementById("supSendBtn").addEventListener("click", supSend);
-  document.getElementById("supChangeBtn").addEventListener("click", () => {
-    const card = document.querySelector(`.sup-card[data-key="${supSelectedKey}"]`);
-    if(card) card.scrollIntoView({ behavior:"smooth", block:"center" });
-  });
+  supUpdatePreview();
 }
 
-/* ==================== בחירת שירות ==================== */
-/* scroll: "smooth" (לחיצה על כרטיס) | "auto" (קישור ישיר — קפיצה מיידית,
-   בלי אנימציה מוזרה בטעינת הדף) | false (בלי גלילה). */
-function supSelect(key, scroll){
-  if(!supSvc(key)) return;
-  supSelectedKey = key;
-  document.querySelectorAll(".sup-card").forEach(c => {
-    const on = c.dataset.key === key;
-    c.classList.toggle("is-on", on);
-    c.setAttribute("aria-pressed", on ? "true" : "false");
-  });
-  supRenderForm();
-  try{ history.replaceState(null, "", "support.html?service=" + encodeURIComponent(key)); }catch(e){}
-  if(scroll !== false){
-    const box = document.getElementById("supForm");
-    if(box) box.scrollIntoView({ behavior: scroll || "smooth", block:"start" });
-  }
-}
-
-/* ==================== איסוף תשובות ובדיקה ==================== */
-function supCollect(s){
-  const out = [];
-  let missing = null;
-
-  s.q.forEach(q => {
-    const el = document.getElementById(`q_${q.id}`);
-    if(!el) return;
-    let val = "";
-    if(q.type === "multi"){
-      val = Array.from(el.querySelectorAll("input:checked")).map(i => i.value).join(", ");
+/* ==================== קליטת תשובות ==================== */
+/* נקראת לפני כל רינדור מחדש של הלוח, כך שסימון שירות נוסף באמצע
+   מילוי טופס לא מוחק את מה שכבר נכתב. */
+function supCapture(){
+  document.querySelectorAll("#supPanel [data-ans]").forEach(el => {
+    const k = el.dataset.ans;
+    if(el.dataset.qtype === "multi"){
+      supAnswers[k] = Array.prototype.slice.call(el.querySelectorAll("input:checked")).map(i => i.value);
     } else {
-      val = (el.value || "").trim();
+      supAnswers[k] = el.value;
     }
-    if(!val){
-      if(!q.opt && !missing) missing = q;
-      return;
-    }
-    out.push({ q: supTr(q.he, q.en).replace(/\s*\(לא חובה\)|\s*\(optional\)/g, ""), a: val });
   });
+  const g = id => { const e = document.getElementById(id); return e ? e.value : null; };
+  const nm = g("supCName"), ph = g("supCPhone"), em = g("supCEmail");
+  if(nm !== null) supContactState.name  = nm;
+  if(ph !== null) supContactState.phone = ph;
+  if(em !== null) supContactState.email = em;
+}
 
-  return { answers: out, missing };
+/* ⚠️ תשובות של select/multi הן מחרוזות בשפה שבה נבחרו. במעבר שפה הן
+   כבר לא תואמות לאף אפשרות ברשימה החדשה, והיו יוצאות בעברית בתוך
+   הודעה באנגלית. טקסט חופשי נשאר — הוא נכתב בידי הלקוח. */
+function supDropLocalizedAnswers(){
+  SUP_SERVICES.forEach(s => (s.q || []).forEach(q => {
+    if(q.type === "select" || q.type === "multi") delete supAnswers[supAnsKey(s.key, q.id)];
+  }));
+}
+
+function supItemFor(s){
+  const answers = [];
+  (s.q || []).forEach(q => {
+    const raw = supAnswers[supAnsKey(s.key, q.id)];
+    const val = Array.isArray(raw) ? raw.join(", ") : String(raw == null ? "" : raw).trim();
+    if(val) answers.push({ q: supQLabel(q), a: val });
+  });
+  return { s: s, answers: answers };
 }
 
 function supNormPhone(raw){
@@ -667,66 +826,188 @@ function supShowError(msg){
   box.style.display = "block";
   box.scrollIntoView({ behavior:"smooth", block:"center" });
 }
+function supHideError(){
+  const box = document.getElementById("supValidation");
+  if(box) box.style.display = "none";
+}
 
-/* ==================== בניית ההודעה ושליחה ==================== */
-function supBuildMessage(s, answers, c){
+/* ==================== בניית ההודעה ==================== */
+/* ⚠️ הפורמט הוא הדרישה עצמה, לא קישוט. שירות אחד = שורה אחת שמתחילה
+   ב-"+", והתשובות שלו בשורות משלהן מתחתיו. בלי זה חמישה שירותים היו
+   נדחסים לשורה אחת ארוכה שאי אפשר לקרוא בטלפון.
+   ⚠️ אין כאן סכום. הדף אינו עגלה והשירותים אינם נרכשים בו, וסכום
+   בתחתית ההודעה היה הופך פנייה להזמנה מאושרת. */
+const SUP_SUBLINE = "   • ";
+
+function supBuildMessage(items, c){
   const L = [];
-  L.push(supTr("היי דביר, אשמח לפנות בנושא שירות:","Hi Dvir, I'd like to request a service:"));
-  L.push("*" + supName(s) + "* — " + supPriceLabel(s.price));
+  L.push(items.length === 1
+    ? supTr("היי דביר, אשמח לפנות בנושא השירות הבא:",
+            "Hi Dvir, I'd like to ask about the following service:")
+    : supTr("היי דביר, אני מעוניין בשירותים הבאים:",
+            "Hi Dvir, I'm interested in the following services:"));
+
+  items.forEach(it => {
+    L.push("+ " + supName(it.s) + " — " + supPriceLabel(it.s.price));
+    it.answers.forEach(a => L.push(SUP_SUBLINE + a.q + " — " + a.a));
+  });
+
+  const who = [];
+  if(c.name)  who.push(supTr("שם","Name") + ": " + c.name);
+  if(c.phone) who.push(supTr("טלפון","Phone") + ": " + c.phone);
+  if(c.email) who.push(supTr("אימייל","Email") + ": " + c.email);
+  if(who.length){ L.push(""); who.forEach(x => L.push(x)); }
+
   L.push("");
-  L.push(supTr("שם","Name") + ": " + c.name);
-  L.push(supTr("טלפון","Phone") + ": " + c.phone);
-  if(c.email) L.push(supTr("אימייל","Email") + ": " + c.email);
-  if(answers.length){
-    L.push("");
-    answers.forEach(a => L.push("• " + a.q + " — " + a.a));
-  }
-  L.push("");
-  L.push(supTr("(נשלח מדף השירות באתר · מק\"ט ","(sent from the site's service page · SKU ") + s.sku + ")");
+  L.push(supTr("(נשלח מדף השירות באתר · מק\"ט: ", "(sent from the site's service page · SKU: ")
+         + items.map(it => it.s.sku).join(", ") + ")");
   return L.join("\n");
 }
 
-function supSend(){
-  const s = supSvc(supSelectedKey);
-  if(!s) return;
+function supUpdatePreview(){
+  const pre = document.getElementById("supPreview");
+  if(!pre) return;
+  const items = supPicked.map(supSvc).filter(Boolean).map(supItemFor);
+  pre.textContent = items.length ? supBuildMessage(items, supContactForMessage()) : "";
+}
 
-  const box = document.getElementById("supValidation");
-  if(box) box.style.display = "none";
+function supContactForMessage(){
+  const name  = String(supContactState.name || "").trim();
+  const phone = supNormPhone(supContactState.phone);
+  const email = String(supContactState.email || "").trim();
+  return {
+    name : name.length >= 2 ? name : "",
+    phone: /^0\d{8,9}$/.test(phone) ? phone : "",
+    email: email
+  };
+}
 
-  const { answers, missing } = supCollect(s);
-  if(missing){
-    supShowError(supTr("חסרה תשובה לשאלה: ","Missing an answer: ") + supTr(missing.he, missing.en));
-    const el = document.getElementById(`q_${missing.id}`);
-    if(el){ el.scrollIntoView({ behavior:"smooth", block:"center" }); if(el.focus) el.focus(); }
-    return;
-  }
-
-  const name  = document.getElementById("supName").value.trim();
-  const phone = supNormPhone(document.getElementById("supPhone").value);
-  const email = document.getElementById("supEmail").value.trim();
-
-  /* אותה בדיקת טלפון כמו ב-checkout.js, כדי שלא יהיו שני תקנים לאותו שדה. */
-  if(name.length < 2 || !/^0\d{8,9}$/.test(phone)){
-    supShowError(supTr("נא למלא שם וטלפון תקין (למשל 050-0000000).",
-                       "Please fill in a name and a valid phone number (e.g. 050-0000000)."));
-    return;
-  }
-
-  const msg = supBuildMessage(s, answers, { name, phone, email });
+/* ==================== שליחה ==================== */
+function supOpenWa(msg){
   const url = `https://wa.me/${SUP_WHATSAPP_NUMBER}?text=${encodeURIComponent(msg)}`;
-
   const w = window.open(url, "_blank", "noopener");
   /* חוסם פופ-אפים במובייל הוא מציאות. במקום לאבד את הפנייה — קישור גלוי. */
   if(!w){
     const fb = document.getElementById("supFallback");
     if(fb){
       fb.hidden = false;
-      fb.innerHTML = `<a href="${url}" target="_blank" rel="noopener">${
-        supEsc(supTr("הדפדפן חסם את החלון — לחץ כאן לפתיחת וואטסאפ","Your browser blocked the window — tap here to open WhatsApp"))
+      fb.innerHTML = `<a href="${supEsc(url)}" target="_blank" rel="noopener">${
+        supEsc(supTr("הדפדפן חסם את החלון — לחץ כאן לפתיחת וואטסאפ",
+                     "Your browser blocked the window — tap here to open WhatsApp"))
       }</a>`;
       fb.scrollIntoView({ behavior:"smooth", block:"center" });
     }
   }
+  return url;
+}
+
+/* פנייה מהירה מכרטיס בודד. אין כאן ולידציה בכוונה: מספר הטלפון של
+   הלקוח מגיע לדביר ממילא יחד עם הודעת הוואטסאפ, ולכן לחסום את הכפתור
+   עד שימלא טופס זה לאבד פנייה בלי שום תמורה. פרטים שכבר מולאו בלוח
+   הפנייה כן נכנסים להודעה. */
+function supQuickSend(key){
+  const s = supSvc(key);
+  if(!s) return;
+  supCapture();
+  supOpenWa(supBuildMessage([supItemFor(s)], supContactForMessage()));
+}
+
+function supFirstMissing(services){
+  for(let i = 0; i < services.length; i++){
+    const s = services[i];
+    const qs = s.q || [];
+    for(let j = 0; j < qs.length; j++){
+      const q = qs[j];
+      if(q.opt) continue;
+      const raw = supAnswers[supAnsKey(s.key, q.id)];
+      const val = Array.isArray(raw) ? raw.join("") : String(raw == null ? "" : raw).trim();
+      if(!val) return { s: s, q: q };
+    }
+  }
+  return null;
+}
+
+function supSend(){
+  supCapture();
+  supHideError();
+
+  const services = supPicked.map(supSvc).filter(Boolean);
+  if(!services.length){
+    supShowError(supTr("עוד לא סימנת שירות. סמן ✓ על שירות אחד לפחות.",
+                       "Nothing is ticked yet. Tick ✓ at least one service."));
+    return;
+  }
+
+  /* ראה ההערה ב-supRenderPanel: חובה רק כשנבחר שירות אחד. */
+  if(services.length === 1){
+    const miss = supFirstMissing(services);
+    if(miss){
+      supShowError(supTr("חסרה תשובה — ","Missing an answer — ") + supName(miss.s) + ": " +
+                   supTr(miss.q.he, miss.q.en));
+      const el = document.getElementById("q_" + miss.s.key + "_" + miss.q.id);
+      if(el){
+        const d = el.closest("details");
+        if(d) d.open = true;
+        el.scrollIntoView({ behavior:"smooth", block:"center" });
+        const f = el.matches('[data-qtype="multi"]') ? el.querySelector("input") : el;
+        if(f && f.focus) f.focus();
+      }
+      return;
+    }
+  }
+
+  const name  = String(supContactState.name || "").trim();
+  const phone = supNormPhone(supContactState.phone);
+  /* אותה בדיקת טלפון כמו ב-checkout.js, כדי שלא יהיו שני תקנים לאותו שדה. */
+  if(name.length < 2 || !/^0\d{8,9}$/.test(phone)){
+    supShowError(supTr("נא למלא שם וטלפון תקין (למשל 050-0000000).",
+                       "Please fill in a name and a valid phone number (e.g. 050-0000000)."));
+    const bad = document.getElementById(name.length < 2 ? "supCName" : "supCPhone");
+    if(bad) bad.focus();
+    return;
+  }
+
+  supOpenWa(supBuildMessage(services.map(supItemFor),
+    { name: name, phone: phone, email: String(supContactState.email || "").trim() }));
+}
+
+/* ==================== בחירה ==================== */
+function supToggle(key, on){
+  if(!supSvc(key)) return;
+  supCapture();
+  const i = supPicked.indexOf(key);
+  if(on  && i === -1) supPicked.push(key);
+  if(!on && i !== -1) supPicked.splice(i, 1);
+  supAfterChange();
+}
+
+function supClearAll(){
+  supCapture();
+  supPicked = [];
+  supAfterChange();
+}
+
+function supAfterChange(){
+  supSyncCards();
+  supSyncCatBadges();
+  supRenderPanel();
+  supSyncJump();
+  /* קישור ישיר שאפשר לשלוח: support.html?service=diagnostics,clean-thermal */
+  try{
+    history.replaceState(null, "", supPicked.length
+      ? "support.html?service=" + supPicked.map(encodeURIComponent).join(",")
+      : "support.html");
+  }catch(e){}
+}
+
+function supSyncJump(){
+  const btn = document.getElementById("supJump");
+  if(!btn) return;
+  const n = supPicked.length;
+  if(!n || supPanelSeen){ btn.hidden = true; return; }
+  btn.innerHTML = `<span>${supEsc(supTr("המשך לפנייה","Go to request"))}</span>` +
+                  `<span class="sup-jump-n">${n}</span>`;
+  btn.hidden = false;
 }
 
 /* ==================== תרגום ומעבר שפה ==================== */
@@ -746,15 +1027,16 @@ function supApplyI18n(){
 
 function setLang(lang){
   if(lang === LANG) return;
-  const keep = supKeepContact();
+  supCapture();
+  supDropLocalizedAnswers();
   setLangCore(lang);
   supApplyI18n();
+  supRenderCats();
   supRenderCatalog();
-  supRenderForm();
-  if(supSelectedKey){
-    const g = id => document.getElementById(id);
-    if(g("supName")){ g("supName").value = keep.name; g("supPhone").value = keep.phone; g("supEmail").value = keep.email; }
-  }
+  supSyncCatBadges();
+  supRenderPanel();
+  supSyncJump();
+  supSpy();
   /* ⚠️ ההדר נבנה פעם אחת ב-site-header.js ולא מתרגם את עצמו מחדש.
      בונים אותו שוב כדי שהניווט יתחלף יחד עם הדף. */
   const header = document.querySelector("header");
@@ -776,28 +1058,79 @@ function supSyncHeaderHeight(){
   if(px > 0) document.documentElement.style.setProperty("--sup-headh", px + "px");
 }
 
+/* צביעת הצ'יפ של הקטגוריה שנמצאת במסך. עם 20 כרטיסים קל מאוד לאבד
+   את המיקום, והרצועה הדביקה היא הדבר היחיד שקבוע על המסך. */
+function supSpy(){
+  if(!("IntersectionObserver" in window)) return;
+  if(supSpyObs){ supSpyObs.disconnect(); supSpyObs = null; }
+  const secs = Array.prototype.slice.call(document.querySelectorAll(".sup-sec"));
+  if(!secs.length) return;
+
+  const head = document.querySelector("header");
+  const top  = Math.round((head ? head.getBoundingClientRect().height : 85) + 74);
+  const seen = Object.create(null);
+
+  supSpyObs = new IntersectionObserver(entries => {
+    entries.forEach(e => { seen[e.target.id] = e.isIntersecting; });
+    let cur = "";
+    for(let i = 0; i < secs.length; i++){
+      if(seen[secs[i].id]){ cur = secs[i].id; break; }
+    }
+    document.querySelectorAll(".sup-chip").forEach(ch =>
+      ch.classList.toggle("is-cur", !!cur && ch.dataset.jump === cur));
+  }, { rootMargin: "-" + top + "px 0px -55% 0px" });
+
+  secs.forEach(s => supSpyObs.observe(s));
+}
+
+/* הכפתור הצף נעלם ברגע שלוח הפנייה עצמו נכנס למסך — אחרת הוא מציע
+   לגלול למקום שכבר רואים. */
+function supWatchPanel(){
+  const panel = document.getElementById("supPanel");
+  if(!panel || !("IntersectionObserver" in window)) return;
+  new IntersectionObserver(entries => {
+    entries.forEach(e => { supPanelSeen = e.isIntersecting; });
+    supSyncJump();
+  }, { rootMargin: "0px 0px -80px 0px" }).observe(panel);
+}
+
 function supInit(){
   supApplyI18n();
+  supRenderCats();
   supRenderCatalog();
+  supRenderPanel();
   supSyncHeaderHeight();
   /* ההדר נבנה ב-site-header.js שרץ לפנינו, אבל הלוגו מוחלף ב-sprite.js
      והגופנים נטענים מאוחר — שתי סיבות שגובה ההדר ישתנה אחרי הטעינה. */
-  window.addEventListener("load", supSyncHeaderHeight);
+  window.addEventListener("load", () => { supSyncHeaderHeight(); supSpy(); });
   window.addEventListener("resize", supSyncHeaderHeight);
 
   const host = document.getElementById("supCatalog");
   if(host){
+    host.addEventListener("change", e => {
+      const cb = e.target.closest(".sup-tick");
+      if(cb) supToggle(cb.dataset.pick, cb.checked);
+    });
     host.addEventListener("click", e => {
-      const card = e.target.closest(".sup-card");
-      if(card) supSelect(card.dataset.key);
+      const q = e.target.closest("[data-quick]");
+      if(!q) return;
+      e.preventDefault();
+      supQuickSend(q.dataset.quick);
     });
-    host.addEventListener("keydown", e => {
-      if(e.key !== "Enter" && e.key !== " ") return;
-      const card = e.target.closest(".sup-card");
-      if(!card) return;
-      e.preventDefault();          /* רווח גולל את הדף אם לא עוצרים אותו */
-      supSelect(card.dataset.key);
+  }
+
+  const panel = document.getElementById("supPanel");
+  if(panel){
+    panel.addEventListener("click", e => {
+      const drop = e.target.closest("[data-drop]");
+      if(drop){ supToggle(drop.dataset.drop, false); return; }
+      if(e.target.closest("#supClear")){ supClearAll(); return; }
+      if(e.target.closest("#supSendBtn")) supSend();
     });
+    /* התצוגה המקדימה מתעדכנת תוך כדי הקלדה — הלקוח רואה בדיוק מה
+       יישלח, וזו הדרך הפשוטה ביותר להראות שההודעה אכן קריאה. */
+    panel.addEventListener("input",  () => { supCapture(); supUpdatePreview(); });
+    panel.addEventListener("change", () => { supCapture(); supUpdatePreview(); });
   }
 
   const nav = document.getElementById("supCats");
@@ -810,16 +1143,137 @@ function supInit(){
     });
   }
 
-  /* קישור ישיר: support.html?service=diagnostics — כדי שאפשר יהיה
-     להפנות מהאתר או מהודעה ישר לשירות הנכון. מי שהגיע דרך קישור כזה
-     כבר בחר, ולכן נוחתים על הטופס ולא בראש הדף. */
+  const jump = document.getElementById("supJump");
+  if(jump){
+    jump.addEventListener("click", () => {
+      const box = document.getElementById("supPanel");
+      if(box) box.scrollIntoView({ behavior:"smooth", block:"start" });
+    });
+  }
+
+  /* קישור ישיר: support.html?service=diagnostics או ?service=a,b,c —
+     כדי שאפשר יהיה להפנות מהאתר או מהודעה ישר לשירותים הנכונים. מי
+     שהגיע דרך קישור כזה כבר בחר, ולכן נוחתים על הלוח ולא בראש הדף. */
   let want = "";
   try{ want = new URLSearchParams(location.search).get("service") || ""; }catch(e){}
-  if(want && supSvc(want)) supSelect(want, "auto");
+  if(want){
+    want.split(",").forEach(raw => {
+      const k = raw.trim();
+      if(k && supSvc(k) && supPicked.indexOf(k) === -1) supPicked.push(k);
+    });
+    if(supPicked.length){
+      supSyncCards();
+      supSyncCatBadges();
+      supRenderPanel();
+      const box = document.getElementById("supPanel");
+      if(box) box.scrollIntoView({ behavior:"auto", block:"start" });
+    }
+  }
+
+  supWatchPanel();
+  supSyncJump();
+  supSpy();
 }
 
 if(document.readyState === "loading"){
   document.addEventListener("DOMContentLoaded", supInit);
 } else {
   supInit();
+}
+
+
+/* ==================== DvirTech Care ====================
+   ⚠️ **הטבלה נבנית ב-JS ולא ב-HTML בכוונה.** אותם נתונים בדיוק מופיעים
+   גם בכרטיסים וגם בטבלת ההשוואה; כתיבה כפולה ב-HTML הייתה מבטיחה
+   שיום אחד אחד מהם יעודכן והשני לא. כאן יש מקור אחד — CARE_PLANS.
+
+   ⚠️ **המחירים כאן זמניים.** היעד: קריאה מהגיליון דרך אותה תשובת
+   getCatalog שכבר נטענת (קטגוריית "מנויים" ב-PRICE_LIST). עד אז
+   מספר שמשתנה כאן חייב להשתנות גם ב-support.html.
+
+   ⚠️ **אין רכישה.** ההצטרפות בתיאום ובאישור העסק — כך בתקנון, ולכן
+   הכפתור פותח וואטסאפ ולא עגלה. */
+/* ⚠️ **המחיר הוא שנתי; החודשי הוא רק תצוגת הפריסה.** כל המכסות
+   (שעות תמיכה, בדיקת תחזוקה) הן שנתיות — מנוי חודשי היה מאפשר לממש
+   שנה שלמה של הטבות בחודש הראשון ולבטל. ראה הנימוק המלא ב-PRICE_LIST
+   שב-2-pricelist-picker.gs. */
+const CARE_PLANS = [
+  { key:"CARE", monthly:50,  yearly:599,
+    priority:["רגילה","Standard"], checks:["פעם בשנה","Once a year"],
+    remote:["עד שעה בשנה","Up to 1 hour a year"], discount:"5%" },
+  { key:"PLUS", monthly:67,  yearly:799,
+    priority:["בינונית","Raised"], checks:["פעם בשנה","Once a year"],
+    remote:["עד 3 שעות בשנה","Up to 3 hours a year"], discount:"10%" },
+  { key:"PRO",  monthly:92,  yearly:1099,
+    priority:["גבוהה","Highest"], checks:["פעמיים בשנה","Twice a year"],
+    remote:["עד 5 שעות בשנה","Up to 5 hours a year"], discount:"15%" }
+];
+
+function careMoney(n){ return n.toLocaleString("he-IL") + " ₪"; }
+
+function careTableHtml(){
+  const cls = { CARE:"c-care", PLUS:"c-plus", PRO:"c-pro" };
+  const ico = { CARE:"🛡", PLUS:"⚡", PRO:"🚀" };
+  const cell = (p, v) => `<td class="${cls[p.key]}">${supEsc(v)}</td>`;
+  const row  = (label, get) =>
+    `<tr><th scope="row">${supEsc(label)}</th>${CARE_PLANS.map(p => cell(p, get(p))).join("")}</tr>`;
+  const yes = `<span class="yes">✓</span>`;
+
+  return `
+    <table>
+      <caption>${supEsc(supTr("השוואה מלאה","Full comparison"))}</caption>
+      <thead><tr>
+        <th scope="col">${supEsc(supTr("הטבה","Benefit"))}</th>
+        ${CARE_PLANS.map(p => `<th scope="col" class="${cls[p.key]}">${ico[p.key]} ${p.key}</th>`).join("")}
+      </tr></thead>
+      <tbody>
+        <tr class="row-price"><th scope="row">${supEsc(supTr("מחיר שנתי","Yearly"))}</th>
+          ${CARE_PLANS.map(p => cell(p, careMoney(p.yearly))).join("")}</tr>
+        <tr><th scope="row">${supEsc(supTr("בפריסה לתשלומים","In installments"))}</th>
+          ${CARE_PLANS.map(p => cell(p, supTr("כ-","~") + careMoney(p.monthly) + supTr(" לחודש"," / mo"))).join("")}</tr>
+        <tr><th scope="row">${supEsc(supTr("תקופת הזכאות","Entitlement period"))}</th>
+          ${CARE_PLANS.map(p => cell(p, supTr("12 חודשים","12 months"))).join("")}</tr>
+        <tr><th scope="row">${supEsc(supTr("תמיכה וייעוץ טכני","Technical support & advice"))}</th>
+          ${CARE_PLANS.map(p => `<td class="${cls[p.key]}">${yes}</td>`).join("")}</tr>
+        ${row(supTr("קדימות בשירות","Service priority"), p => supTr(p.priority[0], p.priority[1]))}
+        ${row(supTr("בדיקת תחזוקה","Maintenance check"), p => supTr(p.checks[0], p.checks[1]))}
+        ${row(supTr("תמיכה מרחוק","Remote support"), p => supTr(p.remote[0], p.remote[1]))}
+        ${row(supTr("הנחה על שירותי DvirTech","Discount on DvirTech services"), p => p.discount)}
+        ${row(supTr("הנחה על ביקור טכנאי","Discount on technician visits"), p => p.discount)}
+        <tr><th scope="row">${supEsc(supTr("סיוע מול גורם האחריות","Help with the warranty provider"))}</th>
+          ${CARE_PLANS.map(p => `<td class="${cls[p.key]}">${yes}</td>`).join("")}</tr>
+      </tbody>
+    </table>
+    <p class="care-fine">${supTr(
+      "<b>מה לא כלול:</b> חלקי חילוף וחומרה, רישיונות ותוכנות, משלוחים, שחזור מידע מורכב, ונזק שנגרם משימוש בלתי תקין. <b>בדיקת התחזוקה ומכסת התמיכה ממומשות לפי פנייה שלך</b> — אין צורך להמתין למועד קבוע, והתיאום לפי זמינות. המכסה אישית, אינה נצברת משנה לשנה ואינה ניתנת להעברה או לפדיון. הקדימות היא העדפה תפעולית ואינה התחייבות לזמן תגובה. <b>החבילה אינה אחריות על החומרה</b> ואינה מאריכה את אחריות היצרן או היבואן. ההצטרפות בתיאום מראש ובאישור העסק, ולא ברכישה ישירה באתר.",
+      "<b>Not included:</b> spare parts and hardware, licenses and software, shipping, complex data recovery, and damage caused by improper use. <b>The maintenance check and support allowance are used on your request</b> — no fixed date to wait for, scheduled by availability. The allowance is personal, does not roll over between years and cannot be transferred or cashed out. Priority is an operational preference, not a guaranteed response time. <b>The plan is not a hardware warranty</b> and does not extend the manufacturer's or importer's warranty. Joining is arranged in advance and subject to approval, not bought directly on the site.")}</p>`;
+}
+
+function careInit(){
+  const btn = document.getElementById("careMoreBtn");
+  const box = document.getElementById("careTable");
+  if(btn && box){
+    btn.addEventListener("click", function(){
+      const open = btn.getAttribute("aria-expanded") === "true";
+      btn.setAttribute("aria-expanded", String(!open));
+      if(!open && !box.innerHTML) box.innerHTML = careTableHtml();
+      box.hidden = open;
+    });
+  }
+  /* ההצטרפות היא שיחה, לא עגלה — הכפתור פותח וואטסאפ עם שם המסלול. */
+  document.querySelectorAll("[data-care]").forEach(function(a){
+    a.addEventListener("click", function(e){
+      e.preventDefault();
+      const plan = a.getAttribute("data-care");
+      const msg = supTr("היי דביר, אשמח לפרטים על מסלול DvirTech Care — " + plan,
+                        "Hi Dvir, I'd like details about the DvirTech Care " + plan + " plan");
+      window.open("https://wa.me/" + SUP_WHATSAPP_NUMBER + "?text=" + encodeURIComponent(msg), "_blank");
+    });
+  });
+}
+
+if(document.readyState === "loading"){
+  document.addEventListener("DOMContentLoaded", careInit);
+}else{
+  careInit();
 }

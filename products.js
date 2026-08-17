@@ -265,8 +265,13 @@ function buildSellableItems_(cat){
 
   const group = SHOP_CATALOG[cat];
   if(!group) return [];
+  /* ⚠️ `cat` מועבר במפורש ולא דרך `.filter(dvtIsSellable)`. שתי סיבות:
+     `_realCat` נקבע רק ב-map שאחרי, כלומר בזמן הסינון הוא עוד לא קיים;
+     ו-`.filter(fn)` מעביר את **האינדקס** כארגומנט השני, כך ש-
+     dvtIsSellable היה מקבל מספר במקום שם קטגוריה ו-DVT_HIDDEN_SUBTYPES
+     לא היה תופס כלום — בלי לזרוק שגיאה. */
   return (group.items || [])
-    .filter(dvtIsSellable)
+    .filter(it => dvtIsSellable(it, cat))
     .map(it => Object.assign({ _realCat: cat }, it));
 }
 
@@ -803,6 +808,47 @@ function shopArt(it){
     : ph;
 }
 
+/* ==================== שלד טעינה ====================
+   🔴 **הבעיה שזה פותר: הביקור הראשון נראה כמו אתר שבור.**
+
+   נמדד מול ה-exec החי: תשובת getCatalog לוקחת ‎10–13 שניות‎ (רובן קריאת
+   הגיליון בצד Apps Script). עד עכשיו ‎#productGrid‎ פשוט נשאר ריק כל
+   הזמן הזה — בלי שלד, בלי טקסט, בלי שום סימן חיים — ולכן מבקר ראשון
+   ראה כותרת ריקה ושטח לבן והסיק שהאתר לא עובד. **הנתונים היו בדרך;
+   רק אף אחד לא אמר לו את זה.**
+
+   ⚠️ מספר הכרטיסים הוא מסך אחד (12) ולא PAGE_SIZE (48): המטרה היא
+   למלא את מה שרואים, ו-48 צמתי DOM לזרוק מיד אחר כך זו עבודה מיותרת
+   בדיוק ברגע שבו ה-thread צריך לפרסר את התשובה.
+
+   ⚠️ ההודעה ל-‎#resultCount‎ היא aria-live: משתמש קורא-מסך צריך לשמוע
+   "טוען מוצרים", אחרת הדף שותק לגמרי לאורך כל ההמתנה. הכרטיסים עצמם
+   מוסתרים ממנו (aria-hidden) — 12 שלדים ריקים אינם מידע. */
+const SHOP_SKELETON_CARDS = 12;
+
+function renderShopSkeleton(){
+  const grid = document.getElementById("productGrid");
+  if(!grid) return;
+
+  const count = document.getElementById("resultCount");
+  if(count){
+    // aria-live נקבע כאן ולא ב-HTML כדי שהאזור יוכרז גם כשהטקסט מתחלף
+    // אחר כך למספר התוצאות האמיתי.
+    count.setAttribute("aria-live", "polite");
+    count.textContent = tr("טוען מוצרים…", "Loading products…");
+  }
+
+  grid.innerHTML = Array.from({ length: SHOP_SKELETON_CARDS }, () => `
+    <div class="p-card p-card--skel" aria-hidden="true">
+      <div class="sk-art"></div>
+      <div class="sk-line sk-sm"></div>
+      <div class="sk-line sk-lg"></div>
+      <div class="sk-line sk-md"></div>
+      <div class="sk-line sk-price"></div>
+      <div class="sk-btn"></div>
+    </div>`).join("");
+}
+
 function renderGrid(){
   const items = filteredItems();
   const grid = document.getElementById("productGrid");
@@ -1090,7 +1136,11 @@ function renderShopStaticText(){
   document.getElementById("filtersToggleBtn").textContent = tr("סינון","Filters");
   document.getElementById("filtersApplyBtn").textContent = tr("הצג תוצאות","Show results");
   document.getElementById("sortLabel").textContent = tr("מיון:","Sort:");
-  document.getElementById("footerText").textContent = t("footerText");
+/* ⚠️ מוגן ב-if: הפוטר הידני הוחלף ב-site-footer.js (16.08.2026)
+     ו-#footerText כבר לא קיים — הגישה הישירה קרסה כאן על כל טעינה
+     והפילה את המשך הפונקציה (כולל סימון כפתור השפה). */
+  const ft = document.getElementById("footerText");
+  if(ft) ft.textContent = t("footerText");
 
   const sel = document.getElementById("sortSelect");
   sel.innerHTML = [
@@ -1113,9 +1163,14 @@ function setLang(lang){
 /* ==================== init ==================== */
 async function loadShop(){
   renderShopStaticText();
+  /* ⚠️ לפני ה-await ולא אחריו — זו כל הנקודה. אחרי ה-await זה היה רץ
+     רק כשהנתונים כבר כאן, כלומר בדיוק כשכבר אין בו צורך. */
+  renderShopSkeleton();
   try{
     setShopCatalog(await dvtGetCatalog());
   }catch(e){
+    const count = document.getElementById("resultCount");
+    if(count) count.textContent = "";
     document.getElementById("productGrid").innerHTML =
       `<div class="empty-state">${tr(
         "לא הצלחנו לטעון את הקטלוג כרגע. רענן/י את הדף או נסה/י שוב בעוד רגע.",

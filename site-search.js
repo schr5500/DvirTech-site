@@ -28,7 +28,7 @@ function siteSearchMatches(catalog, term){
     const group = catalog[cat];
     const label = dvtCatLabel(cat, group);
     (group.items || []).forEach(it => {
-      if(!dvtIsSellable(it)) return;
+      if(!dvtIsSellable(it, cat)) return;
       const score = dvtItemScore(it, label, term);
       if(score > 0) out.push({ cat, it, score, label });
     });
@@ -46,7 +46,7 @@ function siteSearchCategoryHits(catalog, term){
     if(cat === "services") return;
     const group = catalog[cat];
     const label = dvtCatLabel(cat, group);
-    const n = (group.items || []).filter(dvtIsSellable).length;
+    const n = (group.items || []).filter(it => dvtIsSellable(it, cat)).length;
     if(n && label.toLowerCase().indexOf(q) > -1) hits.push({ cat, label, n });
   });
   return hits;

@@ -260,6 +260,18 @@ function renderCart(){
   badge.style.display = count ? "flex" : "none";
   badge.textContent = count;
 
+  /* 🔴 **הסמן בעגלה שבהדר היה מת בכל האתר.** `site-header.js` יוצר
+     `#headCartCount` עם `display:none`, אבל **שום קוד באתר לא כתב
+     אליו אף פעם** — כלומר בכל דף, בכל מצב, הוא נשאר מוסתר. לקוח
+     שהוסיף מוצר ואז ניווט לדף אחר לא ראה שום סימן שיש לו עגלה.
+     ⚠️ מוגן ב-null: לא כל דף טוען את ההדר המשותף (למשל דף התשלום,
+     שמסתיר את העגלה בכוונה). */
+  const headBadge = document.getElementById("headCartCount");
+  if (headBadge){
+    headBadge.style.display = count ? "" : "none";
+    headBadge.textContent = count;
+  }
+
   const list = document.getElementById("cartItemsList");
   const emptyMsg = document.getElementById("cartEmptyMsg");
   const totalRow = document.getElementById("cartTotalRow");
@@ -315,8 +327,54 @@ function renderCart(){
   document.getElementById("cartTotalPrice").textContent = cartTotal().toLocaleString() + " ₪";
 }
 
-function openCart(){ document.getElementById("cartOverlay").classList.add("show"); document.body.style.overflow="hidden"; }
-function closeCart(){ document.getElementById("cartOverlay").classList.remove("show"); document.body.style.overflow=""; }
+/* ================= פתיחה / סגירה =================
+   ⚠️ הסגירה חייבת JS ולא רק CSS: ‎.cart-overlay הוא ‎display:none כשהוא
+   סגור, והורדת ‎.show לבדה מקפיצה אותו החוצה בפריים אחד — בלי דהייה
+   ובלי החלקה. לכן עוברים דרך מצב ביניים ‎.closing (מוגדר ב-style.css),
+   שמחזיק את השכבה מוצגת בזמן שהאנימציה רצה, ורק אז מסירים אותו.
+
+   ⚠️ ‎animationend לבדו לא מספיק: בלשונית ברקע, כשהאנימציות מושהות או
+   כשהמשתמש ביקש ‎prefers-reduced-motion, האירוע פשוט לא נורה והשכבה
+   הייתה נשארת תקועה על המסך וחוסמת את הדף. לכן טיימר גיבוי, ושחרור
+   יחיד דרך ‎done (מי שמגיע ראשון). */
+let cartCloseTimer = null;
+
+function openCart(){
+  const ov = document.getElementById("cartOverlay");
+  if(!ov) return;
+  // פתיחה מחדש באמצע סגירה: מבטלים את הסגירה כדי שהמגירה לא "תיעלם"
+  // רגע אחרי שנפתחה. ההסרה מחזירה display:none, וה-reflow מיד אחריה
+  // מאלץ את הדפדפן להריץ שוב את cartSlide כשמוסיפים show.
+  clearTimeout(cartCloseTimer); cartCloseTimer = null;
+  ov.classList.remove("closing");
+  void ov.offsetWidth;
+  ov.classList.add("show");
+  document.body.style.overflow = "hidden";
+}
+
+function closeCart(){
+  const ov = document.getElementById("cartOverlay");
+  if(!ov || !ov.classList.contains("show")) return;   // כבר סגורה/נסגרת
+  document.body.style.overflow = "";
+
+  const reduced = window.matchMedia && window.matchMedia("(prefers-reduced-motion: reduce)").matches;
+  if(reduced){ ov.classList.remove("show"); return; }  // בלי אנימציה — נסגר מיד
+
+  /* ⚠️ ‎.closing נוסף *לפני* הסרת ‎.show ולא אחריה. שתי המחלקות יחד הן
+     מצב חוקי — ‎.closing מוגדר אחריה בקובץ ולכן ‎opacity:0 שלו מנצח —
+     והדפדפן אף פעם לא רואה רגע שבו אף אחת מהן לא קיימת. בסדר ההפוך
+     די בחישוב סגנון אחד שנופל בין השתיים כדי שהשכבה תיעלם ל-display:none
+     ותחתוך את האנימציה בדיוק כמו קודם. */
+  ov.classList.add("closing");
+  ov.classList.remove("show");
+  const done = () => {
+    clearTimeout(cartCloseTimer); cartCloseTimer = null;
+    ov.classList.remove("closing");
+  };
+  const panel = ov.querySelector(".cart-panel");
+  if(panel) panel.addEventListener("animationend", done, { once: true });
+  cartCloseTimer = setTimeout(done, 320);              // מעט מעל .26s של cartSlideOut
+}
 
 /* ================= static text (language switch) ================= */
 function renderCartStaticText(){

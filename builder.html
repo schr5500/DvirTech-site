@@ -57,13 +57,212 @@
   @keyframes partIn{0%{opacity:0;transform:scale(.82)}60%{opacity:1;transform:scale(1.05)}100%{opacity:1;transform:scale(1)}}
   @keyframes rowIn{from{opacity:0;transform:translateY(6px)}to{opacity:1;transform:none}}
   @keyframes podium{0%,100%{opacity:.5;transform:scaleX(.97)}50%{opacity:.95;transform:scaleX(1.02)}}
-  @media (max-width:1180px){
-    [data-cols]{grid-template-columns:1fr !important}
-    [data-col="picker"]{order:1}[data-col="stage"]{order:2}[data-col="summary"]{order:3}
-    [data-col]{position:static !important}
-    [data-stage-row]{flex-direction:column !important}
-    [data-partlist]{flex-direction:row !important;flex-wrap:wrap !important;width:100% !important}
-    [data-partlist] > *{flex:1 1 210px}
+  /* ================================================================
+     מחלקות יציבות (bld-*) למבנים המרכזיים של הבונה.
+     הערכים בבסיס זהים 1:1 לסגנונות ה-inline שהיו כאן קודם — דסקטופ
+     ‎(≥1300px)‎ נשאר זהה פיקסל-פיקסל. ה-inline נשאר רק על הצהרות
+     שנקשרות לתבנית ({{ }}); כל מה שסטטי עבר לכאן, כדי שאפשר יהיה
+     לעצב מובייל בלי ‎!important מול inline — ובלי הסלקטורים השבירים
+     ‎[style*="…"] שב-style.css (חלקים 4–5 שם מיותרים מעכשיו).
+     ================================================================ */
+  .bld-head{width:100%;max-width:1820px;margin:0 auto;padding:30px 22px 0;display:flex;align-items:center;gap:18px;flex-wrap:wrap}
+  .bld-head-lede{flex:1;min-width:260px}
+  .bld-title{font-family:'Rubik',sans-serif;margin:0;font-size:30px;font-weight:800;letter-spacing:-.4px;color:#0E2A47}
+  .bld-subtitle{margin:4px 0 0;color:#5F7590;font-size:14.5px}
+  .bld-stepper{display:flex;align-items:center;gap:0;background:#fff;border:1px solid #E2EAF2;border-radius:999px;padding:8px 12px;box-shadow:0 2px 10px rgba(14,42,71,.05);min-width:0;max-width:100%}
+  .bld-step{display:flex;align-items:center;gap:9px;padding:0 12px;flex:none}
+  .bld-step-num{width:24px;height:24px;border-radius:50%;display:grid;place-items:center;font-family:'Rubik',sans-serif;font-size:12px;font-weight:800}
+  .bld-step-label{font-size:13px;white-space:nowrap}
+  .bld-step-line{width:46px;height:2px;border-radius:2px;background:#E2EAF2;flex:none}
+  .bld-quiz-wrap{width:100%;max-width:1820px;margin:0 auto;padding:20px 22px 0}
+  .bld-quiz{background:#fff;border:1px solid #EDF2F8;box-shadow:0 2px 12px rgba(14,42,71,.05);border-radius:20px;padding:22px 24px;display:flex;align-items:center;gap:14px;flex-wrap:wrap}
+  .bld-quiz-head{width:100%;display:flex;align-items:baseline;gap:10px;flex-wrap:wrap;justify-content:center;text-align:center}
+  .bld-quiz-title{font-family:'Rubik',sans-serif;margin:0;font-size:18.5px;font-weight:700;letter-spacing:-.2px;color:#0E2A47;text-wrap:balance;white-space:nowrap}
+  .bld-quiz-sub{font-size:13px;color:#5F7590}
+  .bld-quiz-btns{display:flex;gap:12px;flex-wrap:wrap;width:100%;justify-content:center;margin-top:4px}
+  .bld-quiz-btn{display:inline-flex;align-items:center;gap:9px;border-radius:14px;padding:13px 22px;white-space:nowrap;font-family:'Heebo',sans-serif;font-size:14.5px;cursor:pointer;transition:.15s}
+  .bld-chip-row{width:100%;display:flex;align-items:center;gap:12px;flex-wrap:wrap;padding-top:6px;justify-content:center}
+  .bld-chip-label{font-size:13px;color:#5F7590;flex:none}
+  .bld-chips{display:flex;gap:8px;flex-wrap:wrap;flex:1;justify-content:center;min-width:0}
+  .bld-chip{display:inline-flex;align-items:center;gap:6px;border-radius:999px;padding:6px 14px;font-size:13px;cursor:pointer;transition:.15s;white-space:nowrap}
+  .bld-res{display:inline-flex;align-items:center;gap:8px;flex:none;font-size:13px;color:#5F7590}
+  .bld-res-select{padding:10px 14px;border-radius:12px;border:1.5px solid #EDF2F8;font-family:'Heebo',sans-serif;font-size:13.5px;background:#F7FAFD;color:#0E2A47}
+  .bld-cols{width:100%;max-width:1820px;margin:0 auto;padding:20px 22px 52px;display:grid;grid-template-columns:minmax(280px,20.5%) minmax(640px,1fr) minmax(290px,21.5%);gap:20px;align-items:start}
+  .bld-col-summary{background:#fff;border:1px solid #EDF2F8;border-radius:22px;box-shadow:0 6px 24px rgba(14,42,71,.07);padding:24px;position:sticky;top:88px}
+  .bld-sum-open,.bld-stage-open{display:none}
+  .bld-sum-toggle,.bld-stage-toggle{display:none}
+  .bld-sum-toggle svg,.bld-stage-toggle svg{width:14px;height:14px;fill:none;stroke:currentColor;stroke-width:2;stroke-linecap:round;stroke-linejoin:round;transition:transform .2s}
+  .bld-sum-head{display:flex;align-items:baseline;justify-content:space-between;gap:10px;margin-bottom:4px}
+  .bld-sum-title{font-family:'Rubik',sans-serif;margin:0;font-size:19px;font-weight:800;letter-spacing:-.2px;color:#0E2A47}
+  .bld-sum-count{font-size:12px;color:#5F7590}
+  .bld-sum-list{list-style:none;padding:0;margin:14px 0 0}
+  .bld-sum-row{display:flex;align-items:center;gap:12px;padding:11px 10px;border-radius:13px;transition:background .15s}
+  .bld-sum-thumb{width:40px;height:40px;border-radius:10px;flex:none}
+  .bld-sum-total{margin-top:18px;background:#F7FAFD;border:1px solid #EDF2F8;border-radius:16px;padding:17px 17px 16px;display:flex;align-items:flex-end;justify-content:space-between;gap:8px}
+  .bld-sum-total-label{font-size:13px;color:#5F7590;line-height:1.4}
+  .bld-sum-price{font-family:'Rubik',sans-serif;font-size:34px;font-weight:800;line-height:1;color:#0B2C4D;letter-spacing:-.5px}
+  .bld-btn-continue{display:flex;align-items:center;justify-content:center;gap:10px;border:none;cursor:pointer;font-family:'Heebo',sans-serif;font-weight:700;font-size:15.5px;border-radius:14px;padding:16px 18px;width:100%;margin-top:16px;background:linear-gradient(100deg,#1B6FE0,#2FC4B0);color:#fff;box-shadow:0 10px 24px rgba(27,111,224,.22);transition:.18s}
+  .bld-btn-whatsapp{display:flex;align-items:center;justify-content:center;gap:9px;cursor:pointer;font-family:'Heebo',sans-serif;font-weight:700;font-size:14px;border-radius:14px;padding:13px 18px;width:100%;margin-top:10px;background:#fff;color:#0C8467;border:1.5px solid #BDE6D8;transition:.18s}
+  .bld-sum-minor{display:flex;gap:10px;margin-top:10px}
+  .bld-btn-minor{flex:1;border:1px solid #EDF2F8;background:#fff;color:#5F7590;border-radius:12px;padding:12px;font-family:'Heebo',sans-serif;font-size:12.5px;font-weight:600;cursor:pointer;transition:.15s}
+  .bld-sum-missing{margin-top:12px;font-size:12px;color:#92650F;background:#FFF6EA;border:1px solid #F6DDAF;border-radius:11px;padding:10px 12px;line-height:1.5}
+  .bld-col-stage{background:linear-gradient(180deg,#0E2C4C 0%,#071628 100%);border-radius:24px;padding:26px;position:relative;overflow:hidden;border:1px solid rgba(143,233,218,.16);box-shadow:0 22px 60px rgba(2,10,20,.4)}
+  .bld-stage-bar{display:flex;gap:8px;align-items:center;position:relative}
+  .bld-compat{margin-inline-end:auto;display:inline-flex;align-items:center;gap:7px;border-radius:999px;padding:7px 14px;font-size:12.5px;font-weight:600;white-space:nowrap}
+  .bld-viewbtn{display:inline-flex;align-items:center;gap:8px;border-radius:10px;padding:9px 15px;font-family:'Heebo',sans-serif;font-size:13px;font-weight:700;cursor:pointer}
+  .bld-stage-row{display:flex;gap:32px;align-items:stretch;margin-top:18px;position:relative}
+  .bld-stage-canvas{flex:1;min-width:0;position:relative;display:flex;flex-direction:column;align-items:center;justify-content:center;gap:14px;min-height:700px}
+  .bld-partlist{width:238px;flex:none;display:flex;flex-direction:column;gap:9px}
+  .bld-part{display:flex;align-items:center;gap:11px;padding:11px 13px;border-radius:13px;cursor:pointer;transition:.18s}
+  .bld-part-thumb{width:32px;height:32px;border-radius:9px;flex:none}
+  .bld-meters{margin-top:16px;background:rgba(255,255,255,.05);border:1px solid rgba(255,255,255,.07);border-radius:16px;padding:16px 18px}
+  .bld-meters-grid{display:grid;grid-template-columns:repeat(4,1fr);gap:10px}
+  .bld-meter{display:flex;align-items:center;gap:10px;justify-content:center}
+  .bld-stage-note{text-align:center;font-size:11.5px;color:rgba(255,255,255,.66)}
+  .bld-col-picker{background:#fff;border:1px solid #EDF2F8;border-radius:22px;box-shadow:0 6px 24px rgba(14,42,71,.07);padding:24px;position:sticky;top:88px;color:#0E2A47}
+  .bld-picker-head{display:flex;align-items:center;justify-content:space-between;gap:10px}
+  .bld-picker-title{font-family:'Rubik',sans-serif;margin:0;font-size:18px;font-weight:800;letter-spacing:-.2px;white-space:nowrap}
+  .bld-tabs{margin-top:16px;display:grid;grid-template-columns:repeat(4,1fr);gap:8px;background:#F7FAFD;border-radius:14px;padding:9px}
+  .bld-tab{display:flex;flex-direction:column;align-items:center;gap:5px;border:none;border-radius:10px;padding:11px 4px 10px;cursor:pointer;position:relative;font-family:'Heebo',sans-serif}
+  .bld-tab-label{font-size:10.5px}
+  .bld-tab-line{position:absolute;bottom:-6px;inset-inline:16%;height:2px;border-radius:2px}
+  .bld-search{display:block;position:relative;margin-top:16px}
+  .bld-search-input{width:100%;border:1px solid #EDF2F8;border-radius:12px;padding:11px 38px 11px 14px;font-family:'Heebo',sans-serif;font-size:13.5px;background:#F7FAFD;color:#0E2A47}
+  .bld-note-ok{margin-top:11px;font-size:11.5px;color:#0E9C8A;background:#F0FDFA;border:1px solid #B7EFE5;padding:7px 11px;border-radius:9px;line-height:1.5}
+  .bld-note-hidden{margin-top:11px;display:flex;align-items:center;gap:9px;flex-wrap:wrap;font-size:11.5px;color:#91690C;background:#FFFBEC;border:1px solid #F5E3B0;padding:8px 11px;border-radius:9px;line-height:1.5}
+  .bld-note-btn{flex:none;border:1px solid #E8CE8A;background:#fff;color:#8A5A00;border-radius:8px;padding:5px 11px;font-family:'Heebo',sans-serif;font-size:11.5px;font-weight:700;cursor:pointer;transition:.15s}
+  .bld-options{margin-top:16px;display:flex;flex-direction:column;gap:14px;max-height:640px;overflow-y:auto;padding-inline-end:4px}
+  .bld-option{position:relative;display:flex;align-items:center;gap:13px;border-radius:16px;padding:17px 18px;transition:.15s}
+  .bld-option-accent{position:absolute;inset-inline-start:0;top:16px;bottom:16px;width:3px;border-radius:3px}
+  .bld-option-dot{width:22px;height:22px;border-radius:50%;display:grid;place-items:center;flex:none;color:#fff;font-size:12px;font-weight:900}
+  .bld-option-img{width:68px;height:68px;border-radius:15px;flex:none}
+  .bld-trust-wrap{width:100%;max-width:1320px;margin:0 auto;padding:0 20px 34px}
+  .bld-trust{background:#fff;border:1px solid #E2EAF2;border-radius:16px;box-shadow:0 2px 10px rgba(14,42,71,.05);display:grid;grid-template-columns:repeat(4,1fr);gap:2px;overflow:hidden}
+  .bld-trust-item{display:flex;align-items:center;gap:12px;padding:18px 20px;border-inline-start:1px solid #EDF2F8}
+
+  /* ---------------- טאבלט ומסכים צרים (עד 1300px) ----------------
+     הרשת דורשת מינימום ‎~1294px לשלוש עמודות, ולכן נערמת כבר כאן
+     (קודם: ‎1180px, והתווך 1181–1293 טולא ב-style.css חלק 5 —
+     מיותר מעכשיו). flex ולא grid: פריט sticky בתוך grid מוגבל
+     ל-grid area של עצמו ולא היה נדבק בכלל (רלוונטי לטלפון למטה). */
+  @media (max-width:1299.98px){
+    /* align-items:stretch ולא start מהבסיס: בטור flex, start מבטל את
+       מתיחת הרוחב והעמודות נפתחות לרוחב התוכן המינימלי שלהן (הבורר
+       הגיע ל-855px בטלפון בגלל 12 הלשוניות). */
+    .bld-cols{display:flex;flex-direction:column;align-items:stretch;grid-template-columns:1fr !important;padding:16px 16px 44px;gap:16px}
+    .bld-col-picker{order:1;position:static}
+    .bld-col-stage{order:2}
+    .bld-col-summary{order:3;position:static}
+    .bld-stage-row{flex-direction:column}
+    .bld-stage-canvas{min-height:0}
+    /* ‎.sc-host-x = העוטף שהרנטיים יוצר ל-x-import של הבמה; הגובה
+       ‎(700px) יושב עליו כ-inline ולכן ‎!important. PCStage מאזין
+       ב-ResizeObserver ומתאים את הקנבס. */
+    .bld-stage-canvas .sc-host-x{height:480px !important}
+    .bld-partlist{width:100%;flex-direction:row;flex-wrap:wrap}
+    .bld-partlist > *{flex:1 1 210px;min-width:0}
+    .bld-options{max-height:520px}
+    .bld-trust{grid-template-columns:repeat(2,1fr)}
+  }
+
+  /* ---------------- טלפון (עד 768px) ----------------
+     עמודה אחת קומפקטית: הבורר ראשון, ההדמיה מקופלת מאחורי מתג,
+     והסיכום הוא סרגל תחתון דביק — הסה"כ וכפתור ההמשך נגישים תמיד.
+     שני מתגי הקיפול הם checkbox+label בלבד (בלי JS חדש). */
+  @media (max-width:767.98px){
+    .bld-head{padding:16px 14px 0;gap:10px}
+    .bld-head-lede{min-width:200px}
+    .bld-title{font-size:22px;letter-spacing:-.3px}
+    .bld-subtitle{font-size:13px}
+    .bld-stepper{overflow-x:auto;padding:7px 10px;scrollbar-width:none;-webkit-overflow-scrolling:touch}
+    .bld-stepper::-webkit-scrollbar{display:none}
+    .bld-step{gap:7px;padding:0 8px}
+    .bld-step-num{width:22px;height:22px;font-size:11px}
+    .bld-step-label{font-size:12px}
+    .bld-step-line{width:16px}
+    .bld-quiz-wrap{padding:12px 14px 0}
+    .bld-quiz{padding:14px;border-radius:16px;gap:10px}
+    .bld-quiz-title{white-space:normal;font-size:16.5px}
+    .bld-quiz-btns{flex-wrap:nowrap;overflow-x:auto;justify-content:flex-start;gap:8px;margin-top:2px;padding-bottom:2px;scrollbar-width:none}
+    .bld-quiz-btns::-webkit-scrollbar{display:none}
+    .bld-quiz-btn{padding:11px 16px;font-size:13.5px;min-height:44px;flex:none}
+    .bld-chip-row{gap:8px;padding-top:2px}
+    .bld-chips{flex-wrap:nowrap;overflow-x:auto;justify-content:flex-start;padding-bottom:2px;scrollbar-width:none}
+    .bld-chips::-webkit-scrollbar{display:none}
+    .bld-chip{padding:9px 14px;min-height:40px}
+    /* ‎16px בשדות קלט: מתחת לזה iOS עושה זום אוטומטי לכל הדף */
+    .bld-res-select{font-size:16px;padding:8px 12px}
+    .bld-search-input{font-size:16px;padding-block:12px}
+    .bld-cols{padding:12px 12px 0;gap:12px}
+
+    /* הבורר */
+    .bld-col-picker{padding:14px;border-radius:16px}
+    .bld-picker-title{font-size:16px}
+    .bld-tabs{display:flex;overflow-x:auto;gap:4px;padding:7px;margin-top:12px;scrollbar-width:none;-webkit-overflow-scrolling:touch}
+    .bld-tabs::-webkit-scrollbar{display:none}
+    .bld-tab{flex:0 0 auto;min-width:62px;min-height:54px;padding:9px 9px 10px}
+    .bld-tab-label{font-size:11px}
+    .bld-options{gap:10px;max-height:min(560px,58vh)}
+    .bld-option{padding:13px 12px;gap:10px}
+    .bld-option-img{width:54px;height:54px;border-radius:12px}
+
+    /* ההדמיה: מקופלת כברירת מחדל, נפתחת במתג */
+    .bld-col-stage{padding:14px;border-radius:18px}
+    .bld-stage-bar{flex-wrap:wrap;row-gap:8px}
+    .bld-col-stage .bld-viewbtn{display:none}
+    .bld-stage-open:checked ~ .bld-stage-bar .bld-viewbtn{display:inline-flex;min-height:40px;padding:9px 12px}
+    .bld-stage-toggle{display:flex;align-items:center;justify-content:center;gap:8px;margin-top:12px;width:100%;min-height:46px;border:1px solid rgba(143,233,218,.35);background:rgba(255,255,255,.06);color:#8FE9DA;border-radius:12px;font-size:13.5px;font-weight:700;cursor:pointer;-webkit-tap-highlight-color:transparent}
+    .bld-stage-toggle-hide{display:none}
+    .bld-stage-open:checked ~ .bld-stage-toggle .bld-stage-toggle-show{display:none}
+    .bld-stage-open:checked ~ .bld-stage-toggle .bld-stage-toggle-hide{display:inline}
+    .bld-stage-open:checked ~ .bld-stage-toggle svg{transform:rotate(180deg)}
+    .bld-col-stage .bld-stage-row,.bld-col-stage .bld-meters,.bld-col-stage .bld-stage-note{display:none}
+    .bld-stage-open:checked ~ .bld-stage-row{display:flex;gap:12px;margin-top:14px}
+    .bld-stage-open:checked ~ .bld-meters{display:block;padding:12px}
+    .bld-stage-open:checked ~ .bld-stage-note{display:block}
+    .bld-stage-canvas{gap:10px}
+    .bld-stage-canvas .sc-host-x{height:320px !important}
+    .bld-partlist{flex-wrap:nowrap;overflow-x:auto;gap:8px;padding-bottom:4px;scrollbar-width:none;-webkit-overflow-scrolling:touch}
+    .bld-partlist::-webkit-scrollbar{display:none}
+    .bld-partlist > *{flex:0 0 176px}
+    .bld-part{min-height:52px;padding:9px 11px}
+    .bld-meters-grid{grid-template-columns:repeat(2,1fr);gap:8px}
+    .bld-meter{justify-content:flex-start}
+
+    /* הסיכום: סרגל תחתון דביק. סה"כ + "המשך" תמיד על המסך; הפירוט
+       (רשימת הרכיבים, וואטסאפ, נקה/שמור) נפתח במתג "פירוט". */
+    .bld-col-summary{position:sticky;top:auto;bottom:0;z-index:40;margin:2px -12px 0;border-radius:18px 18px 0 0;border-bottom:none;padding:10px 14px calc(10px + env(safe-area-inset-bottom,0px));box-shadow:0 -10px 30px rgba(14,42,71,.18);display:grid;grid-template-columns:minmax(0,1fr) auto;column-gap:10px;align-items:center}
+    .bld-sum-head{grid-column:1/-1;align-items:center;margin-bottom:6px}
+    .bld-sum-title{font-size:15px}
+    .bld-sum-toggle{display:inline-flex;align-items:center;gap:5px;font-size:12.5px;font-weight:700;color:#1B6FE0;background:#F4F9FF;border:1px solid #C9DEF8;border-radius:999px;padding:7px 13px;cursor:pointer;-webkit-tap-highlight-color:transparent;min-height:36px}
+    .bld-sum-open:checked ~ .bld-sum-head .bld-sum-toggle svg{transform:rotate(180deg)}
+    .bld-sum-list{display:none;grid-column:1/-1;margin:0 0 8px;max-height:38vh;overflow-y:auto;background:#FBFDFF;border:1px solid #EDF2F8;border-radius:12px;padding:4px 6px}
+    .bld-sum-open:checked ~ .bld-sum-list{display:block}
+    .bld-sum-row{padding:9px 8px;gap:10px}
+    .bld-sum-total{grid-column:1;margin:0;padding:9px 12px;align-items:center}
+    .bld-sum-total-label{font-size:11px;line-height:1.3}
+    .bld-sum-price{font-size:22px}
+    .bld-btn-continue{grid-column:2;width:auto;margin:0;padding:13px 16px;font-size:14.5px;min-height:48px}
+    .bld-btn-whatsapp{display:none;grid-column:1/-1;margin-top:10px}
+    .bld-sum-open:checked ~ .bld-btn-whatsapp{display:flex}
+    .bld-sum-minor{display:none;grid-column:1/-1}
+    .bld-sum-open:checked ~ .bld-sum-minor{display:flex}
+    .bld-sum-minor .bld-btn-minor{min-height:44px}
+    /* בטלפון ההערה "חסר עוד" נפתחת עם "פירוט" — אחרת הסרגל הדביק תופס
+       שליש מסך; הכפתור עצמו ממילא עוצר עם הרשימה כשמנסים להמשיך. */
+    .bld-sum-missing{display:none;grid-column:1/-1;margin-top:8px;padding:8px 10px;font-size:11.5px}
+    .bld-sum-open:checked ~ .bld-sum-missing{display:block}
+
+    /* אמון ושוליים */
+    .bld-trust-wrap{padding:16px 14px 26px}
+    .bld-trust{grid-template-columns:1fr;gap:0}
+    .bld-trust-item{padding:13px 16px;border-inline-start:none;border-top:1px solid #EDF2F8}
+    .bld-trust-item:first-child{border-top:none}
+
+    /* הכפתורים הצפים של האתר (עגלה/וואטסאפ, style.css) — מעל הסרגל
+       התחתון הדביק, אחרת הם מכסים את הסה"כ וכפתור ההמשך. */
+    .cart-fab{bottom:132px}
+    .wa-fab{bottom:194px}
   }
   @media (max-width:1000px){header nav{display:none !important}}
   @media (prefers-reduced-motion:reduce){*{animation:none !important}}
@@ -82,45 +281,45 @@
          לכל האתר (אותם פריטים, אותו סדר, אותו צד). בלי ההסרה הזו
          הופיעו שני תפריטים זה מעל זה. הסגנון הלבן נשמר דרך CSS. -->
 
-  <div style="width:100%;max-width:1820px;margin:0 auto;padding:30px 22px 0;display:flex;align-items:center;gap:18px;flex-wrap:wrap">
-    <div style="flex:1;min-width:260px">
-      <h1 style="font-family:'Rubik',sans-serif;margin:0;font-size:30px;font-weight:800;letter-spacing:-.4px;color:#0E2A47">בונה המחשבים</h1>
-      <p style="margin:4px 0 0;color:#5F7590;font-size:14.5px">בוחרים רכיב, רואים אותו נכנס למחשב, ומקבלים הרכבה שנבדקה לפני המשלוח.</p>
+  <div class="bld-head">
+    <div class="bld-head-lede">
+      <h1 class="bld-title">בונה המחשבים</h1>
+      <p class="bld-subtitle">בוחרים רכיב, רואים אותו נכנס למחשב, ומקבלים הרכבה שנבדקה לפני המשלוח.</p>
     </div>
-    <div style="display:flex;align-items:center;gap:0;background:#fff;border:1px solid #E2EAF2;border-radius:999px;padding:8px 12px;box-shadow:0 2px 10px rgba(14,42,71,.05)">
+    <div class="bld-stepper">
       <sc-for list="{{ stepper }}" as="s" hint-placeholder-count="3">
-        <div style="display:flex;align-items:center;gap:9px;padding:0 12px">
-          <span style="width:24px;height:24px;border-radius:50%;display:grid;place-items:center;font-family:'Rubik',sans-serif;font-size:12px;font-weight:800;background:{{ s.bg }};color:{{ s.fg }}">{{ s.n }}</span>
-          <span style="font-size:13px;font-weight:{{ s.w }};color:{{ s.tc }};white-space:nowrap">{{ s.label }}</span>
+        <div class="bld-step">
+          <span class="bld-step-num" style="background:{{ s.bg }};color:{{ s.fg }}">{{ s.n }}</span>
+          <span class="bld-step-label" style="font-weight:{{ s.w }};color:{{ s.tc }}">{{ s.label }}</span>
         </div>
-        <sc-if value="{{ s.line }}" hint-placeholder-val="{{ true }}"><span style="width:46px;height:2px;border-radius:2px;background:#E2EAF2"></span></sc-if>
+        <sc-if value="{{ s.line }}" hint-placeholder-val="{{ true }}"><span class="bld-step-line"></span></sc-if>
       </sc-for>
     </div>
   </div>
 
-  <div style="width:100%;max-width:1820px;margin:0 auto;padding:20px 22px 0">
-    <div style="background:#fff;border:1px solid #EDF2F8;box-shadow:0 2px 12px rgba(14,42,71,.05);border-radius:20px;padding:22px 24px;display:flex;align-items:center;gap:14px;flex-wrap:wrap">
-      <div style="width:100%;display:flex;align-items:baseline;gap:10px;flex-wrap:wrap;justify-content:center;text-align:center">
-        <h2 style="font-family:'Rubik',sans-serif;margin:0;font-size:18.5px;font-weight:700;letter-spacing:-.2px;color:#0E2A47;text-wrap:balance;white-space:nowrap">בוא נתאים את המחשב למה שאתה באמת צריך</h2>
-        <span style="font-size:13px;color:#5F7590">כדי שאמליץ לך על הרכיבים הנכונים — לא יותר ולא פחות</span>
+  <div class="bld-quiz-wrap">
+    <div class="bld-quiz">
+      <div class="bld-quiz-head">
+        <h2 class="bld-quiz-title">בוא נתאים את המחשב למה שאתה באמת צריך</h2>
+        <span class="bld-quiz-sub">כדי שאמליץ לך על הרכיבים הנכונים — לא יותר ולא פחות</span>
       </div>
-      <div style="display:flex;gap:12px;flex-wrap:wrap;width:100%;justify-content:center;margin-top:4px">
+      <div class="bld-quiz-btns">
         <sc-for list="{{ useCases }}" as="u" hint-placeholder-count="4">
-          <button onClick="{{ u.pick }}" style="display:inline-flex;align-items:center;gap:9px;border:1.5px solid {{ u.bd }};background:{{ u.bg }};color:{{ u.fg }};border-radius:14px;padding:13px 22px;white-space:nowrap;font-family:'Heebo',sans-serif;font-size:14.5px;font-weight:{{ u.weight }};cursor:pointer;transition:.15s;box-shadow:{{ u.shadow }}" style-hover="border-color:#C9DEF8">
+          <button class="bld-quiz-btn" onClick="{{ u.pick }}" style="border:1.5px solid {{ u.bd }};background:{{ u.bg }};color:{{ u.fg }};font-weight:{{ u.weight }};box-shadow:{{ u.shadow }}" style-hover="border-color:#C9DEF8">
             <span style="font-size:17px;line-height:1">{{ u.icon }}</span>{{ u.label }}
           </button>
         </sc-for>
       </div>
-      <div style="width:100%;display:flex;align-items:center;gap:12px;flex-wrap:wrap;padding-top:6px;justify-content:center">
-        <span style="font-size:13px;color:#5F7590;flex:none">{{ chipsLabel }}</span>
-        <div style="display:flex;gap:8px;flex-wrap:wrap;flex:1;justify-content:center">
+      <div class="bld-chip-row">
+        <span class="bld-chip-label">{{ chipsLabel }}</span>
+        <div class="bld-chips">
           <sc-for list="{{ chips }}" as="c" hint-placeholder-count="5">
-            <span onClick="{{ c.toggle }}" style="display:inline-flex;align-items:center;gap:6px;border:1.5px solid {{ c.bd }};border-radius:999px;padding:6px 14px;font-size:13px;cursor:pointer;background:{{ c.bg }};color:{{ c.fg }};transition:.15s">{{ c.label }}</span>
+            <span class="bld-chip" onClick="{{ c.toggle }}" style="border:1.5px solid {{ c.bd }};background:{{ c.bg }};color:{{ c.fg }}">{{ c.label }}</span>
           </sc-for>
         </div>
         <sc-if value="{{ showRes }}" hint-placeholder-val="{{ true }}">
-          <label style="display:inline-flex;align-items:center;gap:8px;flex:none;font-size:13px;color:#5F7590">רזולוציה
-            <select style="padding:10px 14px;border-radius:12px;border:1.5px solid #EDF2F8;font-family:'Heebo',sans-serif;font-size:13.5px;background:#F7FAFD;color:#0E2A47">
+          <label class="bld-res">רזולוציה
+            <select class="bld-res-select">
               <option>1440p</option><option>1080p</option><option>4K</option>
             </select>
           </label>
@@ -129,17 +328,23 @@
     </div>
   </div>
 
-  <div data-cols="1" style="width:100%;max-width:1820px;margin:0 auto;padding:20px 22px 52px;display:grid;grid-template-columns:minmax(280px,20.5%) minmax(640px,1fr) minmax(290px,21.5%);gap:20px;align-items:start">
+  <div class="bld-cols" data-cols="1">
 
-    <div data-col="summary" style="background:#fff;border:1px solid #EDF2F8;border-radius:22px;box-shadow:0 6px 24px rgba(14,42,71,.07);padding:24px;position:sticky;top:88px">
-      <div style="display:flex;align-items:baseline;justify-content:space-between;gap:10px;margin-bottom:4px">
-        <h3 style="font-family:'Rubik',sans-serif;margin:0;font-size:19px;font-weight:800;letter-spacing:-.2px;color:#0E2A47">סיכום ההרכבה</h3>
-        <span style="font-size:12px;color:#5F7590">{{ chosenCount }} רכיבים נבחרו</span>
+    <div class="bld-col-summary" data-col="summary">
+      <!-- מתג "פירוט" של הסרגל התחתון בטלפון — checkbox+label בלבד,
+           בלי JS. בדסקטופ ובטאבלט שניהם display:none והרשימה גלויה. -->
+      <input type="checkbox" id="bldSumOpen" class="bld-sum-open">
+      <div class="bld-sum-head">
+        <h3 class="bld-sum-title">סיכום ההרכבה</h3>
+        <span class="bld-sum-count">{{ chosenCount }} רכיבים נבחרו</span>
+        <label for="bldSumOpen" class="bld-sum-toggle">פירוט
+          <svg viewBox="0 0 24 24"><path d="M6 15l6-6 6 6"></path></svg>
+        </label>
       </div>
-      <ul style="list-style:none;padding:0;margin:14px 0 0">
+      <ul class="bld-sum-list">
         <sc-for list="{{ summary }}" as="row" hint-placeholder-count="8">
-          <li style="display:flex;align-items:center;gap:12px;padding:11px 10px;border-radius:13px;transition:background .15s" style-hover="background:#F7FAFD">
-            <span role="img" style="width:40px;height:40px;border-radius:10px;background-color:{{ row.thumbBg }};background-image:{{ row.imgUrl }};background-size:{{ row.imgSize }};background-repeat:no-repeat;background-position:center;flex:none;opacity:{{ row.imgOp }}"></span>
+          <li class="bld-sum-row" style-hover="background:#F7FAFD">
+            <span role="img" class="bld-sum-thumb" style="background-color:{{ row.thumbBg }};background-image:{{ row.imgUrl }};background-size:{{ row.imgSize }};background-repeat:no-repeat;background-position:center;opacity:{{ row.imgOp }}"></span>
             <span style="flex:1;min-width:0">
               <span dir="auto" style="display:block;font-size:14px;font-weight:600;color:{{ row.nameColor }};line-height:1.35;overflow:hidden;text-overflow:ellipsis;white-space:nowrap;direction:{{ row.dir }};text-align:right">{{ row.name }}</span>
               <span style="display:block;font-size:11.5px;color:#5F7590;letter-spacing:.2px;margin-top:2px">{{ row.cat }}</span>
@@ -167,49 +372,63 @@
            ב-0 ₪ יחד עם ההרכבה, ודף התשלום מזהה לפיה שהלקוח בנה מחשב
            שלם. ראה state.services בסקריפט למטה. -->
 
-      <div style="margin-top:18px;background:#F7FAFD;border:1px solid #EDF2F8;border-radius:16px;padding:17px 17px 16px;display:flex;align-items:flex-end;justify-content:space-between;gap:8px">
+      <div class="bld-sum-total">
         <!-- ⚠️ לא "כולל מע״מ": עוסק פטור אינו גובה מע״מ ואינו רשאי להציג
              מחיר כך. "מחיר סופי" נכון גם עובדתית וגם חוקית. ראה ההערה
              המלאה ב-support.html. -->
-        <span style="font-size:13px;color:#5F7590;line-height:1.4">סה"כ<br><span style="font-size:11px;color:#5F7590">מחיר סופי</span></span>
-        <span style="font-family:'Rubik',sans-serif;font-size:34px;font-weight:800;line-height:1;color:#0B2C4D;letter-spacing:-.5px">{{ total }} ₪</span>
+        <span class="bld-sum-total-label">סה"כ<br><span style="font-size:11px;color:#5F7590">מחיר סופי</span></span>
+        <span class="bld-sum-price">{{ total }} ₪</span>
       </div>
 
-      <button id="finishBuildBtn" onClick="{{ finishBuild }}" style="display:flex;align-items:center;justify-content:center;gap:10px;border:none;cursor:pointer;font-family:'Heebo',sans-serif;font-weight:700;font-size:15.5px;border-radius:14px;padding:16px 18px;width:100%;margin-top:16px;background:linear-gradient(100deg,#1B6FE0,#2FC4B0);color:#fff;box-shadow:0 10px 24px rgba(27,111,224,.22);transition:.18s" style-hover="box-shadow:0 14px 30px rgba(27,111,224,.28);filter:brightness(1.04)">
+      <button id="finishBuildBtn" class="bld-btn-continue" onClick="{{ finishBuild }}" style-hover="box-shadow:0 14px 30px rgba(27,111,224,.28);filter:brightness(1.04)">
         המשך לסיכום והרכבה
         <svg viewBox="0 0 24 24" style="width:17px;height:17px;fill:none;stroke:currentColor;stroke-width:2;stroke-linecap:round;stroke-linejoin:round"><path d="M14 6l-6 6 6 6"></path></svg>
       </button>
-      <button onClick="{{ sendWhatsapp }}" style="display:flex;align-items:center;justify-content:center;gap:9px;cursor:pointer;font-family:'Heebo',sans-serif;font-weight:700;font-size:14px;border-radius:14px;padding:13px 18px;width:100%;margin-top:10px;background:#fff;color:#0C8467;border:1.5px solid #BDE6D8;transition:.18s" style-hover="background:#F2FBF8;border-color:#8FD6C1">
+      <button class="bld-btn-whatsapp" onClick="{{ sendWhatsapp }}" style-hover="background:#F2FBF8;border-color:#8FD6C1">
         <svg viewBox="0 0 24 24" style="width:16px;height:16px;fill:currentColor"><path d="M17.5 14.4c-.3-.2-1.7-.9-2-1-.3-.1-.5-.2-.7.1-.2.3-.7 1-.9 1.2-.2.2-.3.2-.6.1-.3-.2-1.2-.5-2.3-1.4-.9-.8-1.4-1.7-1.6-2-.2-.3 0-.5.1-.6l.5-.6c.1-.2.2-.3.3-.5 0-.2 0-.4 0-.5 0-.2-.7-1.6-.9-2.2-.2-.6-.5-.5-.7-.5h-.6c-.2 0-.5.1-.8.4-.3.3-1 1-1 2.5s1.1 2.9 1.2 3.1c.2.2 2.1 3.2 5.1 4.5.7.3 1.3.5 1.7.6.7.2 1.4.2 1.9.1.6-.1 1.7-.7 2-1.4.2-.7.2-1.3.2-1.4-.1-.1-.3-.2-.6-.3zM12 2C6.5 2 2 6.5 2 12c0 1.8.5 3.4 1.3 4.9L2 22l5.3-1.4c1.4.8 3 1.2 4.7 1.2 5.5 0 10-4.5 10-10S17.5 2 12 2z"></path></svg>
         שליחת ההרכבה בוואטסאפ
       </button>
-      <div style="display:flex;gap:10px;margin-top:10px">
-        <button style="flex:1;border:1px solid #EDF2F8;background:#fff;color:#5F7590;border-radius:12px;padding:12px;font-family:'Heebo',sans-serif;font-size:12.5px;font-weight:600;cursor:pointer;transition:.15s" style-hover="color:#1B6FE0;border-color:#C9DEF8">שמור לרשימת משאלות</button>
-        <button onClick="{{ clearAll }}" style="flex:1;border:1px solid #EDF2F8;background:#fff;color:#5F7590;border-radius:12px;padding:12px;font-family:'Heebo',sans-serif;font-size:12.5px;font-weight:600;cursor:pointer;transition:.15s" style-hover="color:#1B6FE0;border-color:#C9DEF8">נקה הכל</button>
+      <!-- ⚠️ כאן היה כפתור "שמור לרשימת משאלות" — **בלי onClick ובלי
+           שום פיצ'ר מאחוריו** בשום מקום באתר. כפתור שלא עושה כלום גרוע
+           מאין-כפתור: הלקוח לוחץ, בטוח ששמר, ומאבד את ההרכבה. הוסר
+           17.08.2026 (דביר: "מה זה? איך פותחים?" — התשובה: זה היה מוקאפ).
+           ההרכבה ממילא נשמרת אוטומטית ב-localStorage (builder-bridge). -->
+      <div class="bld-sum-minor">
+        <button class="bld-btn-minor" onClick="{{ clearAll }}" style-hover="color:#1B6FE0;border-color:#C9DEF8">נקה הכל</button>
       </div>
       <sc-if value="{{ missingText }}" hint-placeholder-val="{{ false }}">
-        <div style="margin-top:12px;font-size:12px;color:#92650F;background:#FFF6EA;border:1px solid #F6DDAF;border-radius:11px;padding:10px 12px;line-height:1.5">חסר עוד: {{ missingText }}</div>
+        <div class="bld-sum-missing">חסר עוד: {{ missingText }}</div>
       </sc-if>
     </div>
 
-    <div data-col="stage" style="background:linear-gradient(180deg,#0E2C4C 0%,#071628 100%);border-radius:24px;padding:26px;position:relative;overflow:hidden;border:1px solid rgba(143,233,218,.16);box-shadow:0 22px 60px rgba(2,10,20,.4)">
-      <div style="display:flex;gap:8px;align-items:center;position:relative">
-        <span style="margin-inline-end:auto;display:inline-flex;align-items:center;gap:7px;border-radius:999px;padding:7px 14px;font-size:12.5px;font-weight:600;white-space:nowrap;background:{{ compat.bg }};color:{{ compat.fg }};border:1px solid {{ compat.bd }}">
+    <div class="bld-col-stage" data-col="stage">
+      <!-- מתג ההדמיה בטלפון: המחשב התלת-ממדי מקופל כברירת מחדל
+           (checkbox+label, בלי JS). בדסקטופ ובטאבלט המתג display:none
+           והבמה גלויה תמיד. -->
+      <input type="checkbox" id="bldStageOpen" class="bld-stage-open">
+      <div class="bld-stage-bar">
+        <span class="bld-compat" style="background:{{ compat.bg }};color:{{ compat.fg }};border:1px solid {{ compat.bd }}">
           <span style="font-size:12px">{{ compat.mark }}</span>{{ compat.text }}
         </span>
-        <button onClick="{{ setView3d }}" style="display:inline-flex;align-items:center;gap:8px;border:1px solid {{ view3d.bd }};background:{{ view3d.bg }};color:{{ view3d.fg }};border-radius:10px;padding:9px 15px;font-family:'Heebo',sans-serif;font-size:13px;font-weight:700;cursor:pointer">
+        <button class="bld-viewbtn" onClick="{{ setView3d }}" style="border:1px solid {{ view3d.bd }};background:{{ view3d.bg }};color:{{ view3d.fg }}">
           <svg viewBox="0 0 24 24" style="width:15px;height:15px;fill:none;stroke:currentColor;stroke-width:1.6"><path d="M12 3l8 4.5v9L12 21l-8-4.5v-9L12 3z"></path><path d="M12 12l8-4.5M12 12v9M12 12L4 7.5"></path></svg>
           תצוגה תלת-ממדית
         </button>
-        <button onClick="{{ setViewIn }}" style="display:inline-flex;align-items:center;gap:8px;border:1px solid {{ viewIn.bd }};background:{{ viewIn.bg }};color:{{ viewIn.fg }};border-radius:10px;padding:9px 15px;font-family:'Heebo',sans-serif;font-size:13px;font-weight:700;cursor:pointer">
+        <button class="bld-viewbtn" onClick="{{ setViewIn }}" style="border:1px solid {{ viewIn.bd }};background:{{ viewIn.bg }};color:{{ viewIn.fg }}">
           <svg viewBox="0 0 24 24" style="width:15px;height:15px;fill:none;stroke:currentColor;stroke-width:1.6"><rect x="3" y="4" width="18" height="13" rx="2"></rect><path d="M8 21h8"></path></svg>
           תצוגה פנימית
         </button>
       </div>
 
-      <div data-stage-row="1" style="display:flex;gap:32px;align-items:stretch;margin-top:18px;position:relative">
+      <label for="bldStageOpen" class="bld-stage-toggle">
+        <span class="bld-stage-toggle-show">הצגת הדמיית המחשב</span>
+        <span class="bld-stage-toggle-hide">הסתרת ההדמיה</span>
+        <svg viewBox="0 0 24 24"><path d="M6 9l6 6 6-6"></path></svg>
+      </label>
 
-        <div style="flex:1;min-width:0;position:relative;display:flex;flex-direction:column;align-items:center;justify-content:center;gap:14px;min-height:700px">
+      <div class="bld-stage-row" data-stage-row="1">
+
+        <div class="bld-stage-canvas">
           <div style="position:absolute;top:50%;left:50%;transform:translate(-50%,-50%);width:420px;height:420px;border-radius:50%;background:radial-gradient(circle,rgba(255,255,255,.055),transparent 68%);pointer-events:none"></div>
           <div style="position:absolute;bottom:24px;left:50%;transform:translateX(-50%);width:70%;height:22px;border-radius:50%;background:radial-gradient(ellipse,rgba(0,0,0,.45),transparent 72%)"></div>
           <div style="position:absolute;bottom:28px;left:50%;transform:translateX(-50%);width:58%;height:1px;background:linear-gradient(90deg,transparent,rgba(143,233,218,.55),transparent)"></div>
@@ -220,10 +439,10 @@
           </sc-if>
         </div>
 
-        <div data-partlist="1" style="width:238px;flex:none;display:flex;flex-direction:column;gap:9px">
+        <div class="bld-partlist" data-partlist="1">
           <sc-for list="{{ stageParts }}" as="p" hint-placeholder-count="8">
-            <div onClick="{{ p.go }}" style="display:flex;align-items:center;gap:11px;padding:11px 13px;border-radius:13px;background:{{ p.bg }};border:1px solid {{ p.bd }};cursor:pointer;transition:.18s;animation:{{ p.anim }}" style-hover="border-color:rgba(143,233,218,.7)">
-              <span role="img" style="width:32px;height:32px;border-radius:9px;background-color:rgba(255,255,255,.06);background-image:{{ p.imgUrl }};background-size:{{ p.imgSize }};background-repeat:no-repeat;background-position:center;flex:none;opacity:{{ p.imgOp }}"></span>
+            <div class="bld-part" onClick="{{ p.go }}" style="background:{{ p.bg }};border:1px solid {{ p.bd }};animation:{{ p.anim }}" style-hover="border-color:rgba(143,233,218,.7)">
+              <span role="img" class="bld-part-thumb" style="background-color:rgba(255,255,255,.06);background-image:{{ p.imgUrl }};background-size:{{ p.imgSize }};background-repeat:no-repeat;background-position:center;opacity:{{ p.imgOp }}"></span>
               <span style="flex:1;min-width:0">
                 <span style="display:block;font-size:10.5px;color:#8FE9DA;letter-spacing:.2px">{{ p.cat }}</span>
                 <span dir="auto" style="display:block;font-family:'Rubik',sans-serif;font-size:12px;font-weight:600;color:{{ p.nameColor }};line-height:1.4;overflow:hidden;text-overflow:ellipsis;white-space:nowrap;direction:{{ p.dir }};text-align:right">{{ p.name }}</span>
@@ -234,11 +453,11 @@
         </div>
       </div>
 
-      <div style="margin-top:16px;background:rgba(255,255,255,.05);border:1px solid rgba(255,255,255,.07);border-radius:16px;padding:16px 18px">
+      <div class="bld-meters">
         <div style="text-align:center;font-size:12px;color:rgba(255,255,255,.62);letter-spacing:.2px;margin-bottom:12px">ציון ביצועים משוער</div>
-        <div style="display:grid;grid-template-columns:repeat(4,1fr);gap:10px">
+        <div class="bld-meters-grid">
           <sc-for list="{{ meters }}" as="m" hint-placeholder-count="4">
-            <div style="display:flex;align-items:center;gap:10px;justify-content:center">
+            <div class="bld-meter">
               <span style="width:54px;height:54px;flex:none;position:relative;display:block">
                 <svg viewBox="0 0 54 54" style="width:54px;height:54px;display:block;transform:rotate(-90deg)">
                   <circle cx="27" cy="27" r="23" fill="none" stroke="rgba(255,255,255,.12)" stroke-width="5"></circle>
@@ -251,92 +470,92 @@
           </sc-for>
         </div>
       </div>
-      <p style="margin:11px 0 0;text-align:center;font-size:11.5px;color:rgba(255,255,255,.66)">* הציונים הם הערכה להמחשה בלבד ועשויים להשתנות בהתאם לשימוש. אין בהם התחייבות לביצועים.</p>
+      <p class="bld-stage-note" style="margin:11px 0 0">* הציונים הם הערכה להמחשה בלבד ועשויים להשתנות בהתאם לשימוש. אין בהם התחייבות לביצועים.</p>
       <!-- ⚠️ תנאי מפורש של הספק לשימוש בתמונות המוצר שלו. בבונה זה נכון
            פי שניים: התמונות כאן הן איורי **קטגוריה** גנריים, לא צילום של
            הדגם שנבחר בפועל. -->
-      <p style="margin:5px 0 0;text-align:center;font-size:11.5px;color:rgba(255,255,255,.66)">* התמונות להמחשה בלבד. המפרט הכתוב הוא המחייב.</p>
+      <p class="bld-stage-note" style="margin:5px 0 0">* התמונות להמחשה בלבד. המפרט הכתוב הוא המחייב.</p>
     </div>
 
-    <div data-col="picker" style="background:#fff;border:1px solid #EDF2F8;border-radius:22px;box-shadow:0 6px 24px rgba(14,42,71,.07);padding:24px;position:sticky;top:88px;color:#0E2A47">
-      <div style="display:flex;align-items:center;justify-content:space-between;gap:10px">
-        <h3 style="font-family:'Rubik',sans-serif;margin:0;font-size:18px;font-weight:800;letter-spacing:-.2px;white-space:nowrap">בחר רכיב</h3>
+    <div class="bld-col-picker" data-col="picker">
+      <div class="bld-picker-head">
+        <h3 class="bld-picker-title">בחר רכיב</h3>
         <a href="#" style="font-size:12.5px;color:#1B6FE0;display:inline-flex;align-items:center;gap:5px;white-space:nowrap">
           <svg viewBox="0 0 24 24" style="width:13px;height:13px;fill:none;stroke:currentColor;stroke-width:2;stroke-linecap:round;stroke-linejoin:round"><path d="M10 6l6 6-6 6"></path></svg>
           חזרה לקטגוריה
         </a>
       </div>
 
-      <div style="margin-top:16px;display:grid;grid-template-columns:repeat(4,1fr);gap:8px;background:#F7FAFD;border-radius:14px;padding:9px">
-        <button onClick="{{ tab.case.go }}" style="display:flex;flex-direction:column;align-items:center;gap:5px;border:none;background:{{ tab.case.bg }};border-radius:10px;padding:11px 4px 10px;cursor:pointer;position:relative;font-family:'Heebo',sans-serif;box-shadow:{{ tab.case.shadow }}">
+      <div class="bld-tabs">
+        <button onClick="{{ tab.case.go }}" class="bld-tab" style="background:{{ tab.case.bg }};box-shadow:{{ tab.case.shadow }}">
           <svg viewBox="0 0 24 24" style="width:19px;height:19px;fill:none;stroke:currentColor;stroke-width:1.6;color:{{ tab.case.color }}"><rect x="6" y="2" width="12" height="20" rx="1.5"></rect><circle cx="12" cy="6" r="1"></circle><path d="M9 11h6M9 14h6"></path></svg>
-          <span style="font-size:10.5px;font-weight:{{ tab.case.weight }};color:{{ tab.case.color }};white-space:nowrap">מארז</span>
-          <span style="position:absolute;bottom:-6px;inset-inline:16%;height:2px;border-radius:2px;background:{{ tab.case.underline }}"></span>
+          <span class="bld-tab-label" style="font-weight:{{ tab.case.weight }};color:{{ tab.case.color }};white-space:nowrap">מארז</span>
+          <span class="bld-tab-line" style="background:{{ tab.case.underline }}"></span>
         </button>
-        <button onClick="{{ tab.mobo.go }}" style="display:flex;flex-direction:column;align-items:center;gap:5px;border:none;background:{{ tab.mobo.bg }};border-radius:10px;padding:11px 4px 10px;cursor:pointer;position:relative;font-family:'Heebo',sans-serif;box-shadow:{{ tab.mobo.shadow }}">
+        <button onClick="{{ tab.mobo.go }}" class="bld-tab" style="background:{{ tab.mobo.bg }};box-shadow:{{ tab.mobo.shadow }}">
           <svg viewBox="0 0 24 24" style="width:19px;height:19px;fill:none;stroke:currentColor;stroke-width:1.6;color:{{ tab.mobo.color }}"><rect x="3" y="3" width="18" height="18" rx="1.5"></rect><rect x="6" y="6" width="6" height="6"></rect><path d="M15 6h3M15 9h3M15 13h3M6 15h3M11 15h7"></path></svg>
-          <span style="font-size:10.5px;font-weight:{{ tab.mobo.weight }};color:{{ tab.mobo.color }};white-space:nowrap">לוחות אם</span>
-          <span style="position:absolute;bottom:-6px;inset-inline:16%;height:2px;border-radius:2px;background:{{ tab.mobo.underline }}"></span>
+          <span class="bld-tab-label" style="font-weight:{{ tab.mobo.weight }};color:{{ tab.mobo.color }};white-space:nowrap">לוחות אם</span>
+          <span class="bld-tab-line" style="background:{{ tab.mobo.underline }}"></span>
         </button>
-        <button onClick="{{ tab.cpu.go }}" style="display:flex;flex-direction:column;align-items:center;gap:5px;border:none;background:{{ tab.cpu.bg }};border-radius:10px;padding:11px 4px 10px;cursor:pointer;position:relative;font-family:'Heebo',sans-serif;box-shadow:{{ tab.cpu.shadow }}">
+        <button onClick="{{ tab.cpu.go }}" class="bld-tab" style="background:{{ tab.cpu.bg }};box-shadow:{{ tab.cpu.shadow }}">
           <svg viewBox="0 0 24 24" style="width:19px;height:19px;fill:none;stroke:currentColor;stroke-width:1.6;color:{{ tab.cpu.color }}"><rect x="6" y="6" width="12" height="12" rx="1.5"></rect><rect x="9" y="9" width="6" height="6"></rect><path d="M9 2v3M12 2v3M15 2v3M9 19v3M12 19v3M15 19v3M2 9h3M2 12h3M2 15h3M19 9h3M19 12h3M19 15h3"></path></svg>
-          <span style="font-size:10.5px;font-weight:{{ tab.cpu.weight }};color:{{ tab.cpu.color }};white-space:nowrap">מעבד</span>
-          <span style="position:absolute;bottom:-6px;inset-inline:16%;height:2px;border-radius:2px;background:{{ tab.cpu.underline }}"></span>
+          <span class="bld-tab-label" style="font-weight:{{ tab.cpu.weight }};color:{{ tab.cpu.color }};white-space:nowrap">מעבד</span>
+          <span class="bld-tab-line" style="background:{{ tab.cpu.underline }}"></span>
         </button>
-        <button onClick="{{ tab.ram.go }}" style="display:flex;flex-direction:column;align-items:center;gap:5px;border:none;background:{{ tab.ram.bg }};border-radius:10px;padding:11px 4px 10px;cursor:pointer;position:relative;font-family:'Heebo',sans-serif;box-shadow:{{ tab.ram.shadow }}">
+        <button onClick="{{ tab.ram.go }}" class="bld-tab" style="background:{{ tab.ram.bg }};box-shadow:{{ tab.ram.shadow }}">
           <svg viewBox="0 0 24 24" style="width:19px;height:19px;fill:none;stroke:currentColor;stroke-width:1.6;color:{{ tab.ram.color }}"><rect x="4" y="7" width="16" height="9" rx="1"></rect><path d="M7 16v3M10 16v3M13 16v3M16 16v3M7 7v3M10 7v2M13 7v2M16 7v3"></path></svg>
-          <span style="font-size:10.5px;font-weight:{{ tab.ram.weight }};color:{{ tab.ram.color }};white-space:nowrap">זיכרון</span>
-          <span style="position:absolute;bottom:-6px;inset-inline:16%;height:2px;border-radius:2px;background:{{ tab.ram.underline }}"></span>
+          <span class="bld-tab-label" style="font-weight:{{ tab.ram.weight }};color:{{ tab.ram.color }};white-space:nowrap">זיכרון</span>
+          <span class="bld-tab-line" style="background:{{ tab.ram.underline }}"></span>
         </button>
-        <button onClick="{{ tab.storage.go }}" style="display:flex;flex-direction:column;align-items:center;gap:5px;border:none;background:{{ tab.storage.bg }};border-radius:10px;padding:11px 4px 10px;cursor:pointer;position:relative;font-family:'Heebo',sans-serif;box-shadow:{{ tab.storage.shadow }}">
+        <button onClick="{{ tab.storage.go }}" class="bld-tab" style="background:{{ tab.storage.bg }};box-shadow:{{ tab.storage.shadow }}">
           <svg viewBox="0 0 24 24" style="width:19px;height:19px;fill:none;stroke:currentColor;stroke-width:1.6;color:{{ tab.storage.color }}"><rect x="4" y="4" width="16" height="16" rx="2"></rect><circle cx="12" cy="12" r="3.2"></circle><circle cx="12" cy="12" r=".6" fill="currentColor"></circle></svg>
-          <span style="font-size:10.5px;font-weight:{{ tab.storage.weight }};color:{{ tab.storage.color }};white-space:nowrap">אחסון</span>
-          <span style="position:absolute;bottom:-6px;inset-inline:16%;height:2px;border-radius:2px;background:{{ tab.storage.underline }}"></span>
+          <span class="bld-tab-label" style="font-weight:{{ tab.storage.weight }};color:{{ tab.storage.color }};white-space:nowrap">אחסון</span>
+          <span class="bld-tab-line" style="background:{{ tab.storage.underline }}"></span>
         </button>
-        <button onClick="{{ tab.gpu.go }}" style="display:flex;flex-direction:column;align-items:center;gap:5px;border:none;background:{{ tab.gpu.bg }};border-radius:10px;padding:11px 4px 10px;cursor:pointer;position:relative;font-family:'Heebo',sans-serif;box-shadow:{{ tab.gpu.shadow }}">
+        <button onClick="{{ tab.gpu.go }}" class="bld-tab" style="background:{{ tab.gpu.bg }};box-shadow:{{ tab.gpu.shadow }}">
           <svg viewBox="0 0 24 24" style="width:19px;height:19px;fill:none;stroke:currentColor;stroke-width:1.6;color:{{ tab.gpu.color }}"><rect x="3" y="8" width="18" height="8" rx="1.5"></rect><circle cx="8" cy="12" r="1.8"></circle><circle cx="13" cy="12" r="1.8"></circle><path d="M3 10.5h-1.5M3 13.5h-1.5M18 16v2h-3v-2"></path></svg>
-          <span style="font-size:10.5px;font-weight:{{ tab.gpu.weight }};color:{{ tab.gpu.color }};white-space:nowrap">כרטיס מסך</span>
-          <span style="position:absolute;bottom:-6px;inset-inline:16%;height:2px;border-radius:2px;background:{{ tab.gpu.underline }}"></span>
+          <span class="bld-tab-label" style="font-weight:{{ tab.gpu.weight }};color:{{ tab.gpu.color }};white-space:nowrap">כרטיס מסך</span>
+          <span class="bld-tab-line" style="background:{{ tab.gpu.underline }}"></span>
         </button>
-        <button onClick="{{ tab.psu.go }}" style="display:flex;flex-direction:column;align-items:center;gap:5px;border:none;background:{{ tab.psu.bg }};border-radius:10px;padding:11px 4px 10px;cursor:pointer;position:relative;font-family:'Heebo',sans-serif;box-shadow:{{ tab.psu.shadow }}">
+        <button onClick="{{ tab.psu.go }}" class="bld-tab" style="background:{{ tab.psu.bg }};box-shadow:{{ tab.psu.shadow }}">
           <svg viewBox="0 0 24 24" style="width:19px;height:19px;fill:none;stroke:currentColor;stroke-width:1.6;color:{{ tab.psu.color }}"><rect x="4" y="5" width="16" height="14" rx="1.5"></rect><path d="M9 9h6l-2 3h2l-4 5 1-4h-2z" fill="currentColor" stroke="none"></path></svg>
-          <span style="font-size:10.5px;font-weight:{{ tab.psu.weight }};color:{{ tab.psu.color }};white-space:nowrap">ספקי כוח</span>
-          <span style="position:absolute;bottom:-6px;inset-inline:16%;height:2px;border-radius:2px;background:{{ tab.psu.underline }}"></span>
+          <span class="bld-tab-label" style="font-weight:{{ tab.psu.weight }};color:{{ tab.psu.color }};white-space:nowrap">ספקי כוח</span>
+          <span class="bld-tab-line" style="background:{{ tab.psu.underline }}"></span>
         </button>
-        <button onClick="{{ tab.caseFans.go }}" style="display:flex;flex-direction:column;align-items:center;gap:5px;border:none;background:{{ tab.caseFans.bg }};border-radius:10px;padding:11px 4px 10px;cursor:pointer;position:relative;font-family:'Heebo',sans-serif;box-shadow:{{ tab.caseFans.shadow }}">
+        <button onClick="{{ tab.caseFans.go }}" class="bld-tab" style="background:{{ tab.caseFans.bg }};box-shadow:{{ tab.caseFans.shadow }}">
           <svg viewBox="0 0 24 24" style="width:19px;height:19px;fill:none;stroke:currentColor;stroke-width:1.6;color:{{ tab.caseFans.color }}"><rect x="3" y="3" width="18" height="18" rx="2"></rect><circle cx="12" cy="12" r="4"></circle><path d="M12 3v5M12 16v5M3 12h5M16 12h5"></path></svg>
-          <span style="font-size:10.5px;font-weight:{{ tab.caseFans.weight }};color:{{ tab.caseFans.color }};white-space:nowrap">מאווררים</span>
-          <span style="position:absolute;bottom:-6px;inset-inline:16%;height:2px;border-radius:2px;background:{{ tab.caseFans.underline }}"></span>
+          <span class="bld-tab-label" style="font-weight:{{ tab.caseFans.weight }};color:{{ tab.caseFans.color }};white-space:nowrap">מאווררים</span>
+          <span class="bld-tab-line" style="background:{{ tab.caseFans.underline }}"></span>
         </button>
-        <button onClick="{{ tab.paste.go }}" style="display:flex;flex-direction:column;align-items:center;gap:5px;border:none;background:{{ tab.paste.bg }};border-radius:10px;padding:11px 4px 10px;cursor:pointer;position:relative;font-family:'Heebo',sans-serif;box-shadow:{{ tab.paste.shadow }}">
+        <button onClick="{{ tab.paste.go }}" class="bld-tab" style="background:{{ tab.paste.bg }};box-shadow:{{ tab.paste.shadow }}">
           <svg viewBox="0 0 24 24" style="width:19px;height:19px;fill:none;stroke:currentColor;stroke-width:1.6;color:{{ tab.paste.color }}"><rect x="7" y="4" width="10" height="14" rx="2"></rect><path d="M10 18v2h4v-2M12 8v5"></path></svg>
-          <span style="font-size:10.5px;font-weight:{{ tab.paste.weight }};color:{{ tab.paste.color }};white-space:nowrap">משחה</span>
-          <span style="position:absolute;bottom:-6px;inset-inline:16%;height:2px;border-radius:2px;background:{{ tab.paste.underline }}"></span>
+          <span class="bld-tab-label" style="font-weight:{{ tab.paste.weight }};color:{{ tab.paste.color }};white-space:nowrap">משחה</span>
+          <span class="bld-tab-line" style="background:{{ tab.paste.underline }}"></span>
         </button>
-        <button onClick="{{ tab.cooling.go }}" style="display:flex;flex-direction:column;align-items:center;gap:5px;border:none;background:{{ tab.cooling.bg }};border-radius:10px;padding:11px 4px 10px;cursor:pointer;position:relative;font-family:'Heebo',sans-serif;box-shadow:{{ tab.cooling.shadow }}">
+        <button onClick="{{ tab.cooling.go }}" class="bld-tab" style="background:{{ tab.cooling.bg }};box-shadow:{{ tab.cooling.shadow }}">
           <svg viewBox="0 0 24 24" style="width:19px;height:19px;fill:none;stroke:currentColor;stroke-width:1.6;color:{{ tab.cooling.color }}"><circle cx="12" cy="12" r="3"></circle><path d="M12 4v4M12 16v4M4 12h4M16 12h4M6.3 6.3l2.8 2.8M14.9 14.9l2.8 2.8M6.3 17.7l2.8-2.8M14.9 9.1l2.8-2.8"></path></svg>
-          <span style="font-size:10.5px;font-weight:{{ tab.cooling.weight }};color:{{ tab.cooling.color }};white-space:nowrap">קירור למעבד</span>
-          <span style="position:absolute;bottom:-6px;inset-inline:16%;height:2px;border-radius:2px;background:{{ tab.cooling.underline }}"></span>
+          <span class="bld-tab-label" style="font-weight:{{ tab.cooling.weight }};color:{{ tab.cooling.color }};white-space:nowrap">קירור למעבד</span>
+          <span class="bld-tab-line" style="background:{{ tab.cooling.underline }}"></span>
         </button>
-        <button onClick="{{ tab.wifi.go }}" style="display:flex;flex-direction:column;align-items:center;gap:5px;border:none;background:{{ tab.wifi.bg }};border-radius:10px;padding:11px 4px 10px;cursor:pointer;position:relative;font-family:'Heebo',sans-serif;box-shadow:{{ tab.wifi.shadow }}">
+        <button onClick="{{ tab.wifi.go }}" class="bld-tab" style="background:{{ tab.wifi.bg }};box-shadow:{{ tab.wifi.shadow }}">
           <svg viewBox="0 0 24 24" style="width:19px;height:19px;fill:none;stroke:currentColor;stroke-width:1.6;color:{{ tab.wifi.color }}"><path d="M4 9a13 13 0 0 1 16 0M7 12.5a8.5 8.5 0 0 1 10 0M10 16a4 4 0 0 1 4 0"></path><circle cx="12" cy="19" r="1"></circle></svg>
-          <span style="font-size:10.5px;font-weight:{{ tab.wifi.weight }};color:{{ tab.wifi.color }};white-space:nowrap">רשת</span>
-          <span style="position:absolute;bottom:-6px;inset-inline:16%;height:2px;border-radius:2px;background:{{ tab.wifi.underline }}"></span>
+          <span class="bld-tab-label" style="font-weight:{{ tab.wifi.weight }};color:{{ tab.wifi.color }};white-space:nowrap">רשת</span>
+          <span class="bld-tab-line" style="background:{{ tab.wifi.underline }}"></span>
         </button>
-        <button onClick="{{ tab.extras.go }}" style="display:flex;flex-direction:column;align-items:center;gap:5px;border:none;background:{{ tab.extras.bg }};border-radius:10px;padding:11px 4px 10px;cursor:pointer;position:relative;font-family:'Heebo',sans-serif;box-shadow:{{ tab.extras.shadow }}">
+        <button onClick="{{ tab.extras.go }}" class="bld-tab" style="background:{{ tab.extras.bg }};box-shadow:{{ tab.extras.shadow }}">
           <svg viewBox="0 0 24 24" style="width:19px;height:19px;fill:none;stroke:currentColor;stroke-width:1.6;color:{{ tab.extras.color }}"><path d="M4 15c2.5 0 2.5-6 5-6s2.5 6 5 6 2.5-6 5-6"></path><circle cx="19.5" cy="9" r="1.4"></circle></svg>
-          <span style="font-size:10.5px;font-weight:{{ tab.extras.weight }};color:{{ tab.extras.color }};white-space:nowrap">אביזרים</span>
-          <span style="position:absolute;bottom:-6px;inset-inline:16%;height:2px;border-radius:2px;background:{{ tab.extras.underline }}"></span>
+          <span class="bld-tab-label" style="font-weight:{{ tab.extras.weight }};color:{{ tab.extras.color }};white-space:nowrap">אביזרים</span>
+          <span class="bld-tab-line" style="background:{{ tab.extras.underline }}"></span>
         </button>
       </div>
 
-      <label style="display:block;position:relative;margin-top:16px">
-        <input placeholder="{{ searchPh }}" style="width:100%;border:1px solid #EDF2F8;border-radius:12px;padding:11px 38px 11px 14px;font-family:'Heebo',sans-serif;font-size:13.5px;background:#F7FAFD;color:#0E2A47">
+      <label class="bld-search">
+        <input class="bld-search-input" placeholder="{{ searchPh }}">
         <svg viewBox="0 0 24 24" style="position:absolute;inset-inline-start:12px;top:50%;transform:translateY(-50%);width:16px;height:16px;color:#5F7590;fill:none;stroke:currentColor;stroke-width:1.7;stroke-linecap:round"><circle cx="11" cy="11" r="7"></circle><path d="M16.5 16.5L21 21"></path></svg>
       </label>
 
       <sc-if value="{{ filterNote }}" hint-placeholder-val="{{ false }}">
-        <div style="margin-top:11px;font-size:11.5px;color:#0E9C8A;background:#F0FDFA;border:1px solid #B7EFE5;padding:7px 11px;border-radius:9px;line-height:1.5">{{ filterNote }}</div>
+        <div class="bld-note-ok">{{ filterNote }}</div>
       </sc-if>
 
       <!-- ⚠️ מונה המוצרים שהוסתרו. חלק מהפיצ'ר ולא קישוט: כל עוד
@@ -344,17 +563,17 @@
            ההסבר היחיד ללקוח שרואה 12 לוחות אם במקום 139 — ודרך החזרה
            לרשימה המלאה בלי לרענן דף או לבטל בחירות. -->
       <sc-if value="{{ hiddenNote }}" hint-placeholder-val="{{ false }}">
-        <div style="margin-top:11px;display:flex;align-items:center;gap:9px;flex-wrap:wrap;font-size:11.5px;color:#91690C;background:#FFFBEC;border:1px solid #F5E3B0;padding:8px 11px;border-radius:9px;line-height:1.5">
+        <div class="bld-note-hidden">
           <span style="flex:1;min-width:120px">{{ hiddenNote }}</span>
-          <button onClick="{{ toggleHidden }}" style="flex:none;border:1px solid #E8CE8A;background:#fff;color:#8A5A00;border-radius:8px;padding:5px 11px;font-family:'Heebo',sans-serif;font-size:11.5px;font-weight:700;cursor:pointer;transition:.15s" style-hover="background:#FFF6E2;border-color:#DDBE6C">{{ hiddenAction }}</button>
+          <button class="bld-note-btn" onClick="{{ toggleHidden }}" style-hover="background:#FFF6E2;border-color:#DDBE6C">{{ hiddenAction }}</button>
         </div>
       </sc-if>
 
-      <div style="margin-top:16px;display:flex;flex-direction:column;gap:14px;max-height:640px;overflow-y:auto;padding-inline-end:4px">
+      <div class="bld-options">
         <sc-for list="{{ options }}" as="o" hint-placeholder-count="6">
-          <div onClick="{{ o.pick }}" aria-disabled="{{ o.aria }}" title="{{ o.reason }}" style="position:relative;display:flex;align-items:center;gap:13px;border:1.5px solid {{ o.bd }};background:{{ o.bg }};border-radius:16px;padding:17px 18px;cursor:{{ o.cursor }};opacity:{{ o.rowOp }};transition:.15s;box-shadow:{{ o.shadow }}" style-hover="border-color:#C9DEF8;background:#FBFDFF">
-            <span style="position:absolute;inset-inline-start:0;top:16px;bottom:16px;width:3px;border-radius:3px;background:{{ o.accent }}"></span>
-            <span style="width:22px;height:22px;border-radius:50%;border:1.5px solid {{ o.dotBd }};background:{{ o.dotBg }};display:grid;place-items:center;flex:none;color:#fff;font-size:12px;font-weight:900">{{ o.mark }}</span>
+          <div class="bld-option" onClick="{{ o.pick }}" aria-disabled="{{ o.aria }}" title="{{ o.reason }}" style="border:1.5px solid {{ o.bd }};background:{{ o.bg }};cursor:{{ o.cursor }};opacity:{{ o.rowOp }};box-shadow:{{ o.shadow }}" style-hover="border-color:#C9DEF8;background:#FBFDFF">
+            <span class="bld-option-accent" style="background:{{ o.accent }}"></span>
+            <span class="bld-option-dot" style="border:1.5px solid {{ o.dotBd }};background:{{ o.dotBg }}">{{ o.mark }}</span>
             <span style="flex:1;min-width:0">
               <span dir="auto" style="display:block;font-size:15px;font-weight:700;color:{{ o.nameColor }};line-height:1.35;letter-spacing:-.1px;direction:{{ o.dir }};text-align:right">{{ o.name }}</span>
               <sc-if value="{{ o.badge }}" hint-placeholder-val="{{ false }}">
@@ -372,16 +591,16 @@
               </sc-if>
               <span style="display:block;font-family:'Rubik',sans-serif;font-size:14.5px;font-weight:800;color:{{ o.priceColor }};margin-top:8px">{{ o.price }}</span>
             </span>
-            <span role="img" style="width:68px;height:68px;border-radius:15px;background-color:#F7FAFD;background-image:{{ o.imgUrl }};background-size:{{ o.imgSize }};background-repeat:no-repeat;background-position:center;flex:none;opacity:{{ o.imgOp }}"></span>
+            <span role="img" class="bld-option-img" style="background-color:#F7FAFD;background-image:{{ o.imgUrl }};background-size:{{ o.imgSize }};background-repeat:no-repeat;background-position:center;opacity:{{ o.imgOp }}"></span>
           </div>
         </sc-for>
       </div>
     </div>
   </div>
 
-  <div style="width:100%;max-width:1320px;margin:0 auto;padding:0 20px 34px">
-    <div style="background:#fff;border:1px solid #E2EAF2;border-radius:16px;box-shadow:0 2px 10px rgba(14,42,71,.05);display:grid;grid-template-columns:repeat(4,1fr);gap:2px;overflow:hidden">
-      <div style="display:flex;align-items:center;gap:12px;padding:18px 20px;border-inline-start:1px solid #EDF2F8">
+  <div class="bld-trust-wrap">
+    <div class="bld-trust">
+      <div class="bld-trust-item">
         <span style="width:38px;height:38px;border-radius:11px;background:#EEF5FE;display:grid;place-items:center;flex:none;color:#1B6FE0">
           <svg viewBox="0 0 24 24" style="width:19px;height:19px;fill:none;stroke:currentColor;stroke-width:1.7;stroke-linecap:round;stroke-linejoin:round"><path d="M4.5 14v-2a7.5 7.5 0 0 1 15 0v2"></path><rect x="2.5" y="13" width="4" height="6.5" rx="2"></rect><rect x="17.5" y="13" width="4" height="6.5" rx="2"></rect><path d="M17.5 19c-1.4 2-3.2 2.6-5 2.6"></path></svg>
         </span>
@@ -390,7 +609,7 @@
           <span style="display:block;font-size:11.5px;color:#5F7590">תמיכה אנושית ישירה מהמרכיב</span>
         </span>
       </div>
-      <div style="display:flex;align-items:center;gap:12px;padding:18px 20px;border-inline-start:1px solid #EDF2F8">
+      <div class="bld-trust-item">
         <span style="width:38px;height:38px;border-radius:11px;background:#EEF5FE;display:grid;place-items:center;flex:none;color:#1B6FE0">
           <svg viewBox="0 0 24 24" style="width:19px;height:19px;fill:none;stroke:currentColor;stroke-width:1.7;stroke-linecap:round;stroke-linejoin:round"><path d="M2 7h11v9H2zM13 10h4l3 3v3h-7z"></path><circle cx="6.5" cy="18" r="1.8"></circle><circle cx="17" cy="18" r="1.8"></circle></svg>
         </span>
@@ -399,7 +618,7 @@
           <span style="display:block;font-size:11.5px;color:#5F7590">1–3 ימי עסקים</span>
         </span>
       </div>
-      <div style="display:flex;align-items:center;gap:12px;padding:18px 20px;border-inline-start:1px solid #EDF2F8">
+      <div class="bld-trust-item">
         <span style="width:38px;height:38px;border-radius:11px;background:#EEF5FE;display:grid;place-items:center;flex:none;color:#1B6FE0">
           <svg viewBox="0 0 24 24" style="width:19px;height:19px;fill:none;stroke:currentColor;stroke-width:1.7;stroke-linecap:round;stroke-linejoin:round"><path d="M12 3l7 3v5.5c0 4.4-2.9 8-7 9.5-4.1-1.5-7-5.1-7-9.5V6z"></path><path d="M9.2 12.2l2 2 3.8-4"></path></svg>
         </span>
@@ -408,7 +627,7 @@
           <span style="display:block;font-size:11.5px;color:#5F7590">לפי תנאי היצרן</span>
         </span>
       </div>
-      <div style="display:flex;align-items:center;gap:12px;padding:18px 20px;border-inline-start:1px solid #EDF2F8">
+      <div class="bld-trust-item">
         <span style="width:38px;height:38px;border-radius:11px;background:#EEF5FE;display:grid;place-items:center;flex:none;color:#1B6FE0">
           <svg viewBox="0 0 24 24" style="width:19px;height:19px;fill:none;stroke:currentColor;stroke-width:1.7;stroke-linecap:round;stroke-linejoin:round"><rect x="4.5" y="10" width="15" height="10.5" rx="2.5"></rect><path d="M8 10V7.5a4 4 0 0 1 8 0V10"></path></svg>
         </span>
@@ -423,10 +642,7 @@
     </p>
   </div>
 
-  <footer style="background:#0B2C4D;color:#9DB4CB;text-align:center;padding:30px 20px 24px;font-size:12.5px">
-    <img src="builder-assets/assets/logo-dvirtech-transparent.png" alt="DvirTech" style="height:38px;width:auto;margin:0 auto 10px;display:block">
-    <span>DvirTech — הרכבת מחשבים בהתאמה אישית</span>
-  </footer>
+<footer></footer>
 </div>
 </x-dc>
 <script type="text/x-dc" data-dc-script data-props="{&quot;$preview&quot;:{&quot;width&quot;:1440,&quot;height&quot;:1180},&quot;stageBg&quot;:{&quot;editor&quot;:&quot;color&quot;,&quot;default&quot;:&quot;#0A2036&quot;,&quot;tsType&quot;:&quot;string&quot;,&quot;options&quot;:[&quot;#0A2036&quot;,&quot;#0E2E4E&quot;,&quot;#0B1220&quot;,&quot;#101822&quot;],&quot;section&quot;:&quot;תצוגה תלת-ממדית&quot;}}">
@@ -989,6 +1205,7 @@ class Component extends DCLogic {
 <script src="search-core.js"></script>
 <script src="site-search.js"></script>
 <script src="site-header.js"></script>
+<script src="site-footer.js"></script>
 <script src="cart.js"></script>
 <!-- ⚠️ הסדר חשוב: builder-data.js מגדיר את מבנה הנתונים, builder-bridge.js
      מחליף את הקטלוג הסטטי שבו בקטלוג החי מהגיליון ומחבר את "הוסף לעגלה". -->

@@ -300,7 +300,36 @@ nav a.active::after{transform:scaleX(1)}
 .promo-txt{position:relative;z-index:1}
 .promo b{display:block;font-family:'Rubik',sans-serif;font-size:19px;font-weight:800;margin-bottom:5px}
 .promo span{display:block;font-size:13.5px;margin-bottom:14px;opacity:.9}
+/* 🔴 ==================== תיקון גלובלי: תמונות חתוכות ====================
+   פריט בתוך grid/flex מקבל `min-height:auto` כברירת מחדל — כלומר "אל
+   תקטן מגודל התוכן". תמונת מוצר 600×500 שנכנסת למסגרת רחבה ונמוכה
+   מקבלת גובה תוכן גדול מהמסגרת, `min-height` **דורס את `height:100%`**,
+   האלמנט גולש, ו-`overflow:hidden` חותך את התחתית.
+
+   ⚠️ `object-fit:contain` לא מונע את זה — הוא מסדר את הביטמאפ *בתוך*
+   תיבת האלמנט ולא מונע מהתיבה לגלוש. זו הסיבה שהתמונות נראו חתוכות
+   למרות ש-contain הוגדר נכון בכל המסגרות.
+
+   ⚠️ הבאג "חוזר" אחרי סנכרון ספק כי הוא תלוי בגודל התמונה: כשהתמונות
+   היו לוגו w_100 גודל התוכן היה קטן מהמסגרת ולא היה מה לחתוך. ברגע
+   שהסנכרון החליף אותן ב-600×500 אמיתיות הוא נחשף בכל האתר בבת אחת.
+   **כל מסגרת תמונה חדשה שנוסיף חייבת לרשת את הכלל הזה.** */
+.cat-card .cat-art img,
+.deal-art img,
+.opt .thumb img,
+.slot-icon-wrap img,
+.product-card img{min-width:0;min-height:0}
+
 .promo .go{display:inline-block;font-size:12.5px;font-weight:700;padding:9px 20px;border-radius:9px}
+/* תג ההטבה בכרטיס הבונה. קטן ומאופק בכוונה — הוא צריך להיקרא כעובדה
+   על השירות ולא כמדבקת מבצע. הסימן ✓ נוסף ב-CSS ולא ב-HTML כדי שהוא
+   לא ייכנס לתרגום ולא ישוכפל בין data-he ל-data-en. */
+.promo .promo-badge{display:inline-flex;align-items:center;gap:6px;align-self:flex-start;
+  font-size:11.5px;font-weight:700;letter-spacing:.2px;padding:5px 11px;margin-bottom:2px;
+  border-radius:999px;background:rgba(255,255,255,.16);
+  border:1px solid rgba(255,255,255,.34);color:#fff;backdrop-filter:blur(2px)}
+.promo .promo-badge::before{content:"✓";font-weight:900;font-size:11px;opacity:.95}
+.promo--light .promo-badge{background:#EAF3FF;border-color:#C9DEF8;color:var(--blue)}
 .promo svg.promo-art{width:96px;height:96px;flex:none;margin-inline-start:auto;position:relative;z-index:1}
 
 /* כהה — פה הכהה עובד, כי הבאנר הוא "תמונה" ולא ממשק */
@@ -413,8 +442,10 @@ nav a.active::after{transform:scaleX(1)}
 /* ---------- פס יצרנים ---------- */
 .brand-strip{background:var(--surface);border:1px solid var(--line);border-radius:var(--radius);
   padding:18px 24px;margin:30px 0 10px;display:flex;align-items:center;justify-content:space-between;gap:18px;flex-wrap:wrap}
-.brand-strip span{font-family:'Rubik',sans-serif;font-weight:800;font-size:15px;color:#93A6BC;letter-spacing:.5px;transition:color .15s}
-.brand-strip span:hover{color:var(--blue)}
+.brand-strip span,.brand-strip a{font-family:'Rubik',sans-serif;font-weight:800;font-size:15px;
+  color:#93A6BC;letter-spacing:.5px;transition:color .15s,opacity .15s;text-decoration:none}
+.brand-strip span:hover,.brand-strip a:hover{color:var(--blue)}
+.brand-strip a:focus-visible{outline:2px solid var(--blue);outline-offset:4px;border-radius:4px}
 
 /* ---------- layout ---------- */
 .builder{display:grid;grid-template-columns:1.6fr 1fr;gap:26px;padding:32px 0 70px;align-items:start}
@@ -1058,3 +1089,334 @@ html, body{height:auto !important}
   border-radius:var(--radius-sm);padding:11px 15px;margin:14px 0 0;
   font-size:12.5px;line-height:1.7;color:var(--ink-soft)}
 .builder-free-note b{color:var(--blue-dark,#0B2C4D)}
+
+/* ===================== פוטר אחיד (site-footer.js) =====================
+   ⚠️ הפוטר נבנה ב-JS ממקור אחד. הכללים כאן חייבים לכסות גם את הגרסה
+   המלאה וגם את המצומצמת (checkout/pay), כי שתיהן מגיעות מאותו קובץ. */
+.footer-wa{display:inline-block;margin-top:12px;font-family:'Rubik',sans-serif;
+  font-size:12.5px;font-weight:700;color:#fff;background:rgba(255,255,255,.12);
+  border:1px solid rgba(255,255,255,.24);border-radius:999px;padding:7px 15px;
+  text-decoration:none;transition:background .15s}
+.footer-wa:hover{background:rgba(255,255,255,.20)}
+.footer-legal-line{margin:18px 0 6px;font-size:11.5px;opacity:.72;line-height:1.7}
+.footer-copy{display:block;margin-top:8px;font-size:11.5px;opacity:.6}
+/* בשלב התשלום — פוטר שקט, ממורכז, בלי ניווט שמוציא מהדף */
+.footer-min{text-align:center}
+.footer-min .footer-legal{justify-content:center}
+
+/* ===================== דף אחרי תשלום (thanks.html) =====================
+   ⚠️⚠️ **המחלקות כאן הן מנגנון אבטחה, לא רק עיצוב.** תוכן ההצלחה בדף
+   התודה מוסתר כברירת מחדל ומוצג **רק** כש-‎#thxCard נושא
+   ‎data-thx-state="confirmed" — ערך ש-thanks.js קובע אך ורק אחרי תשובת
+   אימות חיובית מהשרת. הערך ההתחלתי כתוב ב-HTML עצמו ("verifying"), כך
+   שגם JS שנפל באמצע לא יכול להציג "שולם" בטעות.
+   **אין להחליף את הכללים האלה בהסתרה/הצגה ידנית מ-JS.** */
+
+.thx-wrap{max-width:600px;padding-top:40px;padding-bottom:64px}
+
+/* ⚠️ cart.js נטען בדף התודה כדי שאייקון העגלה שב-header יעבוד
+   (‎onclick="openCart&&openCart()" — בלי cart.js הלחיצה זורקת
+   ReferenceError). אבל הוא מזריק גם כפתור עגלה **צף**, וכפתור קנייה צף
+   על מסך אישור תשלום הוא רעש: אותו שיקול שבגללו site-header.js מחריג
+   את thanks.html מכפתור הוואטסאפ הצף. המגירה עצמה נשארת נגישה מההדר. */
+.thx-page .cart-fab{display:none}
+
+.thx-card{position:relative;background:var(--surface);border:1px solid var(--line);
+  border-radius:var(--radius);box-shadow:var(--shadow);overflow:hidden}
+/* פס הגרדיאנט העליון — אותה שפה ויזואלית של הכפתור הראשי באתר. */
+.thx-card::before{content:"";position:absolute;inset-inline:0;top:0;height:4px;background:var(--grad)}
+
+.thx-head{padding:36px 26px 24px;text-align:center;border-bottom:1px solid var(--line-soft)}
+.thx-body{padding:24px 26px 26px}
+
+/* ---------- סמל המצב ---------- */
+.thx-badge{width:78px;height:78px;margin:0 auto 18px;border-radius:50%;
+  display:grid;place-items:center;background:var(--blue-soft);color:var(--blue);
+  transition:background .25s ease,color .25s ease}
+.thx-ic{display:none;width:40px;height:40px;fill:none;stroke:currentColor;
+  stroke-width:2.6;stroke-linecap:round;stroke-linejoin:round}
+
+/* טבעת טעינה. אותה שפה של .spinner הקיים, בגודל שמתאים לסמל. */
+.thx-spin{border:3px solid rgba(27,111,224,.20);border-top-color:currentColor;
+  border-radius:50%;animation:spin .8s linear infinite}
+
+/* ---------- מצב → צבע + איזה סמל מוצג ---------- */
+[data-thx-state="verifying"] .thx-ic-spin{display:block}
+
+[data-thx-state="confirmed"] .thx-badge{background:#E4F7F3;color:var(--teal-dark)}
+[data-thx-state="confirmed"] .thx-ic-check{display:block}
+
+[data-thx-state="pending"] .thx-badge{background:var(--amber-bg);color:var(--amber)}
+[data-thx-state="pending"] .thx-ic-clock{display:block}
+
+[data-thx-state="failed"] .thx-badge{background:var(--red-bg);color:var(--red)}
+[data-thx-state="failed"] .thx-ic-alert{display:block}
+
+[data-thx-state="noorder"] .thx-badge{background:var(--surface-2);color:var(--ink-soft)}
+[data-thx-state="noorder"] .thx-ic-info{display:block}
+
+/* סימן הווי שנמשך. מרגיע ומאשר — אבל רק פעם אחת, בלי לולאה שמושכת עין. */
+@keyframes thxDraw{to{stroke-dashoffset:0}}
+@keyframes thxPop{0%{transform:scale(.8);opacity:0}60%{transform:scale(1.06)}100%{transform:scale(1);opacity:1}}
+[data-thx-state="confirmed"] .thx-badge{animation:thxPop .34s cubic-bezier(.34,1.56,.64,1) both}
+[data-thx-state="confirmed"] .thx-ic-check path{stroke-dasharray:34;stroke-dashoffset:34;
+  animation:thxDraw .45s .16s ease forwards}
+
+/* ---------- כותרות ---------- */
+.thx-title{font-size:25px;line-height:1.3;margin:0 0 8px;font-weight:800}
+.thx-sub{margin:0;color:var(--ink-soft);font-size:14.5px;line-height:1.7}
+
+/* ---------- שבבי פרטי ההזמנה ---------- */
+.thx-meta{display:flex;flex-wrap:wrap;justify-content:center;gap:8px;margin-top:18px}
+.thx-meta:empty{display:none}
+.thx-chip{display:inline-flex;align-items:center;gap:7px;max-width:100%;
+  background:var(--surface-2);border:1px solid var(--line);border-radius:999px;
+  padding:6px 14px;font-size:12.5px;color:var(--ink-soft)}
+/* ⚠️ **חובה.** ‎thanks.js מסתיר שבב ריק עם המאפיין ‎hidden, אבל
+   ‎[hidden]{display:none} של הדפדפן הוא כלל ברירת מחדל חלש יותר
+   מ-‎.thx-chip{display:inline-flex} — בלי השורה הזו שבב "מספר הזמנה"
+   ריק מוצג בדף גם כשאין הזמנה. אותו דבר לגבי ‎.thx-detail. */
+.thx-chip[hidden],.thx-detail[hidden]{display:none}
+/* מזהה הזמנה יכול להיות ארוך — שובר במקום לדחוף את הדף לרוחב. */
+.thx-chip-v{font-family:'Rubik',sans-serif;font-weight:700;color:var(--ink);
+  letter-spacing:.02em;overflow-wrap:anywhere}
+
+/* ---------- בלוקים תלויי-מצב ---------- */
+.thx-only{display:none}
+[data-thx-state="verifying"] .thx-only-verifying,
+[data-thx-state="confirmed"] .thx-only-confirmed,
+[data-thx-state="pending"]   .thx-only-pending,
+[data-thx-state="failed"]    .thx-only-failed,
+[data-thx-state="noorder"]   .thx-only-noorder{display:block}
+
+.thx-note{margin:0;text-align:center;font-size:13.5px;line-height:1.75;color:var(--ink-soft)}
+
+/* ---------- "מה קורה עכשיו" ---------- */
+.thx-h2{font-size:16px;margin:0 0 16px;font-weight:700}
+
+.thx-steps{list-style:none;margin:0 0 4px;padding:0}
+.thx-step{position:relative;display:flex;gap:13px;padding-bottom:20px}
+/* הקו המחבר בין השלבים. inset-inline-start מוודא שהוא מתהפך נכון
+   באנגלית בלי כלל נפרד ל-LTR. */
+.thx-step::before{content:"";position:absolute;inset-inline-start:14px;top:32px;bottom:4px;
+  width:2px;background:var(--line);border-radius:2px}
+.thx-step-last{padding-bottom:0}
+.thx-step-last::before{display:none}
+
+.thx-step-num{flex:none;width:30px;height:30px;border-radius:50%;background:var(--grad);
+  color:#fff;display:grid;place-items:center;font-family:'Rubik',sans-serif;
+  font-size:13px;font-weight:700;position:relative;z-index:1}
+.thx-step-txt{min-width:0}
+.thx-step-txt b{display:block;font-size:14.5px;font-weight:700;margin-bottom:3px;line-height:1.5}
+.thx-step-txt span{display:block;font-size:13px;line-height:1.75;color:var(--ink-soft)}
+
+/* ---------- זמני אספקה ---------- */
+.thx-ship{margin-top:11px;background:var(--surface-2);border:1px solid var(--line-soft);
+  border-radius:var(--radius-sm);padding:11px 14px}
+.thx-ship-row{display:flex;flex-wrap:wrap;justify-content:space-between;gap:4px 14px;
+  font-size:12.5px;padding:5px 0;color:var(--ink-soft)}
+.thx-ship-row + .thx-ship-row{border-top:1px solid var(--line-soft)}
+.thx-ship-row b{color:var(--ink);font-weight:700}
+
+/* ⚠️ ההערה שאומרת שאין מעקב ואין SMS. מובלטת בכוונה — היא מונעת את
+   ההמתנה לעדכון שלא קיים. ראה thanks.html. */
+.thx-honest{margin:16px 0 0;background:var(--blue-soft);border:1px solid #C7DDFC;
+  border-radius:var(--radius-sm);padding:12px 15px;font-size:12.5px;line-height:1.75;
+  color:var(--blue-dark)}
+
+/* ---------- תיבת הודעה (לא אומת / נכשל / אין הזמנה) ---------- */
+.thx-notice{border-radius:var(--radius-sm);padding:14px 16px;font-size:13.5px;line-height:1.75}
+.thx-notice p{margin:0}
+.thx-notice p + p{margin-top:9px}
+[data-thx-state="pending"] .thx-notice{background:var(--amber-bg);border:1px solid #F6DDAF;color:#7A5600}
+[data-thx-state="failed"]  .thx-notice{background:var(--red-bg);border:1px solid #F6C9C7;color:#8A2F2B}
+[data-thx-state="noorder"] .thx-notice{background:var(--surface-2);border:1px solid var(--line);color:var(--ink-soft)}
+/* נוסח השגיאה כפי שהשרת ניסח אותו — מוצג ולא מתורגם. */
+.thx-detail{font-size:12.5px;opacity:.85;font-style:italic;overflow-wrap:anywhere}
+
+/* ---------- פעולות ---------- */
+.thx-actions{display:grid;gap:10px;margin-top:22px}
+.thx-actions .btn{margin-top:0;width:100%;text-decoration:none}
+/* בזמן האימות אין עדיין פעולה נכונה להציע. */
+[data-thx-state="verifying"] .thx-actions,
+[data-thx-state="verifying"] .thx-alt{display:none}
+/* בהצלחה — "המשך לדף הבית" הוא הצעד הטבעי; בכל מצב אחר וואטסאפ הוא
+   הפעולה שבאמת פותרת ללקוח את הבעיה, ולכן ראשון. */
+.thx-act-wa{order:1}
+.thx-act-home{order:2}
+[data-thx-state="confirmed"] .thx-act-home{order:1}
+[data-thx-state="confirmed"] .thx-act-wa{order:2}
+/* ⚠️ #ui-wa הוא הסמל היחיד בספרייה שמצויר במילוי, ולכן לא משתמשים
+   ב-.ui-ic (שקובע fill:none וגורם לו להיעלם). */
+.thx-wa-ic{width:19px;height:19px;flex:none;fill:currentColor;stroke:none;display:block}
+
+.thx-alt{margin:16px 0 0;text-align:center;font-size:12.5px;color:var(--ink-soft)}
+.thx-alt a{color:var(--blue);font-weight:600;text-decoration:none;margin-inline-start:4px}
+.thx-alt a:hover{text-decoration:underline}
+
+/* ---------- מסכים צרים ---------- */
+@media(max-width:560px){
+  .thx-wrap{padding-top:26px;padding-bottom:44px}
+  .thx-head{padding:28px 18px 20px}
+  .thx-body{padding:20px 18px 22px}
+  .thx-title{font-size:21px}
+  .thx-badge{width:66px;height:66px;margin-bottom:15px}
+  .thx-ic{width:34px;height:34px}
+}
+
+/* מי שביקש פחות תנועה מקבל את אותו מידע בלי אנימציה. */
+@media(prefers-reduced-motion:reduce){
+  [data-thx-state="confirmed"] .thx-badge{animation:none}
+  [data-thx-state="confirmed"] .thx-ic-check path{stroke-dasharray:none;stroke-dashoffset:0;animation:none}
+  .thx-spin{animation-duration:1.6s}
+}
+
+/* =====================================================================
+   מעבר רספונסיבי — מובייל, טאבלט ומסכים צרים (כל האתר)
+   =====================================================================
+   דביר בדק את האתר בטלפון ובמסך אנכי ודיווח: "הרבה דברים היו חסרים,
+   דברים לא הופיעו נכון, כפתורים/תפריט לא הופיע נכון". הממצא המרכזי:
+   מתחת ל-1000px הניווט כולו היה `display:none` (השורה למעלה בקובץ) —
+   בלי תפריט המבורגר חלופי. כלומר בטלפון ובטאבלט **אין שום ניווט**:
+   אי אפשר להגיע לבונה, לתמיכה או לקטגוריות אלא בניחוש כתובת.
+
+   כל הבלוקים כאן הם תוספות בסוף הקובץ בלבד: מעל 1000px (למעט תיקון
+   התפריט הנפתח, ראו בלוק 1) שום כלל לא משתנה, כך שהדסקטופ נשאר
+   פיקסל-פיקסל כמו קודם. הכול ב-inline-start/end כדי שיעבוד גם ב-EN.
+===================================================================== */
+
+/* ---------- 1. תפריט "מוצרים" נחתך מחוץ למסך (1001px–1460px) ----------
+   ⚠️ באג אמיתי גם בדסקטופ צר וגם במסך אנכי: התפריט (‎min-width:680px)
+   ממורכז מתחת לקישור "מוצרים", שיושב קרוב לקצה הפנימי של ההדר. בכל
+   רוחב חלון שקטן מ‎-1460px~ החצי החיצוני של התפריט נדחף אל מחוץ למסך —
+   ב-RTL ימינה (נחתך בשקט), וב-EN שמאלה. גרוע מזה: גם **סגור** התיבה
+   שלו (‎visibility:hidden עדיין תופס שטח פריסה) הרחיבה את ‎scrollWidth
+   ויצרה פס גלילה אופקי מיותר (נמדד ‎+73px ברוחב 1199).
+   הפתרון: במקום מרכוז, התפריט נצמד לקצה ה-inline-start של הקישור
+   וגדל פנימה אל תוך הדף — כך הוא לעולם לא חורג מהמסך, פתוח או סגור.
+   העיגון לקישור עצמו נשמר, ולכן גשר ההצבעה (::before) ממשיך לעבוד. */
+@media (min-width:1001px) and (max-width:1460px){
+  .navcat-menu{left:auto;right:auto;inset-inline-start:0;transform:translateY(8px)}
+  .navcat:hover .navcat-menu,.navcat.open .navcat-menu,.navcat:focus-within .navcat-menu{transform:translateY(0)}
+  /* ⚠️ חייב לבוא אחרי שלושת מצבי הפתיחה — אותה ספציפיות, הסדר מכריע
+     (בדיוק כמו בכלל המקורי למעלה). */
+  .navcat.dismissed .navcat-menu{transform:translateY(8px)}
+}
+
+/* ---------- 2. ההדר במובייל/טאבלט (עד 1000px): הניווט חוזר ----------
+   במקום להעלים את הניווט, ה-headbar נשבר לשורות: לוגו/עגלה/שפה בשורה
+   הראשונה, והניווט הופך לרצועת גלילה אופקית ברוחב מלא מתחתיהם — הדפוס
+   המקובל בחנויות מובייל, ובלי שום JS חדש.
+   ⚠️ הסלקטור הוא ‎header nav#mainNav ולא ‎nav סתם: support.html מכיל
+   ‎<nav class="sup-cats"> משלו מחוץ להדר, וכלל רחב היה הורס אותו.
+   ⚠️ ‎!important נדרש כי builder.html ו-contact.html מזריקים בעצמם
+   ‎`header nav{display:none !important}` מתחת ל-1000px (בלוק <style>
+   בתוך ה-<helmet> של הייצוא). ה-id מעניק ספציפיות גבוהה יותר, וזה
+   מה שמכריע בין שני כללי ‎!important. */
+@media (max-width:1000px){
+  .headbar{flex-wrap:wrap;gap:8px 14px}
+  header nav#mainNav{
+    display:flex !important;order:10;flex:0 0 100%;min-width:0;
+    flex-wrap:nowrap;align-items:center;gap:2px;padding:0 2px 2px;
+    overflow-x:auto;-webkit-overflow-scrolling:touch;overscroll-behavior-x:contain;
+    scrollbar-width:none}
+  header nav#mainNav::-webkit-scrollbar{display:none}
+  /* יעד מגע: קישור בגובה ~40px במקום טקסט עם ריפוד 2px. הריפוד האופקי
+     מחליף חלק מה-gap כדי שכל שטח בין מילים יהיה לחיץ. */
+  header nav#mainNav > a,header nav#mainNav .navcat-btn{
+    white-space:nowrap;flex:none;font-size:13.5px;padding:10px 9px}
+
+  /* תפריט "מוצרים" בפריסה הזו: ההורה הופך static ולכן התפריט נפרס
+     יחסית ל-header (sticky = הורה ממקם) על כל רוחב המסך, מתחת להדר —
+     וכך הוא גם בורח מחיתוך ה-overflow של רצועת הגלילה (אלמנט אבסולוטי
+     לא נחתך ע"י אב גולל שאינו ההורה הממקם שלו).
+     ⚠️ במגע אין ‎hover, ולכן נגיעה ב"מוצרים" פשוט מנווטת לכל המוצרים
+     (זה קישור) — התפריט המלא נשאר זמין לעכבר ולמקלדת. */
+  .navcat{position:static}
+  .navcat-menu{
+    left:0;right:0;inset-inline-start:auto;transform:translateY(8px);
+    min-width:0;margin-top:0;border-radius:0 0 14px 14px;
+    padding:14px 16px 12px;
+    /* מסך קצר: התפריט נגלל בתוך עצמו במקום להיחתך בתחתית המסך */
+    max-height:min(72vh,560px);overflow-y:auto}
+  .navcat:hover .navcat-menu,.navcat.open .navcat-menu,.navcat:focus-within .navcat-menu{transform:translateY(0)}
+  .navcat.dismissed .navcat-menu{transform:translateY(8px)}
+}
+
+/* ---------- 3. טלפון (עד 600px): הדר קומפקטי, חיפוש בשורה משלו ----------
+   עד עכשיו תיבת החיפוש נמעכה ל~60px בין הלוגו לעגלה — אי אפשר להקליד
+   בה. עכשיו: שורה 1 לוגו+עגלה+שפה, שורה 2 חיפוש ברוחב מלא, שורה 3
+   רצועת הניווט. הסדר נקבע ב-order בלי לגעת ב-HTML. */
+@media (max-width:600px){
+  .headbar{gap:6px 10px}
+  .brand-logo{height:44px}
+  .head-search{order:8;flex:1 1 100%;max-width:none;margin-inline-start:0}
+  .head-acts{margin-inline-start:auto}
+  /* פאנל תוצאות החיפוש היה רחב מהמסך (‎min 380px) ונחתך — עכשיו הוא
+     בדיוק ברוחב תיבת החיפוש, שהיא ממילא כל רוחב המסך. */
+  .site-search-panel{width:100%;min-width:0}
+  /* יעד מגע לעגלה שבהדר (38px → 42px) */
+  .head-ic{width:42px;height:42px}
+  header nav#mainNav > a,header nav#mainNav .navcat-btn{font-size:13px;padding:9px 7px}
+
+  /* ⚠️ 16px ולא פחות בשדות קלט: iOS מבצע זום אוטומטי לכל input עם
+     פונט קטן מ-16px, והדף "קופץ" בכל נגיעה בשדה. חל על החיפוש, שדות
+     התשלום וה-select-ים. */
+  .head-search input,.checkout-field input,.add-row input,select{font-size:16px}
+
+  /* יעדי מגע בעגלה ובסיכום ההזמנה: כפתורי +/- של הכמות היו 18px —
+     קטן מדי לאצבע. הסרה (פח) מקבלת שטח נגיעה גדול יותר סביב האייקון. */
+  .qty-ctrl button{width:26px;height:26px;font-size:15px}
+  .cart-item-remove{padding:8px}
+
+  /* ⚠️ כפתורי "מעבר לתשלום"/"המשך גלישה" במגירת העגלה: ‎.btn הוא
+     ‎width:100% ובנוסף מקבל ‎margin-inline:22px — ביחד רחבים מהמגירה,
+     והעודף גלש ב-RTL שמאלה כך שהכפתור נראה "נחתך" בקצה המסך.
+     ‎width:auto עם ‎display:flex ממלא את הרוחב הפנוי *בניכוי* השוליים. */
+  .cart-panel #cartCheckoutBtn,.cart-panel #cartContinueBtn{display:flex;width:auto}
+
+  /* הכפתורים הצפים (עגלה + וואטסאפ) כיסו רצועה שלמה בצד המסך הצר.
+     קטנים יותר — עדיין לחיצים בנוחות (50px), מסתירים פחות תוכן. */
+  .cart-fab{width:50px;height:50px;font-size:19px}
+  .cart-fab-badge{min-width:18px;height:18px;font-size:10px}
+  .wa-fab{width:50px;height:50px;bottom:78px}
+  .wa-fab svg{width:25px;height:25px}
+}
+
+/* ---------- 3ב. חיפוש באנגלית: האייקון ישב על הטקסט (כל הרוחבים) ----------
+   ⚠️ הריפוד של תיבת החיפוש פיזי (‎38px בצד ימין, ‎14px בצד שמאל) וכוון
+   לעברית, שבה אייקון הזכוכית המגדלת יושב מימין. באנגלית האייקון עובר
+   שמאלה (‎inset-inline-start) אבל הריפוד נשאר — והאייקון ישב על תחילת
+   ה-placeholder. בעברית אין שום שינוי. */
+[dir="ltr"] .head-search input{padding:10px 14px 10px 38px}
+
+/* ---------- 4. בונה המחשבים: פס השלבים גלש מהמסך (עד 640px) ----------
+   ⚠️ builder.html הוא ייצוא DesignCode שכולו סגנונות inline — אין שם
+   מחלקות. הגלולה הלבנה של "1 בחירת רכיבים — 2 בדיקת תאימות — 3 סיכום"
+   רחבה 523px ואינה מתכווצת (white-space:nowrap בפריטים), מה שניפח את
+   viewport הפריסה בטלפון ל-545px: **כל האתר** הוצג מוקטן וחתוך בצד.
+   הסלקטורים כאן לפי מקטעי ערך יציבים שקיימים גם בקובץ וגם אחרי
+   שהרנטיים משכתב את style (‎"1820px" = עוטפי הרוחב של הבונה, ‎"999px" =
+   הגלולה, ‎"46px" = קווי החיבור בין השלבים). אם המבנה ב-builder.html
+   ישתנה — לעדכן גם כאן. ‎!important נדרש מול סגנון inline. */
+@media (max-width:640px){
+  [style*="1820px"] > [style*="999px"]{
+    flex-wrap:wrap;justify-content:center;row-gap:4px;
+    max-width:100%;border-radius:22px !important}
+  /* קווי החיבור בין השלבים חסרי משמעות כשהשלבים נשברים לשורות */
+  [style*="1820px"] > [style*="999px"] span[style*="46px"]{display:none !important}
+
+  /* שורת הכפתורים שמעל הדמיית המחשב ("תאימות תקינה" + שני מתגי
+     התצוגה): flex בלי wrap, והכפתור השלישי נחתך בקצה המסך (האזור הכהה
+     הוא overflow:hidden ולכן החיתוך שקט). נשברת לשורות במקום להיחתך. */
+  [data-col="stage"] > div:first-child{flex-wrap:wrap;row-gap:8px}
+}
+
+/* ---------- 5. בונה המחשבים: שלוש העמודות נחתכו ב-1181–1293px ----------
+   ⚠️ הרשת של הבונה (inline) דורשת מינימום ‎280+640+290px + מרווחים =
+   ‎~1294px, אבל נשברת לעמודה אחת רק מתחת ל-1180px (ה-media שבייצוא).
+   בתווך שביניהם עמודת הסיכום נדחפה אל מחוץ למסך. במקום מינימום קשיח —
+   אחוזים בלבד, כך שהעמודות מתכווצות לרוחב הזמין. מעל 1293px אין שינוי. */
+@media (min-width:1181px) and (max-width:1293px){
+  [data-cols]{grid-template-columns:minmax(0,20.5%) minmax(0,1fr) minmax(0,21.5%) !important}
+}

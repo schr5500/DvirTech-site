@@ -62,17 +62,17 @@ const NAV_CATALOG_GROUPS = [
            "caseFans", "wifi", "paste"] },
   // אביזרים נלווים (כבלים, מפצלים, דיסקים חיצוניים) אינם רכיב הרכבה
   // ואינם ציוד היקפי, ולכן קבוצה משלהם ולא דחיפה לאחת הקיימות.
-  /* ⚠️ שתי השורות הראשונות (דיסקים חיצוניים / זיכרונות ניידים) הן
-     הקבוצה הגדולה ביותר באביזרים — 41 מוצרים — אבל הערכים
-     `external-drive` / `flash-drive` עדיין **אינם ברשימת הערכים** של
-     עמודת subType ב-CAT_DEFS (11-catalog.gs), ולכן 17-subtype-fill.gs
-     חוסם את כתיבתם ומדווח עליהם. עד שיתווספו שם, שתי השורות האלה
-     פשוט לא מוצגות — בדיוק כמו כל תת-קטגוריה ריקה. ברגע שיתווספו
-     והמילוי ירוץ, הן נדלקות מעצמן. */
+  /* ✅ דיסקים חיצוניים (36) וזיכרונות ניידים (5) פעילים — הערכים נוספו
+     ל-CAT_DEFS ב-11-catalog.gs ו-subtypeFillApply() מילא אותם.
+     ⚠️ **"דפנות ופאנלים למארז" (`case-glass`) הוסר מכאן בכוונה** —
+     החלטת דביר: המבחר קטן מדי למדף באתר, והם נמכרים לפי בקשה. ההסתרה
+     עצמה נאכפת ב-`DVT_HIDDEN_SUBTYPES` שב-search-core.js, שמסיר אותם
+     גם מהחנות, מהחיפוש ומקבוצות הסינון. השורה הזו נמחקה כאן רק כדי
+     שלא תישאר שורה מתה בתפריט — החזרת המוצרים לאתר נעשית **שם**. */
   { key: "accessories", title: ["אביזרים",     "Accessories"],
     cats: ["extras",
            "sub:extras:external-drive", "sub:extras:flash-drive",
-           "sub:extras:case-glass", "sub:extras:adapter",
+           "sub:extras:adapter",
            "sub:extras:gpu-bracket", "sub:extras:cable", "sub:extras:hub"] }
 ];
 
@@ -324,7 +324,7 @@ function wireCatalogMenu(bar){
 /* פריטי המכירה של קטגוריה אמיתית בגיליון. */
 function shItems(catalog, cat){
   const g = catalog && catalog[cat];
-  return (g && g.items ? g.items : []).filter(dvtIsSellable);
+  return (g && g.items ? g.items : []).filter(it => dvtIsSellable(it, cat));
 }
 
 /* תווית לערך subType — קודם מ-VALUE_LABELS (ההגדרה המשותפת של האתר,

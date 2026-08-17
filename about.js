@@ -32,7 +32,11 @@ function renderAboutPage(){
   document.getElementById("legalTitle").textContent = t("aboutLegalTitle");
   document.getElementById("legalText").textContent = t("aboutLegalText");
 
-  document.getElementById("footerText").textContent = t("footerText");
+/* ⚠️ מוגן ב-if: הפוטר הידני הוחלף ב-site-footer.js (16.08.2026)
+     ו-#footerText כבר לא קיים — הגישה הישירה קרסה כאן על כל טעינה
+     והפילה את המשך הפונקציה (כולל סימון כפתור השפה). */
+  const ft = document.getElementById("footerText");
+  if(ft) ft.textContent = t("footerText");
   renderFooterLegal();
   document.querySelectorAll(".lang-btn").forEach(b => b.classList.toggle("active", b.dataset.lang === LANG));
 }

@@ -17,6 +17,89 @@
 <link rel="preconnect" href="https://fonts.googleapis.com">
 <link href="https://fonts.googleapis.com/css2?family=Rubik:wght@400;500;600;700;800;900&family=Heebo:wght@300;400;500;700&display=swap" rel="stylesheet">
 <link rel="stylesheet" href="style.css">
+<style>
+/* =====================================================================
+   סגנונות מקומיים לדף התשלום בלבד.
+   ⚠️ **בכוונה כאן ולא ב-style.css** — style.css הוא קובץ משותף לכל
+   האתר ונערך במקביל ע"י מי שעובד על העיצוב הכללי; שינוי שלו מכאן היה
+   דורס עבודה של אחרים. כל מה שכאן נוגע אך ורק לרכיבים של checkout.html.
+
+   ⚠️ הסלקטורים מתחילים ב-#servicesBox (id) כדי לגבור על הכללים
+   הכלליים ב-style.css בלי !important — id שווה יותר מ-class בסדר
+   העדיפויות של CSS, וזה בדיוק מה שצריך כאן.
+   ===================================================================== */
+
+/* --- 1. להבליט שאזור השירותים הוא תפריט נפתח ---
+   הבעיה שתוקנה: <details> נראה כמו כותרת סטטית. לקוח שלא הבין שאפשר
+   ללחוץ פשוט לא ראה את השירותים בכלל. שלוש הבהרות ביחד: רקע תכלת
+   בולט מהרקע הלבן, מילת פעולה מפורשת ("הצג"/"הסתר"), וחץ בתוך עיגול
+   שמסתובב בפתיחה. גם מסגרת מודגשת ב-hover וגם focus-visible למקלדת. */
+#servicesBox{
+  border:1.5px solid #C7DDFC;
+  background:var(--blue-soft,#E9F2FE);
+  overflow:hidden;
+  transition:border-color .15s, box-shadow .15s;
+}
+#servicesBox:hover{border-color:var(--blue,#1B6FE0)}
+#servicesBox[open]{background:var(--surface,#fff);border-color:var(--blue,#1B6FE0)}
+#servicesBox > .svc-summary{
+  padding:13px;
+  font-size:13.5px;
+  transition:background .15s;
+}
+#servicesBox > .svc-summary:hover{background:rgba(27,111,224,.07)}
+#servicesBox > .svc-summary:focus-visible{
+  outline:2px solid var(--blue,#1B6FE0);
+  outline-offset:-2px;
+}
+#servicesBox .svc-title{font-weight:800}
+/* מילת הפעולה — הדבר שהופך "כותרת" ל"כפתור" בעיניים של הלקוח */
+#servicesBox .svc-toggle{
+  display:inline-flex;align-items:center;gap:5px;
+  font-size:12px;font-weight:700;color:var(--blue,#1B6FE0);
+  white-space:nowrap;
+}
+#servicesBox .svc-toggle-close{display:none}
+#servicesBox[open] .svc-toggle-open{display:none}
+#servicesBox[open] .svc-toggle-close{display:inline}
+#servicesBox .svc-chev{
+  width:20px;height:20px;flex:none;
+  display:inline-grid;place-items:center;
+  border-radius:50%;
+  background:#fff;
+  border:1px solid #C7DDFC;
+  color:var(--blue,#1B6FE0);
+  transition:transform .18s ease, background .15s;
+}
+#servicesBox > .svc-summary:hover .svc-chev{background:var(--blue,#1B6FE0);color:#fff;border-color:var(--blue,#1B6FE0)}
+#servicesBox[open] .svc-chev{transform:rotate(180deg)}
+/* המונה נדחף שמאלה, אבל מילת הפעולה חייבת להישאר צמודה לחץ */
+#servicesBox .svc-count{margin-inline-start:auto}
+
+/* --- 2. שירות שכלול בחבילה שנבחרה ---
+   מסומן, נעול, ומחירו 0. מוצג ולא מוסתר, כדי שהלקוח יראה **מה** הוא
+   מקבל בתוך ה-700 ₪ ולא רק שהוא לא יכול ללחוץ. */
+#servicesBox .svc-opt.is-covered{
+  border-color:#B7EFE5;
+  background:#F0FDFA;
+  cursor:default;
+}
+#servicesBox .svc-opt.is-covered:hover{border-color:#B7EFE5}
+#servicesBox .svc-opt.is-covered input{accent-color:var(--teal-dark,#0F766E)}
+#servicesBox .svc-opt.is-covered .svc-price{color:var(--teal-dark,#0F766E)}
+#servicesBox .svc-opt.is-covered .svc-name{color:var(--ink,#0F2540)}
+
+/* --- 3. הודעה כשהשירותים נעולים כי אין מחשב שלם בעגלה --- */
+#servicesBox .svc-hint.is-locked{
+  background:#FFF7E6;
+  border:1px solid #FFE0A3;
+  border-radius:9px;
+  color:#7A5200;
+  padding:9px 11px;
+  margin:0 13px 9px;
+  font-weight:600;
+}
+</style>
 </head>
 <body>
 
@@ -70,10 +153,22 @@
            4-payment-api.gs — ומקור האמת לשניהם הוא PRICE_LIST ב-
            CRM+SUPPLIERS/2-pricelist-picker.gs. -->
       <details class="svc-box" id="servicesBox" style="margin:18px 0 12px">
+        <!-- ⚠️ ה-summary כולל **מילת פעולה** ("הצג"/"הסתר") ולא רק חץ:
+             חץ לבד לא נקרא כאפשרות לחיצה אצל חלק מהלקוחות, וזו הייתה
+             תקלה אמיתית — האזור נראה ככותרת סטטית ואף אחד לא פתח אותו.
+             שני ה-span מוחלפים ע"י CSS לפי [open], כדי שהטקסט יישאר
+             נכון בלי JS ובלי לשבור את מתג השפה. -->
         <summary class="svc-summary">
           <span class="svc-title" id="servicesTitle"></span>
           <span class="svc-count" id="servicesCount"></span>
-          <span class="svc-chev" aria-hidden="true">⌄</span>
+          <span class="svc-toggle">
+            <span class="svc-toggle-open" id="servicesToggleOpen"></span>
+            <span class="svc-toggle-close" id="servicesToggleClose"></span>
+            <svg class="svc-chev" viewBox="0 0 24 24" aria-hidden="true">
+              <path d="M6 9.5l6 6 6-6" fill="none" stroke="currentColor"
+                    stroke-width="2.6" stroke-linecap="round" stroke-linejoin="round"/>
+            </svg>
+          </span>
         </summary>
         <p class="svc-hint" id="servicesHint"></p>
         <div id="servicesOptions" class="svc-opts"></div>
@@ -117,6 +212,28 @@
         <input id="custEmail" type="email" autocomplete="email" dir="ltr">
       </div>
 
+      <!-- ⚠️ **כתובת למשלוח — בלעדיה אין לאן לשלוח.** עד 16.08.2026
+           הטופס אסף שם/טלפון/מייל בלבד, כלומר הזמנה עם משלוח הגיעה
+           בלי כתובת ודביר היה צריך לרדוף אחרי הלקוח בטלפון.
+           ⚠️ מוצג **רק** כשנבחר משלוח (לא באיסוף עצמי) — ראה
+           toggleAddressFields ב-checkout.js. שדה כתובת שמופיע למי
+           שבא לאסוף בעצמו הוא בדיוק סוג החיכוך שגורם לנטישה.
+           ⚠️ הכתובת נשלחת לשרת ונכנסת לקבלה; היא **לא** נשמרת בדפדפן. -->
+      <div id="shipAddressBlock" style="display:none">
+        <div class="checkout-field">
+          <label class="field-label" id="labelCity"></label>
+          <input id="custCity" type="text" autocomplete="address-level2">
+        </div>
+        <div class="checkout-field">
+          <label class="field-label" id="labelStreet"></label>
+          <input id="custStreet" type="text" autocomplete="street-address">
+        </div>
+        <div class="checkout-field">
+          <label class="field-label" id="labelAptNotes"></label>
+          <input id="custAptNotes" type="text" autocomplete="off">
+        </div>
+      </div>
+
       <label style="display:flex;align-items:center;gap:8px;font-size:13.5px;font-weight:600;margin:4px 0 12px;cursor:pointer">
         <input type="checkbox" id="isBusinessCheckbox" onchange="toggleBusinessField()" style="width:16px;height:16px;cursor:pointer">
         <span id="isBusinessLabel"></span>
@@ -138,20 +255,14 @@
   </div>
 </div>
 
-<footer>
-  <span class="footer-logo-crop"><img class="footer-logo" src="images/logo-dvirtech-transparent.png" alt="DvirTech"></span>
-  <span id="footerText"></span>
-  <div class="footer-legal">
-    <a href="about.html" id="footerAboutLink"></a>
-    <a href="contact.html" id="footerContactLink"></a>
-    <a href="terms.html" id="footerTermsLink"></a>
-  </div>
-</footer>
+<footer></footer>
 
 <script src="sprite.js"></script>
 <script src="i18n.js"></script>
+<script src="site-content.js"></script>
 <script src="search-core.js"></script>
 <script src="site-header.js"></script>
+<script src="site-footer.js"></script>
 <script src="checkout.js"></script>
 </body>
 </html>

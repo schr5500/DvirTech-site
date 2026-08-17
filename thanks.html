@@ -1,8 +1,33 @@
 <!DOCTYPE html>
+<!--
+  =====================================================================
+  DvirTech — דף אחרי תשלום (thanks.html)
+  =====================================================================
+  זהו יעד ה-RedirectURL ש-4-payment-api.gs שולח ל-SUMIT
+  (CFG.RETURN_SUCCESS). **הגעה לדף הזה אינה הוכחה שהתשלום עבר** — היא רק
+  אומרת שהדפדפן הופנה לכאן. מי שקובע הוא השרת: thanks.js קורא
+  ‎action=verifyPayment שמאמת מול SUMIT עצמו (‎billing/payments/get/‎).
+
+  ⚠️⚠️ **התוכן של מצב "אושר" חייב להישאר מוסתר כברירת מחדל.**
+  המבנה כאן מגן על זה מבנית ולא בהבטחה: כל בלוק תלוי-מצב מסומן
+  ‎.thx-only ומוצג **רק** כשה-CSS מזהה ‎[data-thx-state="…"] תואם על
+  ‎#thxCard. הערך ההתחלתי בתגית עצמה הוא ‎"verifying", ורק תשובת שרת
+  חיובית מעבירה אותו ל-‎"confirmed". כלומר גם אם ה-JS ייפול באמצע, שום
+  הצהרת הצלחה לא תוצג. **אין להחליף את זה בהסתרה/הצגה ידנית ב-JS.**
+
+  ⚠️ הדף חייב לעבוד גם בלי שום פרמטר בכתובת (מישהו שהגיע ישירות).
+  במקרה כזה המצב הוא ‎"noorder" — הודעה ניטרלית, לא מסך שגיאה.
+
+  ⚠️ עוסק פטור — DvirTech אינו גובה מע״מ. **אסור** שיופיע כאן טקסט
+  שמייחס לסכום רכיב מע״מ כלשהו, בשום ניסוח.
+  =====================================================================
+-->
 <html lang="he" dir="rtl">
 <head>
 <meta charset="UTF-8">
 <meta name="viewport" content="width=device-width, initial-scale=1.0">
+<!-- דף אישור אישי להזמנה — אין סיבה שיופיע בתוצאות חיפוש. -->
+<meta name="robots" content="noindex,nofollow">
 <title>DvirTech — תודה על ההזמנה</title>
 <script>
   (function(){
@@ -12,60 +37,202 @@
     document.documentElement.dir = saved === "he" ? "rtl" : "ltr";
   })();
 </script>
+<link rel="preconnect" href="https://script.google.com" crossorigin>
+<link rel="preconnect" href="https://script.googleusercontent.com" crossorigin>
 <link rel="preconnect" href="https://fonts.googleapis.com">
 <link href="https://fonts.googleapis.com/css2?family=Rubik:wght@400;500;600;700;800;900&family=Heebo:wght@300;400;500;700&display=swap" rel="stylesheet">
 <link rel="stylesheet" href="style.css">
 </head>
-<body>
+<!-- ⚠️ thx-page משמש את style.css כדי להסתיר את כפתור העגלה הצף
+     (‎.cart-fab) שקופץ מ-cart.js. אותו שיקול בדיוק שבגללו
+     site-header.js מחריג את הדף הזה מכפתור הוואטסאפ הצף
+     (SITE_WA_HIDDEN_PAGES): זה מסך אישור, לא מסך קנייה. אייקון העגלה
+     בהדר נשאר עובד. -->
+<body class="thx-page">
 
 <header>
   <div class="wrap headbar">
     <a class="brand" href="home.html" aria-label="DvirTech — לדף הבית"><img class="brand-logo" src="images/logo-dvirtech-transparent.png" alt="DvirTech"></a>
+    <div class="lang-switch">
+      <button class="lang-btn" data-lang="he" onclick="setLang('he')">עברית</button>
+      <button class="lang-btn" data-lang="en" onclick="setLang('en')">English</button>
+    </div>
   </div>
 </header>
 
-<div class="wrap" style="max-width:520px;padding-top:44px;padding-bottom:70px;text-align:center">
+<main class="wrap thx-wrap">
 
-  <div id="loadingState" style="padding:40px 0;color:var(--ink-soft)">מאמת את התשלום מול SUMIT…</div>
+  <!-- ⚠️ data-thx-state="verifying" הוא ברירת המחדל **בתגית עצמה**, לא
+       ב-JS. ראה ההסבר בראש הקובץ. -->
+  <div class="thx-card" id="thxCard" data-thx-state="verifying">
+    <div class="thx-head">
 
-  <div id="paidState" style="display:none">
-    <h1 style="font-size:24px;margin:0 0 10px">✅ התשלום התקבל, תודה!</h1>
-    <p style="color:var(--ink-soft);margin:0 0 22px">
-      הקבלה נשלחת אוטומטית לכתובת המייל שהזנת. נהיה איתך בקשר בקרוב לגבי המשך הטיפול בהזמנה.
-    </p>
-    <a href="home.html" class="btn btn-primary" style="display:inline-flex;width:auto;padding:12px 22px">חזרה לעמוד הבית</a>
+      <div class="thx-badge" aria-hidden="true">
+        <span class="thx-spin thx-ic thx-ic-spin"></span>
+        <svg class="thx-ic thx-ic-check" viewBox="0 0 40 40"><path d="M11 20.5 17.5 27 29 14.5"/></svg>
+        <svg class="thx-ic thx-ic-clock" viewBox="0 0 40 40"><circle cx="20" cy="20" r="13"/><path d="M20 12.5V20l5 3.5"/></svg>
+        <svg class="thx-ic thx-ic-alert" viewBox="0 0 40 40"><path d="M20 8.5 34 31.5H6z"/><path d="M20 17.5v6.5"/><path d="M20 28h.02"/></svg>
+        <svg class="thx-ic thx-ic-info" viewBox="0 0 40 40"><circle cx="20" cy="20" r="13"/><path d="M20 19v8.5"/><path d="M20 13.5h.02"/></svg>
+      </div>
+
+      <!-- ⚠️ הכותרת והתת-כותרת נכתבות מ-thanks.js לפי המצב, ולכן אין להן
+           data-he/data-en. הן מתורגמות דרך tr() בכל רינדור מחדש. -->
+      <h1 class="thx-title" id="thxTitle"></h1>
+      <p class="thx-sub" id="thxSub"></p>
+
+      <!-- פרטי ההזמנה. מוצג רק מה שידוע בפועל — שורה ריקה נשארת מוסתרת. -->
+      <div class="thx-meta" id="thxMeta">
+        <span class="thx-chip" id="thxOrderChip" hidden>
+          <span class="thx-chip-k" id="thxOrderLabel"></span>
+          <b class="thx-chip-v" id="thxOrderValue" dir="ltr"></b>
+        </span>
+        <span class="thx-chip" id="thxAmountChip" hidden>
+          <span class="thx-chip-k" id="thxAmountLabel"></span>
+          <b class="thx-chip-v" id="thxAmountValue"></b>
+        </span>
+      </div>
+    </div>
+
+    <div class="thx-body">
+
+      <!-- ================= מצב: מאמתים ================= -->
+      <div class="thx-only thx-only-verifying">
+        <p class="thx-note" data-he="הבדיקה מתבצעת מול חברת הסליקה ולוקחת כמה שניות. אפשר להישאר בדף — הוא יתעדכן לבד."
+                            data-en="We are checking directly with the payment provider. It takes a few seconds — stay on this page and it will update by itself.">הבדיקה מתבצעת מול חברת הסליקה ולוקחת כמה שניות. אפשר להישאר בדף — הוא יתעדכן לבד.</p>
+      </div>
+
+      <!-- ================= מצב: אושר ================= -->
+      <div class="thx-only thx-only-confirmed">
+
+        <h2 class="thx-h2" data-he="מה קורה עכשיו" data-en="What happens next">מה קורה עכשיו</h2>
+
+        <ol class="thx-steps">
+          <li class="thx-step">
+            <span class="thx-step-num" aria-hidden="true">1</span>
+            <div class="thx-step-txt">
+              <b data-he="הקבלה נשלחת אליך במייל" data-en="Your receipt goes out by email">הקבלה נשלחת אליך במייל</b>
+              <span data-he="אוטומטית, לכתובת שהזנת בתשלום — בדרך כלל תוך דקות ספורות. אם היא לא הגיעה, שווה להציץ בתיקיית הספאם."
+                    data-en="Automatically, to the address you entered at checkout — usually within a few minutes. If it has not arrived, check your spam folder.">אוטומטית, לכתובת שהזנת בתשלום — בדרך כלל תוך דקות ספורות. אם היא לא הגיעה, שווה להציץ בתיקיית הספאם.</span>
+            </div>
+          </li>
+          <li class="thx-step">
+            <span class="thx-step-num" aria-hidden="true">2</span>
+            <div class="thx-step-txt">
+              <b data-he="דביר יוצר איתך קשר" data-en="Dvir gets in touch">דביר יוצר איתך קשר</b>
+              <span data-he="בדרך כלל תוך יום עסקים אחד, בוואטסאפ או בטלפון — לאישור הפרטים, לתיאום ולכל שאלה שנשארה פתוחה."
+                    data-en="Usually within one business day, by WhatsApp or phone — to confirm the details, arrange timing and answer anything still open.">בדרך כלל תוך יום עסקים אחד, בוואטסאפ או בטלפון — לאישור הפרטים, לתיאום ולכל שאלה שנשארה פתוחה.</span>
+            </div>
+          </li>
+          <li class="thx-step">
+            <span class="thx-step-num" aria-hidden="true">3</span>
+            <div class="thx-step-txt">
+              <b data-he="הזמנה והכנה" data-en="Sourcing and preparation">הזמנה והכנה</b>
+              <span data-he="הזמנה שכוללת הרכבה נבנית ועוברת בדיקת מאמץ לפני המסירה. זמן ההרכבה מתווסף לזמן המשלוח — את לוח הזמנים המדויק תקבל ממני בשיחה."
+                    data-en="Orders that include assembly are built and stress-tested before they go out. Assembly time is added on top of delivery time — you will get the exact schedule from me directly.">הזמנה שכוללת הרכבה נבנית ועוברת בדיקת מאמץ לפני המסירה. זמן ההרכבה מתווסף לזמן המשלוח — את לוח הזמנים המדויק תקבל ממני בשיחה.</span>
+            </div>
+          </li>
+          <li class="thx-step thx-step-last">
+            <span class="thx-step-num" aria-hidden="true">4</span>
+            <div class="thx-step-txt">
+              <b data-he="משלוח או איסוף" data-en="Delivery or pickup">משלוח או איסוף</b>
+              <span data-he="לפי מה שבחרת בתשלום:" data-en="According to what you chose at checkout:">לפי מה שבחרת בתשלום:</span>
+
+              <!-- ⚠️ זמני האספקה חייבים להישאר תואמים ל-DVT_SHIPPING
+                   ב-checkout.js ול-SHIPPING_OPTIONS_ ב-4-payment-api.gs.
+                   נקודת האיסוף היא **אבן שמואל** (ולא באר שבע, שהיא אזור
+                   השירות לביקורי בית). -->
+              <div class="thx-ship">
+                <div class="thx-ship-row">
+                  <span data-he="משלוח רגיל" data-en="Standard delivery">משלוח רגיל</span>
+                  <b data-he="3-7 ימי עסקים" data-en="3-7 business days">3-7 ימי עסקים</b>
+                </div>
+                <div class="thx-ship-row">
+                  <span data-he="משלוח מהיר" data-en="Express delivery">משלוח מהיר</span>
+                  <b data-he="2-5 ימי עסקים" data-en="2-5 business days">2-5 ימי עסקים</b>
+                </div>
+                <div class="thx-ship-row">
+                  <span data-he="איסוף עצמי" data-en="Self pickup">איסוף עצמי</span>
+                  <b data-he="אבן שמואל, בתיאום מראש" data-en="Even Shmuel, by prior arrangement">אבן שמואל, בתיאום מראש</b>
+                </div>
+              </div>
+            </div>
+          </li>
+        </ol>
+
+        <!-- ⚠️⚠️ **ההערה הזו נשארת.** אין לנו מערכת מעקב ואין הודעות SMS
+             אוטומטיות. עדיף לקוח שיודע את זה מראש מאשר לקוח שממתין
+             לקישור מעקב שלעולם לא יגיע. אין להחליף את זה ב"תקבל קישור
+             מעקב" כל עוד אין כזה בפועל. -->
+        <p class="thx-honest"
+           data-he="אין לנו מערכת מעקב אונליין ואין הודעות SMS אוטומטיות — כל עדכון על ההזמנה מגיע ממני ישירות, בוואטסאפ או בטלפון. אם משהו מתעכב, תדע על זה ממני ולא תצטרך לרדוף אחריי."
+           data-en="We do not have an online tracker or automated SMS updates — every update comes from me directly, by WhatsApp or phone. If anything is delayed you will hear it from me; you will not have to chase me.">אין לנו מערכת מעקב אונליין ואין הודעות SMS אוטומטיות — כל עדכון על ההזמנה מגיע ממני ישירות, בוואטסאפ או בטלפון. אם משהו מתעכב, תדע על זה ממני ולא תצטרך לרדוף אחריי.</p>
+      </div>
+
+      <!-- ================= מצב: לא אומת / נכשל / אין הזמנה ================= -->
+      <div class="thx-only thx-only-pending">
+        <div class="thx-notice">
+          <p data-he="חשוב: אל תשלם שוב. כל תשלום שנקלט אצל חברת הסליקה קיים ומתועד אצלה, גם אם האישור לא חזר לדף הזה. אני בודק כל תשלום שמגיע ואחזור אליך."
+             data-en="Important: please do not pay again. Any payment the provider accepted is recorded on their side even if the confirmation did not make it back to this page. I review every incoming payment and will get back to you.">חשוב: אל תשלם שוב. כל תשלום שנקלט אצל חברת הסליקה קיים ומתועד אצלה, גם אם האישור לא חזר לדף הזה. אני בודק כל תשלום שמגיע ואחזור אליך.</p>
+          <p data-he="הדרך המהירה ביותר לסגור את זה: שלח לי הודעה בוואטסאפ עם הפרטים שלמעלה."
+             data-en="The fastest way to settle this: send me a WhatsApp message with the details above.">הדרך המהירה ביותר לסגור את זה: שלח לי הודעה בוואטסאפ עם הפרטים שלמעלה.</p>
+        </div>
+      </div>
+
+      <div class="thx-only thx-only-failed">
+        <div class="thx-notice">
+          <p data-he="לא בוצע חיוב. אפשר לנסות שוב — לפעמים מדובר בסירוב זמני של חברת האשראי, בפרטי כרטיס שגויים או במגבלת אשראי."
+             data-en="No charge was made. You can try again — this is often a temporary decline from the card issuer, a typo in the card details, or a credit limit.">לא בוצע חיוב. אפשר לנסות שוב — לפעמים מדובר בסירוב זמני של חברת האשראי, בפרטי כרטיס שגויים או במגבלת אשראי.</p>
+          <p data-he="אם אתה כן רואה חיוב בכרטיס — אל תשלם שוב, כתוב לי ואבדוק את זה מול חברת הסליקה."
+             data-en="If you do see a charge on your card, do not pay again — message me and I will check it with the payment provider.">אם אתה כן רואה חיוב בכרטיס — אל תשלם שוב, כתוב לי ואבדוק את זה מול חברת הסליקה.</p>
+          <p class="thx-detail" id="thxDetail" dir="auto" hidden></p>
+        </div>
+      </div>
+
+      <div class="thx-only thx-only-noorder">
+        <div class="thx-notice">
+          <p data-he="הגעת לדף האישור בלי קישור הזמנה, ולכן אין כאן מה לאמת. אם עוד לא ביצעת הזמנה — אפשר להתחיל מדף הבית."
+             data-en="You reached the confirmation page without an order link, so there is nothing here to verify. If you have not placed an order yet, start from the homepage.">הגעת לדף האישור בלי קישור הזמנה, ולכן אין כאן מה לאמת. אם עוד לא ביצעת הזמנה — אפשר להתחיל מדף הבית.</p>
+          <p data-he="אם זה עתה שילמת והגעת לכאן ישירות ולא דרך הקישור שאחרי התשלום — אל תשלם שוב. כתוב לי ואוודא מול חברת הסליקה שההזמנה נקלטה."
+             data-en="If you just paid and arrived here directly rather than through the post-payment link, do not pay again. Message me and I will confirm with the payment provider that the order came through.">אם זה עתה שילמת והגעת לכאן ישירות ולא דרך הקישור שאחרי התשלום — אל תשלם שוב. כתוב לי ואוודא מול חברת הסליקה שההזמנה נקלטה.</p>
+        </div>
+      </div>
+
+      <!-- ================= פעולות ================= -->
+      <!-- מוסתר לגמרי בזמן האימות: כל עוד לא יודעים מה קרה, אין פעולה
+           נכונה להציע. ‎.thx-act-wa / ‎.thx-act-home מסודרים ב-CSS לפי
+           המצב — בהצלחה "המשך לדף הבית" ראשון, אחרת וואטסאפ ראשון. -->
+      <div class="thx-actions">
+        <a class="btn btn-accent thx-act-wa" id="thxWaBtn" href="https://wa.me/972502000373" target="_blank" rel="noopener">
+          <!-- ⚠️ **לא** class="ui-ic" כאן. הכלל הגלובלי ‎[class*="ui-"] use
+               קובע ‎fill:none, ו-‎#ui-wa הוא הסמל היחיד בספרייה שמצויר
+               במילוי ולא בקו — עם ui-ic הוא פשוט נעלם. -->
+          <svg class="thx-wa-ic" viewBox="0 0 24 24" aria-hidden="true"><use href="#ui-wa"/></svg>
+          <span data-he="שליחת הודעה בוואטסאפ" data-en="Message us on WhatsApp">שליחת הודעה בוואטסאפ</span>
+        </a>
+        <a class="btn btn-primary thx-act-home" href="home.html">
+          <span data-he="המשך לדף הבית" data-en="Continue to homepage">המשך לדף הבית</span>
+        </a>
+      </div>
+
+      <p class="thx-alt">
+        <span data-he="מעדיף ערוץ אחר?" data-en="Prefer another channel?">מעדיף ערוץ אחר?</span>
+        <a href="contact.html" data-he="כל דרכי יצירת הקשר" data-en="All the ways to reach us">כל דרכי יצירת הקשר</a>
+      </p>
+
+    </div>
   </div>
+</main>
 
-  <div id="pendingState" style="display:none">
-    <h1 style="font-size:24px;margin:0 0 10px">⏳ התשלום עדיין בבדיקה</h1>
-    <p style="color:var(--ink-soft);margin:0 0 22px" id="pendingText"></p>
-    <a href="contact.html" class="btn btn-primary" style="display:inline-flex;width:auto;padding:12px 22px">צור קשר</a>
-  </div>
-
-  <div id="errorState" style="display:none">
-    <h1 style="font-size:24px;margin:0 0 10px">⚠️ לא הצלחנו לאמת את התשלום</h1>
-    <p style="color:var(--ink-soft);margin:0 0 22px" id="errorText"></p>
-    <p style="font-size:13px;color:var(--ink-soft);margin:0 0 22px">
-      אם בוצע חיוב בפועל, אין צורך לדאוג — נבדוק את זה ידנית. פשוט צרו קשר עם פרטי ההזמנה.
-    </p>
-    <a href="contact.html" class="btn btn-primary" style="display:inline-flex;width:auto;padding:12px 22px">צור קשר</a>
-  </div>
-
-</div>
-
-<footer>
-  <span class="footer-logo-crop"><img class="footer-logo" src="images/logo-dvirtech-transparent.png" alt="DvirTech"></span>
-  <div class="footer-legal">
-    <a href="about.html">אודות</a>
-    <a href="contact.html">צור קשר</a>
-    <a href="terms.html">תקנון</a>
-  </div>
-</footer>
+<footer></footer>
 
 <script src="sprite.js"></script>
 <script src="i18n.js"></script>
 <script src="search-core.js"></script>
 <script src="site-header.js"></script>
+<script src="site-footer.js"></script>
+<!-- ⚠️ thanks.js לפני cart.js: cart.js עוטף את window.setLang כדי לרענן
+     גם את טקסטי העגלה, ואם setLang עוד לא הוגדר הוא מוותר בשקט. -->
 <script src="thanks.js"></script>
+<script src="cart.js"></script>
 </body>
 </html>

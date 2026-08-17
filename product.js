@@ -49,7 +49,7 @@ function pdFindItem(catalog, cat, id){
     : cat;
   const g = catalog[realCat];
   if(!g) return null;
-  const it = (g.items || []).filter(dvtIsSellable).find(x => String(x.id) === String(id));
+  const it = (g.items || []).filter(x => dvtIsSellable(x, realCat)).find(x => String(x.id) === String(id));
   return it ? Object.assign({ _realCat: realCat }, it) : null;
 }
 
@@ -59,7 +59,7 @@ function pdFindItem(catalog, cat, id){
 function pdFindAnywhere(catalog, id){
   const cats = Object.keys(catalog || {});
   for(const c of cats){
-    const it = ((catalog[c] || {}).items || []).filter(dvtIsSellable)
+    const it = ((catalog[c] || {}).items || []).filter(x => dvtIsSellable(x, c))
       .find(x => String(x.id) === String(id));
     if(it) return Object.assign({ _realCat: c }, it);
   }
@@ -586,7 +586,9 @@ function pdRenderBody(){
         </div>
 
         <ul class="pd-perks">
-          <li><svg class="ui-ic"><use href="#ui-truck"/></svg>${tr("משלוח 2-5 ימי עסקים","Delivery in 2-5 business days")}</li>
+          <li><svg class="ui-ic"><use href="#ui-truck"/></svg>${(typeof dvtText === "function"
+            ? tr("משלוח ", "Delivery in ") + dvtText("shipping.expressDays")
+            : tr("משלוח 2-5 ימי עסקים","Delivery in 2-5 business days"))}</li>
           <li><svg class="ui-ic"><use href="#ui-shield"/></svg>${tr("אחריות מלאה על כל רכיב","Full warranty on every part")}</li>
           <li><svg class="ui-ic"><use href="#ui-tools"/></svg>${tr("הרכבה והתקנה בתוספת תשלום","Assembly and setup available")}</li>
           <li><svg class="ui-ic"><use href="#ui-chat"/></svg>${tr("שאלה על המוצר?","Questions about this product?")}
@@ -652,6 +654,136 @@ function pdDescription(it, catName){
   return parts.join(" ");
 }
 
+/* =====================================================================
+   SEO — שהמוצר יימצא בגוגל, עם קישור ישר לדף שלו
+   =====================================================================
+   דף המוצר נבנה כולו ב-JS מ-getCatalog, ולכן ה-HTML שיוצא מהשרת זהה
+   לכל 1,271 המוצרים: אותה כותרת ("DvirTech — מוצר") ובלי שום תיאור.
+   שלושת הדברים כאן נותנים לגוגל את מה שהוא צריך כדי להציג את המוצר
+   הנכון עם המחיר והזמינות שלו:
+     · <title> ו-<meta name="description"> לפי המוצר עצמו
+     · <link rel="canonical"> לכתובת אחת מוסכמת
+     · JSON-LD מסוג Product עם offers
+
+   ⚠️ **מוצר שאזל מקבל availability=OutOfStock ולא נעלם.** גוגל מסמן
+   אותו כאזל ומדרג אותו נמוך יותר מעצמו, ומרצ'נט סנטר מוציא אותו
+   מהקניות — בלי שאף אחד יצטרך להסתיר את הדף. הסתרת הדף לעומת זאת
+   מוחקת את כל הדירוג שהוא צבר, ומחזירה אותו לאפס ביום שהוא חוזר
+   למלאי. זו אותה החלטה בדיוק כמו בחנות: מוצר שאזל נשאר מוצג עם תג.
+
+   ⚠️ שדה שאין בקטלוג פשוט לא נכתב. אין כאן ניחוש של יצרן, של מק"ט
+   יצרן, של דירוג או של מצב המוצר — "לוח משופץ" בקטלוג היה הופך כל
+   הצהרת itemCondition גורפת לשקר. */
+
+/* קנוניקל = **קטגוריית המקור** ולא הווירטואלית. לאותו מסך יש שתי
+   כתובות תקינות (?cat=monitor ו-?cat=peripherals), וזה תוכן כפול
+   בעיני גוגל. הקנוניקל מאחד אותן לאחת ומרכז אליה את הדירוג. */
+function pdCanonicalUrl(){
+  if(!/^https?:$/.test(location.protocol)) return "";      // file:// — אין כתובת אמיתית
+  return location.origin + location.pathname +
+    "?cat=" + encodeURIComponent(PD_CAT) + "&id=" + encodeURIComponent(PD_ITEM.id);
+}
+
+function pdHeadTag_(selector, make){
+  let el = document.head.querySelector(selector);
+  if(!el){ el = make(); document.head.appendChild(el); }
+  return el;
+}
+
+function pdSetMeta_(name, content){
+  const el = pdHeadTag_(`meta[name="${name}"]`, () => {
+    const m = document.createElement("meta");
+    m.setAttribute("name", name);
+    return m;
+  });
+  el.setAttribute("content", content);
+}
+
+/* תיאור המטא נגזר מאותו טקסט שמוצג בדף עצמו — תיאור שלא מופיע בעמוד
+   הוא בדיוק מה שגוגל מתעלם ממנו. נחתך על גבול מילה סביב 155 תווים,
+   האורך שגוגל מציג בפועל. */
+function pdMetaDescription(text){
+  const s = String(text || "").replace(/\s+/g, " ").trim();
+  if(s.length <= 155) return s;
+  const cut = s.slice(0, 155);
+  const sp = cut.lastIndexOf(" ");
+  return (sp > 80 ? cut.slice(0, sp) : cut).trim() + "…";
+}
+
+/* ⚠️ הבריחה היחידה שחשובה בתוך <script type="application/ld+json">:
+   התוכן שם אינו HTML, אבל הדפדפן עדיין מחפש בו את המחרוזת "</script".
+   שם מוצר עם < או & (ובקטלוג יש שמות כאלה) היה קוטע את התג ושובר את
+   כל ה-JSON. JSON.stringify כבר מטפל בגרשיים ובשורות חדשות. */
+function pdJsonLdText_(obj){
+  return JSON.stringify(obj)
+    .replace(/</g, "\\u003c")
+    .replace(/>/g, "\\u003e")
+    .replace(/&/g, "\\u0026");
+}
+
+function pdBuildJsonLd(it, catName, description){
+  const url = pdCanonicalUrl();
+  const data = {
+    "@context": "https://schema.org",
+    "@type": "Product",
+    name: itemName(it),
+    description: description
+  };
+  if(catName) data.category = catName;
+  if(it.id) data.sku = String(it.id);
+  if(it.brand) data.brand = { "@type": "Brand", name: String(it.brand) };
+  // רק כתובת תמונה אמיתית. נתיב יחסי או ערך זבל גרוע מלא לשלוח כלום.
+  if(it.image && /^https?:\/\//i.test(String(it.image))) data.image = String(it.image);
+
+  const price = Number(it.price);
+  if(price > 0){
+    const offer = {
+      "@type": "Offer",
+      price: String(price),
+      priceCurrency: "ILS",
+      availability: pdInStock(it) ? "https://schema.org/InStock"
+                                  : "https://schema.org/OutOfStock",
+      seller: { "@type": "Organization", name: "DvirTech" }
+    };
+    if(url) offer.url = url;
+    data.offers = offer;
+  }
+  return data;
+}
+
+/* ⚠️ עטוף כולו: תקלה בבניית ה-SEO לא אמורה להשאיר את הלקוח בלי דף
+   מוצר. זה מטא-דאטה לרובוטים, לא תוכן. */
+function pdSeo(){
+  try{
+    const it = PD_ITEM;
+    if(!it) return;
+    const catName = dvtCatLabel(PD_VIEW_CAT, PD_CATALOG ? PD_CATALOG[PD_VIEW_CAT] : null);
+    const description = pdDescription(it, catName);
+
+    document.title = itemName(it) + " — DvirTech";
+    pdSetMeta_("description", pdMetaDescription(description));
+
+    const url = pdCanonicalUrl();
+    if(url){
+      pdHeadTag_('link[rel="canonical"]', () => {
+        const l = document.createElement("link");
+        l.setAttribute("rel", "canonical");
+        return l;
+      }).setAttribute("href", url);
+    }
+
+    const tag = pdHeadTag_('script[type="application/ld+json"]', () => {
+      const s = document.createElement("script");
+      s.setAttribute("type", "application/ld+json");
+      return s;
+    });
+    tag.textContent = pdJsonLdText_(pdBuildJsonLd(it, catName, description));
+  }catch(e){
+    console.error("[product] seo failed:", e);
+  }
+}
+
+
 /* ==================== מוצרים קשורים ==================== */
 function pdRenderRelated(){
   const same = sellableInCat(PD_VIEW_CAT)
@@ -680,7 +812,7 @@ function sellableInCat(cat){
   if(dvtIsVirtualCat(cat)) return dvtVirtualItems(PD_CATALOG, cat);
   const g = PD_CATALOG[cat];
   if(!g) return [];
-  return (g.items || []).filter(dvtIsSellable).map(x => Object.assign({ _realCat: cat }, x));
+  return (g.items || []).filter(x => dvtIsSellable(x, cat)).map(x => Object.assign({ _realCat: cat }, x));
 }
 
 /* קישור וואטסאפ עם שם המוצר שהלקוח צופה בו, כדי שלא יצטרך להסביר
@@ -750,6 +882,8 @@ function setLang(lang){
    מקבלים דף מוצר חלקי עם הודעה, ולא כלום. */
 function pdRenderProduct(){
   try{
+    // ראשון: גם אם הרינדור החזותי ייפול, לגוגל כבר יש את הנתונים הנכונים
+    pdSeo();
     pdRenderCrumbs();
     pdRenderBody();
     pdRenderRelated();
@@ -798,7 +932,8 @@ async function loadProduct(){
   // צריך לראות "מסכים" בפירורי הלחם ולחזור לשם, לא ל"ציוד היקפי".
   PD_VIEW_CAT = (cat && dvtIsVirtualCat(cat) && DVT_VIRTUAL_CATS[cat].from === PD_CAT
                  && DVT_VIRTUAL_CATS[cat].match(found)) ? cat : PD_CAT;
-  document.title = itemName(found) + " — DvirTech";
+  // ה-<title> נקבע ב-pdSeo יחד עם שאר המטא-דאטה, כדי שיהיה מקום אחד
+  // שקובע מה גוגל רואה — והוא רץ גם במעבר שפה וגם ברענון הקטלוג.
 
   pdRenderProduct();
 

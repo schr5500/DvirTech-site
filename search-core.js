@@ -28,6 +28,7 @@ const DVT_API_URL = "https://script.google.com/macros/s/AKfycbwuW5tgiRDhoIEFNkHH
 /* ==================== קטלוג ==================== */
 let _dvtCatalog = null;
 let _dvtCatalogPromise = null;
+let _dvtCatalogVer = null;   // חתימת התוכן הנוכחי — ראה _dvtVerOf
 
 /* ---------------------------------------------------------------------
    מטמון בדפדפן — stale-while-revalidate
@@ -58,10 +59,56 @@ function _dvtReadCache(){
   }catch(e){ return null; }
 }
 
-function _dvtWriteCache(catalog){
+function _dvtWriteCache(catalog, version){
   try{
-    localStorage.setItem(DVT_CACHE_KEY, JSON.stringify({ savedAt: Date.now(), catalog: catalog }));
+    localStorage.setItem(DVT_CACHE_KEY, JSON.stringify({
+      savedAt: Date.now(), version: version || null, catalog: catalog
+    }));
   }catch(e){ /* מכסת אחסון מלאה / גלישה פרטית — פשוט בלי מטמון */ }
+}
+
+/* ---------------------------------------------------------------------
+   זיהוי שינוי — בזול
+   ---------------------------------------------------------------------
+   הגרסה הקודמת עשתה כאן, בכל טעינת דף:
+       JSON.stringify(fresh) !== JSON.stringify(_dvtCatalog)
+   כלומר שתי הסדרות של ~460,000 תווים כל אחת, רק כדי לענות על שאלת
+   כן/לא.
+
+   ⚠️ **נמדד, ולא כפי שנראה בקריאה:** זה עלה 1.1ms בלבד (Chrome,
+   1,271 מוצרים) — JSON.stringify של V8 מהיר בהרבה ממה שהגודל מרמז.
+   כלומר זו **לא** הייתה הסיבה לאיטיות של הדף, וזו הסיבה היחידה
+   שהמספר כתוב כאן: כדי שאף אחד לא "יתקן" את זה שוב בתור אופטימיזציה
+   גדולה. הצוואר האמיתי הוא תשובת getCatalog (10–13 שניות), ראה
+   4-payment-api.gs.
+
+   מה שכן: השרת מחזיר עכשיו `version` (חתימת FNV-1a שמחושבת אצלו פעם
+   ב-6 שעות), וההשוואה היא בין שתי מחרוזות קצרות — 1.1ms → ~0.
+   השיפור אמיתי אך צנוע, והערך העיקרי שלו הוא שהוא לא גדל עם הקטלוג.
+
+   ⚠️ `_dvtCheapSig` הוא **גיבוי לפריסה ישנה של 4-payment-api.gs**
+   שעדיין לא מחזירה `version`. בלעדיו, לקוח חדש מול שרת ישן היה
+   מסיק "שום דבר לא השתנה" לנצח ולא מרענן את המסך לעולם. הוא עובר רק
+   על השדות שמשפיעים על מה שמצויר (מזהה/מחיר/מלאי/אורך שם/מחיר קודם)
+   ונמדד ב-0.3ms.
+--------------------------------------------------------------------- */
+function _dvtCheapSig(catalog){
+  const parts = [];
+  Object.keys(catalog || {}).sort().forEach(cat => {
+    const g = catalog[cat];
+    if(!g || !Array.isArray(g.items)) return;
+    parts.push(cat, g.items.length);
+    g.items.forEach(it => {
+      parts.push(it.id, it.price, it.inStock === undefined ? "" : it.inStock,
+                 (it.name || "").length, it.oldPrice === undefined ? "" : it.oldPrice);
+    });
+  });
+  return parts.join("|");
+}
+
+/* המזהה שמייצג את התוכן הנוכחי: גרסת השרת אם יש, אחרת חתימה מקומית. */
+function _dvtVerOf(catalog, version){
+  return version || _dvtCheapSig(catalog);
 }
 
 /* בריחת HTML לכל טקסט שנכנס ל-innerHTML. חובה על מילת חיפוש — היא
@@ -106,7 +153,7 @@ function dvtInStock(it){
 }
 
 /* מוצר אמיתי *וגם* זמין. זה הגייט שכל כפתור קנייה חייב לעבור. */
-function dvtCanBuy(it){ return dvtIsSellable(it) && dvtInStock(it); }
+function dvtCanBuy(it, cat){ return dvtIsSellable(it, cat) && dvtInStock(it); }
 
 /* גישה סינכרונית לקטלוג שכבר נטען — לשימוש בנקודות שבהן אי אפשר
    להמתין ל-Promise, כמו הגנת ההוספה לעגלה. מחזיר null אם עוד לא נטען. */
@@ -203,7 +250,9 @@ function _dvtFetchFresh(){
     .then(r => r.json())
     .then(d => {
       if(!d.ok || !d.catalog) throw new Error(d.error || "getCatalog failed");
-      return d.catalog;
+      // ⚠️ `version` קיים רק בפריסות חדשות של 4-payment-api.gs. חסר =
+      // נופלים לחתימה מקומית, ולא שוברים כלום.
+      return { catalog: d.catalog, version: d.version || null };
     });
 }
 
@@ -214,13 +263,16 @@ function dvtGetCatalog(){
   const cached = _dvtReadCache();
   if(cached){
     _dvtCatalog = cached.catalog;
+    _dvtCatalogVer = cached.version || null;
     const stale = (Date.now() - cached.savedAt) > DVT_CACHE_MAX_AGE_MS;
     // מרעננים ברקע תמיד. אם התוכן באמת השתנה — מודיעים למי שנרשם.
-    _dvtFetchFresh().then(fresh => {
-      const changed = JSON.stringify(fresh) !== JSON.stringify(_dvtCatalog);
-      _dvtCatalog = fresh;
-      _dvtWriteCache(fresh);
-      if(changed) _dvtRefreshSubs.forEach(fn => { try{ fn(fresh); }catch(e){} });
+    _dvtFetchFresh().then(res => {
+      const before = _dvtVerOf(_dvtCatalog, _dvtCatalogVer);
+      const after  = _dvtVerOf(res.catalog, res.version);
+      _dvtCatalog = res.catalog;
+      _dvtCatalogVer = res.version;
+      _dvtWriteCache(res.catalog, res.version);
+      if(before !== after) _dvtRefreshSubs.forEach(fn => { try{ fn(res.catalog); }catch(e){} });
     }).catch(() => { /* אין רשת — ממשיכים עם המטמון */ });
 
     // מטמון ישן מדי ולא הצלחנו לרענן: עדיף להציג נתונים ישנים מכלום,
@@ -231,7 +283,12 @@ function dvtGetCatalog(){
 
   // ביקור ראשון — אין ברירה אלא לחכות לרשת
   _dvtCatalogPromise = _dvtFetchFresh()
-    .then(c => { _dvtCatalog = c; _dvtWriteCache(c); return c; })
+    .then(res => {
+      _dvtCatalog = res.catalog;
+      _dvtCatalogVer = res.version;
+      _dvtWriteCache(res.catalog, res.version);
+      return res.catalog;
+    })
     .catch(e => {
       // מאפסים כדי שניסיון הבא יוכל לנסות שוב, ולא ייתקע על promise דחוי
       _dvtCatalogPromise = null;
@@ -314,8 +371,35 @@ function dvtItemScore(item, catLabelText, term){
    `"חשוד"` (נעדר מהמחירון האחרון) **נשאר מוצג**: מחירון אחד חלקי או
    מוצר שחזר למלאי היו מוחקים מוצרים חיים מהחנות בשקט. ראה
    `15-catalog-hygiene.gs`. */
-function dvtIsSellable(it){
+/* ==================== תת-סוגים שלא מוצגים באתר ====================
+   🔴 **דביר — כאן מסתירים קבוצת מוצרים מהאתר בלי למחוק אותה מהגיליון.**
+   המפתח הוא `"<קטגוריה>:<subType>"`.
+
+   ⚠️ הסתרה כאן מסירה את המוצרים **בכל מקום בבת אחת** — החנות, החיפוש,
+   דף הבית, קבוצות הסינון והתפריט העליון. זה בכוונה נקודה אחת: הסתרה
+   בדף אחד בלבד הייתה משאירה את המוצר נגיש דרך חיפוש או קישור ישיר,
+   וזה גרוע יותר מלא להסתיר בכלל — כי אז יש מדף שמוביל למוצר שכאילו
+   לא קיים.
+
+   ⚠️ המוצרים **נשארים בגיליון** ומסונכרנים כרגיל (מלאי, מחיר, תמונה).
+   מחיקת השורה כאן מחזירה אותם לאתר מיד, בלי לייבא כלום מחדש — וזה
+   בדיוק התרחיש של "לקוח ביקש דופן למארז".
+
+   `extras:case-glass` — 34 דפנות ופאנלים למארז. החלטת דביר 14.08.2026:
+   המבחר קטן מדי מכדי להציג אותו כמדף באתר, והוא נמכר לפי בקשה. */
+const DVT_HIDDEN_SUBTYPES = {
+  "extras:case-glass": true
+};
+
+function dvtIsHiddenSubType(it, cat){
+  const c = (it && (it._realCat || it.category)) || cat;
+  const s = it && it.subType;
+  return !!(c && s && DVT_HIDDEN_SUBTYPES[c + ":" + s]);
+}
+
+function dvtIsSellable(it, cat){
   if(!it || it.id === "none" || !(Number(it.price) > 0)) return false;
+  if(dvtIsHiddenSubType(it, cat)) return false;
   const st = it.supply_status || it.supplyStatus;
   return String(st || "").trim() !== "הופסק";
 }
@@ -343,8 +427,11 @@ function dvtVirtualItems(catalog, cat){
   if(!v || !catalog) return [];
   const g = catalog[v.from];
   if(!g) return [];
+  /* ⚠️ `v.from` ולא `cat`: הקטגוריה האמיתית של הפריטים היא מקור
+     הנתונים (peripherals), לא הקטגוריה הווירטואלית (monitor). מפתחות
+     DVT_HIDDEN_SUBTYPES נכתבים לפי הקטגוריה האמיתית. */
   return (g.items || [])
-    .filter(dvtIsSellable)
+    .filter(it => dvtIsSellable(it, v.from))
     .filter(v.match)
     .map(it => Object.assign({ _realCat: v.from }, it));
 }

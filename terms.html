@@ -1,4 +1,24 @@
 <!DOCTYPE html>
+<!--
+  =====================================================================
+  🔴🔴 DvirTech — תקנון האתר · אזהרה לפני השקה
+  =====================================================================
+  דביר ביקש מפורשות לתעד ולהזכיר:
+  **"GPT המליץ להתייעץ עם עו"ד לפני השקה — תתעד ותזכיר לי."**
+
+  הטקסט בעמוד הזה (Web/terms.js) נוסח על ידי מודל שפה, מתוך אימות מול
+  מקורות דין רשמיים — אבל **הוא אינו ייעוץ משפטי**. אסור להתחיל למכור
+  בפועל דרך האתר לפני שעו"ד ישראלי (צרכנות / מסחר אלקטרוני) עבר עליו.
+
+  רשימת הנקודות שחייבות אישור עו"ד, המקורות שנבדקו והתאריכים שלהם:
+  → DVT-TERMS-REVIEW.md בשורש הפרויקט.
+
+  בטקסט עצמו כל נקודה כזו מסומנת "⚠️ לאישור עו״ד" (class="legal-todo").
+  **אין להסיר את הסימונים האלה בלי אישור בפועל.**
+
+  ⚠️ הבאנר הצהוב בראש העמוד מיועד להסרה **רק** אחרי אישור עו"ד.
+  =====================================================================
+-->
 <html lang="he" dir="rtl">
 <head>
 <meta charset="UTF-8">
@@ -20,6 +40,22 @@
   .terms-section h2{font-size:17px;margin:0 0 10px;color:var(--navy-900)}
   .terms-section p{font-size:14.5px;line-height:1.85;color:var(--ink);margin:0 0 10px}
   .terms-section p:last-child{margin-bottom:0}
+
+  /* ⚠️ באנר טיוטה. נשאר עד שעו"ד יאשר את הנוסח — ראה ההערה בראש הקובץ
+     ו-DVT-TERMS-REVIEW.md. אין להסתיר אותו ב-CSS "כדי שייראה נקי". */
+  .terms-draft-note{
+    border:1px solid #E8B84B;background:#FFF8E6;border-radius:12px;
+    padding:14px 16px;margin:0 0 26px;
+  }
+  .terms-draft-note b{display:block;font-size:14px;color:#7A5600;margin-bottom:5px}
+  .terms-draft-note span{display:block;font-size:13px;line-height:1.75;color:#6B5320}
+
+  /* סימון נקודה שממתינה לעו"ד, בתוך גוף הסעיף. */
+  .legal-todo{
+    display:inline-block;white-space:nowrap;
+    background:#FFF1C9;border:1px solid #E8B84B;border-radius:6px;
+    padding:1px 7px;margin:0 2px;font-size:12.5px;font-weight:600;color:#7A5600;
+  }
 </style>
 </head>
 <body>
@@ -33,7 +69,7 @@
       <a href="products.html?cat=peripherals" id="navPeripherals"></a>
       <a href="products.html?cat=gpu" id="navComponents"></a>
       <a href="builder.html" id="navBuilder"></a>
-      <a href="coming-soon.html?service=support" id="navLab"></a>
+      <a href="support.html" id="navLab"></a>
       <a href="why-dvirtech.html" id="navWhy"></a>
       <a href="contact.html" id="navContact"></a>
     </nav>
@@ -46,25 +82,24 @@
 
 <div class="wrap" style="max-width:760px;padding-top:44px;padding-bottom:70px">
   <h1 id="pageTitle" style="font-size:28px;margin:0 0 4px"></h1>
-  <p id="pageUpdated" style="color:var(--ink-soft);font-size:13px;margin:0 0 30px"></p>
+  <p id="pageUpdated" style="color:var(--ink-soft);font-size:13px;margin:0 0 22px"></p>
 
+  <!-- ⚠️ **באנר ה"טיוטה" הוסר במכוון (16.08.2026).** הוא הכריז ללקוח
+       שהמסמך טרם נבדק משפטית — הצהרה שמזמינה ספק ואינה נדרשת: סעיף 1
+       כבר קובע שהדין גובר על כל סעיף בתקנון. המעקב אחרי מה שממתין
+       לעו"ד עבר ל-DVT-TERMS-REVIEW.md סעיף 5, ששם מקומו.
+       ⚠️ אין בהסרה כדי לייתר את בדיקת עורך הדין לפני השקה. -->
   <div id="termsBody"></div>
 </div>
 
-<footer>
-  <span class="footer-logo-crop"><img class="footer-logo" src="images/logo-dvirtech-transparent.png" alt="DvirTech"></span>
-  <span id="footerText"></span>
-  <div class="footer-legal">
-    <a href="about.html" id="footerAboutLink"></a>
-    <a href="contact.html" id="footerContactLink"></a>
-    <a href="terms.html" id="footerTermsLink"></a>
-  </div>
-</footer>
+<footer></footer>
 
 <script src="sprite.js"></script>
 <script src="i18n.js"></script>
+<script src="site-content.js"></script>
 <script src="search-core.js"></script>
 <script src="site-header.js"></script>
+<script src="site-footer.js"></script>
 <script src="terms.js"></script>
 <script src="cart.js"></script>
 </body>

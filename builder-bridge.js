@@ -56,6 +56,35 @@
     });
   }
 
+  /* ⚠️ בלשונית המארזים בגיליון יושבים גם **מארזים חיצוניים לדיסקים**
+     (ADATA AED600, MAIVO Dual Bay...). בחנות זה בסדר — זה באמת מוצר
+     מאותה משפחה — אבל בבונה "מארז" פירושו מארז מחשב, ולקוח שבוחר
+     קופסת USB לדיסק כמארז להרכבה מקבל הזמנה בלתי אפשרית. למנוע
+     ההתאמה אין איך לתפוס את זה (אין להם מפרט מארז, אז החוקים פשוט
+     שותקים) — לכן הסינון כאן, בכניסה לבונה. */
+  function isBuildableCaseItem(i){
+    return !/מארז\s*חיצוני|enclosure|docking/i.test(String((i && i.name) || ""));
+  }
+
+  /* אפשרות "קירור בסיסי שמגיע עם המעבד" — דרישה מפורשת של דביר:
+     כשלמעבד שנבחר באמת מצורף גוף קירור (coolerIncluded, אחרי אימות
+     מהשם — ראה dvtCoolerIncluded ב-builder-compat.js), שלב הקירור
+     מציע גם את הקירור מהקופסה ב-0 ₪. הזמינות נאכפת ע"י החוק
+     cooling-stock-needs-cpu במנוע: בלי מעבד מתאים האפשרות מוצגת
+     חסומה עם הסיבה, בדיוק כמו כל רכיב לא תואם אחר.
+     pasteIncluded:true כי משחה תרמית מרוחה עליו מהמפעל. */
+  const STOCK_COOLER = {
+    id: "stock-cooler", stockCooler: true, price: 0, t: 1,
+    name: "קירור בסיסי שמגיע עם המעבד",
+    spec: "הגוף שמצורף למעבד בקופסה · ללא עלות · מתאים לעבודה יומיומית",
+    pasteIncluded: true, inStock: true
+  };
+  function ensureStockCooler(){
+    const list = D.CATALOG.cooling;
+    if(!Array.isArray(list)) return;
+    if(!list.some(i => i && i.id === STOCK_COOLER.id)) list.unshift(STOCK_COOLER);
+  }
+
   function applyCatalog(catalog){
     if(!catalog) return false;
     let changed = false;
@@ -65,14 +94,16 @@
       /* ⚠️ בבונה, בניגוד לחנות, מוצר שאזל *כן* נשמט מהרשימה: אי אפשר
          להרכיב מחשב מרכיב שאין, והצגתו רק תגרום ללקוח לבחור בו ואז
          להיתקע. בחנות הוא נשאר מוצג עם תג "אזל". */
-      const sellable = group.items.filter(i =>
+      let sellable = group.items.filter(i =>
         (typeof dvtCanBuy === "function") ? dvtCanBuy(i)
         : (typeof dvtIsSellable === "function") ? dvtIsSellable(i) : (i && i.id !== "none"));
+      if(cat === "case") sellable = sellable.filter(isBuildableCaseItem);
       if(!sellable.length) return;
       D.CATALOG[cat] = sellable.map(i => toBuilderItem(i, sellable));
       liveFilled.add(cat);
       changed = true;
     });
+    ensureStockCooler();
     return changed;
   }
 
@@ -86,6 +117,60 @@
       if(cached && cached.catalog) applyCatalog(cached.catalog);
     }
   }catch(e){ /* מטמון פגום — פשוט ממשיכים לשרת */ }
+  // גם בלי מטמון (ביקור ראשון, גלישה פרטית) — האפשרות קיימת ברשימה
+  ensureStockCooler();
+
+  /* ---------- הודעת "הוסר בשל חוסר התאמה" ----------
+     ⚠️ הבאנר חי כאן ולא ב-builder.html בכוונה: העיצוב של הבונה מוחלף
+     בימים אלה, והגשר חייב לעבוד עם כל גרסה שלו. סגנון inline בלבד —
+     בלי תלות ב-style.css. aria-live כדי שגם קורא מסך ישמע את ההסרה. */
+  function dvtCompatToast(messages){
+    if(!messages || !messages.length || !document.body) return;
+    let host = document.getElementById("dvtCompatToast");
+    if(!host){
+      host = document.createElement("div");
+      host.id = "dvtCompatToast";
+      host.setAttribute("dir", "rtl");
+      host.setAttribute("aria-live", "polite");
+      host.style.cssText = "position:fixed;bottom:18px;right:18px;z-index:9999;display:flex;flex-direction:column;gap:8px;max-width:min(420px,calc(100vw - 36px));font-family:'Heebo',sans-serif";
+      document.body.appendChild(host);
+    }
+    messages.forEach(msg => {
+      const card = document.createElement("div");
+      card.style.cssText = "background:#FFF6EA;border:1.5px solid #F6DDAF;color:#92650F;border-radius:14px;padding:12px 16px;font-size:14px;line-height:1.5;box-shadow:0 8px 24px rgba(14,42,71,.14)";
+      card.textContent = msg;
+      host.appendChild(card);
+      // נשאר מספיק זמן לקריאה; לא לנצח — זו הודעה, לא מצב
+      setTimeout(() => { if(card.parentNode) card.parentNode.removeChild(card); }, 12000);
+    });
+  }
+
+  /* ---------- הסרה אוטומטית של רכיב שכבר לא מתאים ----------
+     דרישת דביר (סעיף 6): שינוי ברכיב א' שהופך את רכיב ב' ללא-תואם
+     חייב להסיר את ב' עם הודעה — לעולם לא הרכבה שבורה בשקט.
+
+     בזמן רגיל ה-UI כבר מונע בחירה מתנגשת (פריט חסום אינו לחיץ), אבל
+     שלושה מסלולים כן מייצרים הרכבה שבורה: הרכבה שמורה מ-localStorage
+     שהמפרט שלה תוקן בגיליון מאז; חוק חדש שנוסף למנוע; ומעבד שהוחלף
+     כשנבחר "קירור בסיסי שמגיע עם המעבד". שלושתם עוברים דרך כאן. */
+  function dvtResolveSel(selIds){
+    const out = {};
+    Object.keys(selIds || {}).forEach(cat => {
+      const it = (D.CATALOG[cat] || []).find(i => i.id === selIds[cat]);
+      if(it) out[cat] = it;
+    });
+    return out;
+  }
+
+  function dvtAutoInvalidate(selIds, qty, keepCat){
+    if(typeof dvtInvalidateSelection !== "function") return null;
+    const res = dvtInvalidateSelection(dvtResolveSel(selIds), qty || {}, keepCat);
+    if(!res.removed.length) return null;
+    res.removed.forEach(r => { delete selIds[r.cat]; });
+    dvtCompatToast(res.removed.map(r =>
+      `${r.item.name} הוסר מההרכבה בשל חוסר התאמה: ${r.reason}`));
+    return res.removed;
+  }
 
   /* --- מסתירים קטגוריות שאין להן נתונים בגיליון ---
      ⚠️ העיצוב הגיע עם מוצרי דמו למאווררי מארז / משחה / רשת / אביזרים.
@@ -140,12 +225,31 @@
         const list = D.CATALOG[cat] || [];
         if(list.some(i => i.id === o.sel[cat])) sel[cat] = o.sel[cat];
       });
+      /* ⚠️ הרכבה שמורה עוברת את מנוע ההתאמה לפני שהיא חוזרת למסך:
+         מאז השמירה המפרט בגיליון יכול היה להשתנות (או שנוסף חוק חדש),
+         ומה שהיה תקין אתמול יכול להיות שבור היום. עדיף רכיב שנעלם עם
+         הסבר מאשר הרכבה שבורה שנראית תקינה. */
+      dvtAutoInvalidate(sel, o.qty || {});
       return { sel, qty: o.qty || {}, services: o.services || ["assembly"] };
     }catch(e){ return null; }
   }
   window.__DVT_SAVED_BUILD = loadSavedBuild();
 
   window.dvtSaveBuild = function(state){
+    /* ⚠️ **זו נקודת ההיאחזות של ההסרה האוטומטית, וזה לא מקרי.**
+       builder.html קורא לכאן מתוך setState:
+           const next = { sel: Object.assign({}, s.sel, {[cat]: id}), last: cat };
+           dvtSaveBuild(Object.assign({}, s, next));
+           return next;
+       האובייקט שמגיע אלינו חולק את **אותה** רפרנס sel עם next —
+       ולכן מחיקת מפתח מ-state.sel כאן משנה גם את מה ש-setState יחיל.
+       כך ההסרה נכנסת למצב הרכיב בלי לגעת ב-builder.html (שאסור לגעת
+       בו — הוא מוחלף בעיצוב מחדש במקביל). אם התבנית שם תשתנה כך
+       שהשיתוף יישבר, ההסרה תפסיק לעבוד בשקט — ולכן גם הבדיקה בזמן
+       טעינה (loadSavedBuild) וגם dvtCheckBuild במסך ממשיכים לתפוס
+       את ההתנגשות; הלקוח לעולם לא רואה "תאימות תקינה" על הרכבה שבורה.
+       state.last = הקטגוריה שהרגע נבחרה = מי שנשאר; הרכיב השני מוסר. */
+    if(state && state.sel) dvtAutoInvalidate(state.sel, state.qty, state.last);
     try{
       localStorage.setItem(BUILD_KEY, JSON.stringify({
         sel: state.sel || {}, qty: state.qty || {}, services: state.services || []
@@ -180,6 +284,14 @@
       if(!it || Number(it.price) === 0 && /none|ללא/.test(String(it.id))) return;
       const n = Math.max(1, Number((qty||{})[cat]) || 1);
       const label = (D.CATS.find(c => c.key === cat) || {}).label || cat;
+      /* ⚠️ הקירור מהקופסה של המעבד הוא לא מוצר בגיליון: שולחים אותו
+         כשורת תיאור בלבד (שדביר יראה בהזמנה מה סוכם) אבל **בלי** SKU —
+         "cooling:stock-cooler" היה נופל בתמחור השרת כמוצר לא מוכר
+         ומפיל את כל התשלום. */
+      if(it.stockCooler === true){
+        lines.push({ label, name: it.name + " (כלול במעבד)", qty: 1 });
+        return;
+      }
       lines.push({ label, name: it.name, qty: n });
       // רק קטגוריות שקיימות בגיליון מקבלות SKU אמיתי לתמחור בשרת
       if(LIVE_CATS.includes(cat)) parts.push({ sku: cat + ":" + it.id, qty: n });
