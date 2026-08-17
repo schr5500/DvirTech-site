@@ -211,13 +211,22 @@ nav a.active::after{transform:scaleX(1)}
    לבנה-שקופה מעליה במקום להתנגש בה. */
 @media(max-width:820px){
   .hero-full .hero-photo{background-position:72% center}
+  /* ⚠️ קודם הבד היה קלוש מדי בדיוק בפס האמצעי (‎.35→.25) — שם יושב
+     ה-lede האפור, ומאחוריו המסך הכחול הבוהק. התוצאה: הכיתוב כמעט לא
+     נקרא בנייד (דיווח של דביר עם צילום). מחזקים את הפס האמצעי כדי
+     שלטקסט יהיה בסיס קריא, בלי להסתיר את התמונה לגמרי. */
   .hero-full .hero-photo::after{
     background:
-      linear-gradient(180deg, rgba(244,245,251,.75) 0%, rgba(244,245,251,.35) 30%,
-                              rgba(245,248,252,.25) 60%, var(--bg) 100%);
+      linear-gradient(180deg, rgba(244,245,251,.90) 0%, rgba(244,245,251,.64) 38%,
+                              rgba(245,248,252,.42) 66%, var(--bg) 100%);
   }
   .hero-full .hero-in{min-height:400px}
   .hero-full .hero-copy{max-width:none}
+  /* הכיתוב עצמו: כהה יותר + הילה לבנה עדינה, כדי לבלוט מעל התמונה בלי
+     להוסיף "קופסה" שתשבור את המראה של טקסט הצף על הצילום. */
+  .hero-copy h1{text-shadow:0 1px 10px rgba(255,255,255,.85), 0 0 2px rgba(255,255,255,.7)}
+  .hero-copy .hero-lede{color:var(--ink);font-weight:500;
+    text-shadow:0 1px 6px rgba(255,255,255,.9), 0 0 2px rgba(255,255,255,.8)}
 }
 
 .trust-bar{background:var(--surface);border-top:1px solid var(--line);border-bottom:1px solid var(--line)}
