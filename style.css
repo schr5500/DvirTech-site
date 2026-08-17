@@ -113,6 +113,11 @@ nav a:hover,.nav-drop-btn:hover{color:var(--blue)}
 nav a:hover::after,.nav-drop-btn:hover::after{transform:scaleX(1)}
 nav a.active{color:var(--blue);font-weight:700}
 nav a.active::after{transform:scaleX(1)}
+/* הדגשה עדינה ל"למה DvirTech?" — טקסט בגרדיאנט המותג, בלי גימיקים.
+   דרישת דביר: שיבלוט בתפריט אבל בלי לכער/להפוך את ההדר לצעקני. */
+nav a.nav-accent{font-weight:700;background:var(--grad);
+  -webkit-background-clip:text;background-clip:text;color:transparent}
+nav a.nav-accent:hover{filter:brightness(1.12)}
 @media(max-width:1000px){nav{display:none}}
 
 /* חיפוש + אייקוני פעולה בהדר (דף הבית) */
@@ -1053,6 +1058,11 @@ header.site-header--blue .navcat-btn:hover,
 header.site-header--blue #mainNav > a.active,
 header.site-header--blue .navcat-btn.active{color:#fff}
 header.site-header--blue #mainNav > a.active::after{background:#5AA9F5}
+/* בהדר הכחול הגרדיאנט הכהה לא קריא — ההדגשה הופכת לתכלת בהירה */
+header.site-header--blue #mainNav > a.nav-accent{background:none;
+  -webkit-background-clip:initial;background-clip:initial;color:#9BD3FF}
+header.site-header--blue #mainNav > a.nav-accent:hover,
+header.site-header--blue #mainNav > a.nav-accent.active{color:#fff}
 header.site-header--blue .head-search{background:rgba(255,255,255,.10);border-color:rgba(255,255,255,.18)}
 header.site-header--blue .head-search input{color:#fff}
 header.site-header--blue .head-search input::placeholder{color:rgba(220,232,244,.65)}

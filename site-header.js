@@ -115,7 +115,8 @@ const SITE_NAV_LINKS = [
   { catalog: true },                            // כאן נכנס תפריט "מוצרים"
   { href: "builder.html",                      he: "בניית מחשב",   en: "PC Builder" },
   { href: "support.html",  he: "שירות ותמיכה", en: "Service & Support" },
-  { href: "why-dvirtech.html",                 he: "למה DvirTech?", en: "Why DvirTech?" },
+  /* accent: הדגשה עדינה לדף המכירתי — דרישת דביר (בלי להפוך גימיקי) */
+  { href: "why-dvirtech.html",                 he: "למה DvirTech?", en: "Why DvirTech?", accent: true },
   { href: "contact.html",                      he: "צור קשר",      en: "Contact" }
 ];
 
@@ -217,8 +218,10 @@ function buildSiteHeader(){
       </div>`;
     }
     // products.html מסומן כפעיל דרך תפריט "מוצרים", לא כקישור נפרד
-    const active = l.href.split("?")[0] === here ? ' class="active"' : "";
-    return `<a href="${l.href}"${active}>${shEsc(shTr(l.he, l.en))}</a>`;
+    const cls = [];
+    if (l.href.split("?")[0] === here) cls.push("active");   // "אתה נמצא פה" — כחול (לבן בהדר כחול)
+    if (l.accent) cls.push("nav-accent");                    // הדגשה עדינה ל"למה DvirTech"
+    return `<a href="${l.href}"${cls.length ? ' class="' + cls.join(" ") + '"' : ""}>${shEsc(shTr(l.he, l.en))}</a>`;
   }).join("");
 
   bar.innerHTML = `

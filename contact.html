@@ -219,10 +219,28 @@
 class Component extends DCLogic {
   state = { copied: null };
   copy(kind, text){
-    try{ navigator.clipboard.writeText(text); }catch(e){}
-    this.setState({ copied: kind });
-    clearTimeout(this._t);
-    this._t = setTimeout(() => this.setState({ copied: null }), 1600);
+    /* ⚠️ clipboard.writeText מחזיר Promise שיכול להידחות בשקט (פוקוס/
+       הרשאות) — ואז מה שמודבק הוא מה שהיה בלוח קודם, שנראה כמו "באג
+       העתקה" אקראי (דווח 18.08: הודבק ערך זר). לכן: await אמיתי עם
+       נפילה ל-execCommand, וסימון "הועתק ✓" רק אחרי הצלחה בפועל. */
+    const done = () => {
+      this.setState({ copied: kind });
+      clearTimeout(this._t);
+      this._t = setTimeout(() => this.setState({ copied: null }), 1600);
+    };
+    const legacy = () => {
+      try{
+        const ta = document.createElement("textarea");
+        ta.value = text; ta.style.position = "fixed"; ta.style.opacity = "0";
+        document.body.appendChild(ta); ta.select();
+        document.execCommand("copy");
+        document.body.removeChild(ta);
+        done();
+      }catch(e){}
+    };
+    try{
+      navigator.clipboard.writeText(text).then(done, legacy);
+    }catch(e){ legacy(); }
   }
   componentWillUnmount(){ clearTimeout(this._t); }
   renderVals(){
