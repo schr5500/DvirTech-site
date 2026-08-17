@@ -615,7 +615,7 @@
         </span>
         <span>
           <span style="display:block;font-size:13px;font-weight:700;color:#0E2A47">משלוח מהיר</span>
-          <span style="display:block;font-size:11.5px;color:#5F7590">1–3 ימי עסקים</span>
+          <span style="display:block;font-size:11.5px;color:#5F7590">2–5 ימי עסקים</span>
         </span>
       </div>
       <div class="bld-trust-item">
@@ -1100,7 +1100,11 @@ class Component extends DCLogic {
       filterNote: (() => {
         const by = this.filterOn(st.cat);
         if(!by.length || !view.rated.length) return null;
-        const names = by.map(k => (CATS.find(c => c.key === k) || {}).label || k).join(" · ");
+        /* צורת היידוע: ברוב הרכיבים ה' בהתחלה (המעבד/הזיכרון), אבל
+           בצירופים ה' יושבת על המילה השנייה (לוח האם, כרטיס המסך,
+           ספק הכוח) — ולכן מפה מפורשת ולא הדבקת "ה" עיוורת. */
+        const DEF_LABEL = { mobo:"לוח האם", gpu:"כרטיס המסך", psu:"ספק הכוח" };
+        const names = by.map(k => DEF_LABEL[k] || ("ה" + ((CATS.find(c => c.key === k) || {}).label || k))).join(" · ");
         if(!view.blocked) return `לפי ${names} שבחרת: כל ${view.rated.length} האפשרויות מתאימות.`;
         /* כמה חסומים עדיין מוצגים ברשימה. גם כשההסתרה פעילה זה בדרך כלל
            לא 0: פריט שחסום רק בגלל רכיב שעדיין לא נבחר ("אין גרפיקה
