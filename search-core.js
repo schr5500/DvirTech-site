@@ -223,7 +223,17 @@ function dvtOldPrice(it){
 }
 function dvtIsOnSale(it){
   const old = dvtOldPrice(it), now = Number(it && it.price);
-  return old > 0 && Number.isFinite(now) && now > 0 && old > now;
+  if(!(old > 0 && Number.isFinite(now) && now > 0 && old > now)) return false;
+  /* ⏲️ פקיעה מדויקת: אם יש saleEndsAt והוא עבר — המבצע נגמר **ברגע
+     הזה**, בלי לחכות לסנכרון הבא (שרץ כל 12ש'). דרישת דביר: הטיימר
+     של הספק קובע מתי המבצע שלנו נגמר; ללקוח לא מציגים טיימר בכלל.
+     בלי saleEndsAt (מבצע ידני בלי תאריך) — נשאר עד שמנקים ידנית. */
+  const ends = it && (it.saleEndsAt || it["סוף מבצע"]);
+  if(ends){
+    const t = Date.parse(ends);
+    if(Number.isFinite(t) && t < Date.now()) return false;
+  }
+  return true;
 }
 function dvtDiscountPct(it){
   if(!dvtIsOnSale(it)) return 0;
