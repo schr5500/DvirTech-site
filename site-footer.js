@@ -58,6 +58,7 @@ const SF_COLUMNS = [
       ["support.html",       "תיקון ושדרוג",      "Repair & upgrade"],
       ["support.html#care",  "DvirTech Care",     "DvirTech Care"],
       ["support.html",       "אבחון תקלה",        "Fault diagnosis"],
+      ["tracking.html",      "מעקב הזמנה",        "Track order"],
       ["contact.html",       "ייעוץ לפני קנייה",  "Pre-purchase advice"]
   ]},
   { title: ["מידע", "Info"], links: [
