@@ -885,6 +885,12 @@ a.cart-item-link:hover{color:var(--blue);text-decoration:underline}
   color:inherit;padding:0;line-height:inherit;text-decoration:none}
 .navcat-chev{width:10px;height:7px;fill:none;stroke:currentColor;stroke-width:1.8;
   stroke-linecap:round;stroke-linejoin:round;transition:transform .2s}
+/* 📱 מכשירי מגע: החץ הוא כפתור פתיחה/סגירה (ראה wireCatalogMenu), ולכן
+   צריך אזור-נגיעה גדול. padding מגדיל את אזור הלחיצה, margin שלילי מבטל
+   את ההשפעה על הפריסה כדי שהתווית לא תזוז. */
+@media(hover:none){
+  .navcat-chev{box-sizing:content-box;padding:11px;margin:-11px;width:12px;height:9px}
+}
 .navcat:hover .navcat-chev,.navcat.open .navcat-chev{transform:rotate(180deg)}
 .navcat-btn:hover,.navcat.open .navcat-btn{color:var(--blue)}
 
@@ -1350,6 +1356,17 @@ html, body{height:auto !important}
     max-height:min(72vh,560px);overflow-y:auto}
   .navcat:hover .navcat-menu,.navcat.open .navcat-menu,.navcat:focus-within .navcat-menu{transform:translateY(0)}
   .navcat.dismissed .navcat-menu{transform:translateY(8px)}
+}
+
+/* 📱 מגע: הראוּת של תפריט "מוצרים" נשלטת אך ורק ע"י .open — site-header.js
+   מוסיף .navcat--touch ומטפל בפתיחה/סגירה בנגיעה בחץ. מבטלים פתיחה על
+   :hover/:focus-within כדי שתרגום-מגע-לעכבר של הדפדפן לא יילחם ב-toggle
+   (בלי זה הסגירה לא עבדה). רק opacity/visibility — המיקום (transform)
+   נשאר לכללי הרוחב הקיימים. חייב לבוא אחרי כל כללי הפתיחה בקובץ. */
+@media(hover:none){
+  .navcat:hover .navcat-menu,
+  .navcat:focus-within .navcat-menu{opacity:0;visibility:hidden;pointer-events:none}
+  .navcat.open .navcat-menu{opacity:1;visibility:visible;pointer-events:auto}
 }
 
 /* ---------- 3. טלפון (עד 600px): הדר קומפקטי, חיפוש בשורה משלו ----------

@@ -283,7 +283,26 @@ function wireCatalogMenu(bar){
     if(on) wrap.classList.remove("dismissed");
     btn.setAttribute("aria-expanded", on ? "true" : "false");
   };
-  // הצבעה/פוקוס פותחים ב-CSS; כאן רק מיישרים את ה-ARIA למה שנראה בפועל.
+
+  /* 📱 זיהוי מגע **חי** (בזמן הלחיצה) ולא פעם אחת בטעינה — מצב ה-hover
+     יכול להתייצב אחרי שהראש כבר נרנדר (נצפה באמולציה, ועלול לקרות גם
+     בטעינה איטית). גיבוי: ontouchstart / maxTouchPoints. */
+  const isTouch = () => !!(
+    (window.matchMedia && window.matchMedia("(hover: none)").matches) ||
+    ("ontouchstart" in window) || (navigator.maxTouchPoints > 0));
+
+  /* דרישת "שני העולמות" של דביר בנייד: לחיצה על **החץ** פותחת/סוגרת את
+     הקטגוריות בלי לנווט; לחיצה על **התווית "מוצרים"** מנווטת לדף. הראוּת
+     בנייד נשלטת אך ורק ע"י ‎.open (ראה @media(hover:none) ב-CSS: שם
+     :hover/:focus-within *לא* פותחים), ולכן ה-toggle אמין ולא נלחם. */
+  btn.addEventListener("click", e => {
+    if(!isTouch()) return;                          // דסקטופ: הקישור מנווט כרגיל
+    if(!e.target.closest(".navcat-chev")) return;   // התווית → ניווט
+    e.preventDefault();                              // החץ → פתיחה/סגירה
+    setOpen(!wrap.classList.contains("open"));
+  });
+
+  // דסקטופ: הצבעה/פוקוס פותחים ב-CSS; כאן רק מיישרים ARIA למה שנראה.
   wrap.addEventListener("mouseenter", () => {
     wrap.classList.remove("dismissed");            // הצבעה חדשה מבטלת Escape קודם
     btn.setAttribute("aria-expanded","true");
@@ -291,6 +310,7 @@ function wireCatalogMenu(bar){
   wrap.addEventListener("mouseleave", () => { if(!wrap.classList.contains("open")) btn.setAttribute("aria-expanded","false"); });
   wrap.addEventListener("focusin",    () => { if(!wrap.classList.contains("dismissed")) btn.setAttribute("aria-expanded","true"); });
   wrap.addEventListener("focusout", e => {
+    if(isTouch()) return;                           // במגע: ה-toggle וקליק-מחוץ מטפלים בסגירה
     if(!wrap.contains(e.relatedTarget)){ setOpen(false); wrap.classList.remove("dismissed"); }
   });
 
@@ -309,7 +329,7 @@ function wireCatalogMenu(bar){
     // Escape מתוך התפריט מחזיר את הפוקוס לקישור, אחרת הוא נופל לתחילת הדף.
     const inside = wrap.contains(document.activeElement);
     setOpen(false);
-    if(inside){ wrap.classList.add("dismissed"); btn.focus(); }
+    if(inside && !isTouch()){ wrap.classList.add("dismissed"); btn.focus(); }
   });
   document.addEventListener("click", e => {
     if(!wrap.contains(e.target)){ setOpen(false); wrap.classList.remove("dismissed"); }

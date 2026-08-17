@@ -1,0 +1,203 @@
+<!DOCTYPE html>
+<!--
+  =====================================================================
+  DvirTech — מעקב הזמנה (tracking.html)
+  =====================================================================
+  דף ציבורי שהלקוח פותח דרך קישור עם טוקן אטום:  tracking.html?order=<טוקן>
+  ⚠️ הטוקן הוא מזהה אקראי לא-ניחוש (לא מספר הזמנה רץ) — אחרת לקוח היה
+  יכול להציץ בהזמנות של אחרים. השרת (4-payment-api.gs, action=getOrderStatus)
+  מאמת את הטוקן ומחזיר רק את המידע של אותה הזמנה.
+
+  מקור האמת הוא גיליון ה-CRM. הסטטוסים (חמישה, מאושרים ע"י דביר):
+    1 ממתין לאישור תשלום   2 בהכנה   3 בהרכבה ובדיקות (רק להרכבות)
+    4 נשלח / בדרך אליך      5 נמסר
+  שלב 3 מוצג רק כשההזמנה כוללת הרכבה (hasAssembly). ה-ETA נגזר מסוג
+  ההזמנה: חלקים בלבד מהיר יותר מהרכבה (ראה trackingEtaText בשרת).
+
+  ⚠️ עוסק פטור — שום אזכור מע"מ בשום מקום בדף.
+  ⚠️ בלי פרמטר/טוקן שגוי → מצב ניטרלי, לא מסך שגיאה מאיים.
+  =====================================================================
+-->
+<html lang="he" dir="rtl">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<meta name="robots" content="noindex,nofollow">
+<title>DvirTech — מעקב הזמנה</title>
+<script>
+  (function(){
+    var saved = "he";
+    try { saved = localStorage.getItem("dvirtech_lang") || "he"; } catch(e) {}
+    document.documentElement.lang = saved;
+    document.documentElement.dir = saved === "he" ? "rtl" : "ltr";
+  })();
+</script>
+<link rel="preconnect" href="https://script.google.com" crossorigin>
+<link rel="preconnect" href="https://script.googleusercontent.com" crossorigin>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link href="https://fonts.googleapis.com/css2?family=Rubik:wght@400;500;600;700;800;900&family=Heebo:wght@300;400;500;700&display=swap" rel="stylesheet">
+<link rel="stylesheet" href="style.css">
+<style>
+/* ===== מעקב הזמנה — סגנון ייעודי. נשען על משתני style.css. ===== */
+.trk-wrap{max-width:720px;margin:0 auto;padding:28px 16px 60px}
+.trk-card{background:var(--surface);border:1px solid var(--line);border-radius:20px;
+  box-shadow:var(--shadow);padding:26px 26px 30px;overflow:hidden}
+
+/* כותרת ההזמנה */
+.trk-top{display:flex;align-items:flex-start;justify-content:space-between;gap:14px;flex-wrap:wrap}
+.trk-ordno{font-family:'Rubik',sans-serif;font-size:22px;font-weight:800;color:var(--ink);letter-spacing:-.01em}
+.trk-sub{font-size:13.5px;color:var(--ink-soft);margin-top:3px}
+.trk-care{display:inline-flex;align-items:center;gap:6px;font-size:12.5px;font-weight:800;
+  padding:6px 12px;border-radius:999px;color:#fff;white-space:nowrap}
+.trk-care.tier-CARE{background:linear-gradient(135deg,#3B82F6,#2563EB)}
+.trk-care.tier-PLUS{background:linear-gradient(135deg,#1D4ED8,#1E3A8A)}
+.trk-care.tier-PRO {background:linear-gradient(135deg,#0E2A47,#0B1F38);box-shadow:inset 0 0 0 1px #C9A227}
+.trk-care.tier-PRO .trk-care-ic{color:#F0C64B}
+
+/* קופסת הצפי */
+.trk-eta{margin:22px 0 8px;background:linear-gradient(135deg,#EAF3FF,#F3F8FF);
+  border:1px solid #D7E7FB;border-radius:16px;padding:16px 18px;display:flex;align-items:center;gap:14px}
+:root:not([data-theme="light"]) .trk-eta{}
+.trk-eta-ic{flex:none;width:42px;height:42px;border-radius:12px;background:#fff;
+  display:grid;place-items:center;box-shadow:0 2px 8px rgba(14,42,71,.10)}
+.trk-eta-ic svg{width:23px;height:23px;fill:none;stroke:var(--blue);stroke-width:1.9;stroke-linecap:round;stroke-linejoin:round}
+.trk-eta-lbl{font-size:12.5px;color:var(--ink-soft);font-weight:600}
+.trk-eta-val{font-family:'Rubik',sans-serif;font-size:18px;font-weight:800;color:var(--ink);margin-top:1px}
+
+/* סרגל השלבים */
+.trk-steps{list-style:none;margin:26px 0 6px;padding:0;position:relative}
+.trk-step{position:relative;display:grid;grid-template-columns:34px 1fr;gap:14px;padding:0 0 22px}
+.trk-step:last-child{padding-bottom:0}
+/* קו מקשר בין הנקודות */
+.trk-step:not(:last-child)::before{content:"";position:absolute;
+  inset-inline-start:16px;top:30px;bottom:2px;width:2px;background:var(--line)}
+.trk-step.done::before{background:var(--blue)}
+.trk-dot{width:34px;height:34px;border-radius:50%;display:grid;place-items:center;
+  background:var(--surface-2,#EDF2F8);border:2px solid var(--line);z-index:1;transition:.2s}
+.trk-dot svg{width:16px;height:16px;fill:none;stroke:#fff;stroke-width:2.4;stroke-linecap:round;stroke-linejoin:round}
+.trk-step.done .trk-dot{background:var(--blue);border-color:var(--blue)}
+.trk-step.current .trk-dot{background:#fff;border-color:var(--blue);box-shadow:0 0 0 5px rgba(27,111,224,.16)}
+.trk-step.current .trk-dot::after{content:"";width:12px;height:12px;border-radius:50%;background:var(--blue)}
+.trk-step.current .trk-dot svg{display:none}
+.trk-step.pending .trk-dot svg{display:none}
+.trk-step.skipped{opacity:.45}
+.trk-body{padding-top:5px}
+.trk-name{display:block;font-family:'Rubik',sans-serif;font-size:15.5px;font-weight:700;color:var(--ink)}
+.trk-step.pending .trk-name,.trk-step.skipped .trk-name{color:var(--ink-soft);font-weight:600}
+.trk-step.current .trk-name{color:var(--blue)}
+.trk-desc{display:block;font-size:12.5px;color:var(--ink-soft);margin-top:3px;line-height:1.5}
+.trk-when{font-size:11.5px;color:var(--ink-soft);margin-top:3px;font-weight:600}
+
+/* מספר מעקב שילוח */
+.trk-ship{margin-top:20px;border-top:1px solid var(--line);padding-top:18px;display:none}
+.trk-ship.show{display:block}
+.trk-ship-btn{display:inline-flex;align-items:center;gap:9px;background:var(--blue);color:#fff;
+  text-decoration:none;font-weight:700;font-size:14px;padding:12px 20px;border-radius:12px}
+.trk-ship-btn svg{width:18px;height:18px;fill:none;stroke:currentColor;stroke-width:2;stroke-linecap:round;stroke-linejoin:round}
+.trk-ship-no{font-size:13px;color:var(--ink-soft)}
+
+/* פריטי ההזמנה */
+.trk-items{margin-top:22px;border-top:1px solid var(--line);padding-top:16px}
+.trk-items h3{font-family:'Rubik',sans-serif;font-size:13px;font-weight:800;color:var(--ink-soft);
+  text-transform:none;margin:0 0 10px}
+.trk-item{display:flex;align-items:center;justify-content:space-between;gap:12px;
+  font-size:14px;color:var(--ink);padding:7px 0;border-bottom:1px dashed var(--line)}
+.trk-item:last-child{border-bottom:none}
+.trk-item em{font-style:normal;color:var(--ink-soft);font-size:12.5px;font-weight:600}
+
+/* מצבי טעינה / ריק */
+.trk-msg{text-align:center;padding:46px 20px;color:var(--ink-soft)}
+.trk-msg h2{font-family:'Rubik',sans-serif;color:var(--ink);font-size:19px;margin:0 0 8px}
+.trk-msg a{color:var(--blue);font-weight:700}
+.trk-help{margin-top:18px;text-align:center;font-size:12.5px;color:var(--ink-soft)}
+.trk-help a{color:var(--blue);font-weight:700;text-decoration:none}
+.trk-spin{width:34px;height:34px;border-radius:50%;border:3px solid var(--line);
+  border-top-color:var(--blue);margin:0 auto 14px;animation:trkspin .8s linear infinite}
+@keyframes trkspin{to{transform:rotate(360deg)}}
+
+@media(max-width:600px){
+  .trk-card{padding:20px 16px 24px;border-radius:16px}
+  .trk-ordno{font-size:19px}
+}
+</style>
+</head>
+<body>
+
+<header>
+  <div class="wrap headbar">
+    <a class="brand" href="home.html" aria-label="DvirTech — לדף הבית"><img class="brand-logo" src="images/logo-dvirtech-transparent.png" alt="DvirTech"></a>
+    <div class="lang-switch">
+      <button class="lang-btn" data-lang="he" onclick="setLang&&setLang('he')">עברית</button>
+      <button class="lang-btn" data-lang="en" onclick="setLang&&setLang('en')">English</button>
+    </div>
+  </div>
+</header>
+
+<main class="wrap trk-wrap">
+
+  <!-- מצב טעינה -->
+  <div class="trk-card" id="trkLoading">
+    <div class="trk-msg">
+      <div class="trk-spin"></div>
+      <div>טוען את פרטי ההזמנה…</div>
+    </div>
+  </div>
+
+  <!-- מצב ריק / טוקן שגוי -->
+  <div class="trk-card" id="trkEmpty" style="display:none">
+    <div class="trk-msg">
+      <h2>לא מצאנו את ההזמנה</h2>
+      <p>ייתכן שהקישור חלקי או שפג תוקפו. אפשר לפנות אליי ואבדוק ידנית — עם מספר ההזמנה או הטלפון שאיתו בוצעה.</p>
+      <p class="trk-help"><a id="trkWa" href="#">שליחת הודעה בוואטסאפ ←</a></p>
+    </div>
+  </div>
+
+  <!-- מצב הזמנה -->
+  <div class="trk-card" id="trkOrder" style="display:none">
+    <div class="trk-top">
+      <div>
+        <div class="trk-ordno" id="trkOrdNo">DVT-—</div>
+        <div class="trk-sub" id="trkPlaced"></div>
+      </div>
+      <span class="trk-care" id="trkCare" style="display:none">
+        <svg class="trk-care-ic" width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M12 2 4 5v6c0 5 3.4 8.5 8 11 4.6-2.5 8-6 8-11V5z"/></svg>
+        <span id="trkCareLbl"></span>
+      </span>
+    </div>
+
+    <div class="trk-eta" id="trkEtaBox">
+      <div class="trk-eta-ic"><svg viewBox="0 0 24 24"><rect x="1" y="6" width="15" height="11" rx="2"/><path d="M16 9h4l3 3v5h-7z"/><circle cx="6" cy="18" r="2"/><circle cx="18" cy="18" r="2"/></svg></div>
+      <div>
+        <div class="trk-eta-lbl" id="trkEtaLbl">צפי הגעה משוער</div>
+        <div class="trk-eta-val" id="trkEtaVal">—</div>
+      </div>
+    </div>
+
+    <ul class="trk-steps" id="trkSteps"></ul>
+
+    <div class="trk-ship" id="trkShip">
+      <a class="trk-ship-btn" id="trkShipBtn" href="#" target="_blank" rel="noopener">
+        <svg viewBox="0 0 24 24"><rect x="1" y="6" width="15" height="11" rx="2"/><path d="M16 9h4l3 3v5h-7z"/><circle cx="6" cy="18" r="2"/><circle cx="18" cy="18" r="2"/></svg>
+        <span id="trkShipBtnLbl">מעקב אחר המשלוח</span>
+      </a>
+      <div class="trk-ship-no" id="trkShipNo" style="display:none"></div>
+    </div>
+
+    <div class="trk-items" id="trkItemsBox" style="display:none">
+      <h3>פריטים בהזמנה</h3>
+      <div id="trkItems"></div>
+    </div>
+  </div>
+
+  <div class="trk-help">שאלה על ההזמנה? <a id="trkWa2" href="#">כתבו לי בוואטסאפ</a></div>
+
+</main>
+
+<script src="i18n.js"></script>
+<script src="site-content.js"></script>
+<script src="search-core.js"></script>
+<script src="site-header.js"></script>
+<script src="site-footer.js"></script>
+<script src="tracking.js"></script>
+</body>
+</html>
