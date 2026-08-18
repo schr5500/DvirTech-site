@@ -29,11 +29,15 @@ const PD_MAX_QTY = 20;  // התקרה שהשרת אוכף על שורה בעגל
 /* ⚠️ warranty מוסתר כאן כי הוא מוצג בתיבת המחיר (pdWarrantyHtml) ולא
    בטבלה. בלי זה הוא היה נופל לשארית שבסוף pdSpecRows ומודפס עם התווית
    "warranty" — facetLabel מחזיר את המפתח עצמו כשאין לו תרגום. */
+/* ⚠️ עמודות ה-supply_* אינן ברשימת העמודות הפנימיות של ה-API בכוונה
+   (ראה SHEET_INTERNAL_COLUMNS_ ב-4-payment-api.gs) — הן מגיעות ללקוח כדי
+   שהחנות תוכל להסתיר מוצר שהופסק. הן לא מפרט, ובלי החסימה כאן הן היו
+   נדפסות בקבוצת "מפרט נוסף" בשמן הגולמי. */
 const PD_HIDDEN_FIELDS = new Set([
   "id","name","nameEn","spec","specEn","price","oldPrice","saleEndsAt",
   "inStock","stock","brand","image","images","_realCat","icon",
   "desc","descEn","label","labelEn","shopOnly","tier","radiatorSupport",
-  "warranty"
+  "warranty","supply_status","supplyStatus","supply_reason","supply_checked"
 ]);
 
 const pdNis = v => Number(v).toLocaleString("he-IL") + " ₪";
@@ -138,7 +142,13 @@ const PD_TECH_FIELDS = {
     { key:"maxTurboWatts",   label:"צריכת שיא (W)" },
     { key:"hasIgpu",         label:"גרפיקה מובנית" },
     { key:"coolerIncluded",  label:"כולל קירור" },
-    { key:"overclockable",   label:"תמיכה ב-OC" }
+    { key:"overclockable",   label:"תמיכה ב-OC" },
+    { key:"threads",               label:"תהליכונים" },
+    { key:"cacheMb",               label:"מטמון (MB)" },
+    { key:"color",               label:"צבע" },
+    { key:"igpuModel",               label:"דגם גרפיקה מובנית" },
+    { key:"baseClockGhz",               label:"תדר בסיס (GHz)" },
+    { key:"boostClockGhz",               label:"תדר טורבו (GHz)" }
   ],
 
   mobo: [
@@ -161,7 +171,10 @@ const PD_TECH_FIELDS = {
     { key:"maxCpuTdpWatts",       label:"הספק מעבד מירבי (W)" },
     { key:"wifiBuiltIn",          label:"WiFi מובנה" },
     { key:"argbHeaders",          label:"חיבורי ARGB" },
-    { key:"supportsOverclocking", label:"תמיכה ב-OC" }
+    { key:"supportsOverclocking", label:"תמיכה ב-OC" },
+    { key:"wifi",               label:"תקן WiFi" },
+    { key:"color",               label:"צבע" },
+    { key:"lanSpeed",               label:"מהירות רשת קווית" }
   ],
 
   ram: [
@@ -171,7 +184,10 @@ const PD_TECH_FIELDS = {
     { key:"speedMhz",   label:"מהירות (MHz)" },
     { key:"cl",         label:"תזמון (CL)" },
     { key:"heightMm",   label:'גובה (מ"מ)' },
-    { key:"tier",       label:"דרג" }
+    { key:"tier",       label:"דרג" },
+    { key:"color",               label:"צבע" },
+    { key:"kitLayout",               label:"מבנה הערכה" },
+    { key:"rgb",               label:"תאורת RGB" }
   ],
 
   gpu: [
@@ -183,7 +199,13 @@ const PD_TECH_FIELDS = {
     { key:"slotWidth",           label:"עובי (חריצים)" },
     { key:"tdpWatts",            label:"צריכת חשמל (W)" },
     { key:"recommendedPsuWatts", label:"ספק מומלץ (W)" },
-    { key:"powerConnectors",     label:"מחברי הזנה" }
+    { key:"powerConnectors",     label:"מחברי הזנה" },
+    { key:"memType",               label:"סוג זיכרון גרפי" },
+    { key:"memBusBit",               label:"רוחב פס זיכרון (bit)" },
+    { key:"outputs",               label:"יציאות תצוגה" },
+    { key:"pcieIface",               label:"ממשק PCIe" },
+    { key:"boostClockMhz",               label:"תדר Boost (MHz)" },
+    { key:"color",               label:"צבע" }
   ],
 
   cooling: [
@@ -195,7 +217,10 @@ const PD_TECH_FIELDS = {
     { key:"radiatorMm",          label:'רדיאטור (מ"מ)' },
     { key:"radiatorThicknessMm", label:'עובי רדיאטור (מ"מ)' },
     { key:"pasteIncluded",       label:"כולל משחה" },
-    { key:"tier",                label:"דרג" }
+    { key:"tier",                label:"דרג" },
+    { key:"fanMm",               label:'גודל מאוורר (מ"מ)' },
+    { key:"noiseDb",               label:"רעש מירבי (dBA)" },
+    { key:"color",               label:"צבע" }
   ],
 
   storage: [
@@ -203,7 +228,11 @@ const PD_TECH_FIELDS = {
     { key:"capacityGb", label:"נפח (GB)" },
     { key:"formFactor", label:"גודל פיזי" },
     { key:"pcieGen",    label:"דור PCIe" },
-    { key:"tier",       label:"דרג" }
+    { key:"tier",       label:"דרג" },
+    { key:"readMbs",               label:"קריאה (MB/s)" },
+    { key:"writeMbs",               label:"כתיבה (MB/s)" },
+    { key:"tbw",               label:"עמידות (TBW)" },
+    { key:"color",               label:"צבע" }
   ],
 
   psu: [
@@ -213,7 +242,10 @@ const PD_TECH_FIELDS = {
     { key:"efficiency", label:"תקן יעילות" },
     { key:"modular",    label:"מודולרי" },
     { key:"connectors", label:"פירוט חיבורים" },
-    { key:"tier",       label:"דרג" }
+    { key:"tier",       label:"דרג" },
+    { key:"fanMm",               label:'גודל מאוורר (מ"מ)' },
+    { key:"color",               label:"צבע" },
+    { key:"atxVer",               label:"תקן ATX" }
   ],
 
   /* ⚠️ שלושה מפתחות כאן שונים מהגיליון, כי postProcessSheetItem_ ב-
@@ -237,21 +269,30 @@ const PD_TECH_FIELDS = {
     { key:"bays25",                  label:'מקומות 2.5"' },
     { key:"bays35",                  label:'מקומות 3.5"' },
     { key:"frontPanel",              label:"פאנל קדמי" },
+    /* נוספו 18.08.2026 יחד עם הרחבת הסכימה ב-11-catalog.gs */
+    { key:"sidePanel",               label:"פאנל צדדי" },
+    { key:"frontPorts",              label:"יציאות בחזית" },
+    { key:"includedFans",            label:"מאווררים מותקנים" },
+    { key:"color",                   label:"צבע" },
     { key:"tier",                    label:"דרג" }
   ],
+
 
   caseFans: [
     { key:"fans",        label:"כמות מאווררים" },
     { key:"sizeMm",      label:'גודל (מ"מ)' },
     { key:"argb",        label:"תאורת ARGB" },
     { key:"pwm",         label:"בקרת PWM" },
-    { key:"hubIncluded", label:"כולל האב" }
+    { key:"hubIncluded", label:"כולל האב" },
+    { key:"noiseDb",               label:"רעש מירבי (dBA)" },
+    { key:"color",               label:"צבע" }
   ],
 
   paste: [
     { key:"grams",                  label:"כמות (גרם)" },
     { key:"conductivity",           label:"מוליכות (W/m·K)" },
-    { key:"electricallyConductive", label:"מוליך חשמל" }
+    { key:"electricallyConductive", label:"מוליך חשמל" },
+    { key:"color",               label:"צבע" }
   ],
 
   wifi: [
@@ -259,14 +300,16 @@ const PD_TECH_FIELDS = {
     { key:"netType",      label:"סוג רשת" },
     { key:"wifiStandard", label:"תקן WiFi" },
     { key:"speedMbps",    label:"מהירות (Mbps)" },
-    { key:"bluetooth",    label:"Bluetooth" }
+    { key:"bluetooth",    label:"Bluetooth" },
+    { key:"color",               label:"צבע" }
   ],
 
   extras: [
     { key:"subType",        label:"סוג אביזר" },
     { key:"argb",           label:"תאורת ARGB" },
     { key:"lengthCm",       label:'אורך (ס"מ)' },
-    { key:"compatibleWith", label:"מתאים ל-" }
+    { key:"compatibleWith", label:"מתאים ל-" },
+    { key:"color",               label:"צבע" }
   ],
 
   readyPc: [
@@ -276,7 +319,8 @@ const PD_TECH_FIELDS = {
     { key:"ramGb",          label:"זיכרון (GB)" },
     { key:"storageGb",      label:"אחסון (GB)" },
     { key:"os",             label:"מערכת הפעלה" },
-    { key:"warrantyMonths", label:"אחריות (חודשים)" }
+    { key:"warrantyMonths", label:"אחריות (חודשים)" },
+    { key:"color",               label:"צבע" }
   ],
 
   laptop: [
@@ -285,12 +329,13 @@ const PD_TECH_FIELDS = {
     { key:"gpuName",        label:"כרטיס מסך" },
     { key:"ramGb",          label:"זיכרון (GB)" },
     { key:"storageGb",      label:"אחסון (GB)" },
-    { key:"sizeInch",       label:'גודל מסך ("")' },
+    { key:"sizeInch",       label:"גודל מסך (אינץ')" },
     { key:"resolution",     label:"רזולוציה" },
     { key:"refreshHz",      label:"רענון (Hz)" },
     { key:"weightKg",       label:'משקל (ק"ג)' },
     { key:"os",             label:"מערכת הפעלה" },
-    { key:"warrantyMonths", label:"אחריות (חודשים)" }
+    { key:"warrantyMonths", label:"אחריות (חודשים)" },
+    { key:"color",               label:"צבע" }
   ],
 
   peripherals: [
@@ -299,10 +344,21 @@ const PD_TECH_FIELDS = {
     { key:"rgb",        label:"תאורת RGB" },
     { key:"dpi",        label:"DPI (עכבר)" },
     { key:"switchType", label:"מתגים (מקלדת)" },
-    { key:"sizeInch",   label:'גודל מסך ("")' },
+    { key:"sizeInch",   label:"גודל מסך (אינץ')" },
     { key:"refreshHz",  label:"רענון (Hz)" },
     { key:"resolution", label:"רזולוציה" },
-    { key:"panel",      label:"סוג פאנל" }
+    { key:"panel",      label:"סוג פאנל" },
+    { key:"responseMs",               label:"זמן תגובה (ms)" },
+    { key:"curved",               label:"מסך קעור" },
+    { key:"vesaMm",               label:'תושבת VESA (מ"מ)' },
+    { key:"hdr",               label:"תקן HDR" },
+    { key:"driverMm",               label:'גודל דרייבר (מ"מ)' },
+    { key:"anc",               label:"ביטול רעשים אקטיבי" },
+    { key:"micType",               label:"סוג מיקרופון" },
+    { key:"batteryHours",               label:"שעות סוללה" },
+    { key:"weightG",               label:"משקל (גרם)" },
+    { key:"color",               label:"צבע" },
+    { key:"ports",               label:"יציאות" }
   ],
 
   services: []
