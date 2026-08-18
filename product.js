@@ -653,6 +653,8 @@ function pdRenderBody(){
             : `<button class="btn btn-primary pd-add" disabled>${tr("אזל המלאי","Out of stock")}</button>`}
         </div>
 
+        ${pdShareHtml()}
+
         <ul class="pd-perks">
           <li><svg class="ui-ic"><use href="#ui-truck"/></svg>${(typeof dvtText === "function"
             ? tr("משלוח ", "Delivery in ") + dvtText("shipping.expressDays")
@@ -1016,3 +1018,157 @@ async function loadProduct(){
 }
 
 loadProduct();
+
+
+/* ==================== שיתוף מוצר ====================
+   ⚠️ שיתוף בין הלקוח לחברים שלו — **לא** אלינו. לכן קישור הוואטסאפ כאן
+   הוא wa.me בלי מספר טלפון: זה פותח את בורר אנשי הקשר של הלקוח ומאפשר
+   לו לבחור למי לשלוח. (הכפתור "דברו איתנו" שבהמשך הדף כן מכיל את המספר
+   שלנו — שני דברים שונים, לא לבלבל ביניהם.)
+
+   ⚠️ המחיר לא נכנס לטקסט המשותף בכוונה. הודעת וואטסאפ חיה לנצח, ומחיר
+   שהשתנה מאז השיתוף הופך אותה להצגת מחיר שגוי. השם והקישור בלבד —
+   הקישור תמיד מציג את המחיר הנוכחי.
+
+   הקישור נבנה מחדש ולא נלקח מ-location.href, כדי לא לגרור פרמטרים
+   זמניים (utm, חיפוש, עוגן) לתוך מה שהלקוח משתף. */
+
+function pdShareUrl(){
+  const it = PD_ITEM;
+  if(!it) return location.href;
+  // PD_CAT (הקטגוריה האמיתית) ולא PD_VIEW_CAT — קישור קנוני אחד למוצר.
+  return location.origin + location.pathname +
+         "?cat=" + encodeURIComponent(PD_CAT) +
+         "&id="  + encodeURIComponent(it.id);
+}
+
+function pdShareTitle(){
+  return PD_ITEM ? itemName(PD_ITEM) : "DvirTech";
+}
+
+/* הטקסט שנשלח לוואטסאפ/טלגרם/מייל. שורה ראשונה שם המוצר, שורה שנייה
+   הקישור — כך זה נראה בהודעה, ורוב האפליקציות יפיקו תצוגה מקדימה. */
+function pdShareText(){
+  return pdShareTitle() + "\n" + pdShareUrl();
+}
+
+function pdShareHtml(){
+  const u = encodeURIComponent(pdShareUrl());
+  const t = encodeURIComponent(pdShareTitle());
+  const full = encodeURIComponent(pdShareText());
+  const canNative = typeof navigator !== "undefined" && !!navigator.share;
+
+  const item = (href, icon, label) =>
+    `<a class="pd-share-item" role="menuitem" href="${href}" target="_blank" rel="noopener noreferrer">
+       <svg class="ui-ic" aria-hidden="true"><use href="#${icon}"/></svg><span>${label}</span></a>`;
+
+  return `
+    <div class="pd-share" id="pdShare">
+      <button type="button" class="pd-share-btn" id="pdShareBtn"
+              aria-haspopup="menu" aria-expanded="false" aria-controls="pdShareMenu"
+              aria-label="${tr("שתף את המוצר","Share this product")}"
+              onclick="pdShareToggle(event)">
+        <svg class="ui-ic" aria-hidden="true"><use href="#ui-share"/></svg>
+        <span>${tr("שתף","Share")}</span>
+      </button>
+
+      <div class="pd-share-menu" id="pdShareMenu" role="menu" hidden
+           aria-label="${tr("שיתוף המוצר","Share this product")}">
+        <p class="pd-share-head">${tr("שיתוף המוצר","Share this product")}</p>
+
+        ${item("https://wa.me/?text=" + full, "ui-wa", tr("וואטסאפ","WhatsApp"))}
+        ${item("https://www.facebook.com/sharer/sharer.php?u=" + u, "ui-fb", tr("פייסבוק","Facebook"))}
+        ${item("https://t.me/share/url?url=" + u + "&text=" + t, "ui-tg", tr("טלגרם","Telegram"))}
+        ${item("mailto:?subject=" + t + "&body=" + full, "ui-mail", tr("אימייל","Email"))}
+
+        <button type="button" class="pd-share-item" role="menuitem" onclick="pdShareCopy(this)">
+          <svg class="ui-ic" aria-hidden="true"><use href="#ui-link"/></svg><span>${tr("העתקת קישור","Copy link")}</span>
+        </button>
+
+        ${canNative ? `
+        <button type="button" class="pd-share-item" role="menuitem" onclick="pdShareNative()">
+          <svg class="ui-ic" aria-hidden="true"><use href="#ui-dots"/></svg><span>${tr("עוד אפשרויות…","More options…")}</span>
+        </button>` : ""}
+      </div>
+    </div>`;
+}
+
+function pdShareToggle(ev){
+  if(ev) ev.stopPropagation();
+  const menu = document.getElementById("pdShareMenu");
+  const btn  = document.getElementById("pdShareBtn");
+  if(!menu || !btn) return;
+  const open = menu.hasAttribute("hidden");
+  if(open){ menu.removeAttribute("hidden"); } else { menu.setAttribute("hidden",""); }
+  btn.setAttribute("aria-expanded", open ? "true" : "false");
+}
+
+function pdShareClose(){
+  const menu = document.getElementById("pdShareMenu");
+  const btn  = document.getElementById("pdShareBtn");
+  if(menu) menu.setAttribute("hidden","");
+  if(btn)  btn.setAttribute("aria-expanded","false");
+}
+
+/* בורר השיתוף של מערכת ההפעלה (בעיקר בנייד): נותן ללקוח כל אפליקציה
+   שמותקנת אצלו, לא רק את הארבע שרשומות למעלה. נפילה בשיתוף היא בדרך
+   כלל AbortError — הלקוח פשוט סגר את החלון, וזו לא שגיאה להציג. */
+function pdShareNative(){
+  if(!navigator.share) return;
+  navigator.share({ title: pdShareTitle(), text: pdShareTitle(), url: pdShareUrl() })
+    .then(pdShareClose)
+    .catch(err => { if(err && err.name !== "AbortError") console.warn("[share]", err); });
+}
+
+function pdShareCopy(btn){
+  const url = pdShareUrl();
+  const done = ok => {
+    if(!btn) return;
+    const span = btn.querySelector("span");
+    const use  = btn.querySelector("use");
+    const was  = span ? span.textContent : "";
+    if(span) span.textContent = ok ? tr("הקישור הועתק","Link copied") : tr("ההעתקה נכשלה","Copy failed");
+    if(use && ok) use.setAttribute("href", "#ui-check");
+    btn.classList.add(ok ? "is-ok" : "is-bad");
+    setTimeout(() => {
+      if(span) span.textContent = was;
+      if(use) use.setAttribute("href", "#ui-link");
+      btn.classList.remove("is-ok","is-bad");
+      pdShareClose();
+    }, 1500);
+  };
+
+  // clipboard API קיים רק בהקשר מאובטח (https). ב-http או בדפדפן ישן
+  // נופלים למסלול ה-textarea, שעדיין עובד כמעט בכל מקום.
+  if(navigator.clipboard && window.isSecureContext){
+    navigator.clipboard.writeText(url).then(() => done(true), () => pdShareCopyFallback(url, done));
+  } else {
+    pdShareCopyFallback(url, done);
+  }
+}
+
+function pdShareCopyFallback(url, done){
+  try{
+    const ta = document.createElement("textarea");
+    ta.value = url;
+    ta.setAttribute("readonly","");
+    ta.style.cssText = "position:fixed;top:-999px;opacity:0";
+    document.body.appendChild(ta);
+    ta.select();
+    const ok = document.execCommand("copy");
+    document.body.removeChild(ta);
+    done(!!ok);
+  }catch(e){ done(false); }
+}
+
+/* סגירה בלחיצה בחוץ / Escape. מאזין אחד ברמת המסמך — התפריט נבנה מחדש
+   בכל רינדור, אז אסור לתלות מאזין על האלמנט עצמו. */
+document.addEventListener("click", function(e){
+  const wrap = document.getElementById("pdShare");
+  const menu = document.getElementById("pdShareMenu");
+  if(!wrap || !menu || menu.hasAttribute("hidden")) return;
+  if(!wrap.contains(e.target)) pdShareClose();
+});
+document.addEventListener("keydown", function(e){
+  if(e.key === "Escape") pdShareClose();
+});

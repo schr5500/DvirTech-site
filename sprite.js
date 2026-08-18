@@ -329,6 +329,13 @@
 <symbol id="ui-arrow" viewBox="0 0 24 24"><path d="M15 5l-7 7 7 7"/></symbol>
 <symbol id="ui-pin" viewBox="0 0 24 24"><path d="M12 21s7-5.3 7-11a7 7 0 1 0-14 0c0 5.7 7 11 7 11z"/><circle cx="12" cy="10" r="2.5"/></symbol>
 <symbol id="ui-wa" viewBox="0 0 24 24"><path d="M17.5 14.4c-.3-.2-1.7-.9-2-1-.3-.1-.5-.2-.7.1-.2.3-.7 1-.9 1.2-.2.2-.3.2-.6.1-.3-.2-1.2-.5-2.3-1.4-.9-.8-1.4-1.7-1.6-2-.2-.3 0-.5.1-.6l.5-.6c.1-.2.2-.3.3-.5 0-.2 0-.4 0-.5 0-.2-.7-1.6-.9-2.2-.2-.6-.5-.5-.7-.5h-.6c-.2 0-.5.1-.8.4-.3.3-1 1-1 2.5s1.1 2.9 1.2 3.1c.2.2 2.1 3.2 5.1 4.5.7.3 1.3.5 1.7.6.7.2 1.4.2 1.9.1.6-.1 1.7-.7 2-1.4.2-.7.2-1.3.2-1.4-.1-.1-.3-.2-.6-.3zM12 2C6.5 2 2 6.5 2 12c0 1.8.5 3.4 1.3 4.9L2 22l5.3-1.4c1.4.8 3 1.2 4.7 1.2 5.5 0 10-4.5 10-10S17.5 2 12 2z"/></symbol>
+<symbol id="ui-share" viewBox="0 0 24 24"><circle cx="17" cy="5.5" r="2.6"/><circle cx="6.5" cy="12" r="2.6"/><circle cx="17" cy="18.5" r="2.6"/><path d="M8.9 10.8 14.6 6.9M8.9 13.2l5.7 3.9"/></symbol>
+<symbol id="ui-link" viewBox="0 0 24 24"><path d="M10.6 13.4a3.6 3.6 0 0 0 5.4.4l2.4-2.4a3.6 3.6 0 0 0-5.1-5.1l-1.4 1.4"/><path d="M13.4 10.6a3.6 3.6 0 0 0-5.4-.4l-2.4 2.4a3.6 3.6 0 0 0 5.1 5.1l1.4-1.4"/></symbol>
+<symbol id="ui-fb" viewBox="0 0 24 24"><rect x="3" y="3" width="18" height="18" rx="4.5"/><path d="M15.6 8.2h-1.3c-.9 0-1.5.6-1.5 1.5v1.6h2.7l-.4 2.7h-2.3V21"/></symbol>
+<symbol id="ui-tg" viewBox="0 0 24 24"><path d="M21.4 3.6 2.9 10.6c-.4.2-.4.7 0 .8l4.6 1.6 1.8 5.5c.1.4.6.5.8.2l2.5-2.8 4.5 3.3c.3.2.8.1.9-.3l3.4-14.7c.1-.5-.4-.8-.8-.6z"/><path d="m7.5 13 11.9-8.5-8 10"/></symbol>
+<symbol id="ui-mail" viewBox="0 0 24 24"><rect x="2.5" y="5" width="19" height="14" rx="2.5"/><path d="m3.6 7.2 8.4 5.9 8.4-5.9"/></symbol>
+<symbol id="ui-check" viewBox="0 0 24 24"><path d="m4.5 12.6 5 5 10-11"/></symbol>
+<symbol id="ui-dots" viewBox="0 0 24 24"><circle cx="5.5" cy="12" r="1.5" fill="currentColor" stroke="none"/><circle cx="12" cy="12" r="1.5" fill="currentColor" stroke="none"/><circle cx="18.5" cy="12" r="1.5" fill="currentColor" stroke="none"/></symbol>
 </svg>`;
 
   function inject() {
