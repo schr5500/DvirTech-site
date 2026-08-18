@@ -468,6 +468,16 @@
   background:#5F7590;color:#fff;font-family:'Rubik',sans-serif;font-weight:700;
   font-size:11.5px;padding:4px 9px;border-radius:999px;
   box-shadow:0 2px 8px rgba(14,42,71,.25)}
+/* מצבי אמצע (לקסיקון 18.08.2026): "זמינות מוגבלת" — כתום שמזרז בלי
+   להבהיל; "לבדיקת זמינות" — כחול, מזמין פנייה (לא מצב שלילי). */
+.p-low-badge{position:absolute;inset-inline-start:10px;top:10px;z-index:3;
+  background:#E8890C;color:#fff;font-family:'Rubik',sans-serif;font-weight:800;
+  font-size:11.5px;padding:4px 9px;border-radius:999px;
+  box-shadow:0 2px 8px rgba(232,137,12,.35)}
+.p-ask-badge{position:absolute;inset-inline-start:10px;top:10px;z-index:3;
+  background:#1B6FE0;color:#fff;font-family:'Rubik',sans-serif;font-weight:700;
+  font-size:11.5px;padding:4px 9px;border-radius:999px;
+  box-shadow:0 2px 8px rgba(27,111,224,.30)}
 .p-card .btn[disabled]{background:#E7EDF4;color:#8A9AAD;border-color:#E7EDF4;
   cursor:not-allowed;box-shadow:none}
 .pd-add[disabled]{background:#E7EDF4;color:#8A9AAD;border-color:#E7EDF4;
@@ -587,6 +597,10 @@
 .pd-stock--in::before{background:var(--teal-dark,#12836C)}
 .pd-stock--out{color:#B23B36}
 .pd-stock--out::before{background:#B23B36}
+.pd-stock--low{color:#C57108}
+.pd-stock--low::before{background:#E8890C}
+.pd-stock--ask{color:#1B6FE0}
+.pd-stock--ask::before{background:#1B6FE0}
 .pd-stock-left{font-weight:600;color:var(--ink-soft,#6B7A8D)}
 
 /* ---------- מחיר ומבצע ---------- */

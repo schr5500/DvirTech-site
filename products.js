@@ -917,10 +917,18 @@ function renderGrid(){
      יודע לחזור. תג המבצע מוחלף בתג האזילה כדי לא להבטיח הנחה על
      משהו שאי אפשר לקנות. */
   const stock = it => (typeof dvtInStock === "function") ? dvtInStock(it) : true;
+  /* מצב מדורג: low = "זמינות מוגבלת" (נקנה, תג כתום שמזרז); ask =
+     "ליצור קשר" (לא נקנה בקליק — הכפתור הופך לפנייה בוואטסאפ). */
+  const st = it => (typeof dvtStockState === "function") ? dvtStockState(it) : (stock(it) ? "in" : "oos");
+  // קישור "בדקו זמינות" — encodeURIComponent מנטרל גרשיים בשם המוצר
+  const askWa = it => "https://wa.me/972502000373?text=" +
+    encodeURIComponent(tr("היי דביר, רציתי לבדוק זמינות של: ", "Hi Dvir, checking availability of: ") + itemName(it).slice(0, 60));
 
   grid.innerHTML = pageItems.map(it => `
-    <a class="p-card${stock(it) ? "" : " p-card--oos"}" href="${href(it)}">
-      ${!stock(it) ? `<span class="p-oos-badge">${tr("אזל המלאי","Out of stock")}</span>`
+    <a class="p-card${st(it) === "oos" ? " p-card--oos" : ""}" href="${href(it)}">
+      ${st(it) === "oos" ? `<span class="p-oos-badge">${tr("אזל המלאי","Out of stock")}</span>`
+        : st(it) === "low" ? `<span class="p-low-badge">${tr("זמינות מוגבלת","Limited stock")}</span>`
+        : st(it) === "ask" ? `<span class="p-ask-badge">${tr("לבדיקת זמינות","Check availability")}</span>`
         : dvtIsOnSale(it) ? `<span class="p-sale-badge">-${dvtDiscountPct(it)}%</span>` : ""}
       <div class="p-art">${shopArt(it)}</div>
       ${catTag(it)}
@@ -929,9 +937,12 @@ function renderGrid(){
       <p class="p-spec">${itemSpec(it)}</p>
       <div class="p-price">${Number(it.price).toLocaleString()} ₪${
         dvtIsOnSale(it) && stock(it) ? `<span class="p-price-was">${dvtOldPrice(it).toLocaleString()} ₪</span>` : ""}</div>
-      ${stock(it)
+      ${st(it) === "in" || st(it) === "low"
         ? `<button class="btn btn-primary"
               onclick="event.preventDefault();event.stopPropagation();addCatalogItemToCart('${it._realCat}','${it.id}')">${t("addToCartBtn")}</button>`
+        : st(it) === "ask"
+        ? `<button class="btn btn-primary p-ask-btn"
+              onclick="event.preventDefault();event.stopPropagation();window.open('${askWa(it)}','_blank')">${tr("בדקו זמינות איתי","Check with me")}</button>`
         : `<button class="btn btn-primary" disabled
               onclick="event.preventDefault();event.stopPropagation()">${tr("אזל המלאי","Out of stock")}</button>`}
     </a>`).join("");

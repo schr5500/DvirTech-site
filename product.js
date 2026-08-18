@@ -496,6 +496,15 @@ function pdPriceNote(it){
 }
 
 function pdStockHtml(it){
+  /* מצבי אמצע (לקסיקון דביר 18.08.2026): "זמינות מוגבלת" נקנה רגיל עם
+     תג כתום שמזרז; "ליצור קשר" מציג פנייה במקום קנייה (ראה הכפתור). */
+  const state = (typeof dvtStockState === "function") ? dvtStockState(it) : (pdInStock(it) ? "in" : "oos");
+  if(state === "low"){
+    return `<div class="pd-stock pd-stock--low">${tr("זמינות מוגבלת — כדאי להזדרז","Limited stock — order soon")}</div>`;
+  }
+  if(state === "ask"){
+    return `<div class="pd-stock pd-stock--ask">${tr("לבדיקת זמינות — דברו איתי ואחזור אליכם מהר","Availability on request — message me")}</div>`;
+  }
   if(!pdInStock(it)){
     return `<div class="pd-stock pd-stock--out">${tr("אזל מהמלאי","Out of stock")}</div>`;
   }
@@ -580,7 +589,10 @@ function pdRenderBody(){
             <span id="pdQty">${PD_QTY}</span>
             <button type="button" onclick="pdChangeQty(1)" aria-label="${tr("הוסף","Increase")}">+</button>
           </div>
-          ${canBuy
+          ${(typeof dvtStockState === "function" && dvtStockState(it) === "ask")
+            ? `<a class="btn btn-primary pd-add" target="_blank" rel="noopener"
+                 href="https://wa.me/972502000373?text=${encodeURIComponent(tr("היי דביר, רציתי לבדוק זמינות של: ","Hi Dvir, checking availability of: ") + itemName(it).slice(0, 60))}">${tr("בדקו זמינות איתי בוואטסאפ","Check availability with me")}</a>`
+            : canBuy
             ? `<button class="btn btn-primary pd-add" onclick="pdAddToCart()">${t("addToCartBtn")}</button>`
             : `<button class="btn btn-primary pd-add" disabled>${tr("אזל המלאי","Out of stock")}</button>`}
         </div>
