@@ -355,16 +355,21 @@
     /* ⚠️ תמונת רקע ("דף נחיתה 7") עם שכבת גרדיאנט כהה־שקוף מעליה:
        התמונה נראית, וכל הטקסט והכפתורים נשארים בניגודיות מלאה ולחיצים.
        סדר השכבות ב-CSS הוא מלמעלה למטה — התמונה אחרונה = הכי מאחור. */
+    /* ⚠️ ההאפלה הייתה 88%/82% ומחקה את התמונה לגמרי.
+       התמונה כהה מלכתחילה (נייבי כהה משמאל, מעגלים טורקיזיים
+       מימין), ולכן מספיק שיפוע כיווני: כהה משמאל לקריאות הטקסט,
+       שקוף מימין כדי שהזוהר ייראה. בגריד RTL הטקסט יושב משמאל.
+       סדר השכבות ב-CSS מלמעלה למטה — התמונה אחרונה = הכי מאחור. */
     background:
-      radial-gradient(ellipse 60% 90% at 88% 15%,rgba(47,196,176,.16),transparent 60%),
-      radial-gradient(ellipse 70% 80% at 10% 90%,rgba(27,111,224,.28),transparent 62%),
-      linear-gradient(140deg,rgba(11,44,77,.88) 0%,rgba(18,59,99,.82) 100%),
+      linear-gradient(to right,rgba(9,38,66,.86) 0%,rgba(10,42,72,.62) 42%,rgba(11,44,77,.30) 72%,rgba(11,44,77,.18) 100%),
       url("images/landing-7-cta.jpg") center/cover no-repeat;
     color:#D6E5F2;box-shadow:var(--shadow-l);
   }
   .final__grid{display:grid;grid-template-columns:1fr;align-items:center;gap:0}
-  .final__art{position:relative;min-height:250px;display:grid;place-items:center;padding:26px}
-  .final__art svg{width:100%;max-width:420px;height:auto}
+  /* מרווח בלבד — שומר על גובה הכרטיס כדי שהתמונה תקבל שטח.
+     בנייד הוא מתכווץ — שם הטקסט תופס את כל הרוחב ומרווח ריק
+     של 250px היה נראה כמו באג. */
+  .final__art{min-height:150px}
   .final__copy{padding:44px 32px}
   .final h2{font-size:clamp(26px,4.2vw,36px);margin-bottom:16px;color:#fff}
   .final p{font-size:17px;color:#B9CFE3}
@@ -467,6 +472,11 @@
     .rig__list li{grid-template-columns:1fr auto;row-gap:2px}
     .rig__ok{grid-column:2}
     .dock{display:block}
+    /* ⚠️ המרווח של התמונה מיותר בנייד: הכרטיס הופך לעמודה
+       אחת, והמרווח נערם 150px של שטח ריק מעל הכותרת — ודווקא
+       באזור הכהה של התמונה, כלומר לא הראה כלום. התמונה עדיין
+       נראית — היא רקע הכרטיס ויושבת מאחורי הטקסט עצמו. */
+    .final__art{display:none}
     .final__copy{padding:34px 24px}
   }
 
@@ -927,46 +937,11 @@
   <div class="wrap--wide">
     <div class="final__card reveal">
       <div class="final__grid">
-        <div class="final__art">
-          <!-- הרכב מחשב מאויר. אפשר להחליף בתמונה אמיתית של עמדה שדביר הרכיב. -->
-          <svg viewBox="0 0 420 260" aria-hidden="true">
-            <defs>
-              <linearGradient id="scr" x1="0" y1="0" x2="1" y2="1">
-                <stop offset="0%" stop-color="#1B6FE0"/><stop offset="55%" stop-color="#2A8BE8"/><stop offset="100%" stop-color="#2FC4B0"/>
-              </linearGradient>
-              <linearGradient id="glass" x1="0" y1="0" x2="1" y2="1">
-                <stop offset="0%" stop-color="#3C82D6" stop-opacity=".55"/><stop offset="100%" stop-color="#0E2A47" stop-opacity=".2"/>
-              </linearGradient>
-            </defs>
-            <!-- מארז -->
-            <rect x="16" y="34" width="104" height="180" rx="12" fill="#0A1E33"/>
-            <rect x="16" y="34" width="104" height="180" rx="12" fill="url(#glass)" stroke="#2E6BA8" stroke-width="1.5"/>
-            <circle cx="68" cy="76" r="20" fill="none" stroke="#2FC4B0" stroke-width="2.5"/>
-            <circle cx="68" cy="124" r="20" fill="none" stroke="#2FC4B0" stroke-width="2.5"/>
-            <circle cx="68" cy="172" r="20" fill="none" stroke="#2FC4B0" stroke-width="2.5"/>
-            <circle cx="68" cy="76" r="5" fill="#2FC4B0"/><circle cx="68" cy="124" r="5" fill="#2FC4B0"/><circle cx="68" cy="172" r="5" fill="#2FC4B0"/>
-            <!-- מסך -->
-            <rect x="140" y="46" width="230" height="140" rx="9" fill="#08182A" stroke="#2E6BA8" stroke-width="1.5"/>
-            <rect x="150" y="56" width="210" height="120" rx="5" fill="url(#scr)" opacity=".85"/>
-            <path d="M158 140c40-52 66 22 100-16s52 4 94-30" fill="none" stroke="#BFF3EA" stroke-width="3" opacity=".75"/>
-            <path d="M158 158c44-44 60 18 100-14s56 8 94-26" fill="none" stroke="#8FD8FF" stroke-width="2" opacity=".5"/>
-            <path d="M240 186v16h30v-16" fill="none" stroke="#2E6BA8" stroke-width="3"/>
-            <rect x="212" y="202" width="86" height="7" rx="3.5" fill="#2E6BA8"/>
-            <!-- מקלדת -->
-            <rect x="150" y="218" width="180" height="26" rx="6" fill="#0A1E33" stroke="#2E6BA8" stroke-width="1.5"/>
-            <g fill="#2FC4B0" opacity=".55">
-              <rect x="160" y="225" width="14" height="5" rx="2"/><rect x="180" y="225" width="14" height="5" rx="2"/>
-              <rect x="200" y="225" width="14" height="5" rx="2"/><rect x="220" y="225" width="14" height="5" rx="2"/>
-              <rect x="240" y="225" width="14" height="5" rx="2"/><rect x="260" y="225" width="14" height="5" rx="2"/>
-              <rect x="280" y="225" width="14" height="5" rx="2"/><rect x="300" y="225" width="14" height="5" rx="2"/>
-              <rect x="180" y="234" width="114" height="5" rx="2.5"/>
-            </g>
-            <!-- אוזניות -->
-            <path d="M348 232a26 26 0 0 1 52 0" fill="none" stroke="#2E6BA8" stroke-width="4"/>
-            <rect x="342" y="228" width="14" height="24" rx="6" fill="#12395F" stroke="#2FC4B0" stroke-width="1.5"/>
-            <rect x="392" y="228" width="14" height="24" rx="6" fill="#12395F" stroke="#2FC4B0" stroke-width="1.5"/>
-          </svg>
-        </div>
+        <!-- ⚠️ האיור המאולף הוסר (19.08) — התמונה האמיתית היא עכשיו
+             רקע הכרטיס עצמו. ה-div נשאר כמרווח: בגריד RTL הוא העמודה
+             הימנית, והוא משאיר את אזור הזוהר של התמונה חשוף ואת הטקסט
+             משמאל על הצד הכהה והריק. -->
+        <div class="final__art" aria-hidden="true"></div>
 
         <div class="final__copy">
           <p class="eyebrow" style="color:#8FE9DA">הצעד הבא</p>
