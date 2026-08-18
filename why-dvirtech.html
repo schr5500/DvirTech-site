@@ -159,10 +159,11 @@
   .badge-pill i{width:6px;height:6px;border-radius:50%;background:var(--teal);animation:pulseGlow 2s ease-in-out infinite}
   @keyframes pulseGlow{0%,100%{opacity:.5}50%{opacity:1}}
 
-  /* align-self:start דורס את ה-stretch של .hero__grid: בלעדיו הקונטיינר
-     נמתח לגובה השורה כולה (כמו טור הטקסט שלצידו), והכיתוב שמעוגן לתחתית
-     .hero__media היה צף על רקע לבן ריק במקום על התמונה עצמה. */
-  .hero__media{position:relative;align-self:start}
+  /* כיול לפי הבאנר שדביר עיצב (תמונה לHERO.png): התמונה יושבת בצד
+     במסגרת מוגבלת-רוחב והטקסט נושם — במקום תמונה full-bleed שמשתלטת
+     על חצי מהמסך. align-self:center מחליף את ה-stretch של .hero__grid,
+     והכיתוב ממילא מעוגן ל-.shot (שהוא position:relative), לא לעמודה. */
+  .hero__media{position:relative;align-self:center;width:100%;max-width:520px;margin-inline:auto;padding:0 22px 46px}
   .hero__media figcaption{position:absolute;inset-inline-start:0;inset-block-end:0;width:100%;background:linear-gradient(to top,rgba(11,44,77,.92),rgba(11,44,77,0));color:#DCE9F5;font-size:14px;padding:40px 20px 15px}
 
   /* --------------------------------------------------------------------
@@ -269,9 +270,9 @@
   .about{padding:0;background:var(--bg-soft)}
   .about__grid{display:grid;grid-template-columns:1fr;gap:0;align-items:stretch}
   .about__photo{position:relative;background:#0E2A47}
-  /* ⚠️ המסגרת חייבת לשמור על יחס התמונה עצמה (3:2 — הקובץ הוא 1536x1024).
-     קודם היא הייתה מסגרת גבוהה וצרה, ו-object-fit:cover חתך כ-45%
-     מרוחב התמונה — כלומר כמעט חצי ממנה לא נראה. */
+  /* במובייל המסגרת שומרת על יחס התמונה (3:2 — הקובץ הוא 1200x800).
+     בדסקטופ המסגרת הופכת דביקה בגובה חלון והתמונה ממלאה אותה ב-cover —
+     ראו בבלוק ה-min-width:900px למטה. */
   .about__photoIn{position:relative;aspect-ratio:3/2;height:auto}
   .about__photo img{width:100%;height:100%;object-fit:cover}
   /* חתימת "דביר" בכתב יד עם החץ — הפרט מהמוקאפ */
@@ -351,10 +352,14 @@
   .final{padding:76px 0}
   .final__card{
     position:relative;overflow:hidden;border-radius:24px;
+    /* ⚠️ תמונת רקע ("דף נחיתה 7") עם שכבת גרדיאנט כהה־שקוף מעליה:
+       התמונה נראית, וכל הטקסט והכפתורים נשארים בניגודיות מלאה ולחיצים.
+       סדר השכבות ב-CSS הוא מלמעלה למטה — התמונה אחרונה = הכי מאחור. */
     background:
       radial-gradient(ellipse 60% 90% at 88% 15%,rgba(47,196,176,.16),transparent 60%),
       radial-gradient(ellipse 70% 80% at 10% 90%,rgba(27,111,224,.28),transparent 62%),
-      linear-gradient(140deg,#0B2C4D 0%,#123B63 100%);
+      linear-gradient(140deg,rgba(11,44,77,.88) 0%,rgba(18,59,99,.82) 100%),
+      url("images/landing-7-cta.jpg") center/cover no-repeat;
     color:#D6E5F2;box-shadow:var(--shadow-l);
   }
   .final__grid{display:grid;grid-template-columns:1fr;align-items:center;gap:0}
@@ -367,14 +372,37 @@
   /* החץ המסולסל שמצביע על הכפתור */
   .final__arrow{width:64px;height:34px;stroke:var(--teal);fill:none;stroke-width:2;stroke-linecap:round;stroke-linejoin:round;margin-bottom:-6px}
 
-  /* ---------- footer ---------- */
-  footer{background:var(--blue-ink);color:#8CA6C2;padding:36px 0;font-size:14px}
-  footer .wrap--wide{display:flex;flex-wrap:wrap;gap:18px;justify-content:space-between;align-items:center}
-  footer .foot__logo{height:46px;width:auto}
+  /* ---------- footer (site-footer.js) ----------
+     ⚠️ הפוטר מוזרק מ-site-footer.js עם המחלקות של style.css
+     (footer-grid / footer-legal / footer-wa וכו') — אבל הדף הזה עצמאי
+     ולא טוען את style.css, ולכן בלי הכללים כאן הוא הוצג כערימה אנכית
+     בתוך ‎.wrap של 700px: בלי גריד, בלי עיצוב ל-h4/ul. הכללים הבאים
+     משכפלים את מראה הפוטר מ-style.css, סקופ לדף בלבד — לא נוגעים
+     ב-site-footer.js עצמו. */
+  footer{background:var(--blue-ink);color:#8CA6C2;padding:44px 0 28px;font-size:13px;text-align:center}
+  footer .wrap{max-width:1140px}
   footer a{color:#B9CFE3;text-decoration:none}
   footer a:hover{color:var(--teal)}
-  footer nav{display:flex;gap:18px;flex-wrap:wrap}
-  .credit{display:block;margin-top:8px;font-size:12px;color:#5A7591;max-width:38ch}
+  .footer-grid{display:grid;grid-template-columns:1.5fr repeat(3,1fr);gap:26px;text-align:start;
+    padding-bottom:24px;border-bottom:1px solid rgba(255,255,255,.09);margin-bottom:18px}
+  .footer-grid h4{color:#fff;font-family:"Rubik",Arial,sans-serif;font-size:14px;font-weight:700;margin:0 0 12px;line-height:1.4}
+  .footer-grid ul{list-style:none;margin:0;padding:0}
+  .footer-grid li{margin-bottom:8px}
+  .footer-grid a{font-size:13px}
+  .footer-grid p{margin:0;line-height:1.85;font-size:13px;max-width:34ch}
+  .footer-logo{height:40px;width:auto;display:block;margin:0 0 12px}
+  .footer-wa{display:inline-block;margin-top:12px;font-family:"Rubik",Arial,sans-serif;
+    font-size:13px;font-weight:700;color:#fff;background:rgba(255,255,255,.12);
+    border:1px solid rgba(255,255,255,.24);border-radius:999px;padding:7px 15px;
+    text-decoration:none;transition:background .15s}
+  .footer-wa:hover{background:rgba(255,255,255,.20);color:#fff}
+  .footer-legal{margin-top:14px;display:flex;gap:18px;justify-content:center;flex-wrap:wrap}
+  .footer-legal a{color:#9DB4CB;font-size:12.5px;text-decoration:underline;text-underline-offset:2px}
+  .footer-legal a:hover{color:var(--teal)}
+  .footer-legal-line{margin:18px 0 6px;font-size:12px;opacity:.72;line-height:1.7}
+  .footer-copy{display:block;margin-top:8px;font-size:12px;opacity:.6}
+  @media (max-width:820px){ .footer-grid{grid-template-columns:1fr 1fr;gap:20px} }
+  @media (max-width:520px){ .footer-grid{grid-template-columns:1fr} }
 
   /* ---------- sticky mobile cta ---------- */
   .dock{position:fixed;inset-inline:0;bottom:0;z-index:60;display:none;background:rgba(255,255,255,.97);border-top:1px solid var(--line);padding:10px 16px calc(10px + env(safe-area-inset-bottom));box-shadow:0 -6px 24px rgba(14,42,71,.1)}
@@ -385,15 +413,20 @@
   a:focus-visible,summary:focus-visible{outline:3px solid var(--blue);outline-offset:3px}
 
   @media (min-width:900px){
-    .hero__grid{grid-template-columns:1.02fr .98fr}
+    /* טור הטקסט מקבל יותר רוחב מהתמונה — הפרופורציה מהבאנר של דביר */
+    .hero__grid{grid-template-columns:1.18fr .82fr}
     .hero__copy{padding:74px 0 78px;max-width:none;padding-inline-start:calc((100vw - 1140px)/2 + 22px);padding-inline-end:44px}
+    .hero__media{max-width:500px;padding:54px 26px}
     .cases{grid-template-columns:repeat(3,1fr)}
     .call__grid{grid-template-columns:1fr .82fr;gap:46px}
-    .about__grid{grid-template-columns:1fr 1fr;align-items:start}
-    .about__photo{height:auto}
-    /* היחס נשמר; max-height רק מונע מהתמונה להשתלט על מסך נמוך. */
-    .about__photoIn{position:relative;aspect-ratio:3/2;height:auto;max-height:min(84vh,760px)}
-    .about__photo img{min-height:0}
+    .about__grid{grid-template-columns:1fr 1fr}
+    /* ⚠️ המסגרת בדיוק ביחס של התמונה (3:2 — 1200x800), ולכן היא נראית
+       בגודלה הטבעי בלי חיתוך ובלי זום. קודם הקונטיינר נמתח ל-100vh
+       ו-object-fit:cover הגדיל את התמונה בכ-2.5 (דיווח: "זום אין יותר
+       מדי"). align-self:start מונע מהטור להימתח, כך שאין שטח מת. */
+    .about__photo{align-self:start}
+    .about__photoIn{position:sticky;top:var(--nav-h);aspect-ratio:3/2;height:auto}
+    .about__photo img{object-position:50% 50%}
     .about__copy{padding:70px 44px}
     .about__copy .inner{margin-inline:0}
     .quotes{grid-template-columns:repeat(3,1fr)}
@@ -434,7 +467,6 @@
     .rig__list li{grid-template-columns:1fr auto;row-gap:2px}
     .rig__ok{grid-column:2}
     .dock{display:block}
-    footer .wrap--wide{flex-direction:column;text-align:center}
     .final__copy{padding:34px 24px}
   }
 
@@ -628,13 +660,13 @@
 
       <div class="reveal">
         <figure class="shot shot--tall" style="margin:0">
-          <!-- ⚠️ קובץ מקומי ולא Unsplash. אותה תמונה בדיוק כבר יושבת
-               בתיקייה שלנו (‎images/landing-about.jpg, 800×1067),
-               ולכן הקישור החיצוני היה תלות מיותרת שנופלת בכל חסימה,
-               מצב לא-מקוון או האטה של הספק — ואז הדף מוצג בלי תמונות.
-               הממדים 800×1067 הם בדיוק ‎3:4 של ‎.shot--tall, כלומר
-               ‎object-fit:cover לא חותך כאן כלום. -->
-          <img src="images/landing-about.jpg" alt="ידיים עובדות על מחשב נייד פתוח עם מברג מדויק" loading="lazy" width="800" height="1067">
+          <!-- תמונה אמיתית של דביר עם אוזניות, בשיחה — מתאימה לכיתוב
+               (שיחת הייעוץ) הרבה יותר מתמונת הסטוק של הידיים עם המברג
+               שהייתה כאן (landing-about.jpg). המקור:
+               ‎LandingPage/assets/preview/check_img0002.jpg, הועתק ונדחס
+               ל-‎images/landing-consult.jpg. הממדים 700×933 הם בדיוק
+               ‎3:4 של ‎.shot--tall, כלומר ‎object-fit:cover לא חותך כלום. -->
+          <img src="images/landing-2-consult.jpg" alt="דביר עם אוזניות, מרוכז בשיחה מול המחשב" loading="lazy" width="700" height="933">
           <figcaption>בשיחה הראשונה עוד לא מחליטים כלום. רק מבינים.</figcaption>
         </figure>
       </div>
@@ -675,20 +707,20 @@
       </div>
     </div>
 
-    <!-- ⚠️⚠️ שלוש התמונות כאן היו קישורי Unsplash חיצוניים ("placeholder"),
-         והן הוחלפו בקבצים שכבר קיימים בתיקיות של האתר. שתי סיבות:
-         1. תמונה שנטענת משרת זר נעלמת בכל חסימה/נפילה/גלישה איטית, וזה
-            בדיוק המצב שבו "חסרות התמונות" בדף הזה.
-         2. ‎LandingPage/assets/preview הוא חומר הגלם שלנו.
-         ⚠️ מתוך אותה תיקייה נלקחו רק קובצי העבודה. יש שם גם צילומים
-         אישיים ומשפחתיים (‎checkA/checkB/img2967/zoom_arm) — אלה **לא**
-         תמונות אתר ואסור להעלות אותן לדף ציבורי. -->
+    <!-- ⚠️⚠️ תמונות הכרטיסים זמניות עד שדביר יצלם תמונות משלו מהעבודות.
+         כולן קבצים מקומיים (לא קישורים חיצוניים — תמונה משרת זר נעלמת
+         בכל חסימה/נפילה/גלישה איטית).
+         ⚠️ ב-‎LandingPage/assets/preview יש גם צילומים אישיים ומשפחתיים
+         (‎checkA/checkB/img2967/zoom_arm — תינוקת, משפחה, חוף) — אלה
+         **לא** תמונות אתר ואסור להעלות אותן לדף ציבורי. לעומת זאת
+         ‎from_clipboard.png (דביר בעמדת עבודה) ו-‎check_img0002.jpg
+         (דביר עם אוזניות) הם צילומי עבודה של דביר עצמו — כן בשימוש. -->
     <div class="strip reveal">
       <!-- ⚠️ strip--render: הרינדור של המארז הוא תמונת מוצר על רקע נקי,
            ו-‎object-fit:cover בריבוע היה חותך ממנו כשליש לרוחב. כאן, ורק
            כאן, התמונה נכנסת שלמה. -->
-      <figure class="strip--render">
-        <img src="images/contact/pc-render.png" alt="מחשב נייח מותאם אישית עם תאורת RGB כחולה" loading="lazy" width="1000" height="672">
+      <figure>
+        <img src="images/landing-5-build.jpg" alt="הרכבת מחשב נייח בהתאמה אישית" loading="lazy" width="825" height="1024">
         <figcaption>מפרט שנבנה לפי מה שאתה עושה, לא לפי מה שיפה בקטלוג.</figcaption>
       </figure>
       <figure>
@@ -696,8 +728,13 @@
         <figcaption>תיקון, שדרוג ובדיקות עומק למחשב קיים.</figcaption>
       </figure>
       <figure>
-        <img src="images/landing-call.jpg" alt="אדם עובד מול מחשב בעמדה מסודרת" loading="lazy" width="900" height="506">
-        <figcaption>התקנה והגדרה אצלך, עד שהכול עובד באמת.</figcaption>
+        <!-- ‎landing-call.jpg הצביע על קובץ שלא קיים ב-images (הכרטיס
+             הוצג שבור), ומקורו ממילא היה תמונת סטוק עם פנים של אדם זר.
+             הוחלף בתמונה אמיתית של דביר בעמדת עבודה (המקור:
+             ‎LandingPage/assets/preview/from_clipboard.png → נדחס
+             ל-‎images/landing-workstation.jpg). -->
+        <img src="images/landing-3-install.jpg" alt="דביר עובד מול מחשב נייד בעמדת עבודה מסודרת" loading="lazy" width="825" height="1024">
+        <figcaption>התקנה והגדרה אצלך, עד שהכול עובד ב100% במקום.</figcaption>
       </figure>
     </div>
   </div>
@@ -707,10 +744,11 @@
 <section class="about" id="about">
   <div class="about__grid">
     <div class="about__photo reveal">
-      <!-- הפנים נשארות בתוך המסגרת כשהטקסט לצידן ארוך: התמונה sticky
-           ומוגבלת בגובה, אחרת היא נמתחת לגובה כל עמודת הטקסט ונחתכת. -->
+      <!-- התמונה האמיתית של דביר (הומרה מ-PhotosForDesign/דף נחיתה/
+           "תמונה להיי אני דביר.png" ל-JPG דחוס 1200x800). הקודם,
+           landing-dvir-hero.jpg, היה תמונת סטוק. -->
       <div class="about__photoIn">
-        <img src="images/landing-dvir-hero.jpg" alt="דביר יושב מול המחשב הנייד ומטפל במארז פתוח" loading="lazy" width="1536" height="1024">
+        <img src="images/landing-dvir-real.jpg" alt="דביר מחייך ליד שולחן העבודה, עם מחשב נייד ומארז פתוח לצידו" loading="lazy" width="1200" height="800">
         <span class="about__sign" aria-hidden="true">
           <span>דביר</span>
           <svg viewBox="0 0 40 22"><path d="M38 3C28 1 12 4 3 15"/><path d="M3 15l9-1.5M3 15l4 7"/></svg>

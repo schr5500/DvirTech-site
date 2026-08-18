@@ -844,8 +844,7 @@ function renderShopSkeleton(){
       <div class="sk-line sk-sm"></div>
       <div class="sk-line sk-lg"></div>
       <div class="sk-line sk-md"></div>
-      <div class="sk-line sk-price"></div>
-      <div class="sk-btn"></div>
+      <div class="sk-foot"><div class="sk-line sk-price"></div><div class="sk-cart"></div></div>
     </div>`).join("");
 }
 
@@ -935,16 +934,19 @@ function renderGrid(){
       ${it.brand ? `<div class="p-brand">${it.brand}</div>` : ""}
       <h4 class="p-name">${itemName(it)}</h4>
       <p class="p-spec">${itemSpec(it)}</p>
-      <div class="p-price">${Number(it.price).toLocaleString()} ₪${
-        dvtIsOnSale(it) && stock(it) ? `<span class="p-price-was">${dvtOldPrice(it).toLocaleString()} ₪</span>` : ""}</div>
-      ${st(it) === "in" || st(it) === "low"
-        ? `<button class="btn btn-primary"
-              onclick="event.preventDefault();event.stopPropagation();addCatalogItemToCart('${it._realCat}','${it.id}')">${t("addToCartBtn")}</button>`
-        : st(it) === "ask"
-        ? `<button class="btn btn-primary p-ask-btn"
-              onclick="event.preventDefault();event.stopPropagation();window.open('${askWa(it)}','_blank')">${tr("בדקו זמינות איתי","Check with me")}</button>`
-        : `<button class="btn btn-primary" disabled
-              onclick="event.preventDefault();event.stopPropagation()">${tr("אזל המלאי","Out of stock")}</button>`}
+      <div class="p-foot">
+        <div class="p-price${dvtIsOnSale(it) && stock(it) ? " p-price--sale" : ""}">${
+          dvtIsOnSale(it) && stock(it) ? `<span class="p-price-was">${dvtOldPrice(it).toLocaleString()} ₪</span>` : ""
+          }<span class="p-price-now">${Number(it.price).toLocaleString()}&nbsp;<span class="p-price-cur">₪</span></span></div>
+        ${st(it) === "in" || st(it) === "low"
+          ? `<button class="p-cart-btn" aria-label="${t("addToCartBtn")}: ${itemName(it).replace(/"/g,"&quot;")}"
+                onclick="event.preventDefault();event.stopPropagation();addCatalogItemToCart('${it._realCat}','${it.id}')"><svg viewBox="0 0 24 24" aria-hidden="true"><use href="#ui-cart"/><path d="M12.3 8.9v4.2M10.2 11h4.2"/></svg></button>`
+          : st(it) === "ask"
+          ? `<button class="p-cart-btn p-cart-btn--wa" aria-label="${tr("בדקו זמינות בוואטסאפ","Check availability on WhatsApp")}: ${itemName(it).replace(/"/g,"&quot;")}"
+                onclick="event.preventDefault();event.stopPropagation();window.open('${askWa(it)}','_blank')"><svg class="p-wa-ic" viewBox="0 0 24 24" aria-hidden="true"><use href="#ui-wa"/></svg></button>`
+          : `<button class="p-cart-btn" disabled aria-label="${tr("אזל המלאי","Out of stock")}"
+                onclick="event.preventDefault();event.stopPropagation()"><svg viewBox="0 0 24 24" aria-hidden="true"><use href="#ui-cart"/></svg></button>`}
+      </div>
     </a>`).join("");
 
   renderPager(pages);
