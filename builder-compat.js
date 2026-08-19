@@ -53,6 +53,21 @@ const DVT_CAT_LABELS = {
    wattage, t מול tier). הכינויים מרוכזים כאן במקום אחד, כדי שהחוקים
    עצמם יקראו שם אחד קנוני ולא יתמלאו ב-?? כפולים. */
 const DVT_FIELD_ALIASES = {
+  /* 🔴 שלושת הכינויים הבאים נוספו 19.08 אחרי סריקה שמצאה
+     ש-11 חוקי תאימות מתים. ארבעה מהם לא היו חסרי נתונים — הנתון
+     היה שם כל הזמן תחת שם אחר, והחוק חיפש מפתח שלא קיים.
+
+     ⚠️ החמור מביניהם: `cpu-cooling-socket` — החוק שחוסם
+     קירור שלא מתאים לתושבת המעבד. הוא לא נורה אף פעם.
+
+     ⚠️ וזו גם הסיבה שחבילת הבדיקות עברה 14,986 צירופים בלי
+     אף שגיאה: חוק שלא יורה אינו יכול ליצור false-positive, והאורקל
+     הפייתוני מממש את אותה טעות בדיוק. הסכמה בין שני מימושים
+     שגויים אינה נכונות. */
+  unlocked:           ["unlocked","overclockable"],
+  supportedSockets:   ["supportedSockets","sockets"],
+  maxCoolerHeightMm:  ["maxCoolerHeightMm","maxAirCoolerHeightMm"],
+
   wattage:            ["wattage","watt","watts","powerWatts"],
   tdpWatts:           ["tdpWatts","tdp"],
   recommendedPsuWatts:["recommendedPsuWatts","psuWatts","recommendedPsu"],

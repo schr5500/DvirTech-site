@@ -678,6 +678,15 @@ function renderCheckoutTotals(){
   const base = Math.round((cartSubtotal + shipCost + svcCost) * 100) / 100;
   const fee = installmentFeeAmount(base, count);
   const grandTotal = Math.round((base + fee) * 100) / 100;
+  /* 🔴 **הבאג שהשאיר "סה\"כ לתשלום: 0 ₪" בקופה החיה.**
+     `pct` הוזכר פעמיים בהמשך הפונקציה ומעולם לא הוגדר — שריד
+     מריפקטור שבו העמלה עברה מאחוז שטוח ל-installmentFeeAmount().
+     ReferenceError הפיל את renderCheckoutTotals לפני השורה
+     האחרונה, ולכן grandTotalPrice נשאר על ערכו ההתחלתי לנצח.
+     ⚠️ הלקוח ראה "סכום הרכישה 379 ₪" ומתחתיו "סה\"כ לתשלום 0 ₪".
+     האחוז האפקטיבי נגזר עכשיו מהעמלה בפועל ולא ממשתנה נפרד,
+     כך שהתווית והסכום לא יכולים להיפרד שוב. */
+  const pct = base > 0 ? Math.round((fee / base) * 1000) / 10 : 0;
 
   const shipRow = document.getElementById("shipRow");
   if(shipRow){
