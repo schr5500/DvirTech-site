@@ -1,0 +1,12 @@
+# ⚠️ קבצים בינאריים — git לעולם לא ימיר בהם שורות.
+# בלי זה core.autocrlf=true השחית קובצי JPEG שבהם לא נמצא בייט NUL
+# בבלוק הראשון, ולכן git ניחש "טקסט". התמונות נשמרו פגומות.
+*.jpg  binary
+*.jpeg binary
+*.png  binary
+*.webp binary
+*.gif  binary
+*.ico  binary
+*.zip  binary
+*.pdf  binary
+*.heic binary

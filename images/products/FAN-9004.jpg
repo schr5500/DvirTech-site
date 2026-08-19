@@ -1,0 +1,438 @@
+
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="utf-8">
+    <meta name="author" content="">
+    <link rel="icon" href="/images/favicon.ico" type="image/x-icon" />
+    <link rel="shortcut icon" href="/images/favicon.ico" type="image/x-icon" />
+
+    <meta name="viewport" content="width=1250, initial-scale=0.6, shrink-to-fit=yes" />
+
+    <title>&#x5DE;&#x5D5;&#x5E8; &#x5DC;&#x5D5;&#x5D9;</title>
+    <meta name="keywords" content="   " />
+    <meta name="description" content="" />
+    <link rel="canonical" href="https://www.morlevi.co.il//Home/Error" />
+
+    <meta name="og:title" content="מור לוי" />
+    <meta name='og:image' content='https://www.morlevi.co.il/images/'>
+    <meta name="og:description" content="" />
+
+    
+    <link href="/lib/bootstrap-slider/slider.min.css" rel="stylesheet" />
+    
+    
+        <link rel="stylesheet" href="/lib/bootstrap/dist/css/bootstrap.min.css?v=NJWeQ-bs82iAeoT5Ktmqbi3NXwxcHlfaVejzJI2dklU" />
+        <link rel="stylesheet" href="/css/megamenu.min.css" />
+        <link href="/lib/font-awesome/css/font-awesome.min.css" rel="stylesheet" />
+        <link rel="stylesheet" href="/css/site.min.css?v=l6MPgIptHJiXjfJ1tibC-jV4hht2CSSKDs7yKYgimmo" />
+
+        <link rel="stylesheet" href="/css/mod2/base.he-IL.min.css?v=RLTiHk-ctMWLHbcRZsVfunMIlvrOREpxSGGwPZiqaCM" />
+        <link rel="stylesheet" href="/lib/bootstarp-rtl/bootstrap.rtl.min.css?v=WHLfhgQA4AdNNP-SXjWZv5QoUrWyqJGASbML4hyVzjE" />
+    
+    
+    <!-- Global site tag (gtag.js) - Google Analytics -->
+    <script async src="https://www.googletagmanager.com/gtag/js?id=UA-123149932-1"></script>
+    <script>
+        window.dataLayer = window.dataLayer || [];
+        function gtag() { dataLayer.push(arguments); }
+        gtag('js', new Date());
+gtag('config', 'UA-123149932-1');
+    </script>
+
+
+</head>
+<body>
+    <div class="inner-container">
+
+<div class="header">
+    <div class="top">
+        <div class="container">
+            <div class="row top">
+                <div class="col logo-wrapper">
+                    <a class="logo" href="/"><img src="/img/logo.png" alt="Mor Levi" /></a>
+                </div>
+                <div class="col justify-content-center align-self-center search">
+                    <form action="/cat/0" method="get" id="searchform" autocomplete="off">
+                        <input id="search-form" name="keyword" placeholder="חפש מוצרים או מספר קטלוגי" class="form-control" value="" autocomplete="off" />
+                        <input type="submit" id="searchbut" class="but" value="" />
+                        <div class="search-autocomplete" id="search-autocomplete"></div>
+                    </form>
+                </div>
+                <div class="col justify-content-center align-self-center">
+                    <ul class="align-items-center d-inline-flex mr-auto nav user-panel">
+                        <li class="nav-item vb-3"><a href="javascript:void();" data-modal="/AllProductsPrices/all/true">הורדת מחירון</a></li>
+                        <li class="nav-item"><a href="/Contact" style="color:#ffffff;">שירות לקוחות 03-9423200</a></li>
+                        <li class="nav-item"><img src="/img/topsep.png" alt="separator" /></li>
+                            <li class="nav-item">
+                                <a href="javascript:void();" data-modal="/User/Login" style="color:#ffffff;">
+                                    <img src="/img/userico.png" alt="user-icon" /> <span>&#x5D4;&#x5EA;&#x5D7;&#x5D1;&#x5E8;</span>
+                                </a>
+                            </li>
+                        <li class="nav-item">
+                            <a href="/basket" class="basket-preview-open basket-drawer-trigger">
+                                <img src="/img/cartico.png" alt="cart-icon" />
+                                <span data-bind="html: basketVM.isLoaded() ? '(' + basketVM.TotalCount() + ')' : '(0)'">(0)</span>
+                            </a>
+                        </li>
+                    </ul>
+                </div>
+            </div>
+        </div>
+    </div>
+    <div class="bottom">
+        <div class="container">
+            <div class="row">
+                <div class="col">
+                    
+    <ul class="nav nav-fill dropdown-panel">
+
+
+<li class="dropdown nav-item"><a href="/Cat/-1" class="nav-link dropdown-toggle" id="dropdownMenu1" data-toggle="dropdown" aria-haspopup="true" aria-expanded="false">כל הקטגוריות</a><ul class="dropdown-menu multi-level" role="menu" aria-labelledby="dropdownMenu"><li class="dropdown-submenu"><a href="/Cat/17" class="dropdown-item" tabindex="-1">לוחות אם</a><ul class="dropdown-menu"><li class="dropdown-submenu"><a href="/Cat/43" class="dropdown-item" tabindex="-1">לוחות למעבדי Intel</a><ul class="dropdown-menu"><li class="dropdown-submenu"><a href="/Cat/420" class="dropdown-item" tabindex="-1">דור 15 LGA 1851</a><ul class="dropdown-menu"><li class="dropdown-item"><a href="/Cat/421" tabindex="-1">Z890</a></li><li class="dropdown-item"><a href="/Cat/425" tabindex="-1">B860</a></li><li class="dropdown-item"><a href="/Cat/434" tabindex="-1">H810</a></li></ul></li><li class="dropdown-submenu"><a href="/Cat/378" class="dropdown-item" tabindex="-1">דור 12/13/14 INTEL LGA1700</a><ul class="dropdown-menu"><li class="dropdown-item"><a href="/Cat/398" tabindex="-1">Z790</a></li><li class="dropdown-item"><a href="/Cat/400" tabindex="-1">B760</a></li><li class="dropdown-item"><a href="/Cat/389" tabindex="-1">H610</a></li></ul></li></ul></li><li class="dropdown-submenu"><a href="/Cat/44" class="dropdown-item" tabindex="-1">לוחות למעבדי AMD</a><ul class="dropdown-menu"><li class="dropdown-submenu"><a href="/Cat/396" class="dropdown-item" tabindex="-1">לוחות למעבדי AM5 AMD</a><ul class="dropdown-menu"><li class="dropdown-item"><a href="/Cat/427" tabindex="-1">X870/X870E</a></li><li class="dropdown-item"><a href="/Cat/426" tabindex="-1">B850</a></li><li class="dropdown-item"><a href="/Cat/433" tabindex="-1">B840</a></li><li class="dropdown-item"><a href="/Cat/428" tabindex="-1">X670/X670E</a></li><li class="dropdown-item"><a href="/Cat/429" tabindex="-1">B650 </a></li><li class="dropdown-item"><a href="/Cat/430" tabindex="-1">A620</a></li></ul></li><li class="dropdown-submenu"><a href="/Cat/22" class="dropdown-item" tabindex="-1">לוחות אם למעבדי  AM4+  AMD</a><ul class="dropdown-menu"><li class="dropdown-item"><a href="/Cat/350" tabindex="-1">A520</a></li><li class="dropdown-item"><a href="/Cat/340" tabindex="-1">B550</a></li></ul></li><li class="dropdown-item"><a href="/Cat/46" tabindex="-1">לוחות אם למעבדי Threadripper AMD</a></li></ul></li><li class="dropdown-item"><a href="/Cat/439" tabindex="-1">לוחות משופצים 3 חודשי אחריות</a></li></ul></li><li class="dropdown-submenu"><a href="/Cat/82" class="dropdown-item" tabindex="-1">כרטיסי מסך</a><ul class="dropdown-menu"><li class="dropdown-submenu"><a href="/Cat/83" class="dropdown-item" tabindex="-1">NVIDIA</a><ul class="dropdown-menu"><li class="dropdown-item"><a href="/Cat/85" tabindex="-1">Gigabyte/AORUS</a></li><li class="dropdown-item"><a href="/Cat/88" tabindex="-1">RTX Blackwell</a></li></ul></li><li class="dropdown-submenu"><a href="/Cat/84" class="dropdown-item" tabindex="-1">AMD Radeon</a><ul class="dropdown-menu"><li class="dropdown-item"><a href="/Cat/86" tabindex="-1">Gigabyte</a></li></ul></li></ul></li><li class="dropdown-submenu"><a href="/Cat/6" class="dropdown-item" tabindex="-1">מעבדים ופתרונות קירור</a><ul class="dropdown-menu"><li class="dropdown-submenu"><a href="/Cat/32" class="dropdown-item" tabindex="-1">מעבדים INTEL</a><ul class="dropdown-menu"><li class="dropdown-item"><a href="/Cat/419" tabindex="-1">Intel LGA1851 Ultra 200</a></li><li class="dropdown-item"><a href="/Cat/409" tabindex="-1">Intel LGA1700 Gen 14</a></li><li class="dropdown-item"><a href="/Cat/399" tabindex="-1">Intel LGA1700 Gen 13</a></li><li class="dropdown-item"><a href="/Cat/380" tabindex="-1">Intel LGA1700 Gen 12</a></li><li class="dropdown-item"><a href="/Cat/29" tabindex="-1">INTEL LGA2066</a></li></ul></li><li class="dropdown-submenu"><a href="/Cat/33" class="dropdown-item" tabindex="-1">מעבדים AMD</a><ul class="dropdown-menu"><li class="dropdown-submenu"><a href="/Cat/417" class="dropdown-item" tabindex="-1">AMD AM5</a><ul class="dropdown-menu"><li class="dropdown-item"><a href="/Cat/418" tabindex="-1">AMD ZEN5</a></li><li class="dropdown-item"><a href="/Cat/397" tabindex="-1">AMD ZEN4</a></li></ul></li><li class="dropdown-item"><a href="/Cat/316" tabindex="-1">AMD AM4</a></li><li class="dropdown-item"><a href="/Cat/31" tabindex="-1">AMD Ryzen Threadripper</a></li></ul></li><li class="dropdown-submenu"><a href="/Cat/34" class="dropdown-item" tabindex="-1">פתרונות קירור אוויר</a><ul class="dropdown-menu"><li class="dropdown-item"><a href="/Cat/288" tabindex="-1">Cooler Master</a></li><li class="dropdown-item"><a href="/Cat/39" tabindex="-1">ANTEC</a></li><li class="dropdown-item"><a href="/Cat/36" tabindex="-1">INTEL/AMD</a></li><li class="dropdown-item"><a href="/Cat/342" tabindex="-1">Corsair</a></li><li class="dropdown-item"><a href="/Cat/391" tabindex="-1">NOCTUA</a></li><li class="dropdown-item"><a href="/Cat/219" tabindex="-1">DEEPCOOL</a></li></ul></li><li class="dropdown-submenu"><a href="/Cat/40" class="dropdown-item" tabindex="-1">קירור נוזלי</a><ul class="dropdown-menu"><li class="dropdown-item"><a href="/Cat/287" tabindex="-1">Cooler Master</a></li><li class="dropdown-item"><a href="/Cat/41" tabindex="-1">Antec</a></li><li class="dropdown-item"><a href="/Cat/42" tabindex="-1">Corsair</a></li><li class="dropdown-item"><a href="/Cat/318" tabindex="-1">Gigabyte Aorus</a></li></ul></li><li class="dropdown-item"><a href="/Cat/320" tabindex="-1">משחה טרמית</a></li></ul></li><li class="dropdown-submenu"><a href="/Cat/169" class="dropdown-item" tabindex="-1">זכרון</a><ul class="dropdown-menu"><li class="dropdown-submenu"><a href="/Cat/149" class="dropdown-item" tabindex="-1">זכרון לנייח DIMM</a><ul class="dropdown-menu"><li class="dropdown-submenu"><a href="/Cat/379" class="dropdown-item" tabindex="-1">DDR5</a><ul class="dropdown-menu"><li class="dropdown-item"><a href="/Cat/390" tabindex="-1">KINGSTON</a></li><li class="dropdown-item"><a href="/Cat/383" tabindex="-1">CRUCIAL</a></li><li class="dropdown-item"><a href="/Cat/384" tabindex="-1">CORSAIR</a></li><li class="dropdown-item"><a href="/Cat/435" tabindex="-1">LEXAR</a></li><li class="dropdown-item"><a href="/Cat/440" tabindex="-1">Samsung</a></li><li class="dropdown-item"><a href="/Cat/441" tabindex="-1">PATRIOT</a></li></ul></li><li class="dropdown-submenu"><a href="/Cat/152" class="dropdown-item" tabindex="-1">DDR4</a><ul class="dropdown-menu"><li class="dropdown-item"><a href="/Cat/224" tabindex="-1">CRUCIAL</a></li><li class="dropdown-item"><a href="/Cat/225" tabindex="-1">KINGSTON</a></li><li class="dropdown-item"><a href="/Cat/405" tabindex="-1">Netac</a></li><li class="dropdown-submenu"><a href="/Cat/227" class="dropdown-item" tabindex="-1">CORSAIR</a><ul class="dropdown-menu"><li class="dropdown-item"><a href="/Cat/244" tabindex="-1">8GB</a></li><li class="dropdown-item"><a href="/Cat/245" tabindex="-1">16GB</a></li><li class="dropdown-item"><a href="/Cat/246" tabindex="-1">32GB</a></li><li class="dropdown-item"><a href="/Cat/247" tabindex="-1">64GB</a></li><li class="dropdown-item"><a href="/Cat/348" tabindex="-1">128GB</a></li></ul></li><li class="dropdown-item"><a href="/Cat/448" tabindex="-1">LEXAR</a></li><li class="dropdown-item"><a href="/Cat/452" tabindex="-1">AFOX</a></li></ul></li></ul></li><li class="dropdown-submenu"><a href="/Cat/148" class="dropdown-item" tabindex="-1">זכרון לנייד SODIMM</a><ul class="dropdown-menu"><li class="dropdown-item"><a href="/Cat/402" tabindex="-1">DDR5</a></li><li class="dropdown-submenu"><a href="/Cat/171" class="dropdown-item" tabindex="-1">DDR4</a><ul class="dropdown-menu"><li class="dropdown-item"><a href="/Cat/236" tabindex="-1">KINGSTON</a></li><li class="dropdown-item"><a href="/Cat/237" tabindex="-1">CRUCIAL</a></li><li class="dropdown-item"><a href="/Cat/277" tabindex="-1">CORSAIR</a></li><li class="dropdown-item"><a href="/Cat/451" tabindex="-1">LEXAR</a></li><li class="dropdown-item"><a href="/Cat/293" tabindex="-1">SAMSUNG</a></li></ul></li></ul></li></ul></li><li class="dropdown-submenu"><a href="/Cat/7" class="dropdown-item" tabindex="-1">אחסון</a><ul class="dropdown-menu"><li class="dropdown-submenu"><a href="/Cat/172" class="dropdown-item" tabindex="-1">SSD - Solid State Drive </a><ul class="dropdown-menu"><li class="dropdown-item"><a href="/Cat/411" tabindex="-1">NVME GEN5</a></li><li class="dropdown-item"><a href="/Cat/314" tabindex="-1">NVME GEN4</a></li><li class="dropdown-item"><a href="/Cat/51" tabindex="-1">NVME GEN3</a></li><li class="dropdown-item"><a href="/Cat/50" tabindex="-1">SSD sata 3</a></li></ul></li><li class="dropdown-submenu"><a href="/Cat/48" class="dropdown-item" tabindex="-1">HDD פנימי</a><ul class="dropdown-menu"><li class="dropdown-submenu"><a href="/Cat/49" class="dropdown-item" tabindex="-1"> לנייח "HDD 3.5</a><ul class="dropdown-menu"><li class="dropdown-item"><a href="/Cat/179" tabindex="-1">Western Digital / HGST</a></li><li class="dropdown-item"><a href="/Cat/56" tabindex="-1">Toshiba</a></li><li class="dropdown-item"><a href="/Cat/180" tabindex="-1">Seagate</a></li></ul></li></ul></li><li class="dropdown-submenu"><a href="/Cat/53" class="dropdown-item" tabindex="-1">HDD חיצוני</a><ul class="dropdown-menu"><li class="dropdown-submenu"><a href="/Cat/176" class="dropdown-item" tabindex="-1">3.5</a><ul class="dropdown-menu"><li class="dropdown-item"><a href="/Cat/296" tabindex="-1">SEAGATE</a></li><li class="dropdown-item"><a href="/Cat/178" tabindex="-1">Western Digital</a></li></ul></li><li class="dropdown-submenu"><a href="/Cat/177" class="dropdown-item" tabindex="-1">2.5</a><ul class="dropdown-menu"><li class="dropdown-item"><a href="/Cat/54" tabindex="-1">MAXTOR/SEAGATE</a></li><li class="dropdown-item"><a href="/Cat/443" tabindex="-1">Seagate</a></li><li class="dropdown-item"><a href="/Cat/55" tabindex="-1">Western Digital</a></li><li class="dropdown-item"><a href="/Cat/220" tabindex="-1">toshiba</a></li></ul></li></ul></li><li class="dropdown-item"><a href="/Cat/175" tabindex="-1">SSD חיצוני</a></li><li class="dropdown-submenu"><a href="/Cat/20" class="dropdown-item" tabindex="-1">Disk on key - SD cards</a><ul class="dropdown-menu"><li class="dropdown-submenu"><a href="/Cat/58" class="dropdown-item" tabindex="-1">Disk On Key</a><ul class="dropdown-menu"><li class="dropdown-item"><a href="/Cat/406" tabindex="-1">Netac</a></li><li class="dropdown-item"><a href="/Cat/183" tabindex="-1">Kingston</a></li><li class="dropdown-item"><a href="/Cat/184" tabindex="-1">SANDISK</a></li><li class="dropdown-item"><a href="/Cat/432" tabindex="-1">Samsung</a></li></ul></li><li class="dropdown-submenu"><a href="/Cat/59" class="dropdown-item" tabindex="-1">MICRO SD</a></li></ul></li><li class="dropdown-submenu"><a href="/Cat/74" class="dropdown-item" tabindex="-1">כונן אופטי</a><ul class="dropdown-menu"><li class="dropdown-item"><a href="/Cat/75" tabindex="-1">פנימי</a></li><li class="dropdown-item"><a href="/Cat/76" tabindex="-1">חיצוני</a></li></ul></li><li class="dropdown-item"><a href="/Cat/81" tabindex="-1">קופסא חיצונית לHDD</a></li><li class="dropdown-item"><a href="/Cat/355" tabindex="-1">אחסון רשת NAS</a></li></ul></li><li class="dropdown-submenu"><a href="/Cat/95" class="dropdown-item" tabindex="-1">מארזים / מאוררים למארז/ ציוד עזר לבנית מחשב</a><ul class="dropdown-menu"><li class="dropdown-item"><a href="/Cat/98" tabindex="-1">Antec</a></li><li class="dropdown-item"><a href="/Cat/447" tabindex="-1">GIGABYTE</a></li><li class="dropdown-item"><a href="/Cat/285" tabindex="-1">Cooler Master</a></li><li class="dropdown-item"><a href="/Cat/99" tabindex="-1">Corsair</a></li><li class="dropdown-item"><a href="/Cat/97" tabindex="-1">Solid & Others</a></li><li class="dropdown-item"><a href="/Cat/261" tabindex="-1">מארזי RACKMOUNT וציוד נלווה</a></li><li class="dropdown-item"><a href="/Cat/403" tabindex="-1">פנלים קדמיים ודלתות צד</a></li><li class="dropdown-submenu"><a href="/Cat/101" class="dropdown-item" tabindex="-1">מאוררים למארז</a><ul class="dropdown-menu"><li class="dropdown-item"><a href="/Cat/102" tabindex="-1">Arctic Cooling</a></li><li class="dropdown-item"><a href="/Cat/103" tabindex="-1">Antec</a></li><li class="dropdown-item"><a href="/Cat/104" tabindex="-1">Corsair</a></li><li class="dropdown-item"><a href="/Cat/105" tabindex="-1">Generic</a></li><li class="dropdown-item"><a href="/Cat/309" tabindex="-1">Cooler Master</a></li></ul></li><li class="dropdown-item"><a href="/Cat/257" tabindex="-1">כבלים ומתאמים לבניית מחשב</a></li></ul></li><li class="dropdown-submenu"><a href="/Cat/64" class="dropdown-item" tabindex="-1">ספקי כוח</a><ul class="dropdown-menu"><li class="dropdown-item"><a href="/Cat/66" tabindex="-1">Antec</a></li><li class="dropdown-item"><a href="/Cat/339" tabindex="-1">Aorus & Gigabyte</a></li><li class="dropdown-item"><a href="/Cat/286" tabindex="-1">Cooler Master</a></li><li class="dropdown-item"><a href="/Cat/67" tabindex="-1">Corsair</a></li><li class="dropdown-item"><a href="/Cat/444" tabindex="-1">DeepCool</a></li><li class="dropdown-item"><a href="/Cat/445" tabindex="-1">ספקי כוח בצבע לבן</a></li><li class="dropdown-item"><a href="/Cat/373" tabindex="-1">SFX - ספקי MINI ITX</a></li><li class="dropdown-item"><a href="/Cat/65" tabindex="-1">ספקי כוח חברות שונות</a></li></ul></li><li class="dropdown-submenu"><a href="/Cat/1" class="dropdown-item" tabindex="-1">מחשבים ניידים/ תיקים/מטענים</a><ul class="dropdown-menu"><li class="dropdown-submenu"><a href="/Cat/195" class="dropdown-item" tabindex="-1">מחשבים ניידים</a><ul class="dropdown-menu"><li class="dropdown-item"><a href="/Cat/358" tabindex="-1">Gigabyte</a></li><li class="dropdown-item"><a href="/Cat/450" tabindex="-1">TOSHIBA Dynabook</a></li><li class="dropdown-item"><a href="/Cat/71" tabindex="-1">Lenovo</a></li><li class="dropdown-item"><a href="/Cat/69" tabindex="-1">Asus</a></li><li class="dropdown-item"><a href="/Cat/70" tabindex="-1">Dell</a></li><li class="dropdown-item"><a href="/Cat/196" tabindex="-1">HP</a></li></ul></li><li class="dropdown-item"><a href="/Cat/333" tabindex="-1">הרחבות אחריות ניידים</a></li><li class="dropdown-item"><a href="/Cat/218" tabindex="-1">תיקים</a></li><li class="dropdown-item"><a href="/Cat/138" tabindex="-1">תחנות עגינה</a></li><li class="dropdown-item"><a href="/Cat/139" tabindex="-1">מטענים</a></li></ul></li><li class="dropdown-submenu"><a href="/Cat/4" class="dropdown-item" tabindex="-1">מחשבים נייחים</a><ul class="dropdown-menu"><li class="dropdown-item bg-grey"><a href="/configurator" tabindex="-1">בנה מחשב</a></li><li class="dropdown-item"><a href="/Cat/238" tabindex="-1">מחשבי גיימינג גרפיקה ועריכה</a></li><li class="dropdown-item"><a href="/Cat/322" tabindex="-1">באנדל מורכב</a></li><li class="dropdown-submenu"><a href="/Cat/131" class="dropdown-item" tabindex="-1">מחשב מותג</a><ul class="dropdown-menu"><li class="dropdown-item"><a href="/Cat/132" tabindex="-1">Lenovo</a></li><li class="dropdown-item"><a href="/Cat/133" tabindex="-1">Dell</a></li><li class="dropdown-item"><a href="/Cat/394" tabindex="-1">ASUS</a></li><li class="dropdown-item"><a href="/Cat/213" tabindex="-1">HP</a></li></ul></li><li class="dropdown-submenu"><a href="/Cat/127" class="dropdown-item" tabindex="-1">Mini PC</a><ul class="dropdown-menu"><li class="dropdown-item"><a href="/Cat/431" tabindex="-1">GMK NucBox</a></li><li class="dropdown-item"><a href="/Cat/446" tabindex="-1">GIGABYTE</a></li><li class="dropdown-item"><a href="/Cat/129" tabindex="-1">LENOVO TINY</a></li><li class="dropdown-item"><a href="/Cat/404" tabindex="-1">DELL OptiPlex</a></li><li class="dropdown-item"><a href="/Cat/128" tabindex="-1">HP</a></li><li class="dropdown-item"><a href="/Cat/375" tabindex="-1">ASUS/INTEL NUC</a></li></ul></li><li class="dropdown-submenu"><a href="/Cat/188" class="dropdown-item" tabindex="-1">AIO</a><ul class="dropdown-menu"><li class="dropdown-item"><a href="/Cat/189" tabindex="-1">HP</a></li><li class="dropdown-item"><a href="/Cat/190" tabindex="-1">LENOVO</a></li><li class="dropdown-item"><a href="/Cat/359" tabindex="-1">ASUS</a></li></ul></li><li class="dropdown-item"><a href="/Cat/334" tabindex="-1">הרחבת אחריות למחשבי מותג</a></li></ul></li><li class="dropdown-submenu"><a href="/Cat/156" class="dropdown-item" tabindex="-1">תוכנות</a><ul class="dropdown-menu"><li class="dropdown-item"><a href="/Cat/157" tabindex="-1">מערכות הפעלה</a></li><li class="dropdown-item"><a href="/Cat/158" tabindex="-1">אופיס</a></li><li class="dropdown-submenu"><a href="/Cat/159" class="dropdown-item" tabindex="-1">אנטיוירוס</a><ul class="dropdown-menu"><li class="dropdown-item"><a href="/Cat/164" tabindex="-1">ESET</a></li></ul></li></ul></li><li class="dropdown-submenu"><a href="/Cat/8" class="dropdown-item" tabindex="-1">מסכי מחשב / טלוויזיות/מתקני תלייה</a><ul class="dropdown-menu"><li class="dropdown-submenu"><a href="/Cat/92" class="dropdown-item" tabindex="-1">מסכי מחשב</a><ul class="dropdown-menu"><li class="dropdown-item"><a href="/Cat/212" tabindex="-1">Solid</a></li><li class="dropdown-item"><a href="/Cat/153" tabindex="-1">SAMSUNG</a></li><li class="dropdown-item"><a href="/Cat/77" tabindex="-1">Dell</a></li><li class="dropdown-item"><a href="/Cat/297" tabindex="-1">GIGABYTE</a></li><li class="dropdown-item"><a href="/Cat/341" tabindex="-1">Cooler Master</a></li><li class="dropdown-item"><a href="/Cat/267" tabindex="-1">LENOVO</a></li></ul></li><li class="dropdown-submenu"><a href="/Cat/93" class="dropdown-item" tabindex="-1">טלוויזיות</a><ul class="dropdown-menu"><li class="dropdown-item"><a href="/Cat/94" tabindex="-1">MAG</a></li></ul></li><li class="dropdown-item"><a href="/Cat/210" tabindex="-1">מתקני תלייה</a></li></ul></li><li class="dropdown-submenu"><a href="/Cat/308" class="dropdown-item" tabindex="-1">מקלדות ועכברים</a><ul class="dropdown-menu"><li class="dropdown-item"><a href="/Cat/155" tabindex="-1">מקלדות סטנדרטיות</a></li><li class="dropdown-item"><a href="/Cat/239" tabindex="-1">מקלדות גיימינג</a></li><li class="dropdown-submenu"><a href="/Cat/107" class="dropdown-item" tabindex="-1">עכברים</a><ul class="dropdown-menu"><li class="dropdown-item"><a href="/Cat/252" tabindex="-1">עכברי גיימינג</a></li><li class="dropdown-item"><a href="/Cat/108" tabindex="-1">עכבר חוטי</a></li><li class="dropdown-item"><a href="/Cat/109" tabindex="-1">עכבר אלחוטי</a></li></ul></li><li class="dropdown-submenu"><a href="/Cat/112" class="dropdown-item" tabindex="-1">סט מקלדת + עכבר</a><ul class="dropdown-menu"><li class="dropdown-item"><a href="/Cat/113" tabindex="-1">סט חוטי</a></li><li class="dropdown-item"><a href="/Cat/449" tabindex="-1">סט גיימינג חוטי</a></li><li class="dropdown-item"><a href="/Cat/114" tabindex="-1">סט אל-חוטי</a></li></ul></li><li class="dropdown-item"><a href="/Cat/292" tabindex="-1">משטח לעכבר/משענת יד למקלדת</a></li></ul></li><li class="dropdown-submenu"><a href="/Cat/368" class="dropdown-item" tabindex="-1">SOUND - ציוד קול</a><ul class="dropdown-menu"><li class="dropdown-submenu"><a href="/Cat/161" class="dropdown-item" tabindex="-1">רמקולים</a><ul class="dropdown-menu"><li class="dropdown-item"><a href="/Cat/249" tabindex="-1">LOGITECH</a></li><li class="dropdown-item"><a href="/Cat/250" tabindex="-1">CREATIVE</a></li><li class="dropdown-item"><a href="/Cat/423" tabindex="-1">EDIFIER</a></li></ul></li><li class="dropdown-item"><a href="/Cat/369" tabindex="-1">מיקרופונים</a></li><li class="dropdown-item"><a href="/Cat/162" tabindex="-1">אוזניות</a></li><li class="dropdown-item"><a href="/Cat/370" tabindex="-1">ציוד נלווה</a></li></ul></li><li class="dropdown-item"><a href="/Cat/436" tabindex="-1">מקרנים</a></li><li class="dropdown-submenu"><a href="/Cat/106" class="dropdown-item" tabindex="-1">ציוד הקפי</a><ul class="dropdown-menu"><li class="dropdown-item"><a href="/Cat/265" tabindex="-1">מפצלי USB</a></li><li class="dropdown-item"><a href="/Cat/393" tabindex="-1">מוצרי אבטחה</a></li><li class="dropdown-submenu"><a href="/Cat/134" class="dropdown-item" tabindex="-1">כבלים ומתאמים</a><ul class="dropdown-menu"><li class="dropdown-item"><a href="/Cat/253" tabindex="-1">HDMI</a></li><li class="dropdown-item"><a href="/Cat/254" tabindex="-1">VGA</a></li><li class="dropdown-item"><a href="/Cat/256" tabindex="-1">Display Port</a></li><li class="dropdown-item"><a href="/Cat/255" tabindex="-1">מוצרי עזר לדיסק קשיח 2.5/ 3.5 /M.2</a></li><li class="dropdown-item"><a href="/Cat/258" tabindex="-1">DVI</a></li><li class="dropdown-item"><a href="/Cat/259" tabindex="-1">כבלי מתח</a></li><li class="dropdown-item"><a href="/Cat/260" tabindex="-1">USB כבלים ומתאמים</a></li></ul></li><li class="dropdown-item"><a href="/Cat/140" tabindex="-1">ציוד נלווה לMINING</a></li><li class="dropdown-item"><a href="/Cat/160" tabindex="-1">מצלמות אינטרנט</a></li><li class="dropdown-item"><a href="/Cat/221" tabindex="-1">כרטיסי PCI וPCIE</a></li><li class="dropdown-item"><a href="/Cat/323" tabindex="-1">שונות</a></li></ul></li><li class="dropdown-submenu"><a href="/Cat/110" class="dropdown-item" tabindex="-1">ציוד רשת</a><ul class="dropdown-menu"><li class="dropdown-submenu"><a href="/Cat/412" class="dropdown-item" tabindex="-1">אבטחת רשת FORTINET FORTIGATE</a><ul class="dropdown-menu"><li class="dropdown-item"><a href="/Cat/422" tabindex="-1">מכשיר Fortigate + רשיון</a></li><li class="dropdown-item"><a href="/Cat/414" tabindex="-1">מכשירי FORTIGATE</a></li><li class="dropdown-item"><a href="/Cat/415" tabindex="-1">רשיונות FORTIGATE</a></li></ul></li><li class="dropdown-item"><a href="/Cat/111" tabindex="-1">נתבים</a></li><li class="dropdown-submenu"><a href="/Cat/141" class="dropdown-item" tabindex="-1">סוויצ'ים</a><ul class="dropdown-menu"><li class="dropdown-item"><a href="/Cat/371" tabindex="-1">2.5 Gbps</a></li><li class="dropdown-item"><a href="/Cat/142" tabindex="-1">10/100</a></li><li class="dropdown-item"><a href="/Cat/143" tabindex="-1">10/100/1000</a></li><li class="dropdown-item"><a href="/Cat/167" tabindex="-1">POE</a></li><li class="dropdown-item"><a href="/Cat/168" tabindex="-1">מנוהל</a></li></ul></li><li class="dropdown-item"><a href="/Cat/144" tabindex="-1">אקסס פוינט</a></li><li class="dropdown-item"><a href="/Cat/154" tabindex="-1">כרטיסי רשת</a></li><li class="dropdown-item"><a href="/Cat/367" tabindex="-1">מודם/נתב סלולרי</a></li><li class="dropdown-submenu"><a href="/Cat/192" class="dropdown-item" tabindex="-1">כבלי רשת</a><ul class="dropdown-menu"><li class="dropdown-item"><a href="/Cat/199" tabindex="-1">CAT 5E</a></li><li class="dropdown-item"><a href="/Cat/200" tabindex="-1">CAT 6</a></li><li class="dropdown-item"><a href="/Cat/201" tabindex="-1">CAT 6A/7</a></li></ul></li><li class="dropdown-item"><a href="/Cat/198" tabindex="-1">ארונות תקשורת</a></li><li class="dropdown-submenu"><a href="/Cat/202" class="dropdown-item" tabindex="-1">ראשים וקופסאות</a><ul class="dropdown-menu"><li class="dropdown-item"><a href="/Cat/203" tabindex="-1">CAT 5</a></li><li class="dropdown-item"><a href="/Cat/204" tabindex="-1">CAT 6</a></li><li class="dropdown-item"><a href="/Cat/205" tabindex="-1">CAT 6A/7</a></li></ul></li><li class="dropdown-item"><a href="/Cat/206" tabindex="-1">כלי עבודה לציוד רשת</a></li></ul></li><li class="dropdown-submenu"><a href="/Cat/115" class="dropdown-item" tabindex="-1">טלוויזיה במעגל סגור</a><ul class="dropdown-menu"><li class="dropdown-submenu"><a href="/Cat/116" class="dropdown-item" tabindex="-1">AHD</a><ul class="dropdown-menu"><li class="dropdown-item"><a href="/Cat/119" tabindex="-1">DVR</a></li><li class="dropdown-item"><a href="/Cat/120" tabindex="-1">מצלמות כיפה</a></li><li class="dropdown-item"><a href="/Cat/121" tabindex="-1">מצלמות צינור</a></li><li class="dropdown-item"><a href="/Cat/194" tabindex="-1">מצלמות נסתרות</a></li><li class="dropdown-item"><a href="/Cat/354" tabindex="-1">PTZ מצלמות ממונעות</a></li></ul></li><li class="dropdown-submenu"><a href="/Cat/117" class="dropdown-item" tabindex="-1">IP</a><ul class="dropdown-menu"><li class="dropdown-item"><a href="/Cat/124" tabindex="-1">NVR</a></li><li class="dropdown-item"><a href="/Cat/122" tabindex="-1">מצלמות כיפה</a></li><li class="dropdown-item"><a href="/Cat/123" tabindex="-1">מצלמות צינור</a></li><li class="dropdown-item"><a href="/Cat/279" tabindex="-1">מצלמות 360 - Fisheye</a></li><li class="dropdown-item"><a href="/Cat/357" tabindex="-1">מצלמות ממונעות</a></li></ul></li><li class="dropdown-item"><a href="/Cat/208" tabindex="-1">מצלמות אלחוטיות</a></li><li class="dropdown-item"><a href="/Cat/211" tabindex="-1">ציוד עזר למצלמות ומכשירי הקלטה</a></li></ul></li><li class="dropdown-submenu"><a href="/Cat/135" class="dropdown-item" tabindex="-1">אל פסק UPS</a><ul class="dropdown-menu"><li class="dropdown-item"><a href="/Cat/137" tabindex="-1">סוללות לאל פסק</a></li><li class="dropdown-submenu"><a href="/Cat/332" class="dropdown-item" tabindex="-1">אל פסק</a><ul class="dropdown-menu"><li class="dropdown-item"><a href="/Cat/136" tabindex="-1">UPS סטנדרטי</a></li><li class="dropdown-item"><a href="/Cat/325" tabindex="-1">UPS ONLINE</a></li></ul></li></ul></li><li class="dropdown-item"><a href="/Cat/271" tabindex="-1">שירותי מעבדה</a></li></ul></li><li class="dropdown nav-item"><a href="/Cat/17" class="nav-link dropdown-toggle" id="dropdownMenu1" data-toggle="dropdown" aria-haspopup="true" aria-expanded="false">לוחות אם</a><ul class="dropdown-menu multi-level" role="menu" aria-labelledby="dropdownMenu"><li class="dropdown-submenu"><a href="/Cat/43" class="dropdown-item" tabindex="-1">לוחות למעבדי Intel</a><ul class="dropdown-menu"><li class="dropdown-submenu"><a href="/Cat/420" class="dropdown-item" tabindex="-1">דור 15 LGA 1851</a><ul class="dropdown-menu"><li class="dropdown-item"><a href="/Cat/421" tabindex="-1">Z890</a></li><li class="dropdown-item"><a href="/Cat/425" tabindex="-1">B860</a></li><li class="dropdown-item"><a href="/Cat/434" tabindex="-1">H810</a></li></ul></li><li class="dropdown-submenu"><a href="/Cat/378" class="dropdown-item" tabindex="-1">דור 12/13/14 INTEL LGA1700</a><ul class="dropdown-menu"><li class="dropdown-item"><a href="/Cat/398" tabindex="-1">Z790</a></li><li class="dropdown-item"><a href="/Cat/400" tabindex="-1">B760</a></li><li class="dropdown-item"><a href="/Cat/389" tabindex="-1">H610</a></li></ul></li></ul></li><li class="dropdown-submenu"><a href="/Cat/44" class="dropdown-item" tabindex="-1">לוחות למעבדי AMD</a><ul class="dropdown-menu"><li class="dropdown-submenu"><a href="/Cat/396" class="dropdown-item" tabindex="-1">לוחות למעבדי AM5 AMD</a><ul class="dropdown-menu"><li class="dropdown-item"><a href="/Cat/427" tabindex="-1">X870/X870E</a></li><li class="dropdown-item"><a href="/Cat/426" tabindex="-1">B850</a></li><li class="dropdown-item"><a href="/Cat/433" tabindex="-1">B840</a></li><li class="dropdown-item"><a href="/Cat/428" tabindex="-1">X670/X670E</a></li><li class="dropdown-item"><a href="/Cat/429" tabindex="-1">B650 </a></li><li class="dropdown-item"><a href="/Cat/430" tabindex="-1">A620</a></li></ul></li><li class="dropdown-submenu"><a href="/Cat/22" class="dropdown-item" tabindex="-1">לוחות אם למעבדי  AM4+  AMD</a><ul class="dropdown-menu"><li class="dropdown-item"><a href="/Cat/350" tabindex="-1">A520</a></li><li class="dropdown-item"><a href="/Cat/340" tabindex="-1">B550</a></li></ul></li><li class="dropdown-item"><a href="/Cat/46" tabindex="-1">לוחות אם למעבדי Threadripper AMD</a></li></ul></li><li class="dropdown-item"><a href="/Cat/439" tabindex="-1">לוחות משופצים 3 חודשי אחריות</a></li></ul></li><li class="dropdown nav-item"><a href="/Cat/82" class="nav-link dropdown-toggle" id="dropdownMenu1" data-toggle="dropdown" aria-haspopup="true" aria-expanded="false">כרטיסי מסך</a><ul class="dropdown-menu multi-level" role="menu" aria-labelledby="dropdownMenu"><li class="dropdown-submenu"><a href="/Cat/83" class="dropdown-item" tabindex="-1">NVIDIA</a><ul class="dropdown-menu"><li class="dropdown-item"><a href="/Cat/85" tabindex="-1">Gigabyte/AORUS</a></li><li class="dropdown-item"><a href="/Cat/88" tabindex="-1">RTX Blackwell</a></li></ul></li><li class="dropdown-submenu"><a href="/Cat/84" class="dropdown-item" tabindex="-1">AMD Radeon</a><ul class="dropdown-menu"><li class="dropdown-item"><a href="/Cat/86" tabindex="-1">Gigabyte</a></li></ul></li></ul></li><li class="dropdown nav-item"><a href="/Cat/6" class="nav-link dropdown-toggle" id="dropdownMenu1" data-toggle="dropdown" aria-haspopup="true" aria-expanded="false">מעבדים ופתרונות קירור</a><ul class="dropdown-menu multi-level" role="menu" aria-labelledby="dropdownMenu"><li class="dropdown-submenu"><a href="/Cat/32" class="dropdown-item" tabindex="-1">מעבדים INTEL</a><ul class="dropdown-menu"><li class="dropdown-item"><a href="/Cat/419" tabindex="-1">Intel LGA1851 Ultra 200</a></li><li class="dropdown-item"><a href="/Cat/409" tabindex="-1">Intel LGA1700 Gen 14</a></li><li class="dropdown-item"><a href="/Cat/399" tabindex="-1">Intel LGA1700 Gen 13</a></li><li class="dropdown-item"><a href="/Cat/380" tabindex="-1">Intel LGA1700 Gen 12</a></li><li class="dropdown-item"><a href="/Cat/29" tabindex="-1">INTEL LGA2066</a></li></ul></li><li class="dropdown-submenu"><a href="/Cat/33" class="dropdown-item" tabindex="-1">מעבדים AMD</a><ul class="dropdown-menu"><li class="dropdown-submenu"><a href="/Cat/417" class="dropdown-item" tabindex="-1">AMD AM5</a><ul class="dropdown-menu"><li class="dropdown-item"><a href="/Cat/418" tabindex="-1">AMD ZEN5</a></li><li class="dropdown-item"><a href="/Cat/397" tabindex="-1">AMD ZEN4</a></li></ul></li><li class="dropdown-item"><a href="/Cat/316" tabindex="-1">AMD AM4</a></li><li class="dropdown-item"><a href="/Cat/31" tabindex="-1">AMD Ryzen Threadripper</a></li></ul></li><li class="dropdown-submenu"><a href="/Cat/34" class="dropdown-item" tabindex="-1">פתרונות קירור אוויר</a><ul class="dropdown-menu"><li class="dropdown-item"><a href="/Cat/288" tabindex="-1">Cooler Master</a></li><li class="dropdown-item"><a href="/Cat/39" tabindex="-1">ANTEC</a></li><li class="dropdown-item"><a href="/Cat/36" tabindex="-1">INTEL/AMD</a></li><li class="dropdown-item"><a href="/Cat/342" tabindex="-1">Corsair</a></li><li class="dropdown-item"><a href="/Cat/391" tabindex="-1">NOCTUA</a></li><li class="dropdown-item"><a href="/Cat/219" tabindex="-1">DEEPCOOL</a></li></ul></li><li class="dropdown-submenu"><a href="/Cat/40" class="dropdown-item" tabindex="-1">קירור נוזלי</a><ul class="dropdown-menu"><li class="dropdown-item"><a href="/Cat/287" tabindex="-1">Cooler Master</a></li><li class="dropdown-item"><a href="/Cat/41" tabindex="-1">Antec</a></li><li class="dropdown-item"><a href="/Cat/42" tabindex="-1">Corsair</a></li><li class="dropdown-item"><a href="/Cat/318" tabindex="-1">Gigabyte Aorus</a></li></ul></li><li class="dropdown-item"><a href="/Cat/320" tabindex="-1">משחה טרמית</a></li></ul></li><li class="dropdown nav-item"><a href="/Cat/169" class="nav-link dropdown-toggle" id="dropdownMenu1" data-toggle="dropdown" aria-haspopup="true" aria-expanded="false">זכרון</a><ul class="dropdown-menu multi-level" role="menu" aria-labelledby="dropdownMenu"><li class="dropdown-submenu"><a href="/Cat/149" class="dropdown-item" tabindex="-1">זכרון לנייח DIMM</a><ul class="dropdown-menu"><li class="dropdown-submenu"><a href="/Cat/379" class="dropdown-item" tabindex="-1">DDR5</a><ul class="dropdown-menu"><li class="dropdown-item"><a href="/Cat/390" tabindex="-1">KINGSTON</a></li><li class="dropdown-item"><a href="/Cat/383" tabindex="-1">CRUCIAL</a></li><li class="dropdown-item"><a href="/Cat/384" tabindex="-1">CORSAIR</a></li><li class="dropdown-item"><a href="/Cat/435" tabindex="-1">LEXAR</a></li><li class="dropdown-item"><a href="/Cat/440" tabindex="-1">Samsung</a></li><li class="dropdown-item"><a href="/Cat/441" tabindex="-1">PATRIOT</a></li></ul></li><li class="dropdown-submenu"><a href="/Cat/152" class="dropdown-item" tabindex="-1">DDR4</a><ul class="dropdown-menu"><li class="dropdown-item"><a href="/Cat/224" tabindex="-1">CRUCIAL</a></li><li class="dropdown-item"><a href="/Cat/225" tabindex="-1">KINGSTON</a></li><li class="dropdown-item"><a href="/Cat/405" tabindex="-1">Netac</a></li><li class="dropdown-submenu"><a href="/Cat/227" class="dropdown-item" tabindex="-1">CORSAIR</a><ul class="dropdown-menu"><li class="dropdown-item"><a href="/Cat/244" tabindex="-1">8GB</a></li><li class="dropdown-item"><a href="/Cat/245" tabindex="-1">16GB</a></li><li class="dropdown-item"><a href="/Cat/246" tabindex="-1">32GB</a></li><li class="dropdown-item"><a href="/Cat/247" tabindex="-1">64GB</a></li><li class="dropdown-item"><a href="/Cat/348" tabindex="-1">128GB</a></li></ul></li><li class="dropdown-item"><a href="/Cat/448" tabindex="-1">LEXAR</a></li><li class="dropdown-item"><a href="/Cat/452" tabindex="-1">AFOX</a></li></ul></li></ul></li><li class="dropdown-submenu"><a href="/Cat/148" class="dropdown-item" tabindex="-1">זכרון לנייד SODIMM</a><ul class="dropdown-menu"><li class="dropdown-item"><a href="/Cat/402" tabindex="-1">DDR5</a></li><li class="dropdown-submenu"><a href="/Cat/171" class="dropdown-item" tabindex="-1">DDR4</a><ul class="dropdown-menu"><li class="dropdown-item"><a href="/Cat/236" tabindex="-1">KINGSTON</a></li><li class="dropdown-item"><a href="/Cat/237" tabindex="-1">CRUCIAL</a></li><li class="dropdown-item"><a href="/Cat/277" tabindex="-1">CORSAIR</a></li><li class="dropdown-item"><a href="/Cat/451" tabindex="-1">LEXAR</a></li><li class="dropdown-item"><a href="/Cat/293" tabindex="-1">SAMSUNG</a></li></ul></li></ul></li></ul></li><li class="dropdown nav-item"><a href="/Cat/7" class="nav-link dropdown-toggle" id="dropdownMenu1" data-toggle="dropdown" aria-haspopup="true" aria-expanded="false">אחסון</a><ul class="dropdown-menu multi-level" role="menu" aria-labelledby="dropdownMenu"><li class="dropdown-submenu"><a href="/Cat/172" class="dropdown-item" tabindex="-1">SSD - Solid State Drive </a><ul class="dropdown-menu"><li class="dropdown-item"><a href="/Cat/411" tabindex="-1">NVME GEN5</a></li><li class="dropdown-item"><a href="/Cat/314" tabindex="-1">NVME GEN4</a></li><li class="dropdown-item"><a href="/Cat/51" tabindex="-1">NVME GEN3</a></li><li class="dropdown-item"><a href="/Cat/50" tabindex="-1">SSD sata 3</a></li></ul></li><li class="dropdown-submenu"><a href="/Cat/48" class="dropdown-item" tabindex="-1">HDD פנימי</a><ul class="dropdown-menu"><li class="dropdown-submenu"><a href="/Cat/49" class="dropdown-item" tabindex="-1"> לנייח "HDD 3.5</a><ul class="dropdown-menu"><li class="dropdown-item"><a href="/Cat/179" tabindex="-1">Western Digital / HGST</a></li><li class="dropdown-item"><a href="/Cat/56" tabindex="-1">Toshiba</a></li><li class="dropdown-item"><a href="/Cat/180" tabindex="-1">Seagate</a></li></ul></li></ul></li><li class="dropdown-submenu"><a href="/Cat/53" class="dropdown-item" tabindex="-1">HDD חיצוני</a><ul class="dropdown-menu"><li class="dropdown-submenu"><a href="/Cat/176" class="dropdown-item" tabindex="-1">3.5</a><ul class="dropdown-menu"><li class="dropdown-item"><a href="/Cat/296" tabindex="-1">SEAGATE</a></li><li class="dropdown-item"><a href="/Cat/178" tabindex="-1">Western Digital</a></li></ul></li><li class="dropdown-submenu"><a href="/Cat/177" class="dropdown-item" tabindex="-1">2.5</a><ul class="dropdown-menu"><li class="dropdown-item"><a href="/Cat/54" tabindex="-1">MAXTOR/SEAGATE</a></li><li class="dropdown-item"><a href="/Cat/443" tabindex="-1">Seagate</a></li><li class="dropdown-item"><a href="/Cat/55" tabindex="-1">Western Digital</a></li><li class="dropdown-item"><a href="/Cat/220" tabindex="-1">toshiba</a></li></ul></li></ul></li><li class="dropdown-item"><a href="/Cat/175" tabindex="-1">SSD חיצוני</a></li><li class="dropdown-submenu"><a href="/Cat/20" class="dropdown-item" tabindex="-1">Disk on key - SD cards</a><ul class="dropdown-menu"><li class="dropdown-submenu"><a href="/Cat/58" class="dropdown-item" tabindex="-1">Disk On Key</a><ul class="dropdown-menu"><li class="dropdown-item"><a href="/Cat/406" tabindex="-1">Netac</a></li><li class="dropdown-item"><a href="/Cat/183" tabindex="-1">Kingston</a></li><li class="dropdown-item"><a href="/Cat/184" tabindex="-1">SANDISK</a></li><li class="dropdown-item"><a href="/Cat/432" tabindex="-1">Samsung</a></li></ul></li><li class="dropdown-submenu"><a href="/Cat/59" class="dropdown-item" tabindex="-1">MICRO SD</a></li></ul></li><li class="dropdown-submenu"><a href="/Cat/74" class="dropdown-item" tabindex="-1">כונן אופטי</a><ul class="dropdown-menu"><li class="dropdown-item"><a href="/Cat/75" tabindex="-1">פנימי</a></li><li class="dropdown-item"><a href="/Cat/76" tabindex="-1">חיצוני</a></li></ul></li><li class="dropdown-item"><a href="/Cat/81" tabindex="-1">קופסא חיצונית לHDD</a></li><li class="dropdown-item"><a href="/Cat/355" tabindex="-1">אחסון רשת NAS</a></li></ul></li><li class="dropdown nav-item"><a href="/Cat/95" class="nav-link dropdown-toggle" id="dropdownMenu1" data-toggle="dropdown" aria-haspopup="true" aria-expanded="false">מארזים / מאוררים למארז/ ציוד עזר לבנית מחשב</a><ul class="dropdown-menu multi-level" role="menu" aria-labelledby="dropdownMenu"><li class="dropdown-item"><a href="/Cat/98" tabindex="-1">Antec</a></li><li class="dropdown-item"><a href="/Cat/447" tabindex="-1">GIGABYTE</a></li><li class="dropdown-item"><a href="/Cat/285" tabindex="-1">Cooler Master</a></li><li class="dropdown-item"><a href="/Cat/99" tabindex="-1">Corsair</a></li><li class="dropdown-item"><a href="/Cat/97" tabindex="-1">Solid & Others</a></li><li class="dropdown-item"><a href="/Cat/261" tabindex="-1">מארזי RACKMOUNT וציוד נלווה</a></li><li class="dropdown-item"><a href="/Cat/403" tabindex="-1">פנלים קדמיים ודלתות צד</a></li><li class="dropdown-submenu"><a href="/Cat/101" class="dropdown-item" tabindex="-1">מאוררים למארז</a><ul class="dropdown-menu"><li class="dropdown-item"><a href="/Cat/102" tabindex="-1">Arctic Cooling</a></li><li class="dropdown-item"><a href="/Cat/103" tabindex="-1">Antec</a></li><li class="dropdown-item"><a href="/Cat/104" tabindex="-1">Corsair</a></li><li class="dropdown-item"><a href="/Cat/105" tabindex="-1">Generic</a></li><li class="dropdown-item"><a href="/Cat/309" tabindex="-1">Cooler Master</a></li></ul></li><li class="dropdown-item"><a href="/Cat/257" tabindex="-1">כבלים ומתאמים לבניית מחשב</a></li></ul></li>    </ul>
+
+                </div>
+            </div>
+        </div>
+
+    </div>
+</div>
+
+        
+
+        <div class="container pt-sm-5 pb-5">
+            
+<div class="row">
+    <h1 class="page-head col-12">
+        404
+    </h1>
+</div>
+<div class="row">
+    <div class="col-12">
+        עמוד לא נמצא
+        <br />
+        <br />
+        <br />
+    </div>
+</div>
+        </div>
+
+        <footer>
+    <a href="#" class="back-to-top">חזור למעלה</a>
+    <div class="container pt-3 pt-sm-5">
+        <div class="d-none row">
+            <div class="col inner-cont">
+                <h1>&#x5D4;&#x5E6;&#x5D8;&#x5E8;&#x5E4;&#x5D5; &#x5D0;&#x5DC;&#x5D9;&#x5E0;&#x5D5;</h1>
+                <h2>&#x5D4;&#x5DB;&#x5E0;&#x5D9;&#x5E1;&#x5D5; &#x5D3;&#x5D5;&#x5D0;&#x5E8; &#x5D0;&#x5DC;&#x5E7;&#x5D8;&#x5E8;&#x5D5;&#x5E0;&#x5D9; &#x5DC;&#x5E7;&#x5D1;&#x5DC; &#x5E0;&#x5D9;&#x5D5;&#x5D6;&#x5DC;&#x5D8;&#x5E8; &#x5E9;&#x5D1;&#x5D5;&#x5E2;&#x5D9; &#x5DE;&#x5D0;&#x5D9;&#x5EA;&#x5E0;&#x5D5;</h2>
+                <form id="loginForm" data-ajax="true" class="form-inline newsletter close-after-success" action="/User/Newsletter" method="post">
+                    <div class="col-12 alert alert-danger error-msg"></div>
+                    <label class="sr-only" for="inlineFormInput">&#x5D3;&#x5D5;&#x5D0;&#x5E8; &#x5D0;&#x5DC;&#x5E7;&#x5D8;&#x5E8;&#x5D5;&#x5E0;&#x5D9;</label>
+                    <input type="email" class="form-control" id="email" placeholder="כתובת דוא”ל" name="email" />
+                    <button type="submit" class="btn btn-secondary sub-btn">&#x5D4;&#x5E8;&#x5E9;&#x5DD;</button>
+                <input name="__RequestVerificationToken" type="hidden" value="CfDJ8Eph-M8fXOlHkF8gHJj5_saHuWw5ViwJLzZ-gn2ISteetpwanthhkZZlvK382lh2K2ZppQYMjpFWDS4eORUlLKdR2nG7V-lA8yCISqxgGOZiMlfVMRooUN6ow-m9BfKX1_BxeYUIve4m11SKezke3ek" /></form>
+            </div>
+        </div>
+        <div class="row mid">
+            <div class="col-12 col-sm-12 col-md-3 site-footer-text footer-1">
+                <div><p>התקשרו אלינו</p>
+                    <h3>03-9423200</h3></div>
+                <div class="col pl-0">
+                        <a target="_blank" href=" "><img src="/img/icon-twitter.png" /></a>
+                </div>
+                <div class="col pl-0">
+                    <a title="Creatix- בניית  אתרים, חנות וירטואלית, UI, UX" class="creatix mt-3 d-inline-block"
+                       href="http://www.creatix.co.il" target="_blank"><span class="d-none">Creatix- בניית  אתרים, חנות וירטואלית, UI, UX</span></a>
+                </div>
+            </div>
+            
+
+<div class="col-12 col-sm-12 col-md-3 footer-1">
+   <ul class="list-unstyled">
+           <li><a href="/Cat/Index/17">&#x5DC;&#x5D5;&#x5D7;&#x5D5;&#x5EA; &#x5D0;&#x5DD;</a></li>
+           <li><a href="/Cat/Index/82">&#x5DB;&#x5E8;&#x5D8;&#x5D9;&#x5E1;&#x5D9; &#x5DE;&#x5E1;&#x5DA;</a></li>
+           <li><a href="/Cat/Index/6">&#x5DE;&#x5E2;&#x5D1;&#x5D3;&#x5D9;&#x5DD; &#x5D5;&#x5E4;&#x5EA;&#x5E8;&#x5D5;&#x5E0;&#x5D5;&#x5EA; &#x5E7;&#x5D9;&#x5E8;&#x5D5;&#x5E8;</a></li>
+           <li><a href="/Cat/Index/169">&#x5D6;&#x5DB;&#x5E8;&#x5D5;&#x5DF;</a></li>
+           <li><a href="/Cat/Index/7">&#x5D0;&#x5D7;&#x5E1;&#x5D5;&#x5DF;</a></li>
+   </ul>
+</div>
+<div class="col-12 col-sm-12 col-md-3 footer-1">
+    <ul class="list-unstyled">
+            <li><a href="/Cat/95&#x5DE;&#x5D0;&#x5E8;&#x5D6;&#x5D9;&#x5DD;&#x5DE;&#x5D0;&#x5D5;&#x5E8;&#x5E8;&#x5D9;&#x5DD;&#x5DC;&#x5DE;&#x5D0;&#x5E8;&#x5D6;&#x5E6;&#x5D9;&#x5D5;&#x5D3;&#x5E2;&#x5D6;&#x5E8;&#x5DC;&#x5D1;&#x5E0;&#x5D9;&#x5EA;&#x5DE;&#x5D7;&#x5E9;&#x5D1;">&#x5DE;&#x5D0;&#x5E8;&#x5D6;&#x5D9;&#x5DD; / &#x5DE;&#x5D0;&#x5D5;&#x5E8;&#x5E8;&#x5D9;&#x5DD; &#x5DC;&#x5DE;&#x5D0;&#x5E8;&#x5D6;/ &#x5E6;&#x5D9;&#x5D5;&#x5D3; &#x5E2;&#x5D6;&#x5E8; &#x5DC;&#x5D1;&#x5E0;&#x5D9;&#x5EA; &#x5DE;&#x5D7;&#x5E9;&#x5D1;</a></li>
+            <li><a href="/Cat/64&#x5E1;&#x5E4;&#x5E7;&#x5D9;&#x5DB;&#x5D5;&#x5D7;">&#x5E1;&#x5E4;&#x5E7;&#x5D9; &#x5DB;&#x5D5;&#x5D7;</a></li>
+            <li><a href="/Cat/1&#x5DE;&#x5D7;&#x5E9;&#x5D1;&#x5D9;&#x5DD;&#x5E0;&#x5D9;&#x5D9;&#x5D3;&#x5D9;&#x5DD;&#x5EA;&#x5D9;&#x5E7;&#x5D9;&#x5DD;&#x5DE;&#x5D8;&#x5E2;&#x5E0;&#x5D9;&#x5DD;">&#x5DE;&#x5D7;&#x5E9;&#x5D1;&#x5D9;&#x5DD; &#x5E0;&#x5D9;&#x5D9;&#x5D3;&#x5D9;&#x5DD;/ &#x5EA;&#x5D9;&#x5E7;&#x5D9;&#x5DD;/&#x5DE;&#x5D8;&#x5E2;&#x5E0;&#x5D9;&#x5DD;</a></li>
+            <li><a href="/Cat/4&#x5DE;&#x5D7;&#x5E9;&#x5D1;&#x5D9;&#x5DD;&#x5E0;&#x5D9;&#x5D9;&#x5D7;&#x5D9;&#x5DD;">&#x5DE;&#x5D7;&#x5E9;&#x5D1;&#x5D9;&#x5DD; &#x5E0;&#x5D9;&#x5D9;&#x5D7;&#x5D9;&#x5DD;</a></li>
+            <li><a href="/Cat/156&#x5EA;&#x5D5;&#x5DB;&#x5E0;&#x5D5;&#x5EA;">&#x5EA;&#x5D5;&#x5DB;&#x5E0;&#x5D5;&#x5EA;</a></li>
+    </ul>
+</div>
+            <div class="col-12 col-sm-12 col-md-3 footer-4">
+                
+
+<ul class="list-unstyled">
+        <li><a href="/Page/11">&#x5D8;&#x5D9;&#x5E4;&#x5D9;&#x5DD; &#x5DC;&#x5E9;&#x5D9;&#x5DE;&#x5D5;&#x5E9; &#x5D1;&#x5D0;&#x5EA;&#x5E8;</a></li>
+        <li><a href="/Page/8">&#x5EA;&#x5E7;&#x5E0;&#x5D5;&#x5DF; &#x5E0;&#x5D2;&#x5D9;&#x5E9;&#x5D5;&#x5EA;</a></li>
+        <li><a href="/Page/3">&#x5EA;&#x5E7;&#x5E0;&#x5D5;&#x5DF;</a></li>
+        <li><a href="/Page/4">&#x5DE;&#x5D3;&#x5D9;&#x5E0;&#x5D9;&#x5D5;&#x5EA; &#x5E4;&#x5E8;&#x5D8;&#x5D9;&#x5D5;&#x5EA;</a></li>
+        <li><a href="/contact">&#x5E6;&#x5D5;&#x5E8; &#x5E7;&#x5E9;&#x5E8;</a></li>
+        <li><a href="/Page/5">&#x5D0;&#x5D5;&#x5D3;&#x5D5;&#x5EA;</a></li>
+        <li><a href="/GuaranteeCheck">&#x5EA;&#x5E0;&#x5D0;&#x5D9; &#x5D0;&#x5D7;&#x5E8;&#x5D9;&#x5D5;&#x5EA; &#x5DB;&#x5DC;&#x5DC;&#x5D9;&#x5D9;&#x5DD; &#x5DC;&#x5DE;&#x5D5;&#x5E6;&#x5E8;&#x5D9;&#x5DD;</a></li>
+        <li><a href="/SiteContacts">&#x5D0;&#x5E0;&#x5E9;&#x5D9; &#x5E7;&#x5E9;&#x5E8; &#x5DE;&#x5D5;&#x5E8; &#x5DC;&#x5D5;&#x5D9;</a></li>
+</ul>
+
+            </div>
+        </div>
+    </div>
+    <div class="bottom bot-footer">
+        <div class="container">
+            <div class="row">
+                <div class="col-12 col-sm-6 ax-1">
+                    <span>® כל הזכויות שמורות למור לוי 2026</span>
+                </div>
+                <div class="col-12 col-sm-6 text-right ax-1 d-none">
+                    <img src="/images/credit-logos.png" />
+                </div>
+            </div>
+        </div>
+    </div>
+</footer>
+    </div>
+    <!-- ko with: basketVM -->
+<div class="basket-preview drawer basket-drawer">
+    <div class="backdrop"></div>
+    <div class="wrapper">
+        <div class="block-title">
+            <span class="text">סל הקניות שלי</span>
+            <button type="button" class="close" aria-label="Close">
+                <span aria-hidden="true">&times;</span>
+            </button>
+        </div>
+        <div class="preloader" data-bind="visible: !isLoaded()"><div></div></div>
+        <!-- ko if: isLoaded() -->
+        <div class="products-wrapper" data-bind="visible: isLoaded() && Items().length > 0">
+            <a href="javascrip: void(0);" data-bind="click: function (row) { basketVM.save('clear', row); }" class="d-block mb-3 text-dark" style="float: left; position: absolute; left: 24px; top: 69px;">&#x5E0;&#x5E7;&#x5D4; &#x5E1;&#x5DC;</a>
+            <ul class="list-unstyled" data-bind="foreach: Items(), visible: isLoaded()">
+                <li class="media mb-4">
+                    <div class="pic">
+                        <img class="d-flex mr-3" data-bind="attr: { src: URLPrefix + '/images/' + Pic() + '?w=60&amp;h=60&mode=pad', title: Name(), alt: Name() }" />
+                        <button type="button" class="remove" aria-label="Close" data-bind="click: function (row) { basketVM.updateQuantity(row, -row.Quantity()); }">
+                            <span aria-hidden="true">&times;</span>
+                        </button>
+                    </div>
+                    <div class="media-body">
+                        <h5 class="mt-0 mb-1">
+                            <a data-bind="attr: { href: URLPrefix + Url() }, text: Name"></a>
+                            <span class="text-muted" data-bind="html: Details"></span>
+                            <span class="m-0 red stockMsg"
+                                  data-bind="html: NotInStockMessage, visible: NotInStockMessage && NotInStockMessage != ''"></span>
+                        </h5>
+                        <div class="quantity-wrapper">
+                            <div class="quantity-right float-left">
+                                <label>כמות</label>
+                                <div class="quantity">
+                                    <div class="c"><a href="#" data-bind="click: function (row) { basketVM.updateQuantity(row, 1); }">+</a></div>
+                                    <div class="c">
+                                        <input type="text" class="form-control" placeholder="Quantity" min="1" max="100"
+                                               data-bind="value: Quantity, event: { change: function (row) { basketVM.changeQuantity(row, Quantity()); }}" style="width: 45px;" />
+                                    </div>
+                                    <div class="c"><a href="#" data-bind="click: function (row) { basketVM.updateQuantity(row, -1); }">-</a></div>
+                                </div>
+                            </div>
+                            <div class="price float-right">
+                                <span data-bind="html: SubTotalString()"></span>
+                                <s class="mr-2 text-black-50" data-bind="visible: SubTotal() != SubTotalBeforeDiscount()">
+                                    <small data-bind="html: SubTotalBeforeDiscountString()"></small>
+                                </s>
+                            </div>
+                        </div>
+                    </div>
+                </li>
+
+            </ul>
+        </div>
+        <div class="summary" data-bind="visible: TotalCount() > 0">
+            <div data-bind="visible: TotalCount() > 0 && ThresholdMessage() && ThresholdMessage() != ''" style="display: none;">
+                <div class="text-info threshold-message mb-1" data-bind="html: ThresholdMessage()"></div>
+            </div>
+            <div class="row" data-bind="visible: TotalDiscount() > 0">
+                <div class="col">&#x5D4;&#x5E0;&#x5D7;&#x5D4;</div>
+                <div class="col text-right" data-bind="text: TotalDiscountString()"></div>
+            </div>
+            <div class="row mb-4">
+                <div class="col">סה"כ</div>
+                <div class="col text-right" data-bind="text: BasketTotalString()"></div>
+            </div>
+            <a href="/Basket" class="btn btn-outline-secondary btn-lg d-block mb-3">צפה בסל הקניות</a>
+            <!-- ko if: !ShowGiveTakePopup() -->
+            <a href="/Checkout" class="btn btn-primary btn-lg d-block" data-bind="if: !ShowGiveTakePopup()">&#x5D4;&#x5DE;&#x5E9;&#x5DA; &#x5DC;&#x5E7;&#x5D5;&#x5E4;&#x5D4;</a>
+            <!-- /ko -->
+            <!-- ko if: ShowGiveTakePopup() -->
+            <a href="#" data-modal="/Basket/BeforeCheckout" class="btn btn-primary btn-lg" data-bind="if: ShowGiveTakePopup()">המשך לקופה</a>
+            <!-- /ko -->
+        </div>
+        <div class="empty-cart" data-bind="visible: TotalCount() == 0" style="display: none;">
+            <p>
+                לא נמצאו פריטים בסל<br>
+                לחץ <a href="/">כאן</a> להמשך שיטוט באתר
+            </p>
+        </div>
+        <!-- /ko -->
+    </div>
+</div>
+<!-- /ko -->
+
+    
+    <div class="gdpr-module" id="gdpr-module-message">
+        <div class="container">
+            <div class="gdpr-content">
+                <div class="gdpr-content-part gdpr-text">
+                    <span>
+                        אתר זה עושה שימוש ב-cookies למטרות סטטיסטיקה, איפיון ושיווק, כדי לספק חווית גלישה טובה יותר וכדי להתאים את התוכן המוצג להעדפות שלך.
+
+                        יש לאשר את השימוש ב-cookies באתר.
+                        <br />
+                        עוד מידע על השימוש ב-cookies אפשר לקרוא <a href="/Page/4">במדיניות הפרטיות שלנו</a>.
+                        &nbsp;
+                    </span>
+                </div>
+                <div class="gdpr-content-part gdpr-accept">
+                    <a href="" class="btn btn-primary gdpr-accept-triger" style="border:0;">אישור</a>
+                </div>
+            </div>
+        </div>
+    </div>
+    <script asp-location="Footer">
+
+        document.addEventListener("DOMContentLoaded", function () {
+            // Frame detection function
+            function isInFrame() {
+                try {
+                    return window !== window.top;
+                } catch (e) {
+                    return true;
+                }
+            }
+
+            // Handle frame detection
+            if (isInFrame()) {
+                var gdprModules = document.querySelectorAll('.gdpr-module');
+                gdprModules.forEach(function (el) {
+                    el.style.display = "none";
+                });
+
+                // If in frame, make all links open in the top window
+                var gdprLinks = document.querySelectorAll('.gdpr-module a');
+                gdprLinks.forEach(function (a) {
+                    a.setAttribute('target', '_top');
+                });
+
+                // Ensure cookie setting works across frames
+                function setTopLevelCookie(name, value, days) {
+                    try {
+                        // Try to set cookie in the top window
+                        var date = new Date();
+                        date.setDate(date.getDate() + days);
+                        var cookie = name + "=" + value + "; expires=" + date.toGMTString() + "; path=/";
+
+                        if (window.top.document.domain === document.domain) {
+                            window.top.document.cookie = cookie;
+                        } else {
+                            document.cookie = cookie;
+                        }
+                        return true;
+                    } catch (e) {
+                        // If cross-origin, fall back to setting cookie in current frame
+                        document.cookie = cookie;
+                        return false;
+                    }
+                }
+                window.setTopLevelCookie = setTopLevelCookie;
+            }
+
+            document.addEventListener("click", function (e) {
+                var target = e.target;
+                if (target.classList.contains("gdpr-accept-triger")) {
+                    e.preventDefault();
+
+                    if (isInFrame()) {
+                        // Set cookie using the enhanced function if in frame
+                        if (typeof setTopLevelCookie === "function") {
+                            setTopLevelCookie("DisableGDPRMessage", "true", 365);
+                        }
+
+                        // Try to notify parent frame of consent if same origin
+                        try {
+                            if (window.parent && window.parent.postMessage) {
+                                window.parent.postMessage("gdpr-consent-given", "*");
+                            }
+                        } catch (e) {
+                            console.log("Could not notify parent frame of consent");
+                        }
+                    } else {
+                        // Original cookie setting behavior if not in frame
+                        var date = new Date();
+                        date.setDate(date.getDate() + 365);
+                        document.cookie = "DisableGDPRMessage=true" + "; expires=" + date.toGMTString() + "; path=/";
+                    }
+
+                    var gdprMessage = document.getElementById("gdpr-module-message");
+                    if (gdprMessage) {
+                        gdprMessage.classList.add("d-none");
+                    }
+                }
+            });
+
+            // Listen for consent messages from child frames
+            if (window === window.top) {
+                window.addEventListener("message", function (event) {
+                    if (event.data === "gdpr-consent-given") {
+                        // Handle consent given in child frame
+                        var gdprMessage = document.getElementById("gdpr-module-message");
+                        if (gdprMessage) {
+                            gdprMessage.classList.add("d-none");
+                        }
+                    }
+                }, false);
+            }
+        });
+        
+    </script>
+
+
+    <script src="/lib/jquery/dist/jquery.min.js"></script>
+    <script src="/lib/popper.js/dist/umd/popper.min.js"></script>
+    <script src="/lib/bootstrap/dist/js/bootstrap.min.js"></script>
+    <script src="/lib/knockout/dist/knockout.js"></script>
+    <script src="/lib/knockout-mapping/build/output/knockout.mapping-latest.js"></script>
+    <script src="/lib/jquery-validation/dist/jquery.validate.min.js"></script>
+    <script src="/lib/jquery-validation-unobtrusive/jquery.validate.unobtrusive.min.js"></script>
+    <script src="/lib/bootstrap-slider/bootstrap-slider.js"></script>
+    <script src="/js/common.js?v=QQT-OwGlAavv9yjyLU9dMUmHsbhNmbIoJ1F5jaFgk9o"></script>
+    <script src="/js/basket.js?v=-8_5KicCN9tDHCqbiiRbnIiByewZAMQTWD7jrCs4kvs"></script>
+    <script src="/js/init.js?v=5uaOYA7ueywcpgCn0Yj1LKqF4edGJL12cOfB-Au0o1E"></script>
+    <script src="/js/morlevi.js?v=U6N3WDLTkiXukDfI-TxcWYlvGlsYTDQfk3jIzYbdKwM"></script>
+
+    
+
+
+    
+    
+    
+
+    <script>
+        ko.applyBindings(baseViewModel);
+        $(document).ready(function () {
+            basketVM.load();
+        });
+    </script>
+    <script>
+        URLPrefix = "";
+        $(document).ready(function () {
+            //basketVM.load();
+
+
+            if (getCookie('sitepopup120320') !== 'true') { setCookie('sitepopup120320', true, 300); _siteEvents.openModalFromUrl('/popup', 'site-popup', 'first-step-popup'); }
+
+
+        });
+    </script>
+    <script src="https://www.creatixshop.co.il/creatix3/accessibility/accessibility.js?v=2" async></script>
+</body>
+</html>
