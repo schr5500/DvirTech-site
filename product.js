@@ -621,6 +621,10 @@ function pdRenderBody(){
         ${it.brand ? `<div class="pd-brand">${pdEsc(it.brand)}</div>` : ""}
         <h1 class="pd-title">${pdEsc(itemName(it))}</h1>
         ${itemSpec(it) ? `<p class="pd-sub">${pdEsc(itemSpec(it))}</p>` : ""}
+        <!-- מק"ט גלוי ללקוח. עד עכשיו הוא נשלח רק ל-JSON-LD של גוגל
+             (data.sku) — כלומר מנועי החיפוש ראו אותו והלקוח לא.
+             הוא מה שמאפשר ללקוח לצטט מוצר מדויק בוואטסאפ או בטלפון. -->
+        <p class="pd-sku">\u05de\u05e7"\u05d8: <span>${pdEsc(String(it.id || ""))}</span></p>
 
         <div class="pd-price-box">
           <div class="pd-price-row">

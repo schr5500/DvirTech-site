@@ -762,3 +762,44 @@
 @media (max-width:520px){
   .pd-share-menu{inset-inline:0;min-width:0}
 }
+
+
+/* ==================== dvt-mobile-taps-products ====================
+   ⚠️ ~80% מהתנועה מהטלפון. מדידה ב-375×812 מצאה שלושה יעדי מגע
+   מתחת לסף ה-44×44 המקובל, ואחד מהם הוא **הפעולה המרכזית באתר**:
+
+     .p-cart-btn   38×38  ← כפתור ההוספה לסל שעל כל כרטיס מוצר
+     .pager-btn    34×34  ← ניווט בין עמודי התוצאות
+     .chip         196×30 ← צ'יפ הסינון הפעיל
+
+   כרטיס בנייד הוא 163px רוחב, כך ש-44px הם 27% ממנו — עדיין מרווח.
+   הכל תחוּם ל-max-width:768px; הדסקטופ לא נוגע. */
+@media (max-width:768px){
+  .p-cart-btn{width:44px; height:44px}
+  .pager-btn{min-width:44px; min-height:44px}
+  /* הצ'יפ נשאר צר לרוחב אבל מקבל גובה אצבע */
+  .chip{min-height:40px}
+
+  /* ---- דף המוצר ----
+     ⚠️ כפתורי הכמות היו 34×34. זה השלב שלפני "הוסף לסל", ומי
+     שמפספס את ה-+ מוסיף פריט אחד במקום שניים או נוטש. */
+  .pd-qty button{min-width:44px; min-height:44px}
+  .pd-crumbs a,
+  .pd-cat-link,
+  .pd-wa,
+  .pd-img-note a{display:inline-flex; align-items:center; min-height:44px}
+  .pd-share-btn{min-height:44px}
+}
+
+
+/* מק"ט המוצר — משני לגמרי, אבל ניתן לבחירה והעתקה כדי
+   שלקוח יוכל לצטט אותו בוואטסאפ. ה-span במספרים מונוספאס
+   כדי שלא יובלבלו ספרות דומות. */
+.pd-sku{
+  margin-top:6px; font-size:12.5px; color:var(--ink-soft);
+  letter-spacing:.01em;
+}
+.pd-sku span{
+  font-family:ui-monospace,SFMono-Regular,Menlo,Consolas,monospace;
+  font-size:12px; color:var(--ink); user-select:all;
+}
