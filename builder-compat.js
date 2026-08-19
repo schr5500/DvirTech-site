@@ -246,7 +246,50 @@ const DVT_DERIVED = {
   coolerIncluded: it => DVT_NO_COOLER_NAME_RE.test(String((it && it.name) || "")) ? false : undefined
 };
 
+/* ==================== מחברי הספק — נגזרים מהמחרוזת ====================
+   \U0001F534 ארבעה חוקי תאימות ביקשו `psu.epsConnectors` · `pcieConnectors` ·
+   `has12vhpwr` — שדות שלא קיימים בגיליון ומעולם לא היו. מה שכן קיים
+   הוא עמודה אחת, `connectors`, בפורמט אחיד להפליא:
+
+       "1x24pin,2xEPS,4xPCIe8pin,1x12VHPWR"     (65 מתוך 73 הספקים)
+
+   ⚠️ **וזו הייתה הכוונה מלכתחילה.** ההערה על העמודה ב-11-catalog.gs
+   אומרת במפורש "האתר מפרסר את זה לבדיקת מחברים" — הפרסור פשוט מעולם
+   לא נכתב, ולכן ארבעת החוקים היו מתים בשקט.
+
+   החמור מביניהם: `gpu-psu-connectors`, שחוסם כרטיס מסך שהספק לא יכול
+   להזין. לקוח היה יכול להרכיב RTX 5090 עם ספק בלי 12VHPWR.
+
+   ⚠️ `sataPowerConnectors` **לא** נגזר: מחברי SATA אינם מופיעים
+   במחרוזת אצל אף ספק. החוק שנשען עליו נשאר מדולג, וזה עדיף על
+   ניחוש — כמעט כל ספק ATX מגיע עם ארבעה ומעלה ממילא. */
+const DVT_PSU_DERIVED = {
+  pcieConnectors: function (raw) {
+    const m = String(raw).match(/(\d+)\s*[x\u00d7*]\s*PCIe\s*8\s*pin/i);
+    return m ? Number(m[1]) : null;
+  },
+  epsConnectors: function (raw) {
+    const m = String(raw).match(/(\d+)\s*[x\u00d7*]\s*EPS/i);
+    return m ? Number(m[1]) : null;
+  },
+  has12vhpwr: function (raw) {
+    return /12VHPWR|12V-?2x6/i.test(String(raw)) ? true : false;
+  }
+};
+
 function dvtGet(item, field){
+  /* גזירה לפני הכינויים: אם השדה מבוקש, לא קיים, ויש connectors —
+     מפרסרים. כך החוקים ממשיכים לקרוא שם קנוני אחד. */
+  if(item && DVT_PSU_DERIVED[field] &&
+     (item[field] === undefined || item[field] === null || item[field] === "") &&
+     item.connectors){
+    const v = DVT_PSU_DERIVED[field](item.connectors);
+    if(v !== null) return v;
+  }
+  return dvtGetRaw_(item, field);
+}
+
+function dvtGetRaw_(item, field){
   if(!item) return undefined;
   if(item[field] !== undefined && item[field] !== null && item[field] !== "") return item[field];
   const alts = DVT_FIELD_ALIASES[field];
