@@ -130,6 +130,13 @@
   .bld-search-input{width:100%;border:1px solid #EDF2F8;border-radius:12px;padding:11px 38px 11px 14px;font-family:'Heebo',sans-serif;font-size:13.5px;background:#F7FAFD;color:#0E2A47}
   .bld-note-ok{margin-top:11px;font-size:11.5px;color:#0E9C8A;background:#F0FDFA;border:1px solid #B7EFE5;padding:7px 11px;border-radius:9px;line-height:1.5}
   .bld-note-hidden{margin-top:11px;display:flex;align-items:center;gap:9px;flex-wrap:wrap;font-size:11.5px;color:#91690C;background:#FFFBEC;border:1px solid #F5E3B0;padding:8px 11px;border-radius:9px;line-height:1.5}
+  /* ממצאי ההרכב — הפאנל של A4. יושב בעמודת הסיכום ולא על כרטיס
+     המוצר, כי אלה אמירות על ההרכבה כולה. */
+  .bld-bn{margin-top:12px;border-radius:12px;border:1px solid #E2EAF2;background:#FBFDFF;padding:11px 12px}
+  .bld-bn-h{display:flex;align-items:center;gap:7px;font-family:'Rubik',sans-serif;font-size:12px;font-weight:700;color:#33475F;margin-bottom:8px}
+  .bld-bn-l{display:flex;gap:8px;align-items:flex-start;font-size:11.8px;line-height:1.5;padding:6px 0;border-top:1px solid #EDF2F8}
+  .bld-bn-l:first-of-type{border-top:0}
+  .bld-bn-ic{flex:none;width:17px;height:17px;border-radius:50%;display:grid;place-items:center;font-size:10.5px;font-weight:800;margin-top:1px}
   .bld-note-btn{flex:none;border:1px solid #E8CE8A;background:#fff;color:#8A5A00;border-radius:8px;padding:5px 11px;font-family:'Heebo',sans-serif;font-size:11.5px;font-weight:700;cursor:pointer;transition:.15s}
   .bld-options{margin-top:16px;display:flex;flex-direction:column;gap:14px;max-height:640px;overflow-y:auto;padding-inline-end:4px}
   .bld-option{position:relative;display:flex;align-items:center;gap:13px;border-radius:16px;padding:17px 18px;transition:.15s}
@@ -380,6 +387,20 @@
         <span class="bld-sum-price">{{ total }} ₪</span>
       </div>
 
+      <!-- A4: ממצאי ההרכב מוצגים כאן, לפני כפתור ההמשך, ולא על כל
+           מוצר ברשימה. הלקוח קורא מה מצב ההרכבה שלו לפני שהוא ממשיך. -->
+      <sc-if value="{{ hasBuildNotes }}" hint-placeholder-val="{{ false }}">
+        <div class="bld-bn">
+          <div class="bld-bn-h">{{ buildNotesTitle }}</div>
+          <sc-for list="{{ buildNotes }}" as="bn" hint-placeholder-count="3">
+            <div class="bld-bn-l">
+              <span class="bld-bn-ic" style="background:{{ bn.bg }};color:{{ bn.fg }}">{{ bn.ic }}</span>
+              <span dir="auto" style="flex:1;min-width:0;color:#33475F;direction:{{ bn.dir }}">{{ bn.text }}</span>
+            </div>
+          </sc-for>
+        </div>
+      </sc-if>
+
       <button id="finishBuildBtn" class="bld-btn-continue" onClick="{{ finishBuild }}" style-hover="box-shadow:0 14px 30px rgba(27,111,224,.28);filter:brightness(1.04)">
         המשך לסיכום והרכבה
         <svg viewBox="0 0 24 24" style="width:17px;height:17px;fill:none;stroke:currentColor;stroke-width:2;stroke-linecap:round;stroke-linejoin:round"><path d="M14 6l-6 6 6 6"></path></svg>
@@ -550,9 +571,17 @@
       </div>
 
       <label class="bld-search">
-        <input class="bld-search-input" placeholder="{{ searchPh }}">
+        <input class="bld-search-input" placeholder="{{ searchPh }}"
+               value="{{ search }}" onChange="{{ onSearch }}">
         <svg viewBox="0 0 24 24" style="position:absolute;inset-inline-start:12px;top:50%;transform:translateY(-50%);width:16px;height:16px;color:#5F7590;fill:none;stroke:currentColor;stroke-width:1.7;stroke-linecap:round"><circle cx="11" cy="11" r="7"></circle><path d="M16.5 16.5L21 21"></path></svg>
       </label>
+
+      <sc-if value="{{ searchNote }}" hint-placeholder-val="{{ false }}">
+        <div class="bld-note-hidden">
+          <span style="flex:1;min-width:120px">{{ searchNote }}</span>
+          <button class="bld-note-btn" onClick="{{ clearSearch }}" style-hover="background:#FFF6E2;border-color:#DDBE6C">נקה חיפוש</button>
+        </div>
+      </sc-if>
 
       <sc-if value="{{ filterNote }}" hint-placeholder-val="{{ false }}">
         <div class="bld-note-ok">{{ filterNote }}</div>
@@ -693,9 +722,26 @@ const OPT_LEVELS = {
    אחרת הוא מופיע בסיכום ההרכבה אבל נעלם מהרשימה שבה בחרו אותו. */
 const HIDE_INCOMPATIBLE = true;
 
+/* עברית → אנגלית לחיפוש. הלקוח קורא ממשק עברי ולכן מקליד עברית,
+   אבל המפרט בגיליון אנגלי כמעט כולו. בלי המפה הזו "אינטל" מחזיר אפס
+   תוצאות — כישלון שנראה זהה לתיבה השבורה שתיקנו.
+   ⚠️ מכוון בכוונה קטן: רק מונחים שהם חד-משמעיים. */
+const BLD_SEARCH_SYN = {
+  "אינטל":"intel", "איי-אם-די":"amd", "אמד":"amd", "נבידיה":"nvidia",
+  "אנבידיה":"nvidia", "רדאון":"radeon", "ג'יפורס":"geforce",
+  "מעבד":"cpu", "לוח":"mobo", "זיכרון":"ram", "מסך":"gpu",
+  "אחסון":"ssd", "ספק":"psu", "קירור":"cool", "מארז":"case",
+  "לבן":"white", "שחור":"black", "שקוף":"glass"
+};
+
 class Component extends DCLogic {
   state = {
     cat: "case",
+    /* 🔴 החיפוש בבונה **לא עבד בכלל** עד 19.08. תיבת החיפוש הייתה
+       אלמנט מהעיצוב עם placeholder בלבד: אין state, אין מאזין, אין
+       סינון. הקלדת "AM5" לא עשתה כלום — לא שגיאה, פשוט כלום, וזה
+       הגרוע מכל כי הלקוח מניח שאין תוצאות ולא שהתיבה מתה. */
+    search: "",
     /* ⚠️ מתחילים ריק. קודם היו כאן מזהי דמו מהעיצוב, ולכן כניסה
        ראשונה לדף כבר הציגה מעבד וכרטיס מסך "נבחרים" — מוצרים
        שהלקוח מעולם לא בחר. הרכבה שמורה נטענת מ-localStorage
@@ -880,6 +926,50 @@ class Component extends DCLogic {
                      להסתרה. נספר תמיד, גם כשההסתרה כבויה, כדי שהמונה
                      יוכל לדווח גם במצב "הצג אותם בכל זאת"
        hidden      — כמה באמת נשמטו מהרשימה עכשיו */
+  /* ==================== חיפוש חופשי בתוך הקטגוריה ====================
+     ⚠️ **לא משתמש ב-dvtItemScore** (search-core.js) בכוונה. הוא סורק
+     name/brand/spec בלבד, ובבונה הנתון שהלקוח מחפש יושב כמעט תמיד
+     בשדה מובנה: socket, cpuSockets, chipset, memoryType, formFactor.
+     "AM5" של לוח אם לא נמצא ב-spec — ולכן חיפוש מבוסס-spec היה מחזיר
+     ריק ונראה בדיוק כמו התקלה שאנחנו מתקנים.
+
+     לכן מרחב החיפוש הוא **כל השדות** של הפריט. זה גם מה שהופך את
+     החיפוש לעמיד: שדה מפרט חדש שנוסף לגיליון נעשה מיד בר-חיפוש בלי
+     לגעת כאן. מדולגים רק מזהים וכתובות תמונה — שם יש מחרוזות אקראיות
+     שמייצרות התאמות שווא. */
+  searchHay(it){
+    if(it.__hay) return it.__hay;
+    const parts = [];
+    for(const k in it){
+      if(!Object.prototype.hasOwnProperty.call(it, k)) continue;
+      if(k.indexOf("__") === 0) continue;                 // פנימיים (__compat)
+      const lk = k.toLowerCase();
+      if(lk === "id" || lk.indexOf("img") > -1 || lk.indexOf("image") > -1 ||
+         lk.indexOf("url") > -1 || lk.indexOf("href") > -1 ||
+         lk.indexOf("link") > -1 || lk.indexOf("thumb") > -1) continue;
+      const v = it[k], t = typeof v;
+      if(t === "string" || t === "number" || t === "boolean") parts.push(v);
+      else if(Array.isArray(v)) parts.push(v.join(" "));
+    }
+    it.__hay = parts.join(" ").toLowerCase();
+    return it.__hay;
+  }
+
+  /* כל מילה חייבת להימצא (AND). ⚠️ לא OR: "מארז שקוף" ב-OR היה מחזיר
+     כל מארז בקטלוג, וזה מרגיש שבור בדיוק כמו חיפוש שלא עובד. */
+  searchMatch(it, term){
+    const hay = this.searchHay(it);
+    const toks = term.toLowerCase().split(" ").filter(Boolean);
+    for(let i = 0; i < toks.length; i++){
+      /* ⚠️ המילה הנרדפת **נוספת** ולא מחליפה. "מסך", "לוח", "זיכרון"
+         הן מילים עבריות אמיתיות שמופיעות במפרט עצמו, והחלפה עיוורת
+         שלהן באנגלית הייתה שוברת חיפושים שעובדים היום. */
+      const tok = toks[i], syn = BLD_SEARCH_SYN[tok];
+      if(hay.indexOf(tok) === -1 && (!syn || hay.indexOf(syn) === -1)) return false;
+    }
+    return true;
+  }
+
   splitOptions(cat){
     const rated = this.ratedOptions(cat);
     const blocked = rated.filter(o => o.__compat && o.__compat.blocked);
@@ -887,12 +977,21 @@ class Component extends DCLogic {
     const selId = this.state.sel[cat];
     const conflicting = blocked.filter(o => o.id !== selId && this.conflictsWithChoice(o));
     const drop = (HIDE_INCOMPATIBLE && !this.state.showHidden) ? conflicting : [];
+    const shown = drop.length ? rated.filter(o => drop.indexOf(o) < 0) : rated;
+    /* ⚠️ החיפוש חל **אחרי** בדיקת התאימות ולא לפניה, ומדווח בנפרד.
+       אחרת חיפוש שלא מצא כלום היה נספר כ"הוסתרו כי אינם מתאימים" —
+       הלקוח היה מאשים את ההרכבה שלו בתוצאה של הקלדה. */
+    const term  = String(this.state.search || "").trim();
+    const found = term ? shown.filter(o => this.searchMatch(o, term)) : shown;
     return {
       rated,
-      list: drop.length ? rated.filter(o => drop.indexOf(o) < 0) : rated,
+      list: found,
       blocked: blocked.length,
       conflicting: conflicting.length,
-      hidden: drop.length
+      hidden: drop.length,
+      term,
+      searchBase: shown.length,
+      searchHits: found.length
     };
   }
 
@@ -936,10 +1035,45 @@ class Component extends DCLogic {
   }
   money(n){ return n.toLocaleString("en-US"); }
   /* שם שמתחיל בעברית נשאר RTL; שם לטיני מוצג LTR ונחתך מהסוף */
-  dirOf(name){ return /^[\u0590-\u05FF]/.test(String(name || "")) ? "rtl" : "ltr"; }
+  buildNotesList(){
+        const r = this.compatResult();
+        const SKIN = {
+          error: { ic:"✕", bg:"#FDECEA", fg:"#B4231B" },
+          warn:  { ic:"!", bg:"#FFF6EA", fg:"#8A5A00" },
+          info:  { ic:"i", bg:"#EAF2FE", fg:"#1B6FE0" },
+          good:  { ic:"✓", bg:"#EAF9F5", fg:"#0E9C8A" }
+        };
+        const out = (r.issues || []).map(i => {
+          const k = SKIN[i.level] || SKIN.info;
+          return { text:i.text, ic:k.ic, bg:k.bg, fg:k.fg, dir:this.dirOf(i.text) };
+        });
+
+        /* ההערות החיוביות נאמרות רק כשיש עליהן כיסוי אמיתי: הן נגזרות
+           ממה שנבחר בפועל, ולא מוצגות על הרכבה ריקה. */
+        const sel = this.selMap();
+        const good = [];
+        const has = k => !!sel[k];
+        if(r.errors === 0 && r.warns === 0 && Object.keys(sel).length >= 4)
+          good.push("כל הרכיבים שנבחרו עד כה מתאימים זה לזה.");
+        if(has("cpu") && has("cooling") && !r.errors)
+          good.push("הקירור שנבחר מתאים לתושבת ולחום של המעבד.");
+        if(has("psu") && has("gpu") && !r.errors){
+          const w = r.watts;
+          const psuW = (typeof dvtNumOf === "function") ? dvtNumOf(sel.psu, "wattage") : null;
+          if(w && psuW && psuW >= w * 1.3)
+            good.push(`ספק ${psuW}W מול צריכה מוערכת של ${w}W — מרווח נוח גם לשדרוג עתידי.`);
+        }
+        good.forEach(t => out.push({ text:t, ic:SKIN.good.ic, bg:SKIN.good.bg, fg:SKIN.good.fg, dir:"rtl" }));
+        return out;
+  }
+
+    dirOf(name){ return /^[\u0590-\u05FF]/.test(String(name || "")) ? "rtl" : "ltr"; }
 
   renderVals(){
     const st = this.state;
+    /* ⚠️ מחושב פעם אחת ומשמש גם את הרשימה וגם את הדגל שמפעיל את
+       ה-sc-if. מנוע התבניות לא פותר `buildNotes.length` בתוך value. */
+    const bnotes = this.buildNotesList();
     const uc = USE_CASES.find(u => u.key === st.useCase) || USE_CASES[0];
     const chosen = CATS.filter(c => st.sel[c.key]);
     let total = 0;
@@ -1064,6 +1198,26 @@ class Component extends DCLogic {
         if(r.warns)  return { mark:"⚠️", text:r.warns===1?"הערה אחת":(r.warns+" הערות"), bg:"#FFF6EA", fg:"#92650F", bd:"#F6DDAF" };
         return { mark:"✓", text:"תאימות תקינה", bg:"rgba(47,196,176,.16)", fg:"#8FE9DA", bd:"rgba(143,233,218,.4)" };
       })(),
+      /* ==================== ממצאי ההרכב (A4 + A5) ====================
+         🔴 עד עכשיו הבונה הציג **מונה בלבד** — "2 אי-התאמות" — ולא
+         הראה בשום מקום *מה* לא מתאים. הטקסטים היו מחושבים ונזרקים.
+
+         ⚠️ כאן יושבים ממצאי ההרכב השלם, כולל אלה שהוצאו מכרטיסי
+         המוצר (scope:"build"): "אין כרטיס מסך", "חסר קירור". זה
+         המקום הנכון להם — הם מדברים על ההרכבה, לא על מוצר מסוים.
+
+         ⚠️ **גם הערות לטובה** (בקשת דביר A5: "להביא הערות על ההרכב,
+         לטובה או לרעה"). רשימה שמכילה רק בעיות מלמדת את הלקוח
+         להתעלם ממנה; רשימה שגם מאשרת מה נכון בהרכבה נקראת. */
+      buildNotes: bnotes,
+      hasBuildNotes: bnotes.length > 0,
+      buildNotesTitle: (() => {
+        const r = this.compatResult();
+        if(r.errors) return r.errors === 1 ? "ממצא אחד בהרכבה" : `${r.errors} ממצאים בהרכבה`;
+        if(r.warns)  return "הערות על ההרכבה";
+        return "מצב ההרכבה";
+      })(),
+
       stageParts: CATS.map(c => {
         const it = this.item(c.key);
         const active = st.last === c.key;
@@ -1078,7 +1232,9 @@ class Component extends DCLogic {
           imgOp: it ? "1" : "0.28",
           iconColor: it ? "#8FE9DA" : "rgba(255,255,255,.3)",
           anim: active ? "rowIn .35s ease-out" : "none",
-          go: () => this.setState({ cat: c.key })
+          /* ⚠️ מאפס את החיפוש. בלי זה מעבר מ"מעבד" (אחרי חיפוש "AM5")
+             ל"זיכרון" היה מציג רשימה מסוננת בלי סימן נראה לעין למה. */
+          go: () => this.setState({ cat: c.key, search: "" })
         };
       }),
       meters,
@@ -1089,11 +1245,26 @@ class Component extends DCLogic {
           bg: on ? "#fff" : "transparent", shadow: on ? "0 2px 8px rgba(14,42,71,.08)" : "none",
           color: on ? "#1B6FE0" : "#5F7590", weight: on ? "700" : "500",
           underline: on ? "#1B6FE0" : "transparent",
-          go: () => this.setState({ cat: c.key })
+          /* ⚠️ מאפס את החיפוש. בלי זה מעבר מ"מעבד" (אחרי חיפוש "AM5")
+             ל"זיכרון" היה מציג רשימה מסוננת בלי סימן נראה לעין למה. */
+          go: () => this.setState({ cat: c.key, search: "" })
         };
         return acc;
       }, {}),
       searchPh: "חפש " + (CATS.find(c => c.key === st.cat) || {}).label + "…",
+      search: st.search,
+      /* onChange ולא onInput: ב-React onChange של שדה טקסט נורה על כל
+         תו (הוא ממופה לאירוע input), והוא הצד השני של `value` בשדה
+         מבוקר. `value` בלי onChange מקפיא את השדה ומדפיס אזהרה. */
+      onSearch: e => this.setState({ search: e.target.value }),
+      clearSearch: () => this.setState({ search: "" }),
+      searchNote: (() => {
+        if(!view.term) return null;
+        if(!view.searchHits)
+          return `לא נמצאו תוצאות ל"${view.term}" מתוך ${view.searchBase} האפשרויות המוצגות`;
+        if(view.searchHits === view.searchBase) return null;
+        return `${view.searchHits} מתוך ${view.searchBase} מתאימים ל"${view.term}"`;
+      })(),
       /* ⚠️ קודם ישב כאן טקסט קבוע מהעיצוב ("תואמים לסוקט LGA1700") —
          הוא הופיע גם כשהמעבד היה AM5, וגם כששום דבר לא סונן בפועל.
          עכשיו הוא נגזר ממה שנבחר וממה שהמנוע חסם בפועל. */
@@ -1119,13 +1290,25 @@ class Component extends DCLogic {
          הוא נשאר גלוי גם אחרי שהלקוח ביקש להציג אותם, כדי שיהיה ברור
          שהרשימה שהוא רואה עכשיו כוללת פריטים שלא ניתן לבחור, ואיך
          לחזור אחורה. */
+      /* ⚠️ A8 — ניסוח. דביר ראה "59 לוחות לא תואמים" וקרא את זה
+         כתקלה. זה לא תקלה אלא **סינון שעבד**: הוא בחר מארז mATX,
+         והבונה הוריד את הלוחות שלא נכנסים אליו.
+
+         ⚠️ ההבדל הוא במי עומד בתחילת המשפט. "59 לא תואמים" מאשים את
+         הקטלוג; "לפי המארז שבחרת נשארו 45" מדווח על פעולה מועילה.
+         לכן ההודעה נפתחת במה שהלקוח בחר, ומסתיימת בכמה נשאר לו. */
       hiddenNote: (() => {
+        // בזמן חיפוש ההודעה על הרשימה שייכת ל-searchNote, לא כאן
+        if(view.term) return null;
         if(view.hidden){
+          const by = this.filterOn(st.cat);
+          const DEF_LABEL = { mobo:"לוח האם", gpu:"כרטיס המסך", psu:"ספק הכוח" };
+          const names = by.map(k => DEF_LABEL[k] || ("ה" + ((CATS.find(c => c.key === k) || {}).label || k))).join(" · ");
+          const src = names ? `לפי ${names} שבחרת` : "לפי הבחירות שלך";
           if(!view.list.length)
-            return `כל ${view.rated.length} האפשרויות בקטגוריה הזו אינן מתאימות לבחירה שלך והוסתרו`;
-          return view.hidden === 1
-            ? "מוצר אחד הוסתר כי אינו מתאים לבחירה שלך"
-            : `${view.hidden} מוצרים הוסתרו כי אינם מתאימים לבחירה שלך`;
+            return `${src} אין כרגע אפשרות מתאימה בקטגוריה הזו.`;
+          return `${src} מוצגות ${view.list.length} אפשרויות מתאימות` +
+                 ` (${view.hidden} שאינן נכנסות סוננו).`;
         }
         if(HIDE_INCOMPATIBLE && st.showHidden && view.conflicting)
           return view.conflicting === 1

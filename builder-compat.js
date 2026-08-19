@@ -660,15 +660,27 @@ const DVT_RULES = [
     }
   },
   {
-    id:"cpu-cooling-tdp", cats:["cpu","cooling"], on:"cooling", level:"error",
+    /* 🔴 היה level:"error" עד 19.08 — והחוק חסם את הבחירה בזמן
+       שההודעה שלו עצמה אומרת שהמחשב **עובד** ורק מוריד תדרים.
+       דביר: "לא חסומים אחד לשני, פשוט יש אזהרה".
+
+       ⚠️ ההבחנה שקובעת כאן: חסימה שמורה למה ש**פיזית לא נכנס או לא
+       עולה** — שקע, מידות, חריצים, ספק שיכבה את המחשב. מרווח תרמי
+       הוא שאלה של ביצועים ורעש, והלקוח רשאי להחליט עליה בעצמו.
+       חסימה על ביצועים גם מלמדת להתעלם מהחסימות האמיתיות. */
+    id:"cpu-cooling-tdp", cats:["cpu","cooling"], on:"cooling", level:"warn",
     when:({cooling}) => !dvtIsStockCooler(cooling),
     needs:["cpu.tdpWatts","cooling.coolerTdpWatts"],
     run:({cpu,cooling}) => {
       const need = dvtNumOf(cpu,"tdpWatts"), can = dvtNumOf(cooling,"coolerTdpWatts");
       // המקרה ה"בגבול" מטופל בחוק ה-warn שאחריו
-      return need > can
-        ? `${cooling.name} מפנה עד ${can}W ו-${cpu.name} מייצר ${need}W. המעבד יוריד תדרים בעומס.`
-        : null;
+      if(!(need > can)) return null;
+      /* הפער עצמו נאמר ללקוח, כי 10W ו-150W הם לא אותה המלצה. */
+      const gap = Math.round((need - can) / can * 100);
+      return `${cooling.name} מפנה עד ${can}W ו-${cpu.name} מייצר ${need}W` +
+             (gap >= 40
+               ? ` — פער של ${gap}%. המעבד יוריד תדרים משמעותית בעומס ממושך; מומלץ קירור חזק יותר.`
+               : `. בעומס ממושך המעבד עשוי להוריד תדרים.`);
     }
   },
   {
@@ -1402,6 +1414,36 @@ function dvtFieldLabel(path){
   return `${field} (${DVT_CAT_LABELS[cat] || cat})`;
 }
 
+/* ==================== רמת הממצא: הרכב או מוצר ====================
+   🔴 הבקשה של דביר: "הלקוח בחר א' — עכשיו הוא על ב'. האם ב' מתאים
+   לא'?" ובנפרד: "את השגיאות על ההרכב הכללי צריך להיות למטה/בצד ולא
+   על כל מוצר".
+
+   שני סוגי ממצאים שהיו מעורבבים:
+
+   **ממצא מוצר** — "המעבד AM5 והלוח LGA1700 לא מתחברים". אמירה על
+   הפריט הזה מול מה ש**כבר נבחר**. מקומו על כרטיס המוצר.
+
+   **ממצא הרכב** — "למעבד אין גרפיקה מובנית ולא נבחר כרטיס מסך".
+   זו אמירה על ההרכבה כשלמה, והיא נפתרת ברגע שהלקוח יבחר את הרכיב
+   החסר. מקומה בסיכום ההרכבה למטה.
+
+   🔴 המחיר של הערבוב, נמדד על הקטלוג החי: **39 מתוך 48 המעבדים**
+   נצבעו אדום ב"בונה ריק — לפני שהלקוח בחר משהו. הלקוח רואה קטלוג
+   שכולו פסול ומסיק שאין לו מה לבחור.
+
+   ⚠️ הסיווג **נגזר ולא נכתב ידנית**: חוק שה-`on` שלו אינו ב-`cats`
+   שלו מייחס את הממצא לרכיב שהוא כלל לא דורש שייבחר — וזו בדיוק
+   ההגדרה של ממצא-הרכב. אותו עיקרון כמו dvtRequiredColumns: תיוג
+   ידני מתיישן ברגע שמישהו מוסיף חוק ושוכח לתייג.
+
+   כרגע נגזרים כך 5 חוקים: cpu-igpu-no-gpu, cpu-no-cooler,
+   mobo-wifi-missing, case-included-fans, cooling-paste-missing. */
+function dvtRuleScope(rule){
+  const cats = rule.cats || [];
+  return cats.indexOf(rule.on) > -1 ? "item" : "build";
+}
+
 function dvtCheckBuild(sel, qty){
   sel = sel || {}; qty = qty || {};
   const out = [];
@@ -1418,14 +1460,16 @@ function dvtCheckBuild(sel, qty){
     let text = null;
     try{ text = rule.run(ctx); }
     catch(e){ /* חוק בודד שנפל לא מפיל את כל הבדיקה */ return; }
-    if(text) out.push({ level: rule.level, cat: rule.on, text, id: rule.id });
+    if(text) out.push({ level: rule.level, cat: rule.on, text, id: rule.id,
+                        scope: dvtRuleScope(rule) });
   });
 
   // כמות מעבדים מעבר לתקרה — נגזרת ולא חוק זוגי
   const cpuMax = dvtMaxQty("cpu", sel);
   const cpuQ = Math.max(1, Number(qty.cpu) || 1);
   if(sel.cpu && cpuQ > cpuMax){
-    out.push({ level:"error", cat:"cpu", id:"cpu-qty",
+    // ממצא-מוצר: הוא מדבר על המעבד שנבחר מול הלוח שנבחר
+    out.push({ level:"error", cat:"cpu", id:"cpu-qty", scope:"item",
       text:`הלוח שנבחר תומך ב-${cpuMax} מעבד${cpuMax>1?"ים":""} בלבד. מחשב ביתי כמעט תמיד עם מעבד אחד.` });
   }
 
@@ -1458,14 +1502,26 @@ function dvtRateOption(cat, item, sel, qty, baseline){
 
   const trial = Object.assign({}, base, { [cat]: item });
   const r = dvtCheckBuild(trial, qty);
-  const mine = r.issues.filter(i => !baseKeys.has(i.id + "|" + i.text));
+  const fresh = r.issues.filter(i => !baseKeys.has(i.id + "|" + i.text));
+
+  /* 🔴 לב השינוי (A2/A4): פסק הדין על המוצר נגזר **רק** מממצאי-מוצר.
+     ממצא-הרכב עדיין קיים ועדיין חשוב — הוא פשוט מדווח בסיכום ההרכבה
+     ולא צובע באדום כל מעבד ברשימה בגלל רכיב שהלקוח עוד לא הגיע אליו.
+
+     ⚠️ המשמעות המעשית: פריט נחסם רק ממה שכבר נבחר. בונה ריק לא חוסם
+     כלום — אין מול מה. */
+  const mine  = fresh.filter(i => i.scope !== "build");
+  const build = fresh.filter(i => i.scope === "build");
 
   const top = mine[0] || null;
   return {
     level: top ? top.level : "ok",
     text: top ? top.text : null,
     blocked: mine.some(x => x.level === "error"),
-    issues: mine
+    issues: mine,
+    /* נשמר כדי שהממשק יוכל להסביר "יחסר לך קירור" כהערה רכה על
+       הפריט, בלי שזה ייחשב אי-התאמה. */
+    buildIssues: build
   };
 }
 

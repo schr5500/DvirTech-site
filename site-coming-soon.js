@@ -15,16 +15,31 @@ const COPY = {
 let LANG = "he";
 try { LANG = localStorage.getItem("dvirtech_lang") || "he"; } catch(e) {}
 
+/* 🔴 דף הבית זרק TypeError בכל טעינה. `footerText` הוסר מה-HTML
+   כשהפוטר עבר לרכיב המשותף (site-footer.js), אבל השורה שכתבה אליו
+   נשארה כאן — ו-render() נפל עליה.
+
+   ⚠️ החומרה לא בשגיאה עצמה אלא במה שהיא **מנעה**: היא ישבה לפני שלוש
+   השורות האחרונות, ולכן `dir="rtl"`, `lang`, וסימון כפתור השפה הפעיל
+   פשוט לא רצו אף פעם. גם מעבר לאנגלית החליף טקסט בלי להחליף כיוון.
+
+   ⚠️ עכשיו כל כתיבה עוברת דרך csSet, כך שאלמנט שיוסר מה-HTML בעתיד
+   ידלג בשקט במקום להפיל את שאר הפונקציה. */
+function csSet(id, prop, val){
+  const el = document.getElementById(id);
+  if(el) el[prop] = val;
+}
+
 function render(){
   const c = COPY[LANG];
-  document.getElementById("badgeText").textContent = c.badge;
-  document.getElementById("titleMain").textContent = c.main;
-  document.getElementById("titleHighlight").textContent = c.highlight;
-  document.getElementById("bodyText").textContent = c.body;
-  document.getElementById("waBtn").textContent = c.wa;
-  document.getElementById("waBtn").href = "https://wa.me/972502000373?text=" + encodeURIComponent(LANG === "he" ? "היי דביר, ראיתי שהאתר בדרך :)" : "Hi Dvir, saw the new site is coming soon :)");
-  document.getElementById("mailBtn").textContent = c.mail;
-  document.getElementById("footerText").textContent = c.footer;
+  csSet("badgeText",      "textContent", c.badge);
+  csSet("titleMain",      "textContent", c.main);
+  csSet("titleHighlight", "textContent", c.highlight);
+  csSet("bodyText",       "textContent", c.body);
+  csSet("waBtn",          "textContent", c.wa);
+  csSet("waBtn", "href", "https://wa.me/972502000373?text=" + encodeURIComponent(LANG === "he" ? "היי דביר, ראיתי שהאתר בדרך :)" : "Hi Dvir, saw the new site is coming soon :)"));
+  csSet("mailBtn",        "textContent", c.mail);
+  // הפוטר מגיע מ-site-footer.js ומתרגם את עצמו — אין כאן מה לכתוב
   document.querySelectorAll(".lang-btn").forEach(b => b.classList.toggle("active", b.dataset.lang === LANG));
   document.documentElement.lang = LANG;
   document.documentElement.dir = LANG === "he" ? "rtl" : "ltr";
