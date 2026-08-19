@@ -245,6 +245,32 @@
     .bld-sum-open:checked ~ .bld-sum-head .bld-sum-toggle svg{transform:rotate(180deg)}
     .bld-sum-list{display:none;grid-column:1/-1;margin:0 0 8px;max-height:38vh;overflow-y:auto;background:#FBFDFF;border:1px solid #EDF2F8;border-radius:12px;padding:4px 6px}
     .bld-sum-open:checked ~ .bld-sum-list{display:block}
+
+    /* 🔴 פאנל ממצאי ההרכב בנייד — נמדד ב-375px: עם הפאנל פתוח הסרגל
+       הדביק תפח מ-~120px ל-**305px**, שליש מהמסך, והכפתורים הצפים
+       (שמורמים כאן ל-132/194 בדיוק כדי לפנות לו מקום) חזרו לשבת עליו.
+
+       ⚠️ הפתרון הוא לא להקטין את הפאנל אלא להתיישר עם ההתנהגות שכבר
+       קיימת בסרגל: פירוט ההרכבה מקופל מאחורי "פירוט", וכך גם כאן.
+       **שורת הכותרת נשארת גלויה תמיד** ("2 ממצאים בהרכבה") כדי
+       שהלקוח ידע שיש מה לקרוא; השורות המלאות נפתחות בלחיצה.
+
+       ⚠️ בדסקטופ אין קיפול — שם עמודת הסיכום היא עמודה אמיתית
+       והפאנל פתוח במלואו. */
+    .bld-bn{grid-column:1/-1;margin:0 0 8px;padding:8px 11px}
+    .bld-bn-h{margin-bottom:0}
+    .bld-bn-l{display:none}
+    .bld-sum-open:checked ~ .bld-bn .bld-bn-l{display:flex}
+    .bld-sum-open:checked ~ .bld-bn .bld-bn-h{margin-bottom:8px}
+    /* ⚠️ תקרה + גלילה פנימית, בדיוק כמו .bld-sum-list. בלי זה הסרגל
+       הפתוח הגיע ל-831px על מסך של 812 — כלומר גלש מהמסך. */
+    .bld-sum-open:checked ~ .bld-bn{max-height:14vh;overflow-y:auto}
+
+    /* ⚠️ כשהסרגל פתוח הוא ממלא כמעט את המסך, והכפתורים הצפים יושבים
+       עליו בהכרח. הם מיותרים באותו רגע — הלקוח כבר בתוך הסיכום, ושם
+       יש כפתור וואטסאפ משלו. */
+    body:has(.bld-sum-open:checked) .wa-fab,
+    body:has(.bld-sum-open:checked) .cart-fab{display:none}
     .bld-sum-row{padding:9px 8px;gap:10px}
     .bld-sum-total{grid-column:1;margin:0;padding:9px 12px;align-items:center}
     .bld-sum-total-label{font-size:11px;line-height:1.3}
@@ -266,10 +292,20 @@
     .bld-trust-item{padding:13px 16px;border-inline-start:none;border-top:1px solid #EDF2F8}
     .bld-trust-item:first-child{border-top:none}
 
-    /* הכפתורים הצפים של האתר (עגלה/וואטסאפ, style.css) — מעל הסרגל
-       התחתון הדביק, אחרת הם מכסים את הסה"כ וכפתור ההמשך. */
-    .cart-fab{bottom:132px}
-    .wa-fab{bottom:194px}
+    /* 🔴 הכפתורים הצפים של האתר (עגלה/וואטסאפ, style.css) הורמו כאן
+       ל-132/194 כדי לפנות מקום לסרגל התחתון הדביק. זה עבד כל עוד
+       גובה הסרגל היה קבוע — אבל הסרגל **משנה גובה** לפי מספר
+       הרכיבים שנבחרו, ומאז 19.08 גם לפי ממצאי ההרכב. נמדד ב-375px:
+       הכפתור הכחול ישב על "המשך לסיכום והרכבה", כלומר על הפעולה
+       הראשית של הדף.
+
+       ⚠️ מספר קבוע לא יכול לעקוב אחרי גובה משתנה, ולכן בנייד הם
+       פשוט יורדים כאן — ואין אובדן תפקוד:
+         · העגלה כבר קיימת בכותרת: כפתור .head-ic עם aria-label="עגלה",
+           מונה פריטים ו-onclick="openCart()" — אומת בנייד.
+         · וואטסאפ קיים בתוך הסרגל הפתוח (.bld-btn-whatsapp).
+       בדסקטופ שניהם נשארים כרגיל; שם אין סרגל דביק. */
+    .cart-fab, .wa-fab{display:none}
   }
   @media (max-width:1000px){header nav{display:none !important}}
   @media (prefers-reduced-motion:reduce){*{animation:none !important}}
@@ -391,7 +427,7 @@
            מוצר ברשימה. הלקוח קורא מה מצב ההרכבה שלו לפני שהוא ממשיך. -->
       <sc-if value="{{ hasBuildNotes }}" hint-placeholder-val="{{ false }}">
         <div class="bld-bn">
-          <div class="bld-bn-h">{{ buildNotesTitle }}</div>
+          <div class="bld-bn-h" style="color:{{ buildNotesFg }}">{{ buildNotesTitle }}</div>
           <sc-for list="{{ buildNotes }}" as="bn" hint-placeholder-count="3">
             <div class="bld-bn-l">
               <span class="bld-bn-ic" style="background:{{ bn.bg }};color:{{ bn.fg }}">{{ bn.ic }}</span>
@@ -1211,6 +1247,12 @@ class Component extends DCLogic {
          להתעלם ממנה; רשימה שגם מאשרת מה נכון בהרכבה נקראת. */
       buildNotes: bnotes,
       hasBuildNotes: bnotes.length > 0,
+      /* ⚠️ בנייד רואים רק את שורת הכותרת עד שפותחים, ולכן היא חייבת
+         לשאת את החומרה בעצמה — אחרת "2 ממצאים" נראה כמו הערת אגב. */
+      buildNotesFg: (() => {
+        const r = this.compatResult();
+        return r.errors ? "#B4231B" : r.warns ? "#8A5A00" : "#0E9C8A";
+      })(),
       buildNotesTitle: (() => {
         const r = this.compatResult();
         if(r.errors) return r.errors === 1 ? "ממצא אחד בהרכבה" : `${r.errors} ממצאים בהרכבה`;

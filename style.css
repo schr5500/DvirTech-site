@@ -138,7 +138,18 @@ nav a.nav-accent:hover{filter:brightness(1.12)}
 .site-search-row{display:flex;align-items:center;justify-content:space-between;gap:10px;
   padding:9px 10px;border-radius:8px;text-decoration:none;color:var(--ink)}
 .site-search-row:hover{background:var(--surface-2)}
-.site-search-row .ssr-name{font-size:13.5px;font-weight:600;overflow:hidden;text-overflow:ellipsis;white-space:nowrap}
+.site-search-row .ssr-name{font-size:13.5px;font-weight:600;overflow:hidden;text-overflow:ellipsis;white-space:nowrap;
+  flex:1;min-width:0}
+/* תמונת המוצר בשורת החיפוש. ⚠️ flex:none — בלי זה השם הארוך מועך
+   אותה לרוחב אפס והשורה נראית כאילו אין תמונה. */
+.site-search-row .ssr-thumb{position:relative;flex:none;width:36px;height:36px;border-radius:9px;
+  background:var(--surface-2);overflow:hidden;display:grid;place-items:center}
+.site-search-row .ssr-thumb img{position:absolute;inset:0;width:100%;height:100%;object-fit:contain;
+  background:#fff}
+.site-search-row .ssr-ph{display:grid;place-items:center;width:100%;height:100%}
+.site-search-row .ssr-ph svg{width:18px;height:18px;color:var(--ink-soft);fill:none;stroke:currentColor;stroke-width:1.6}
+/* התמונה עלתה — ממלא המקום מפנה מקום כדי שלא יציץ מבעד ל-PNG שקוף */
+.site-search-row .ssr-thumb.on .ssr-ph{opacity:0}
 .site-search-row .ssr-meta{display:flex;align-items:center;gap:8px;flex:none}
 .site-search-row .ssr-cat{font-size:11px;color:var(--ink-soft);background:var(--surface-2);border-radius:999px;padding:2px 8px}
 .site-search-row .ssr-price{font-size:13px;font-weight:800;color:var(--blue);font-family:'Rubik',sans-serif;white-space:nowrap}
@@ -1538,3 +1549,37 @@ html, body{height:auto !important}
 .navcat-link:hover .navcat-ic{background:#DCE9FC}
 /* השורה כבר flex; מוודאים יישור אנכי נקי עם האייקון */
 .navcat-link{align-items:center}
+
+
+/* ==================== אזור בטוח לכפתורים הצפים ====================
+   🔴 הבעיה שדביר ראה: בועת הוואטסאפ/העגלה ישבה על טקסט ולא אפשרה
+   לקרוא אותו. נמדד ב-375px — `cart-fab` כיסה שורה בפאנל ממצאי ההרכב.
+
+   ⚠️ העיקר הוא לא שהכפתור *לפעמים* חופף — כפתור צף תמיד חופף משהו
+   בזמן גלילה. העיקר הוא ש**בתחתית הדף אי אפשר היה לגלול את התוכן
+   החוצה מתחתיו**: הגעת לסוף, והשורה האחרונה נשארה מכוסה לתמיד.
+   `--fab-safe` מוסיף בדיוק את המקום הזה בסוף כל דף, כך שכל תוכן
+   ניתן להזזה אל מעל הכפתורים.
+
+   ⚠️ נמדד ולא נוחש: 24px תחתית + 56 עגלה + 14 רווח + 56 וואטסאפ
+   ≈ 150px, ובנייד הכפתורים קטנים יותר ולכן 132px. */
+:root{ --fab-safe: 150px }
+@media (max-width:768px){ :root{ --fab-safe: 132px } }
+
+/* ⚠️ **לא** על body. ריפוד על body מוסיף את המקום *מתחת* לפוטר, וכיוון
+   שהפוטר כהה ורקע הגוף בהיר נוצרה רצועה בהירה בתחתית שנראית כמו תקלה
+   (נראה בצילום ותוקן מיד). ספייסר בתוך הפוטר נותן בדיוק את אותו מקום
+   גלילה, אבל בצבע הפוטר — כלומר בלתי נראה. */
+footer::after{ content:""; display:block; height: var(--fab-safe) }
+
+/* ⚠️ scrollIntoView לא יודע על הכפתורים הצפים ומצמיד את היעד לתחתית
+   הדפדפן — כלומר בדיוק מתחתיהם. זה שומר עליו מעליהם. */
+*{ scroll-margin-bottom: var(--fab-safe) }
+
+/* בנייד הכפתורים קטנים יותר: הם עדיין בולטים לעין אבל תופסים פחות
+   שטח על התוכן. ⚠️ 44px הוא המינימום לשטח נגיעה נוח — לא לרדת מזה. */
+@media (max-width:768px){
+  .wa-fab, .cart-fab{ width:44px; height:44px }
+  .cart-fab{ bottom:18px; inset-inline-end:14px }
+  .wa-fab{ bottom:76px; inset-inline-end:14px }
+}

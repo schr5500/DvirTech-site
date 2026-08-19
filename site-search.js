@@ -109,6 +109,7 @@ function initSiteSearch(){
 
     const catRows = cats.map(c => `
       <a class="site-search-row site-search-cat-row" href="products.html?cat=${encodeURIComponent(c.cat)}">
+        ${dvtThumbHtml(null, c.cat)}
         <span class="ssr-name">${escHtml(c.label)}</span>
         <span class="ssr-meta"><span class="ssr-cat">${
           _ssTr(`${c.n} מוצרים`, `${c.n} products`)}</span></span>
@@ -118,7 +119,12 @@ function initSiteSearch(){
       const name  = (_ssLang() === "en" && it.nameEn) ? it.nameEn : it.name;
       const price = Number(it.price).toLocaleString("he-IL") + " ₪";
       const href  = "products.html?cat=" + encodeURIComponent(cat) + "&q=" + encodeURIComponent(term);
+      /* ⚠️ התמונה היא הדבר שהופך רשימת שמות לרשימת מוצרים. שמות
+         המוצרים כאן ארוכים ודומים זה לזה ("לוח אם Gigabyte B650M...")
+         ונחתכים באמצע — הלקוח מזהה את הפריט לפי איך שהוא נראה הרבה
+         לפני שהוא מסיים לקרוא את השם. */
       return `<a class="site-search-row" href="${href}">
+        ${dvtThumbHtml(it, cat)}
         <span class="ssr-name">${escHtml(name)}</span>
         <span class="ssr-meta"><span class="ssr-cat">${escHtml(label)}</span><span class="ssr-price">${price}</span></span>
       </a>`;

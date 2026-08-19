@@ -359,6 +359,28 @@ function dvtCatLabel(cat, group){
    להתחרות בשם של מוצר זיכרון אמיתי. */
 const DVT_FIELD_SCORE = { name: 100, cat: 60, brand: 40, spec: 10 };
 
+/* ==================== תמונה קטנה למוצר ====================
+   מחזיר HTML של תמונת מוצר לשורת רשימה (חלונית החיפוש, ובעתיד כל
+   מקום שצריך תצוגה מוקטנת).
+
+   ⚠️ יושב כאן ולא ב-products.js בכוונה: products.js נטען רק בדף
+   החנות, בעוד `shopArt` שם עושה בדיוק את אותו הדבר. search-core.js
+   נטען בכל 12 הדפים, וזה התנאי לכך שהחיפוש בכותרת יעבוד בכולם.
+
+   ⚠️ אותה תבנית של shopArt, ומאותה סיבה: ממלא המקום נכתב **לפני**
+   ה-img ויושב מתחתיו ולא במקומו. כך רואים אייקון קטגוריה כבר בזמן
+   הטעינה, ו-onerror על כתובת שבורה מסיר רק את ה-img וחושף אותו
+   בחזרה — במקום סמל "תמונה שבורה" של הדפדפן. */
+function dvtThumbHtml(it, cat){
+  const icon = (typeof dvtIcon === "function") ? dvtIcon(cat) : "ic-case";
+  const ph = `<span class="ssr-ph" aria-hidden="true"><svg><use href="#${escHtml(icon)}"/></svg></span>`;
+  const img = (it && it.image)
+    ? `<img src="${escHtml(it.image)}" alt="" loading="lazy"
+           onload="this.parentNode.classList.add('on')" onerror="this.remove()">`
+    : "";
+  return `<span class="ssr-thumb">${ph}${img}</span>`;
+}
+
 function dvtItemScore(item, catLabelText, term){
   const tokens = String(term || "").toLowerCase().trim().split(/\s+/).filter(Boolean);
   if(!tokens.length) return 0;
