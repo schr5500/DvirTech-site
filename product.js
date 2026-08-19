@@ -318,6 +318,10 @@ const PD_TECH_FIELDS = {
     { key:"gpuName",        label:"כרטיס מסך" },
     { key:"ramGb",          label:"זיכרון (GB)" },
     { key:"storageGb",      label:"אחסון (GB)" },
+    { key:"storageType",    label:"סוג אחסון" },
+    { key:"moboChipset",    label:"ערכת שבבים" },
+    { key:"psuWatts",       label:"ספק כוח (W)" },
+    { key:"ramType",        label:"סוג זיכרון" },
     { key:"os",             label:"מערכת הפעלה" },
     { key:"warrantyMonths", label:"אחריות (חודשים)" },
     { key:"color",               label:"צבע" }
