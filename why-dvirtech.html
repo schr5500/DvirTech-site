@@ -362,7 +362,12 @@
        סדר השכבות ב-CSS מלמעלה למטה — התמונה אחרונה = הכי מאחור. */
     background:
       linear-gradient(to right,rgba(9,38,66,.86) 0%,rgba(10,42,72,.62) 42%,rgba(11,44,77,.30) 72%,rgba(11,44,77,.18) 100%),
-      url("images/landing-7-cta.jpg") center/cover no-repeat;
+      /* ⚠️ 115% ולא cover: לתמונה עצמה יש מסגרת נייבי כהה
+         צרובה בקצוות (כ-4% מהרוחב מכל צד). עם cover היא נשארת
+         ונראית כפס כהה בצד ימין — בדיוק מה שנראה שבור.
+         מתיחה ל-115% דוחפת את המסגרת מחוץ למלבן. הגובה נשאר
+         auto ועדיין מכסה: 1096×1.15 = 1260 רוחב ⇒ 704 גובה, מעל 442. */
+      url("images/landing-7-cta.jpg") center/115% auto no-repeat;
     color:#D6E5F2;box-shadow:var(--shadow-l);
   }
   .final__grid{display:grid;grid-template-columns:1fr;align-items:center;gap:0}
