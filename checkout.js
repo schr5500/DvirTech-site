@@ -861,6 +861,28 @@ async function submitCheckout(){
   }
 }
 
+/* ==================== שחזור אחרי חזרה מדף התשלום ====================
+   🔴 הבאג: submitCheckout מסמן את הכפתור `disabled` ומחליף את הטקסט
+   ל-"⏳ שולח...", ואז הדף עובר ל-SUMIT. כשהלקוח לוחץ "הקודם" הדפדפן
+   משחזר את העמוד **מה-bfcache** — בדיוק כפי שהיה, כלומר עם כפתור
+   מושבת שכתוב עליו "שולח...". הלקוח תקוע ואין לו דרך לנסות שוב.
+
+   ⚠️ זה לא נראה כמו באג אלא כמו תקלת רשת, ולכן לקוח סביר פשוט נוטש.
+
+   `pageshow` עם `persisted` הוא האירוע היחיד שנורה בשחזור מ-bfcache —
+   `load` ו-`DOMContentLoaded` לא נורים שוב. נבדק גם `navigation.type`
+   כי חלק מהדפדפנים משחזרים בלי לסמן persisted. */
+window.addEventListener("pageshow", function (e) {
+  var nav = (performance.getEntriesByType &&
+             performance.getEntriesByType("navigation")[0]) || {};
+  if (!e.persisted && nav.type !== "back_forward") return;
+  var b = document.getElementById("checkoutSubmitBtn");
+  if (b) { b.disabled = false; b.textContent = t("submitOrderBtn"); }
+  /* מרעננים גם את הסכומים — ייתכן שהעגלה השתנתה בלשונית אחרת בזמן
+     שהלקוח היה בדף התשלום. */
+  if (typeof renderCheckoutPage === "function") { try { renderCheckoutPage(); } catch (x) {} }
+});
+
 /* ================= static text (language switch) ================= */
 function renderCheckoutStaticText(){
   document.getElementById("backLink").textContent = t("continueBrowsing");
