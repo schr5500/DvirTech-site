@@ -96,8 +96,37 @@
   .bld-sum-title{font-family:'Rubik',sans-serif;margin:0;font-size:19px;font-weight:800;letter-spacing:-.2px;color:#0E2A47}
   .bld-sum-count{font-size:12px;color:#5F7590}
   .bld-sum-list{list-style:none;padding:0;margin:14px 0 0}
-  .bld-sum-row{display:flex;align-items:center;gap:12px;padding:11px 10px;border-radius:13px;transition:background .15s}
-  .bld-sum-thumb{width:40px;height:40px;border-radius:10px;flex:none}
+  /* 🔴 קודם היה כאן `white-space:nowrap` + `text-overflow:ellipsis`, ולכן
+     כמעט כל שם נחתך: שמות הקטלוג ארוכים ("מארז ללא ספק ANTEC VSK3000B-U3
+     Mini TOWER mini-ATX CASE") והעמודה צרה. הלקוח ראה שלוש מילים ראשונות
+     ולא ידע מה בדיוק הוא בחר.
+
+     ⚠️ הגלישה בטוחה: השורה היא בלוק בזרימה רגילה בלי גובה קבוע, ולכן
+     שם ארוך מגדיל את הגובה של השורה שלו בלבד ולא נכנס לשורה הבאה.
+     `align-items:flex-start` על .bld-sum-row משלים את זה.
+
+     🔴 `overflow-wrap:anywhere` **שבר את הפריסה** ונתפס במדידה: הוא
+     מקטין את רוחב-המינימום הפנימי של האלמנט לתו בודד, וה-flex ניצל
+     את זה וכיווץ את השם ל-40px בתוך עמודה של 295px. התוצאה: שם של
+     60 תווים נפרס על 14 שורות בגובה 265px.
+     `break-word` שובר מילה ארוכה שלא נכנסת, אבל **אינו** משנה את
+     חישוב הרוחב — וזה ההבדל שמחזיק את הפריסה.
+
+     ⚠️ `text-align:start` ולא `right` — בשם שמתחיל באנגלית ה-dir הוא
+     ltr, ו-`right` היה דוחף אותו לצד הלא נכון. */
+  .bld-sum-name{display:block;font-size:14px;font-weight:600;line-height:1.35;
+    white-space:normal;overflow-wrap:break-word;text-align:start}
+  /* 🔴 גוש הטקסט קיבל `flex:1;min-width:0` בלבד, וכשהשורה כללה גם בורר
+     כמות (− 1 +) הוא נדחס ל-40px בעמודה של 295px — שם של 60 תווים
+     נפרס ל-14 שורות. `min-width` מבטיח לו רוחב מינימלי, ו-flex-wrap
+     על השורה נותן לכמות ולמחיר לרדת שורה במקום למעוך אותו. */
+  .bld-sum-main{flex:1 1 auto; min-width:58%}
+  .bld-sum-row{flex-wrap:wrap; row-gap:6px}
+  /* ⚠️ align-items:flex-start ולא center. ברגע שהשם גולש לשתיים-שלוש
+     שורות, מרכוז אנכי מזיז את התמונה ואת המחיר לאמצע גוש הטקסט
+     והשורות מפסיקות להיראות מיושרות זו לזו. */
+  .bld-sum-row{display:flex;align-items:flex-start;gap:12px;padding:11px 10px;border-radius:13px;transition:background .15s}
+  .bld-sum-thumb{width:40px;height:40px;border-radius:10px;flex:none;margin-top:1px}
   .bld-sum-total{margin-top:18px;background:#F7FAFD;border:1px solid #EDF2F8;border-radius:16px;padding:17px 17px 16px;display:flex;align-items:flex-end;justify-content:space-between;gap:8px}
   .bld-sum-total-label{font-size:13px;color:#5F7590;line-height:1.4}
   .bld-sum-price{font-family:'Rubik',sans-serif;font-size:34px;font-weight:800;line-height:1;color:#0B2C4D;letter-spacing:-.5px}
@@ -388,8 +417,8 @@
         <sc-for list="{{ summary }}" as="row" hint-placeholder-count="8">
           <li class="bld-sum-row" style-hover="background:#F7FAFD">
             <span role="img" class="bld-sum-thumb" style="background-color:{{ row.thumbBg }};background-image:{{ row.imgUrl }};background-size:{{ row.imgSize }};background-repeat:no-repeat;background-position:center;opacity:{{ row.imgOp }}"></span>
-            <span style="flex:1;min-width:0">
-              <span dir="auto" style="display:block;font-size:14px;font-weight:600;color:{{ row.nameColor }};line-height:1.35;overflow:hidden;text-overflow:ellipsis;white-space:nowrap;direction:{{ row.dir }};text-align:right">{{ row.name }}</span>
+            <span class="bld-sum-main">
+              <span dir="auto" class="bld-sum-name" style="color:{{ row.nameColor }};direction:{{ row.dir }}">{{ row.name }}</span>
               <span style="display:block;font-size:11.5px;color:#5F7590;letter-spacing:.2px;margin-top:2px">{{ row.cat }}</span>
             </span>
             <sc-if value="{{ row.hasQty }}" hint-placeholder-val="{{ false }}">
@@ -735,8 +764,12 @@ const CATS = DATA.CATS, CATALOG = DATA.CATALOG,
    (או קורא מסך) חייב לדעת *למה* הפריט מסומן. */
 const OPT_LEVELS = {
   error:{ badge:"לא מתאים",    icon:"⛔", fg:"#A81E17", bg:"#FDECEA", bd:"#F3BDB8", accent:"#E4322B" },
-  warn: { badge:"אזהרה חמורה", icon:"⚠️", fg:"#8A5A00", bg:"#FFF1DB", bd:"#F0C989", accent:"#F0A32B" },
-  info: { badge:"אזהרה",       icon:"⚠️", fg:"#91690C", bg:"#FFFBEC", bd:"#F5E3B0", accent:"#F7CE6B" },
+  /* ⚠️ היה "אזהרה חמורה" ל-warn ו"אזהרה" ל-info. שתי התוויות היו חזקות
+     מדי מהתוכן שמאחוריהן: הערת זרימת אוויר קיבלה "חמורה", ו-info —
+     שהוא במהותו מידע ולא בעיה — הוצג כאזהרה. תווית שמפחידה יותר
+     ממה שהיא מתארת מלמדת את הלקוח להתעלם גם מהאמיתיות. */
+  warn: { badge:"שווה לשים לב", icon:"⚠️", fg:"#8A5A00", bg:"#FFF1DB", bd:"#F0C989", accent:"#F0A32B" },
+  info: { badge:"לידיעתך",      icon:"ℹ️", fg:"#91690C", bg:"#FFFBEC", bd:"#F5E3B0", accent:"#F7CE6B" },
   fit:  { badge:"מומלץ",       icon:"✓",  fg:"#0C7A62", bg:"#EAFBF6", bd:"#B7EFE5", accent:"#2FC4B0" }
 };
 
@@ -1093,6 +1126,17 @@ class Component extends DCLogic {
           good.push("כל הרכיבים שנבחרו עד כה מתאימים זה לזה.");
         if(has("cpu") && has("cooling") && !r.errors)
           good.push("הקירור שנבחר מתאים לתושבת ולחום של המעבד.");
+        /* ⚠️ המסר הזה ישב קודם כתג "לידיעתך" על 54% מכרטיסי הזיכרון
+           ברשימה. הוא נכון וחשוב — ערכת DDR5-6000 רצה ב-4800 עד
+           שמפעילים XMP, ולקוח שמרכיב לבד לא תמיד יודע את זה — אבל
+           מקומו כאמירה אחת על ההרכבה, לא כחזרה על כל פריט. */
+        if(has("ram") && typeof dvtNumOf === "function"){
+          const got  = dvtNumOf(sel.ram, "speedMhz");
+          const base = Math.max(dvtNumOf(sel.cpu, "maxRamSpeedMhz") || 0,
+                                dvtNumOf(sel.mobo, "maxRamSpeedMhz") || 0);
+          if(got && base && got > base)
+            good.push(`הזיכרון שנבחר רץ ב-${got}MHz דרך פרופיל XMP/EXPO — אני מפעיל אותו בביוס לפני המשלוח.`);
+        }
         if(has("psu") && has("gpu") && !r.errors){
           const w = r.watts;
           const psuW = (typeof dvtNumOf === "function") ? dvtNumOf(sel.psu, "wattage") : null;

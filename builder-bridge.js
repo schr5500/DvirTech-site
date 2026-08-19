@@ -66,6 +66,24 @@
     return !/מארז\s*חיצוני|enclosure|docking/i.test(String((i && i.name) || ""));
   }
 
+  /* 🔴 שני מתוך עשרת "מאווררי המארז" בקטלוג הם **מצנני מעבד**:
+     NOCTUA NH-D15 250W TDP DUAL 140mm FAN. זהו מגדל קירור למעבד
+     שעולה מאות שקלים, ולא מאוורר שמתברג לדופן המארז.
+
+     ⚠️ הוא הגיע לכאן כי בשמו כתוב "140mm FAN", וסיווג לפי מילת
+     המפתח שלח אותו לקטגוריה הלא נכונה. הלקוח שבחר "מאווררי מארז"
+     קיבל אותו כאפשרות ראשונה ברשימה.
+
+     ⚠️ הסינון כאן הוא רשת ביטחון בלבד — התיקון האמיתי הוא בגיליון
+     (להעביר לקטגוריית `cooling`). הרשת נשארת גם אחריו, כי המקרה
+     הזה יחזור: כל מצנן מגדל מזכיר בשמו את מידת המאוורר שלו. */
+  function isBuildableFanItem(i){
+    const n = String((i && i.name) || "");
+    if(/NH-D\d|NH-U\d|HYPER\s*\d|TOWER\s*COOLER/i.test(n)) return false;
+    if(/TDP/i.test(n)) return false;              // מפרט של מצנן מעבד, לא של מאוורר
+    return true;
+  }
+
   /* אפשרות "קירור בסיסי שמגיע עם המעבד" — דרישה מפורשת של דביר:
      כשלמעבד שנבחר באמת מצורף גוף קירור (coolerIncluded, אחרי אימות
      מהשם — ראה dvtCoolerIncluded ב-builder-compat.js), שלב הקירור
@@ -97,7 +115,8 @@
       let sellable = group.items.filter(i =>
         (typeof dvtCanBuy === "function") ? dvtCanBuy(i)
         : (typeof dvtIsSellable === "function") ? dvtIsSellable(i) : (i && i.id !== "none"));
-      if(cat === "case") sellable = sellable.filter(isBuildableCaseItem);
+      if(cat === "case")     sellable = sellable.filter(isBuildableCaseItem);
+      if(cat === "caseFans") sellable = sellable.filter(isBuildableFanItem);
       if(!sellable.length) return;
       D.CATALOG[cat] = sellable.map(i => toBuilderItem(i, sellable));
       liveFilled.add(cat);

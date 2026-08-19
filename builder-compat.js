@@ -212,12 +212,25 @@ function dvtFanSizeList(v){
   const s = String(v == null ? "" : v).trim();
   if(!s) return [];
   if(/^\d+$/.test(s) && s.length > 3){
-    const KNOWN = ["200","140","120","92","80"];
+    /* 🔴 הרשימה חסרה 160, ובגלל זה **מארז נעל את כל קטגוריית
+       המאווררים**. נמצא בסריקה על הקטלוג החי: Antec C8 RGB רשום
+       "120140160", הפירוק הגיע ל-"160", לא זיהה אותו, נפל לגיבוי
+       והחזיר את המספר כולו [120140160]. מאותו רגע שום מאוורר לא
+       "מתאים" למארז — 10 מתוך 10 נחסמו והלקוח מצא רשימה ריקה.
+
+       ⚠️ הרשימה חייבת להיות ממוינת מהארוך לקצר: בלי זה "80" היה
+       נתפס בתוך "800" ודומיו. נוספו כאן כל מידות המאוורר המקובלות
+       ולא רק אלה שבמקרה הופיעו בגיליון — הגיליון גדל, והבאג הזה
+       הוא בדיוק מה שקורה כשמופיע ערך חדש.
+
+       ⚠️ הגיבוי גם שופר: אם נותרה שארית לא מזוהה אבל כבר פירקנו
+       מידות תקינות, מחזירים אותן במקום לזרוק הכל. */
+    const KNOWN = ["220","200","180","160","140","120","92","80","70","60","40"];
     const out = [];
     let rest = s;
     while(rest.length){
       const hit = KNOWN.find(k => rest.indexOf(k) === 0);
-      if(!hit) return dvtArr(s).map(Number).filter(Number.isFinite);
+      if(!hit) return out.length ? out : dvtArr(s).map(Number).filter(Number.isFinite);
       out.push(Number(hit));
       rest = rest.slice(hit.length);
     }
@@ -593,6 +606,18 @@ const DVT_RULES = [
     id:"cpu-mobo-support-list", cats:["cpu","mobo"], on:"mobo", level:"warn",
     needs:["cpu.cpuGen","mobo.supportedCpuGens"],
     run:({cpu,mobo}) => {
+      /* 🔴 נמדד בסריקה של 20 הרכבות: החוק ירה **313 אזהרות — בדיוק
+         כמספר חסימות השקע**. הסיבה: מעבד AM5 מול לוח Intel נחסם ממילא
+         על השקע, ואז קיבל *בנוסף* "הלוח לא מצוין כתומך בדור". שתי
+         הודעות על אותה עובדה אחת, והשנייה מוסיפה בלבול ולא מידע.
+
+         ⚠️ החוק הזה נועד למקרה ההפוך לגמרי, וזה כתוב בהערה שמעליו:
+         **שקע תואם** אבל הדור לא נתמך (B660 מול דור 13) — מצב שבו
+         המחשב פיזית מתחבר ופשוט לא עולה בלי עדכון BIOS. זה המידע
+         היקר, והוא נבלע ב-313 חזרות.
+
+         לכן: אם השקעים כבר לא תואמים, אין כאן מה לומר. */
+      if(!dvtSameSocket(dvtGet(cpu,"socket"), dvtGet(mobo,"socket"))) return null;
       const gen = String(dvtGet(cpu,"cpuGen")).toLowerCase();
       const list = dvtArrOf(mobo,"supportedCpuGens").map(s => s.toLowerCase());
       if(!list.length) return null;
@@ -619,7 +644,7 @@ const DVT_RULES = [
     id:"cpu-mobo-oc", cats:["cpu","mobo"], on:"mobo", level:"info",
     needs:["cpu.unlocked","mobo.supportsOc"],
     run:({cpu,mobo}) => (dvtBoolOf(cpu,"unlocked") === true && dvtBoolOf(mobo,"supportsOc") === false)
-      ? `${cpu.name} הוא מעבד פתוח להאצה, אבל ${mobo.name} לא תומך בהאצה. המעבד יעבוד מצוין — פשוט בלי היכולת הזו.`
+      ? `${cpu.name} הוא מעבד פתוח להאצה (Overclocking), אבל ${mobo.name} אינו תומך בהאצה. המעבד יעבוד מצוין — פשוט בלי היכולת להעלות לו את התדר מעבר למפעל.`
       : null
   },
   {
@@ -638,10 +663,22 @@ const DVT_RULES = [
     id:"cpu-ram-speed", cats:["cpu","ram"], on:"ram", level:"info",
     needs:["cpu.maxRamSpeedMhz","ram.speedMhz"],
     run:({cpu,ram}) => {
+      /* 🔴 ירה 237 פעמים — **54% מכל אפשרויות הזיכרון**. אותה סיבה
+         כמו ב-mobo-ram-speed: `maxRamSpeedMhz` של המעבד הוא מפרט
+         JEDEC (5600 לדור 14), וכל ערכת 6000 חורגת ממנו. כלומר תג
+         "לידיעתך" ישב על יותר ממחצית הרשימה.
+
+         ⚠️ המסר עצמו ("אני מפעיל XMP לפני המשלוח") הוא דווקא מסר
+         טוב ומבדל — ולכן הוא לא נמחק אלא **עבר למקום הנכון**:
+         הערה חיובית אחת על ההרכבה בפאנל הסיכום (buildNotesList),
+         במקום חזרה על כל כרטיס זיכרון ברשימה.
+
+         כאן נשאר רק פער חריג באמת (מעל 20%), שבו יש מה לומר על
+         הפריט המסוים. */
       const max = dvtNumOf(cpu,"maxRamSpeedMhz"), got = dvtNumOf(ram,"speedMhz");
-      return got > max
-        ? `${ram.name} מדורג ל-${got}MHz ו-${cpu.name} רשמית עד ${max}MHz. זה עובד דרך פרופיל XMP/EXPO — אני מפעיל אותו בהרכבה.`
-        : null;
+      if(!(got > max * 1.2)) return null;
+      return `${ram.name} מדורג ל-${got}MHz, הרבה מעל המפרט הרשמי של ${cpu.name} (${max}MHz). ` +
+             `זה עובד דרך פרופיל XMP/EXPO — אני מפעיל אותו בהרכבה.`;
     }
   },
 
@@ -793,13 +830,29 @@ const DVT_RULES = [
     }
   },
   {
-    id:"mobo-ram-speed", cats:["mobo","ram"], on:"ram", level:"warn",
+    /* 🔴 היה `warn` עם התנאי `got > max` בלבד, וירה **249 פעמים
+       בסריקה של 20 הרכבות — 45% מכל אפשרויות הזיכרון**. הבדיקה מול
+       הנתונים בגיליון הראתה שזו אזהרה **שגויה שיטתית**:
+
+         · `maxRamSpeedMhz` של הלוחות מתפלג 5600×60 ו-6400×29.
+         · אלה ערכי **JEDEC** — מהירות הבסיס הרשמית, לא התקרה.
+           לוח Z890 רשום כאן 6400 ובפועל מריץ DDR5-8000 עם XMP.
+         · 51 מתוך ערכות הזיכרון בקטלוג הן 6000MHz — הערכה הנפוצה
+           ביותר לגיימינג, ורצה מצוין על כל לוח DDR5 מודרני.
+
+       כלומר הלקוח קיבל "הזיכרון יעבוד לאט יותר" על הצירוף הכי נפוץ
+       ובריא שיש, ועלול היה לוותר על ערכה טובה בגלל אזהרה לא נכונה.
+
+       ⚠️ מה נשאר: רק פער אמיתי (מעל 20% מעל הבסיס) מקבל הערה, והיא
+       `info` ומנוסחת כמידע על XMP/EXPO — שזו האמת המעשית, ובדיוק
+       הדבר שדביר מגדיר בביוס לפני המשלוח. */
+    id:"mobo-ram-speed", cats:["mobo","ram"], on:"ram", level:"info",
     needs:["mobo.maxRamSpeedMhz","ram.speedMhz"],
     run:({mobo,ram}) => {
       const max = dvtNumOf(mobo,"maxRamSpeedMhz"), got = dvtNumOf(ram,"speedMhz");
-      return got > max
-        ? `הזיכרון מדורג ל-${got}MHz והלוח ${mobo.name} עד ${max}MHz. הוא יעבוד — במהירות של הלוח.`
-        : null;
+      if(!(got > max * 1.2)) return null;
+      return `הזיכרון מדורג ל-${got}MHz, ומעל המהירות הרשמית של ${mobo.name} (${max}MHz). ` +
+             `הוא יעבוד — אני מפעיל את פרופיל ה-XMP/EXPO בביוס לפני המשלוח.`;
     }
   },
   {
@@ -944,7 +997,7 @@ const DVT_RULES = [
     run:({mobo,psu}) => {
       const need = dvtNumOf(mobo,"epsConnectors"), have = dvtNumOf(psu,"epsConnectors");
       return need > have
-        ? `ל-${mobo.name} יש ${need} שקעי EPS להזנת המעבד ול-${psu.name} יש ${have} כבל${have>1?"ים":""}. המחשב יעלה ויעבוד ככה — השקע הנוסף נחוץ למעבד חזק בעומס ממושך או להאצה. אם זה הכיוון, שווה ספק עם ${need} מחברי EPS.`
+        ? `ל-${mobo.name} יש ${need} שקעי EPS להזנת המעבד ול-${psu.name} יש ${have} כבל${have>1?"ים":""}. המחשב יעלה ויעבוד ככה — השקע הנוסף נחוץ למעבד חזק בעומס ממושך או להאצה (Overclocking). אם זה הכיוון, שווה ספק עם ${need} מחברי EPS.`
         : null;
     }
   },
@@ -1270,12 +1323,27 @@ const DVT_RULES = [
 
   /* ============ מארז ↔ מאווררים ============ */
   {
-    id:"case-fans-budget", cats:["case","caseFans"], on:"caseFans", level:"error",
+    /* 🔴 היה `error`, וזה **חסם קטגוריה שלמה**. נמדד בסריקה של 30
+       הרכבות על הקטלוג החי: אחרי בחירת מארז מיני-טאואר (2 עמדות
+       מאוורר — נפוץ מאוד) כל 10 ערכות המאווררים נחסמו, כי רובן
+       ערכות של 3. הלקוח הגיע לשלב המאווררים ומצא רשימה ריקה.
+
+       ⚠️ וזו גם לא הייתה חסימה נכונה: ערכה של 3 מאווררים במארז עם 2
+       עמדות אינה אי-אפשרות פיזית — המחשב נבנה ועובד מצוין, פשוט
+       נשאר מאוורר אחד בקופסה. לפי הכלל שקבענו (חסימה שמורה למה שלא
+       נכנס או לא עולה; בזבוז ועודף הם אזהרה) זו אזהרה.
+
+       ⚠️ הניסוח שונה בהתאם: "חסרות עמדות" נשמע ככשל, בעוד המידע
+       שהלקוח באמת צריך הוא כמה מאווררים יישארו לו בלי מקום. */
+    id:"case-fans-budget", cats:["case","caseFans"], on:"caseFans", level:"warn",
     needs:["case.fanMounts"],
     run:({sel,qty}) => {
       const b = dvtFanBudget(sel, qty);
       if(b.free === null || b.free >= 0) return null;
-      return `במארז ${b.mounts} עמדות מאוורר; הרדיאטור תופס ${b.usedByRad} וערכת המאווררים דורשת ${b.kitFans}. חסרות ${Math.abs(b.free)} עמדות.`;
+      const extra = Math.abs(b.free);
+      const radPart = b.usedByRad ? `, והרדיאטור תופס ${b.usedByRad} מהן` : "";
+      return `במארז ${b.mounts} עמדות מאוורר${radPart}, והערכה כוללת ${b.kitFans}. ` +
+             `אפשר להתקין — ${extra === 1 ? "מאוורר אחד יישאר" : extra + " מאווררים יישארו"} בלי מקום.`;
     }
   },
   {
@@ -1388,11 +1456,59 @@ const DVT_RULES = [
 /* =====================================================================
    6. הרצת המטריצה
 ===================================================================== */
+/* ==================== שם קצר להודעות ====================
+   🔴 הבעיה: שמות הקטלוג ארוכים מאוד — **59 מתוך 59 המעבדים ו-133
+   מתוך 138 הלוחות מעל 45 תווים** — והם מוטמעים בתוך משפטי ההודעות.
+   התוצאה נראית כך:
+
+     "מארז ללא ספק ANTEC VSK3000B-U3 Mini TOWER mini-ATX CASE
+      מגיע עם 1 מאוורר..."
+
+   הלקוח צריך לחצות שמונה מילים לפני שהוא מגיע למידע. דביר על אותה
+   הודעה: "מארז ללא ספק? מה זה בכלל".
+
+   ⚠️ הפתרון הוא **לא** לשנות את הקטלוג. השם בגיליון הוא שם המוצר של
+   הספק וצריך להישאר כפי שהוא — כאן מקצרים לתצוגה בלבד, ורק את
+   קידומת הקטגוריה בעברית ("מארז ללא ספק", "כרטיס מסך", "מעבד"),
+   שממילא ידועה מההקשר: ההודעה כבר יושבת על כרטיס בקטגוריה הזו.
+
+   ⚠️ **שני תנאי בטיחות**, בלעדיהם זה שובר דברים:
+     1. שם בלי אותיות לטיניות כלל נשאר שלם. פריטי-הדמה של הבונה
+        ("ללא כרטיס מסך", "קירור בסיסי שמגיע עם המעבד") הם עברית
+        מלאה, וחיתוך עד לאות הלטינית הראשונה היה מוחק אותם.
+     2. קידומת של יותר מ-4 מילים לא נחתכת — שם חריג לא ייפגע.
+
+   ⚠️ החיתוך חל על `name` בתוך ה-ctx של החוקים בלבד. הפרסרים שקוראים
+   את השם (dvtCpuIgpuFromName, dvtCoolerIncluded, dvtCaseFansFromName,
+   dvtGpuIsWorkstation) מחפשים תבניות לטיניות — Tray / No Fan / BOX /
+   RTX PRO — ולכן הסרת קידומת עברית אינה נוגעת בהם. */
+function dvtShortName(name){
+  const n = String(name || "");
+  if(!/[A-Za-z]/.test(n)) return n;                    // עברית בלבד — לא נוגעים
+  const i = n.search(/[A-Za-z0-9]/);
+  if(i <= 0) return n;
+  const prefix = n.slice(0, i).trim();
+  if(!prefix) return n;
+  if(/[A-Za-z]/.test(prefix)) return n;
+  if(prefix.split(/\s+/).length > 4) return n;             // קידומת חריגה — משאירים
+  return n.slice(i).trim() || n;
+}
+
 function dvtRuleCtx(sel, qty){
   const q = c => Math.max(1, Number((qty||{})[c]) || 1);
-  return Object.assign({}, sel, {
-    cs: sel.case, fans: sel.caseFans, cooling: sel.cooling,
-    sel, qty, q
+  /* עותק רדוד לכל פריט עם שם מקוצר. ⚠️ עותק ולא שינוי במקום — הפריט
+     עצמו מגיע מהקטלוג המשותף, ודריסת `name` שם הייתה משנה את השם
+     בכל האתר. `rawName` נשמר למי שיצטרך את המקור. */
+  const short = {};
+  Object.keys(sel || {}).forEach(k => {
+    const it = sel[k];
+    if(it && typeof it === "object" && it.name)
+      short[k] = Object.assign({}, it, { name: dvtShortName(it.name), rawName: it.name });
+    else short[k] = it;
+  });
+  return Object.assign({}, short, {
+    cs: short.case, fans: short.caseFans, cooling: short.cooling,
+    sel: short, qty, q
   });
 }
 
@@ -1544,6 +1660,33 @@ const DVT_USE_LABEL = {
   general:  "מתאים לשימוש כללי"
 };
 
+/* ==================== כרטיס תחנת עבודה מול כרטיס גיימינג ====================
+   🔴 דביר: "איך כ.המסך האלה מומלצים לגיימינג?" — ובצדק. שמונה כרטיסי
+   **תחנת עבודה** נשאו את התג: RTX PRO 2000/4000/5000 ו-Radeon Pro
+   W7800/W7900. הם יקרים מאוד, והם לא כרטיסי גיימינג.
+
+   ⚠️ למה זה קרה: ההמלצה נשענה על `tier` בלבד, ובדרג 5 יושבים גם
+   RTX 5090 וגם RTX PRO 5000. הדרג מודד עוצמה, והם באמת חזקים —
+   אבל "חזק" ו"מתאים לגיימינג" אינם אותה שאלה. הכרטיסים האלה מכוונים
+   ל-CAD, רינדור ו-AI: הדרייברים והאופטימיזציה שלהם לשם, המחיר לפריים
+   גרוע בהרבה מכרטיס גיימינג באותו כסף, וחלקם אפילו איטיים יותר
+   במשחקים מכרטיס זול משמעותית.
+
+   ⚠️ **טעות יקרה במיוחד**: לקוח שסומך על התג עלול לשלם אלפי שקלים
+   מיותרים ולקבל ביצועי משחק נמוכים יותר.
+
+   הם כן מקבלים "מומלץ לעריכה ויצירה" — שם הם באמת הבחירה הנכונה. */
+function dvtGpuIsWorkstation(name){
+  const n = String(name || "");
+  return /RTX\s*PRO\s*\d{4}/i.test(n)      // RTX PRO 2000/4000/5000/6000
+      || /QUADRO/i.test(n)
+      || /RADEON\s*PRO/i.test(n)                 // Radeon Pro W-series
+      || /\bW7[89]\d{2}\b/i.test(n)                  // W7800 / W7900
+      || /\bRTX\s*A\d{4}\b/i.test(n)               // RTX A4000 וכו'
+      || /\bNVS\b/i.test(n)
+      || /\bT(?:400|600|1000)\b/i.test(n);
+}
+
 function dvtRecommendFor(cat, it, useCase){
   if(!it || !useCase || !DVT_USE_LABEL[useCase]) return null;
   const t    = Number(it.tier ?? it.t ?? 0);
@@ -1559,7 +1702,7 @@ function dvtRecommendFor(cat, it, useCase){
      ולכן אין שם מידע. */
 
   if(useCase === "gaming"){
-    if(cat === "gpu")     return t >= 4 ? ok() : null;
+    if(cat === "gpu")     return (t >= 4 && !dvtGpuIsWorkstation(it.name)) ? ok() : null;
     if(cat === "cpu")     return (t >= 3 && (num("cores") || 0) >= 6) ? ok() : null;
     if(cat === "ram")     return (gb >= 32 && (num("speedMhz") || 0) >= 6000) ? ok() : null;
     if(cat === "storage") return (dvtIsNvmeDrive(it) && (num("pcieGen") || 0) >= 4 && gb >= 1000) ? ok() : null;
@@ -1571,7 +1714,10 @@ function dvtRecommendFor(cat, it, useCase){
     if(cat === "cpu")     return (num("cores") || 0) >= 12 ? ok() : null;
     if(cat === "ram")     return gb >= 64 ? ok() : null;
     if(cat === "storage") return (dvtIsNvmeDrive(it) && gb >= 2000) ? ok() : null;
-    if(cat === "gpu")     return (num("vramGb") || 0) >= 16 ? ok() : null;
+    /* ⚠️ כרטיס תחנת עבודה נכנס גם בלי `vramGb` בגיליון: הוא נבנה
+       בדיוק לשימוש הזה, וחבל שההמלצה תיפול על שדה חסר. */
+    if(cat === "gpu")     return ((num("vramGb") || 0) >= 16 ||
+                                  (dvtGpuIsWorkstation(it.name) && t >= 4)) ? ok() : null;
     return null;
   }
   if(useCase === "office"){
