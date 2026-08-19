@@ -368,6 +368,22 @@ var DVT_CAT_ICON = {
   cpu:"ic-cpu", mobo:"ic-mobo", ram:"ic-ram", gpu:"ic-gpu",
   cooling:"ic-cool", storage:"ic-storage", psu:"ic-psu", case:"ic-case",
   readyPc:"ic-desktop", peripherals:"ic-peri", services:"ic-service",
-  monitor:"ic-monitor", laptop:"ic-laptop", keyboard:"ic-keyboard", accessories:"ic-acc"
+  monitor:"ic-monitor", laptop:"ic-laptop", keyboard:"ic-keyboard", accessories:"ic-acc",
+
+  /* ⚠️ הושלם 19.08 כשהתפריט קיבל אייקונים: 12 מתוך 33 השורות נשארו
+     בלי, כי המפתח בתפריט הוא הקטגוריה בגיליון ("extras", "caseFans")
+     או תת-סוג ("external-drive"), ואלה לא היו במפה.
+     ⚠️ אין איור ייעודי לעכבר/אוזניות/מצלמה, ולכן הם ממופים ל-ic-peri
+     שהוא איור הציוד ההיקפי — קרוב מספיק, ועדיף על שורה בלי סמל
+     שנראית כמו פריט מסוג אחר. */
+  mouse:"ic-peri", headset:"ic-peri", webcam:"ic-peri", speakers:"ic-peri",
+  microphone:"ic-peri", mousepad:"ic-peri",
+  caseFans:"ic-cool", paste:"ic-cool",
+  wifi:"ic-mobo",
+  extras:"ic-acc",
+  /* תת-סוגי האביזרים */
+  "external-drive":"ic-storage", "flash-drive":"ic-storage",
+  adapter:"ic-acc", "gpu-bracket":"ic-gpu", cable:"ic-acc",
+  "case-glass":"ic-case", tools:"ic-acc"
 };
 function dvtIcon(cat){ return DVT_CAT_ICON[cat] || "ic-case"; }

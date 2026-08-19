@@ -1456,3 +1456,85 @@ html, body{height:auto !important}
 @media (min-width:1181px) and (max-width:1293px){
   [data-cols]{grid-template-columns:minmax(0,20.5%) minmax(0,1fr) minmax(0,21.5%) !important}
 }
+
+
+/* ==================== dvt-mobile-taps — יעדי מגע בנייד ====================
+   ⚠️ ~80% מהתנועה מגיעה מהטלפון, ולכן זו לא "התאמה" אלא הפלטפורמה
+   העיקרית. מדידה בדפדפן ב-375×812 מצאה קישורים בגובה 19–30 פיקסלים;
+   הסף המקובל למגע הוא 44×44 (Apple HIG) / 48×48 (Material).
+
+   הכי גרועים היו קישורי הפוטר — 19 ו-20 פיקסלים. אצבע ממוצעת היא
+   ~9 מ"מ, כלומר בערך 44 פיקסלים; קישור בגובה 19 פשוט מפספס.
+
+   ⚠️ הפתרון הוא **ריפוד ולא font-size** — הטקסט נשאר באותו גודל ורק
+   שטח הלחיצה גדל, כך שהעיצוב לא משתנה ויזואלית.
+
+   ⚠️ הכל תחוּם ל-max-width:768px. הדסקטופ לא נוגע — שם יש עכבר, ו-44
+   פיקסלים היו מנפחים את הפוטר בלי סיבה.
+
+   ⚠️ אלמנטי .navcat-* **לא** נכללים כאן בכוונה: הם המגה-מניו של
+   הדסקטופ ומסומנים visibility:hidden בנייד. הם נראו "קטנים" במדידה
+   הראשונה ורק ניפחו את הספירה. */
+@media (max-width:768px){
+
+  /* קישורי הפוטר — 19px → 44px */
+  footer li a{
+    display:inline-flex; align-items:center;
+    min-height:44px; padding-block:2px;
+  }
+  /* ⚠️ 14 קישורים × 44px = 616px של פוטר. שתי עמודות מחזירות
+     את הגובה לקדמותו **בלי** לוותר על שטח הלחיצה — הרוחב הזמין הוא
+     335px, כלומר ~157px לעמודה, ומספיק גם ל"ייעוץ לפני קנייה". */
+  footer .footer-grid ul{
+    display:grid; grid-template-columns:1fr 1fr;
+    column-gap:12px; align-items:start;
+  }
+  /* שורת התקנון/פרטיות — 20px → 44px, בלי לשבור את ה-flex-wrap */
+  .footer-legal{gap:6px 18px}
+  .footer-legal a{
+    display:inline-flex; align-items:center;
+    min-height:44px; padding-inline:4px;
+  }
+
+  /* "צפה בכל הקטגוריות" / "הצג הכל" — 21px */
+  .sec-head .more{min-height:44px; padding-inline:6px}
+
+  /* לוגואי היצרנים ברצועה — 25px */
+  .brand-strip a{
+    display:inline-flex; align-items:center;
+    min-height:44px; padding-inline:8px;
+  }
+
+  /* מתג השפה — 30px */
+  .lang-btn{min-height:40px; padding-inline:12px}
+
+  /* "⟵ המשך גלישה" בצ'קאאוט — 21px */
+  .checkout-back-link{display:inline-flex; align-items:center; min-height:44px}
+
+  /* ⚠️ קישורים **בתוך שורת טקסט** (tracking, תקנון) נשארים כמו שהם
+     בכוונה — WCAG 2.5.5 פוטר אותם מהסף, והגדלתם הייתה שוברת את
+     רווח השורות של הפסקה. */
+
+  /* ניווט עליון ואייקוני הכותרת — 39/42px, גבוליים */
+  header nav a{min-height:44px; display:inline-flex; align-items:center}
+  .head-ic{min-width:44px; min-height:44px}
+
+  /* ⚠️ טקסט 10px ברצועת היצרנים — קטן מדי לקריאה בנייד.
+     11.5 הוא המינימום שנשאר קריא בלי לשבור את הפריסה. */
+  .brand-strip a, .brand-strip span{font-size:11.5px}
+}
+
+
+/* אייקון קטגוריה בתפריט המוצרים — עיגול קטן לצד כל שורה.
+   ⚠️ אותו איור של כרטיס הקטגוריה בדף הבית, רק קטן ובעיגול: הלקוח
+   מזהה את אותו סמל בשני המקומות, וזה מה שנותן תחושת מלאות בלי
+   להוסיף ולו קובץ אחד. */
+.navcat-ic{
+  flex:none; width:26px; height:26px; border-radius:50%;
+  background:var(--blue-soft); display:grid; place-items:center;
+  margin-inline-end:9px;
+}
+.navcat-ic svg{width:16px; height:16px}
+.navcat-link:hover .navcat-ic{background:#DCE9FC}
+/* השורה כבר flex; מוודאים יישור אנכי נקי עם האייקון */
+.navcat-link{align-items:center}

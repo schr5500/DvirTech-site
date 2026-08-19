@@ -367,6 +367,17 @@ function shSubLabel(value){
    ⚠️ **החוזה של הפונקציה: אין מוצרים → null → השורה לא מוצגת.** כל ענף
    כאן חייב לשמור עליו. תת-קטגוריה ריקה בתפריט היא הבטחה שהאתר לא
    מקיים, וזה הרבה יותר גרוע מלא להציג אותה בכלל. */
+/* אייקון הקטגוריה לתפריט. ⚠️ משתמש באותו sprite שכבר טעון בכל דף
+   (DVT_CAT_ICON ב-sprite.js) ולכן **אפס בקשות רשת נוספות** ואפס קבצים
+   חדשים — האיור כבר בזיכרון. זו גם הסיבה שלא הורדנו לוגואים: אלה
+   הנכסים שלנו, בלי שאלת סימני מסחר.
+   מחזיר null כשאין התאמה, כדי שהתפריט יישאר טקסטואלי ולא יציג
+   אייקון ברירת מחדל שגוי. */
+function shIcon(key){
+  if(typeof DVT_CAT_ICON !== "object" || !DVT_CAT_ICON) return null;
+  return DVT_CAT_ICON[key] || null;
+}
+
 function shEntry(catalog, key){
   if(!catalog) return null;
 
@@ -383,7 +394,7 @@ function shEntry(catalog, key){
     const lab = SH_USE_LABELS[cat + ":" + use] || SH_USE_LABELS[use];
     return { href: `products.html?cat=${encodeURIComponent(cat)}&useCase=${encodeURIComponent(use)}`,
              label: lab ? shTr(lab[0], lab[1]) : use,
-             n: items.length };
+             n: items.length, icon: shIcon(cat) };
   }
 
   /* --- תת-סוג לפי subType: "sub:extras:cable" --- */
@@ -394,7 +405,7 @@ function shEntry(catalog, key){
     const items = shItems(catalog, cat).filter(it => String(it.subType || "") === sub);
     if(!items.length) return null;
     return { href: `products.html?cat=${encodeURIComponent(cat)}&subType=${encodeURIComponent(sub)}`,
-             label: shSubLabel(sub), n: items.length };
+             label: shSubLabel(sub), n: items.length, icon: shIcon(sub) || shIcon(cat) };
   }
 
   /* --- תת-קבוצה לפי חיפוש: "q:readyPc:מיני" ---
@@ -412,7 +423,7 @@ function shEntry(catalog, key){
     const lab = SH_QUERY_LABELS[key];
     return { href: `products.html?cat=${encodeURIComponent(cat)}&q=${encodeURIComponent(term)}`,
              label: lab ? shTr(lab[0], lab[1]) : term,
-             n: items.length };
+             n: items.length, icon: shIcon(cat) };
   }
 
   const n = (typeof dvtIsVirtualCat === "function" && dvtIsVirtualCat(key))
@@ -420,7 +431,7 @@ function shEntry(catalog, key){
     : shItems(catalog, key).length;
   if(!n) return null;
   return { href: `products.html?cat=${encodeURIComponent(key)}`,
-           label: dvtCatLabel(key, catalog[key]), n };
+           label: dvtCatLabel(key, catalog[key]), n, icon: shIcon(key) };
 }
 
 function buildCatalogMenu(catalog){
@@ -447,6 +458,7 @@ function buildCatalogMenu(catalog){
             : `<div class="navcat-h">${shEsc(shTr(g.title[0], g.title[1]))}</div>`}
           ${g.entries.map(e => `
             <a class="navcat-link" href="${e.href}">
+              ${e.icon ? `<span class="navcat-ic" aria-hidden="true"><svg><use href="#${e.icon}"/></svg></span>` : ""}
               <span>${shEsc(e.label)}</span>
               ${e.n !== null ? `<em>${e.n}</em>` : ""}
             </a>`).join("")}
