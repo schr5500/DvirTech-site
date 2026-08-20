@@ -359,6 +359,107 @@ function dvtCatLabel(cat, group){
    להתחרות בשם של מוצר זיכרון אמיתי. */
 const DVT_FIELD_SCORE = { name: 100, cat: 60, brand: 40, spec: 10 };
 
+/* ==================== לאיזו קטגוריה המונח *שייך* ====================
+   🔴 דביר: "כשאני מקליד DDR5 זה מקפיץ לי לוחות אם. זה לא הדבר הראשון
+   שצריך לקפוץ — ראם צריך לקפוץ ישר, זה הכי מתאים."
+
+   ⚠️ הניקוד לבדו לא יכול להכריע כאן, וזו הנקודה: "DDR5" מופיע בשם
+   של ערכת זיכרון **וגם** בשם של רוב לוחות האם המודרניים, שניהם
+   בשדה `name` שהוא הכבד ביותר. הציון יוצא זהה, והשובר-שוויון הוא
+   מחיר — ולכן לוח זול קפץ לפני זיכרון.
+
+   ההבדל האמיתי אינו בטקסט אלא במשמעות: עבור ערכת זיכרון DDR5 הוא
+   **מה שהמוצר הוא**; עבור לוח אם הוא תכונה אחת מיני עשרות. לכן
+   נדרשת מפה מפורשת, ולא ניסיון לגזור את זה מהתדירות — DDR5 מופיע
+   בשיעור גבוה בשתי הקטגוריות, וסטטיסטיקה לא תבחין ביניהן.
+
+   ⚠️ **הטיה ולא סינון.** קטגוריות המשך מקבלות בונוס קטן יותר לפי
+   סדר, וכל השאר עדיין מופיע — רק נמוך יותר. חיפוש "AM5" יביא
+   מעבדים ולוחות ואז גופי קירור, בדיוק כפי שדביר תיאר. */
+const DVT_TERM_HOME = [
+  // זיכרון — סוג הזיכרון הוא זהות המוצר; בלוח הוא תכונה
+  [/^ddr[345]$/i,                        ["ram", "mobo", "laptop"]],
+  [/^(?:cl\d{1,2}|\d{4,5}mhz)$/i,         ["ram"]],
+  // תושבות ופלטפורמות — המעבד והלוח, ואחריהם הקירור שמתברג לאותה תושבת
+  [/^(?:am[45]|lga\d{3,4}|str5|sp\d)$/i,  ["cpu", "mobo", "cooling"]],
+  [/^(?:socket|תושבת)$/i,                 ["cpu", "mobo", "cooling"]],
+  // אחסון
+  [/^(?:nvme|m\.?2|sata|ssd|hdd)$/i,      ["storage", "mobo"]],
+  [/^(?:tb|gb)$/i,                        ["storage", "ram"]],
+  // כרטיס מסך
+  [/^(?:rtx|gtx|radeon|geforce|vram)$/i,  ["gpu", "readyPc", "laptop"]],
+  // מארז ותקן לוח
+  [/^(?:atx|matx|m-atx|itx|mini-itx|e-atx)$/i, ["case", "mobo", "psu"]],
+  // ספק כוח
+  [/^(?:80\+|gold|bronze|platinum|modular|מודולרי)$/i, ["psu"]],
+  [/^\d{3,4}w$/i,                         ["psu"]],
+  // קירור
+  [/^(?:aio|רדיאטור|watercooling|נוזלי)$/i, ["cooling"]],
+  [/^\d{2,3}mm$/i,                        ["caseFans", "cooling", "case"]],
+  // רשת
+  [/^(?:wifi\d?|bluetooth|בלוטות)$/i,     ["wifi", "mobo"]]
+];
+
+/* בונוס לפי מיקום הקטגוריה ברשימת ההעדפה. ראשונה מקבלת את המלוא. */
+function dvtTermHomeBonus(cat, tokens){
+  let best = 0;
+  for(const tok of tokens){
+    for(const [re, cats] of DVT_TERM_HOME){
+      if(!re.test(tok)) continue;
+      const i = cats.indexOf(cat);
+      if(i > -1) best = Math.max(best, 120 - i * 45);
+    }
+  }
+  return best;
+}
+
+/* ==================== שם מוצר לתצוגה ברשימה ====================
+   🔴 שמות הקטלוג הם שמות הספק, והם דוחסים לתוך השם גם את הקטגוריה
+   בעברית וגם את כל המפרט. דוגמה אמיתית מהקטלוג:
+
+     "דיסק פנימי Samsung 9100 PRO 1TB Gen5 M.2 NVME 2.0 14700 read 13300 write"
+
+   בעמודת הסיכום (רוחב 295px) זה נפרס על 23 שורות. דביר: "את הלקוח
+   כרגע לא מעניין הפירוט הטכני, רק הדברים הקריטיים".
+
+   ⚠️ **תצוגה בלבד.** השם המלא נשאר בגיליון, נשאר ב-title לריחוף,
+   ונשאר במלואו בדף המוצר — שם הפירוט הטכני דווקא שייך.
+
+   ⚠️ **שמרני בכוונה.** נחתכות רק סיומות שהן חד-משמעית מפרט מדיד:
+   מהירויות קריאה/כתיבה, TDP בוואטים, Tray / No Fan / No GPU / Bulk,
+   ו-"up to X GHz". **לא** נחתך דבר שעשוי להיות חלק מזהות הדגם
+   (מספר דגם, קיבולת, "OC", "WIFI7") — שני דגמים עלולים להיבדל בדיוק
+   שם. ראה GPU-2035, שכל ההבדל בינו לבין דגם אחר הוא המילה "OC".
+
+   ⚠️ רצפת ביטחון: אם החיתוך מוריד את השם מתחת ל-18 תווים מוחזר
+   המקור. עדיף שם ארוך מדי מ-"Samsung" בלי שום זיהוי. */
+var DVT_NAME_TRIM = [
+  /\s*\d+\s*read\s*\d+\s*write\s*$/i,
+  /\s*up\s+to\s+[\d.]+\s*(?:ghz|mb\/s|gb\/s)\s*$/i,
+  /\s*\d+\s*w\s*tdp\s*$/i,
+  /\s*no\s+fans?\s*$/i,
+  /\s*no\s+gpu\s*$/i,
+  /\s*tray\s*$/i,
+  /\s*bulk\s*$/i,
+  /\s*(?:\d+\s*x\s*)?(?:dp|hdmi)\s*$/i,
+  /\s*\d+\s*\/\s*\d+\s*rw\s*$/i,          // "14700/13300 RW"
+  /\s*[\d.]+\s*ghz\s*$/i                    // תדר בסוף שם, בלי "up to"
+];
+
+function dvtDisplayName(name){
+  var base = (typeof dvtShortName === "function") ? dvtShortName(name) : String(name || "");
+  var out = base;
+  /* כמה סבבים: שם יכול לשאת שתי סיומות מפרט ברצף
+     ("... No GPU 4.7 Ghz No Fan 65W TDP"). */
+  for(var pass = 0; pass < 5; pass++){
+    var before = out;
+    for(var i = 0; i < DVT_NAME_TRIM.length; i++) out = out.replace(DVT_NAME_TRIM[i], "");
+    out = out.replace(/[\s,\u00b7|-]+$/, "");
+    if(out === before) break;
+  }
+  return out.length >= 18 ? out : base;
+}
+
 /* ==================== תמונה קטנה למוצר ====================
    מחזיר HTML של תמונת מוצר לשורת רשימה (חלונית החיפוש, ובעתיד כל
    מקום שצריך תצוגה מוקטנת).
@@ -381,7 +482,7 @@ function dvtThumbHtml(it, cat){
   return `<span class="ssr-thumb">${ph}${img}</span>`;
 }
 
-function dvtItemScore(item, catLabelText, term){
+function dvtItemScore(item, catLabelText, term, catKey){
   const tokens = String(term || "").toLowerCase().trim().split(/\s+/).filter(Boolean);
   if(!tokens.length) return 0;
 
@@ -403,6 +504,9 @@ function dvtItemScore(item, catLabelText, term){
     if(!best) return 0;
     total += best;
   }
+  /* ⚠️ הבונוס נוסף פעם אחת לפריט ולא לכל מילה, אחרת חיפוש של שתי
+     מילים מאותה קטגוריה היה מכפיל אותו ומעוות את הדירוג. */
+  if(catKey) total += dvtTermHomeBonus(catKey, tokens);
   return total;
 }
 

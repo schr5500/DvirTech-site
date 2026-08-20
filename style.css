@@ -1583,3 +1583,14 @@ footer::after{ content:""; display:block; height: var(--fab-safe) }
   .cart-fab{ bottom:18px; inset-inline-end:14px }
   .wa-fab{ bottom:76px; inset-inline-end:14px }
 }
+
+/* שירותים בתיאום מראש — שורות מידע בקופה, בלי תיבת סימון ובלי מחיר.
+   ⚠️ מכוון להיראות שונה משירות שאפשר לבחור, כדי שלא ייווצר רושם
+   שאפשר להוסיף אותם להזמנה ולשלם עליהם עכשיו. */
+.svc-onreq{margin-top:12px;padding:11px 12px;border:1px dashed var(--line,#E2EAF2);
+  border-radius:12px;background:var(--surface-2,#F7FAFD)}
+.svc-onreq-h{font-size:11.5px;font-weight:800;color:var(--ink-soft,#5F7590);margin-bottom:7px}
+.svc-onreq-row{display:flex;align-items:center;gap:7px;font-size:12.5px;color:var(--ink,#0E2A47);
+  padding:4px 0}
+.svc-onreq-row::before{content:"•";color:var(--ink-soft,#5F7590)}
+.svc-onreq-link{display:inline-block;margin-top:7px;font-size:12px;font-weight:800;color:var(--blue,#1B6FE0)}

@@ -453,14 +453,28 @@ function shippingAddressText(){
 const DVT_SERVICES = [
   { key:"win11-license",     he:"התקנת Windows 11 + רישיון",         en:"Windows 11 install + license",       price:300, group:"os", requiresPc:true },
   { key:"win11-own-license", he:"התקנת Windows (ללא רישיון)",        en:"Windows install (license not included)", price:200, group:"os", requiresPc:true },
-  { key:"software-install",  he:"התקנת תוכנות",                      en:"Software installation",              price:80 },
+  /* 🔴 היה בלי `requiresPc`, ולכן הוצע גם כשבעגלה יש רק מארז — דביר
+     ראה את זה בפועל וסימן אותו. אי אפשר להתקין תוכנות על מארז ריק.
+     ⚠️ הסינון עצמו כבר היה קיים ועבד (servicesForCart), פשוט לא סומן
+     על השירות הזה; שני שירותי ה-Windows שלידו כן סומנו. */
+  { key:"software-install",  he:"התקנת תוכנות",                      en:"Software installation",              price:80,  requiresPc:true },
   /* ⚠️ הניסוח חייב לומר **מאיפה** מגיעים הנתונים. "העברת נתונים"
      לבד יצר ציפייה שדביר נוסע ללקוח או מחלץ נתונים ממחשב שאין לו —
      ואין לו. בפועל השירות אפשרי רק כשהדיסק הישן מגיע פיזית אליו,
      ולכן זה כתוב בשם השירות עצמו ולא באותיות קטנות. */
-  { key:"data-transfer",     he:"העברת נתונים מדיסק שתביא איתך",     en:"Data transfer from a drive you send with the order", price:200 },
-  { key:"clean-thermal",     he:"ניקוי פנימי + משחה תרמית",          en:"Internal cleaning + thermal paste",  price:150 },
+  /* ⚠️ requiresPc — צריך מחשב שאליו מעבירים. */
+  { key:"data-transfer",     he:"העברת נתונים מדיסק שתביא איתך",     en:"Data transfer from a drive you send with the order", price:200, requiresPc:true },
 ];
+
+/* 🔴 "ניקוי פנימי + משחה תרמית" הוסר מהתשלום המקוון (20.08). דביר:
+   "כשלקוח מרכיב מחשב חדש אין צורך אף פעם לניקוי + משחה — זה חדש
+   מהניילונים."
+
+   ⚠️ והעניין רחב יותר מהמקרה הזה: **כל מה שנמכר בקופה המקוונת הוא
+   מוצר חדש**, ולכן שירות שכל כולו מכוון למחשב קיים ומלוכלך אינו יכול
+   להיות רלוונטי כאן לעולם. הוא גם דורש שהמחשב יגיע פיזית — כלומר
+   תיאום — ולכן מקומו באותה רשימה עם ביקור הבית והתמיכה מרחוק.
+   ⚠️ השירות עצמו לא בוטל: הוא ממשיך להיות מוצע דרך support.html. */
 
 /* שירותים שמוצגים בדף התשלום **לידיעה בלבד** — בלי תיבת סימון ובלי
    מחיר שנכנס לסכום.
@@ -469,6 +483,7 @@ const DVT_SERVICES = [
    כשורה שאי אפשר לבחור מונעת גם את השאלה "אז אתם לא עושים את זה?"
    וגם את ההתחייבות. הפנייה עצמה עוברת ל-support.html. */
 const DVT_SERVICES_ON_REQUEST = [
+  { he:"ניקוי פנימי + משחה תרמית",     en:"Internal cleaning + thermal paste" },
   { he:"תמיכה מרחוק",                  en:"Remote support" },
   { he:"התקנת מחשב בעמדת הלקוח",       en:"On-site setup at your desk" },
   { he:"ביקור בית ואבחון תקלה",        en:"Home visit & fault diagnosis" }
@@ -614,6 +629,28 @@ function renderServiceOptions(){
         : (s.noteHe ? `<span class="svc-note">${tr(s.noteHe, s.noteEn)}</span>` : "")}
     </label>`;
   }).join("");
+
+  /* 🔴 `DVT_SERVICES_ON_REQUEST` הוגדר בקובץ הזה עם הערה מפורטת
+     שמסבירה שהוא "מוצג בדף התשלום לידיעה בלבד" — ו**מעולם לא רונדר
+     בשום מקום**. חיפוש בקובץ מחזיר מופע אחד: ההגדרה עצמה.
+
+     ⚠️ זה כבר הדפוס הרביעי מאותו סוג בפרויקט (כפתור רשימת המשאלות,
+     החיפוש בבונה, site-search.js בתשעה דפים, וזה) — תוכן או פקד
+     שהוגדר, תועד, ואף אחד לא חיבר אותו. שווה סריקה יזומה.
+
+     ⚠️ הם מוצגים כשורות טקסט בלי תיבת סימון ובלי מחיר, בכוונה: כולם
+     כרוכים בנסיעה או בתיאום, ואי אפשר להתחייב עליהם מראש בקופה. */
+  const req = document.getElementById("servicesOnRequest");
+  if(req){
+    req.innerHTML =
+      `<div class="svc-onreq-h">${tr("בתיאום מראש — פנייה דרך העמוד שירות ותמיכה",
+                                     "By arrangement — request via the Support page")}</div>` +
+      DVT_SERVICES_ON_REQUEST.map(function(o){
+        return `<div class="svc-onreq-row"><span>${tr(o.he, o.en)}</span></div>`;
+      }).join("") +
+      `<a class="svc-onreq-link" href="support.html">${tr("לעמוד שירות ותמיכה ←",
+                                                          "Go to Support →")}</a>`;
+  }
 
   renderServicesCounter();
 }

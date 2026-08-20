@@ -114,19 +114,44 @@
 
      ⚠️ `text-align:start` ולא `right` — בשם שמתחיל באנגלית ה-dir הוא
      ltr, ו-`right` היה דוחף אותו לצד הלא נכון. */
-  .bld-sum-name{display:block;font-size:14px;font-weight:600;line-height:1.35;
+  .bld-sum-name{display:-webkit-box;-webkit-line-clamp:2;-webkit-box-orient:vertical;
+    overflow:hidden;font-size:13px;font-weight:600;line-height:1.32;
     white-space:normal;overflow-wrap:break-word;text-align:start}
   /* 🔴 גוש הטקסט קיבל `flex:1;min-width:0` בלבד, וכשהשורה כללה גם בורר
      כמות (− 1 +) הוא נדחס ל-40px בעמודה של 295px — שם של 60 תווים
      נפרס ל-14 שורות. `min-width` מבטיח לו רוחב מינימלי, ו-flex-wrap
      על השורה נותן לכמות ולמחיר לרדת שורה במקום למעוך אותו. */
-  .bld-sum-main{flex:1 1 auto; min-width:58%}
-  .bld-sum-row{flex-wrap:wrap; row-gap:6px}
+  /* 🔴 סבב שני. הפתרון הקודם (flex-wrap + min-width:58%) אמנם הציג את
+     השם המלא, אבל דחף את המחיר ואת בורר הכמות לשורה נפרדת: יצאו
+     ~4 שורות לכל מוצר, והמחיר — הנתון שהלקוח הכי צריך לראות תמיד —
+     ירד מהעין. דביר: "התמונה והשם באותה שורה, ~2 שורות למוצר,
+     והמחיר יחזור לאיפה שהיה".
+
+     ⚠️ שלושה שינויים שעובדים יחד, ואף אחד מהם לא מספיק לבד:
+       1. בלי `flex-wrap` — הכל חוזר לשורה אחת, המחיר תמיד נראה.
+       2. השם מוגבל ל-2 שורות (`line-clamp`) — תקרה קשיחה לגובה
+          השורה, במקום להסתמך על אורך השם.
+       3. השם מוצג **מקוצר** (dvtShortName) — הסרת קידומת הקטגוריה
+          העברית מורידה ~12 תווים, וזה מה שמאפשר לשם המלא להיכנס
+          בשתי שורות במקום להיחתך. בלי הקיצור, ה-clamp היה חוזר
+          לחתוך בדיוק כמו הגרסה הראשונה.
+     התמונה קטנה מעט (40→34) והגופן ל-13px — שניהם מפנים רוחב לשם. */
+  .bld-sum-main{flex:1 1 0%; min-width:0}
+  /* ⚠️ העמודה 246px בלבד. עם תמונה + בורר כמות + מחיר באותה שורה,
+     לשם נשארו 66px ו-53 תווים נחתכו. הבורר יורד לשורה משלו **רק
+     בשורות שיש בהן כמות** (flex-basis:100%), וכך השם מקבל ~140px
+     בכל השורות. המחיר נשאר בשורה הראשונה עם התמונה, כדרישת דביר. */
+  .bld-sum-price{order:1; flex:none}
+  .bld-sum-qty{order:2; flex:0 0 100%; justify-content:flex-end; margin-top:3px}
+  /* ⚠️ רצפת 96px. בלעדיה, בשורות שיש בהן בורר כמות ה-flex מעך את השם
+     ל-20px ו-53 תווים נפרסו על 23 שורות. 275px תוכן פחות תמונה 34,
+     רווחים 30, בורר ~56 ומחיר ~45 = בדיוק 110 שנותרים לשם. */
+  .bld-sum-name{-webkit-line-clamp:3}
   /* ⚠️ align-items:flex-start ולא center. ברגע שהשם גולש לשתיים-שלוש
      שורות, מרכוז אנכי מזיז את התמונה ואת המחיר לאמצע גוש הטקסט
      והשורות מפסיקות להיראות מיושרות זו לזו. */
-  .bld-sum-row{display:flex;align-items:flex-start;gap:12px;padding:11px 10px;border-radius:13px;transition:background .15s}
-  .bld-sum-thumb{width:40px;height:40px;border-radius:10px;flex:none;margin-top:1px}
+  .bld-sum-row{display:flex;flex-wrap:wrap;align-items:flex-start;gap:8px;padding:11px 7px;border-radius:13px;transition:background .15s}
+  .bld-sum-thumb{width:34px;height:34px;border-radius:9px;flex:none;margin-top:1px}
   .bld-sum-total{margin-top:18px;background:#F7FAFD;border:1px solid #EDF2F8;border-radius:16px;padding:17px 17px 16px;display:flex;align-items:flex-end;justify-content:space-between;gap:8px}
   .bld-sum-total-label{font-size:13px;color:#5F7590;line-height:1.4}
   .bld-sum-price{font-family:'Rubik',sans-serif;font-size:34px;font-weight:800;line-height:1;color:#0B2C4D;letter-spacing:-.5px}
@@ -418,17 +443,19 @@
           <li class="bld-sum-row" style-hover="background:#F7FAFD">
             <span role="img" class="bld-sum-thumb" style="background-color:{{ row.thumbBg }};background-image:{{ row.imgUrl }};background-size:{{ row.imgSize }};background-repeat:no-repeat;background-position:center;opacity:{{ row.imgOp }}"></span>
             <span class="bld-sum-main">
-              <span dir="auto" class="bld-sum-name" style="color:{{ row.nameColor }};direction:{{ row.dir }}">{{ row.name }}</span>
-              <span style="display:block;font-size:11.5px;color:#5F7590;letter-spacing:.2px;margin-top:2px">{{ row.cat }}</span>
+              <span dir="auto" class="bld-sum-name" title="{{ row.fullName }}" style="color:{{ row.nameColor }};direction:{{ row.dir }}">{{ row.name }}</span>
+              <sc-if value="{{ row.showCat }}" hint-placeholder-val="{{ false }}">
+                <span style="display:block;font-size:11.5px;color:#5F7590;letter-spacing:.2px;margin-top:2px">{{ row.cat }}</span>
+              </sc-if>
             </span>
             <sc-if value="{{ row.hasQty }}" hint-placeholder-val="{{ false }}">
-              <span style="display:inline-flex;align-items:center;gap:5px;background:#F7FAFD;border:1px solid #E2EAF2;border-radius:999px;padding:2px 8px;flex:none">
-                <button onClick="{{ row.dec }}" style="border:none;background:none;width:16px;height:16px;color:#1B6FE0;font-weight:800;cursor:pointer;font-size:13px;line-height:1;padding:0">−</button>
-                <span style="font-size:11.5px;font-weight:700;min-width:9px;text-align:center">{{ row.qty }}</span>
-                <button onClick="{{ row.inc }}" style="border:none;background:none;width:16px;height:16px;color:#1B6FE0;font-weight:800;cursor:pointer;font-size:13px;line-height:1;padding:0">+</button>
+              <span class="bld-sum-qty" style="display:inline-flex;align-items:center;gap:3px;background:#F7FAFD;border:1px solid #E2EAF2;border-radius:999px;padding:2px 7px">
+                <button onClick="{{ row.dec }}" title="{{ row.capHint }}" style="border:none;background:none;width:16px;height:16px;color:{{ row.decColor }};font-weight:800;cursor:pointer;font-size:13px;line-height:1;padding:0">−</button>
+                <span style="font-size:11.5px;font-weight:700;min-width:12px;text-align:center">{{ row.qtyLabel }}</span>
+                <button onClick="{{ row.inc }}" title="{{ row.capHint }}" style="border:none;background:none;width:16px;height:16px;color:{{ row.incColor }};font-weight:800;cursor:pointer;font-size:13px;line-height:1;padding:0">+</button>
               </span>
             </sc-if>
-            <span style="font-family:'Rubik',sans-serif;font-size:13.5px;font-weight:700;color:{{ row.priceColor }};flex:none;white-space:nowrap">{{ row.price }}</span>
+            <span class="bld-sum-price" style="font-family:'Rubik',sans-serif;font-size:13.5px;font-weight:700;color:{{ row.priceColor }};white-space:nowrap">{{ row.price }}</span>
           </li>
         </sc-for>
       </ul>
@@ -770,7 +797,11 @@ const OPT_LEVELS = {
      ממה שהיא מתארת מלמדת את הלקוח להתעלם גם מהאמיתיות. */
   warn: { badge:"שווה לשים לב", icon:"⚠️", fg:"#8A5A00", bg:"#FFF1DB", bd:"#F0C989", accent:"#F0A32B" },
   info: { badge:"לידיעתך",      icon:"ℹ️", fg:"#91690C", bg:"#FFFBEC", bd:"#F5E3B0", accent:"#F7CE6B" },
-  fit:  { badge:"מומלץ",       icon:"✓",  fg:"#0C7A62", bg:"#EAFBF6", bd:"#B7EFE5", accent:"#2FC4B0" }
+  /* 🔴 היה "מומלץ" — ודביר צדק שזה מטעה. התג הזה אינו אומר שהמוצר
+     טוב או שכדאי לקנות אותו; הוא אומר **רק** שהוא מתחבר למה שכבר
+     נבחר. לקוח שקורא "מומלץ" על כרטיס בינוני עלול לבחור אותו בגלל
+     המילה. תווית חייבת לומר בדיוק את מה שנבדק, לא יותר. */
+  fit:  { badge:"תואם להרכב", icon:"✓",  fg:"#0C7A62", bg:"#EAFBF6", bd:"#B7EFE5", accent:"#2FC4B0" }
 };
 
 /* ⚠️ **שינוי מדיניות מכוון.** קודם פריט שאינו מתאים פיזית להרכבה נשאר
@@ -1204,12 +1235,29 @@ class Component extends DCLogic {
       chosenCount: chosen.length,
       summary: CATS.map(c => {
         const it = this.item(c.key);
-        const hasQty = ["cpu","ram","storage"].includes(c.key) && !!it;
+        /* 🔴 היה `["cpu","ram","storage"].includes(...)` — רשימה קשיחה,
+           ולכן **אי אפשר היה לבחור שני מאווררים או שני כרטיסי מסך**
+           גם כשהלוח והמארז תומכים. עכשיו הבורר מופיע בכל קטגוריה
+           שהתקרה שלה גדולה מ-1, והתקרה כבר נגזרת מהלוח/הספק/המארז
+           ב-dvtMaxQty. קטגוריה חדשה תקבל את זה בלי לגעת כאן. */
+        const cap = (typeof dvtMaxQty === "function") ? dvtMaxQty(c.key, this.selMap()) : 1;
+        const hasQty = !!it && cap > 1;
         const q = this.qtyOf(c.key);
+        /* ⚠️ שם מקוצר לתצוגה בלבד — הקטלוג לא נגוע, ו-`title` נושא את
+           השם המלא לריחוף. אותה פונקציה שמשמשת בהודעות התאימות. */
+        const shown = it
+          ? ((typeof dvtDisplayName === "function") ? dvtDisplayName(it.name)
+             : (typeof dvtShortName === "function") ? dvtShortName(it.name) : it.name)
+          : "לא נבחר";
         return {
           cat: c.label,
-          name: it ? it.name : "לא נבחר",
-          dir: this.dirOf(it ? it.name : "לא נבחר"),
+          name: shown,
+          fullName: it ? it.name : "",
+          /* ⚠️ שם הקטגוריה מוצג רק בשורה ריקה, שם הוא התווית היחידה.
+             כשיש מוצר הוא מיותר — התמונה והסדר הקבוע של 11 השורות
+             כבר אומרים אותו — והוא עלה שורה שלמה בגובה לכל פריט. */
+          showCat: !it,
+          dir: this.dirOf(shown),
           nameColor: it ? "#0E2A47" : "#B3C1D1",
           price: it ? (it.price === 0 ? "כלול" : this.money(it.price * q) + " ₪") : "—",
           priceColor: it ? (it.price === 0 ? "#0E9C8A" : "#1B6FE0") : "#C4D0DD",
@@ -1217,7 +1265,18 @@ class Component extends DCLogic {
           imgSize: this.renderOf(c.key, it) ? "82%" : "cover",
           imgOp: it ? "1" : "0.25",
           thumbBg: it ? "#F3F8FF" : "#F5F8FC",
-          hasQty, qty: q,
+          hasQty, qty: q, qtyMax: cap, atMax: q >= cap,
+          /* ⚠️ קומפקטי: המספר בלבד, והתקרה מוצגת רק כשמגיעים אליה — שם
+             היא באמת מידע. העמודה 246px, וכל 20px משנים שורה בשם. */
+          qtyLabel: q >= cap ? (q + "/" + cap) : String(q),
+          /* ⚠️ כשמגיעים לתקרה הכפתור מקבל צבע דהוי **וגם** title עם
+             הסיבה. קודם הוא פשוט לא הגיב, וזה נקרא כתקלה. */
+          incColor: q >= cap ? "#C4D0DD" : "#1B6FE0",
+          decColor: q <= 1   ? "#C4D0DD" : "#1B6FE0",
+          capHint: q >= cap
+            ? ((typeof dvtMaxQtyReason === "function" && dvtMaxQtyReason(c.key, this.selMap()))
+               || ("המקסימום להרכבה הזו: " + cap))
+            : ("אפשר עד " + cap),
           inc: () => this.bump(c.key, 1),
           dec: () => this.bump(c.key, -1)
         };
