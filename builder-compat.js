@@ -496,6 +496,54 @@ function dvtVhpwrAdapter8pin(gpu){
    3. תקרות כמות — כמה יחידות מותר מכל קטגוריה
    ---------------------------------------------------------------
    זו התשובה ל"אפשר להגיע ל-4 מעבדים": התקרה נגזרת מהחומרה שנבחרה. */
+/* ==================== למה זו התקרה ====================
+   ⚠️ `dvtMaxQty` יודע **מה** התקרה אבל לא אומר **למה**, והלקוח שלוחץ
+   "+" ושום דבר לא קורה מסיק שהכפתור שבור. כאן נגזר המשפט שמסביר,
+   מאותם נתונים בדיוק — כדי שלא ייווצר מצב שהתקרה אומרת 2 וההסבר
+   מדבר על 4. */
+function dvtMaxQtyReason(cat, sel){
+  sel = sel || {};
+  const mobo = sel.mobo, cs = sel.case;
+  const nm = it => (typeof dvtShortName === "function") ? dvtShortName(it.name) : it.name;
+  switch(cat){
+    case "cpu": {
+      const n = dvtNumOf(mobo, "cpuSockets");
+      if(!mobo) return "בחר לוח אם כדי לדעת בכמה מעבדים הוא תומך.";
+      return `${nm(mobo)} הוא לוח עם ${n || 1} שקע מעבד.`;
+    }
+    case "ram": {
+      const slots = dvtNumOf(mobo, "ramSlots");
+      const perKit = Math.max(1, dvtNumOf(sel.ram, "modules") || 1);
+      if(!mobo || slots === null) return null;
+      return perKit > 1
+        ? `ל-${nm(mobo)} יש ${slots} חריצי זיכרון, והערכה שנבחרה תופסת ${perKit} כל אחת.`
+        : `ל-${nm(mobo)} יש ${slots} חריצי זיכרון.`;
+    }
+    case "storage": {
+      const m2 = dvtNumOf(mobo, "m2Slots"), sata = dvtNumOf(mobo, "sataPorts");
+      if(!mobo || (m2 === null && sata === null)) return null;
+      const parts = [];
+      if(m2)   parts.push(`${m2} חריצי M.2`);
+      if(sata) parts.push(`${sata} יציאות SATA`);
+      return `ל-${nm(mobo)} יש ${parts.join(" ו-")}.`;
+    }
+    case "gpu": {
+      const slots = dvtNumOf(mobo, "pcieX16Slots");
+      if(!mobo || slots === null) return null;
+      if(slots <= 1) return `ל-${nm(mobo)} חריץ PCIe x16 אחד — מקום לכרטיס מסך אחד.`;
+      /* ⚠️ דרישת דביר: להסביר שהחריץ השני כמעט תמיד צר יותר. */
+      return `ל-${nm(mobo)} ${slots} חריצי PCIe x16. ⚠️ ברוב הלוחות הצרכניים ` +
+             `רק הראשון רץ ב-x16 מלא והשאר ב-x8 או פחות — כרטיס שני יעבוד, בפס צר יותר.`;
+    }
+    case "caseFans": {
+      const mounts = dvtNumOf(cs, "fanMounts");
+      if(!cs || mounts === null) return null;
+      return `ל-${nm(cs)} ${mounts} עמדות מאוורר.`;
+    }
+    default: return null;
+  }
+}
+
 function dvtMaxQty(cat, sel){
   sel = sel || {};
   const mobo = sel.mobo, psu = sel.psu, gpu = sel.gpu, cs = sel.case, ram = sel.ram;

@@ -32,7 +32,12 @@
     more:     tr("למה DvirTech?", "Why DvirTech?"),
     moreHref: "why-dvirtech.html"
   };
-  var LIFE_MS = 9000;
+  /* 🔴 היה 9000. תשע שניות זה בקושי זמן לקרוא כותרת + שתי שורות,
+     ובוודאי לא זמן להחליט ללחוץ על קישור משני. דביר ביקש ~30 שניות
+     — "מספיק כדי שיקלטו את זה".
+     ⚠️ הבאנר יושב בפינה העליונה ולא חוסם דבר (pointer-events:none
+     על העוטף), ולכן הארכה כאן אינה פוגעת במי שלא מתעניין. */
+  var LIFE_MS = 30000;
 
   var css =
     /* פינה עליונה, לא חוסם. pointer-events:none על העוטף, auto על הכרטיס */
@@ -52,8 +57,15 @@
     ".dvt-toast-cta{display:inline-flex;align-items:center;gap:6px;background:var(--grad,linear-gradient(135deg,#1B6FE0,#0E4FA8));" +
       "color:#fff;text-decoration:none;font-weight:800;font-size:13.5px;padding:9px 16px;border-radius:10px}" +
     ".dvt-toast-cta:hover{filter:brightness(1.06)}" +
-    ".dvt-toast-more{color:var(--ink-soft,#5F7590);text-decoration:none;font-weight:700;font-size:12.5px}" +
-    ".dvt-toast-more:hover{color:var(--blue,#1B6FE0);text-decoration:underline}" +
+    /* 🔴 "למה DvirTech?" היה טקסט אפור (--ink-soft) ליד כפתור בגרדיאנט —
+       כלומר נראה כמו הערת שוליים. זה הדף שמסביר למה לקנות דווקא כאן,
+       והוא ראוי לכפתור אמיתי. עכשיו כפתור-מתאר (outline): נוכח לעין,
+       ועדיין משני ברור לעומת ה-CTA הראשי ולא מתחרה בו. */
+    ".dvt-toast-more{display:inline-flex;align-items:center;gap:5px;color:var(--blue,#1B6FE0);" +
+      "text-decoration:none;font-weight:800;font-size:12.5px;border:1.5px solid var(--blue-soft,#C9DEF8);" +
+      "background:#fff;border-radius:11px;padding:9px 13px;transition:.16s;white-space:nowrap}" +
+    ".dvt-toast-more:hover{background:var(--blue-soft,#EAF2FE);border-color:var(--blue,#1B6FE0);" +
+      "transform:translateY(-1px)}" +
     ".dvt-toast-x{position:absolute;inset-inline-end:8px;top:7px;width:26px;height:26px;border:none;background:transparent;" +
       "color:var(--ink-soft,#5F7590);font-size:19px;line-height:1;cursor:pointer;border-radius:7px}" +
     ".dvt-toast-x:hover{background:var(--surface-2,#EDF2F8);color:var(--ink,#0E2A47)}" +
@@ -63,7 +75,12 @@
     "[dir=ltr] .dvt-toast-fill{transform-origin:left}" +
     ".dvt-toast-card:hover .dvt-toast-fill{animation-play-state:paused}" +
     "@keyframes dvtToastDrain{to{transform:scaleX(0)}}" +
-    "@media(prefers-reduced-motion:reduce){.dvt-toast-fill{animation-duration:14000ms}.dvt-toast-card{transition:none}}";
+    "@media(prefers-reduced-motion:reduce){.dvt-toast-fill{animation-duration:" + LIFE_MS + "ms}"
+    /* 🔴 כאן היה 14000ms קבוע. סיום האנימציה הוא מה שסוגר את הטוסט
+       (animationend -> close), ולכן משתמש עם prefers-reduced-motion
+       קיבל 14 שניות בלבד — בלי קשר ל-LIFE_MS. הגדרת נגישות אינה
+       אמורה לקצר תוכן, רק להרגיע תנועה. */
+      ".dvt-toast-card{transition:none}}";
 
   var style = document.createElement("style");
   style.textContent = css;
@@ -103,4 +120,21 @@
   var fill = wrap.querySelector(".dvt-toast-fill");
   if (fill) fill.addEventListener("animationend", close);
   timer = setTimeout(close, LIFE_MS + 1500);
+
+  /* ⚠️ dvtToastHold — מי שמרחף מעל הכרטיס קורא אותו, ולסגור לו אותו
+     באמצע זה בדיוק ההפך ממה שהבאנר נועד לעשות. הריחוף עוצר גם את
+     הטיימר וגם את פס ההתקדמות; ביציאה ניתנות עוד 8 שניות ולא 30,
+     כי הוא כבר קרא. `focusin` נכלל כדי שגם ניווט במקלדת לא ייקטע. */
+  function dvtToastHold(){
+    if (timer) { clearTimeout(timer); timer = null; }
+    if (fill) fill.style.animationPlayState = "paused";
+  }
+  function dvtToastResume(){
+    if (!wrap.parentNode || timer) return;
+    if (fill) fill.style.animationPlayState = "running";
+    timer = setTimeout(close, 8000);
+  }
+  wrap.addEventListener("mouseenter", dvtToastHold);
+  wrap.addEventListener("focusin",    dvtToastHold);
+  wrap.addEventListener("mouseleave", dvtToastResume);
 })();

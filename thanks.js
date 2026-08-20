@@ -99,10 +99,13 @@ function clearCart(){
 
 function thHeadCopy(){
   switch(TH.state){
+    /* ⚠️ הנוסח נכתב לפי בקשת דביר (20.08): לומר במפורש שהקבלה נשלחה
+       למייל, כי SUMIT שולחים אותה אוטומטית והלקוח לא יודע לחפש אותה.
+       ⚠️ "הקבלה" ולא "חשבונית" — עוסק פטור אינו מוציא חשבונית מס. */
     case "confirmed": return {
-      title: tr("התשלום אושר. תודה!", "Payment confirmed. Thank you!"),
-      sub:   tr("אימתנו את התשלום מול חברת הסליקה וההזמנה נקלטה. מכאן זה עליי.",
-                "We verified the payment with the provider and your order is in. I will take it from here.")
+      title: tr("ההזמנה התקבלה בהצלחה! 🎉", "Your order is confirmed! 🎉"),
+      sub:   tr("התשלום אומת מול חברת הסליקה. הקבלה ופרטי ההזמנה נשלחו לכתובת המייל שהזנת — מכאן זה עליי.",
+                "The payment was verified with the provider. The receipt and order details were sent to the email you entered — I will take it from here.")
     };
     case "pending": return {
       title: tr("עוד לא הצלחנו לאמת את התשלום", "We could not confirm the payment yet"),

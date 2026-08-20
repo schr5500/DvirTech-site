@@ -378,6 +378,12 @@ function shIcon(key){
   return DVT_CAT_ICON[key] || null;
 }
 
+/* תצלום אמיתי לקטגוריה, כשיש. ⚠️ מוחזר בנפרד מהאיור ולא במקומו,
+   כדי שהרינדור יוכל להעדיף תצלום ולהישאר עם איור כשאין. */
+function shPhoto(key){
+  return (typeof dvtCatPhoto === "function") ? dvtCatPhoto(key) : null;
+}
+
 function shEntry(catalog, key){
   if(!catalog) return null;
 
@@ -394,7 +400,7 @@ function shEntry(catalog, key){
     const lab = SH_USE_LABELS[cat + ":" + use] || SH_USE_LABELS[use];
     return { href: `products.html?cat=${encodeURIComponent(cat)}&useCase=${encodeURIComponent(use)}`,
              label: lab ? shTr(lab[0], lab[1]) : use,
-             n: items.length, icon: shIcon(cat) };
+             n: items.length, icon: shIcon(cat), photo: shPhoto(cat) };
   }
 
   /* --- תת-סוג לפי subType: "sub:extras:cable" --- */
@@ -405,7 +411,7 @@ function shEntry(catalog, key){
     const items = shItems(catalog, cat).filter(it => String(it.subType || "") === sub);
     if(!items.length) return null;
     return { href: `products.html?cat=${encodeURIComponent(cat)}&subType=${encodeURIComponent(sub)}`,
-             label: shSubLabel(sub), n: items.length, icon: shIcon(sub) || shIcon(cat) };
+             label: shSubLabel(sub), n: items.length, icon: shIcon(sub) || shIcon(cat), photo: shPhoto(sub) || shPhoto(cat) };
   }
 
   /* --- תת-קבוצה לפי חיפוש: "q:readyPc:מיני" ---
@@ -423,7 +429,7 @@ function shEntry(catalog, key){
     const lab = SH_QUERY_LABELS[key];
     return { href: `products.html?cat=${encodeURIComponent(cat)}&q=${encodeURIComponent(term)}`,
              label: lab ? shTr(lab[0], lab[1]) : term,
-             n: items.length, icon: shIcon(cat) };
+             n: items.length, icon: shIcon(cat), photo: shPhoto(cat) };
   }
 
   const n = (typeof dvtIsVirtualCat === "function" && dvtIsVirtualCat(key))
@@ -431,7 +437,7 @@ function shEntry(catalog, key){
     : shItems(catalog, key).length;
   if(!n) return null;
   return { href: `products.html?cat=${encodeURIComponent(key)}`,
-           label: dvtCatLabel(key, catalog[key]), n, icon: shIcon(key) };
+           label: dvtCatLabel(key, catalog[key]), n, icon: shIcon(key), photo: shPhoto(key) };
 }
 
 function buildCatalogMenu(catalog){
@@ -458,7 +464,10 @@ function buildCatalogMenu(catalog){
             : `<div class="navcat-h">${shEsc(shTr(g.title[0], g.title[1]))}</div>`}
           ${g.entries.map(e => `
             <a class="navcat-link" href="${e.href}">
-              ${e.icon ? `<span class="navcat-ic" aria-hidden="true"><svg><use href="#${e.icon}"/></svg></span>` : ""}
+              ${e.photo
+                ? `<span class="navcat-ic navcat-ic--photo" aria-hidden="true"
+                         style="background-image:url('${e.photo}')"></span>`
+                : e.icon ? `<span class="navcat-ic" aria-hidden="true"><svg><use href="#${e.icon}"/></svg></span>` : ""}
               <span>${shEsc(e.label)}</span>
               ${e.n !== null ? `<em>${e.n}</em>` : ""}
             </a>`).join("")}

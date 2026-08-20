@@ -74,7 +74,12 @@ function trkInit(){
             (typeof PAYMENT_API_URL === "string" && PAYMENT_API_URL) || "";
   if(!api){ trkShow("trkEmpty"); return; }
 
-  fetch(api + "?action=getOrderStatus&token=" + encodeURIComponent(token))
+  /* ⚠️ `cache:"no-store"` + חותמת זמן. הסטטוס משתנה בצד דביר בכל
+     רגע, ולקוח שמרענן את הדף חייב לראות את המצב העדכני — לא עותק
+     שהדפדפן שמר לפני שעה. שתי ההגנות יחד ולא אחת: יש דפדפנים
+     ומתווכים שמתעלמים מ-no-store על GET, ופרמטר ייחודי עוקף אותם. */
+  fetch(api + "?action=getOrderStatus&token=" + encodeURIComponent(token) +
+        "&_=" + Date.now(), { cache: "no-store" })
     .then(function(r){ return r.json(); })
     .then(function(d){ if(d && d.ok){ trkRender(d); } else { trkShow("trkEmpty"); } })
     .catch(function(){ trkShow("trkEmpty"); });

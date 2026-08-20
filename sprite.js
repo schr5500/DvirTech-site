@@ -386,4 +386,32 @@ var DVT_CAT_ICON = {
   adapter:"ic-acc", "gpu-bracket":"ic-gpu", cable:"ic-acc",
   "case-glass":"ic-case", tools:"ic-acc"
 };
+/* ==================== תצלום קטגוריה ====================
+   🔴 דביר: "אני לא רוצה סתם תמונות גנריות כאלה כמו עכשיו" — בתפריט
+   העליון הוצגו איורי ה-sprite, ולאתר **כבר יש 13 תצלומי קטגוריה
+   אמיתיים** שמשמשים את כרטיסי דף הבית.
+
+   ⚠️ הם ישבו ב-`HOME_CAT_IMAGE` בתוך home.js, שנטען רק בדף הבית,
+   ולכן התפריט — שמוזרק בכל דף — לא יכול היה להגיע אליהם. המפה עברה
+   לכאן (sprite.js נטען בכל 12 הדפים), ו-home.js ממשיך להשתמש בה.
+
+   ⚠️ מי שאין לו תצלום (תת-סוגים כמו "מאווררי מארז", "עכבר") נופל
+   חזרה לאיור — עדיף איור מדויק מתצלום של קטגוריה אחרת. */
+var DVT_CAT_PHOTO = {
+  cpu:         "images/categories/cpu.jpg",
+  gpu:         "images/categories/gpu.jpg",
+  ram:         "images/categories/ram.jpg",
+  mobo:        "images/categories/mobo.jpg",
+  storage:     "images/categories/storage.jpg",
+  psu:         "images/categories/psu.jpg",
+  cooling:     "images/categories/cooling.jpg",
+  "case":      "images/categories/case.jpg",
+  monitor:     "images/categories/monitor.jpg",
+  readyPc:     "images/categories/readyPc.jpg",
+  peripherals: "images/categories/peripherals.jpg",
+  laptop:      "images/categories/laptop.jpg",
+  accessories: "images/categories/accessories.jpg"
+};
+function dvtCatPhoto(cat){ return DVT_CAT_PHOTO[cat] || null; }
+
 function dvtIcon(cat){ return DVT_CAT_ICON[cat] || "ic-case"; }

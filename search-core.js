@@ -224,6 +224,41 @@ function dvtCartOutOfStock(items){
   });
 }
 
+/* ---------- זמינות נמוכה בעגלה ----------
+   מחזיר את הפריטים בעגלה שמצב המלאי שלהם "low" — כלומר `dvtStockState`
+   זיהה "זמינות מוגבלת" או "מלאי אחרון".
+
+   🔴 **נמדד על הקטלוג החי (20.08): אין כרגע אף מוצר במצב הזה.**
+   ערכי המלאי בפועל הם "במלאי" (797), "אזל" (423), "ליצור קשר" (7)
+   ושניים ריקים. כלומר הפונקציה הזו והודעת הקופה שנשענת עליה **ישנות
+   עד שהערך יופיע בגיליון** — בסנכרון מהספק או בהקלדה ידנית.
+   זה בכוונה: עדיף שהמנגנון יהיה מוכן ומדויק מאשר שיאולתר ברגע שדביר
+   יתחיל לסמן פריטים גבוליים.
+
+   ⚠️ אותה לוגיקת פירוק כמו `dvtCartOutOfStock` — הרכבה מהבונה היא
+   פריט אחד בעגלה שמכיל `parts[]`, ובלי לפרק אותה רכיב גבולי בתוך
+   הרכבה לא היה נספר כלל. */
+function dvtCartLowStock(items){
+  const cat = dvtCatalogNow();
+  if(!cat) return [];
+  const skus = [];
+  (items || []).forEach(function(i){
+    if(i && i.type === "build" && Array.isArray(i.parts)){
+      i.parts.forEach(function(p){ if(p && p.sku) skus.push(p.sku); });
+    }else if(i && i.sku && i.type === "product"){
+      skus.push(i.sku);
+    }
+  });
+  const seen = {}, out = [];
+  skus.forEach(function(sku){
+    if(seen[sku]) return;
+    seen[sku] = 1;
+    const it = dvtFindBySku(sku);
+    if(it && dvtStockState(it) === "low") out.push({ sku: sku, name: it.name });
+  });
+  return out;
+}
+
 /* ---------- מבצעים ----------
    מוצר "במבצע" = יש לו מחיר קודם גבוה מהמחיר הנוכחי.
    הדרך להפעיל את זה: להוסיף לגיליון עמודה בשם oldPrice (או "מחיר קודם")

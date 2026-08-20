@@ -34,7 +34,17 @@
    אמיתיות — זה כסף אמיתי.
 ===================================================================== */
 
-const CART_STORAGE_KEY = "dvirtech_cart_items_v1";
+/* 🔴 כאן ישב `const CART_STORAGE_KEY` — **ההצהרה הזהה שנייה בדף**.
+   cart.js מצהיר עליו גם הוא, ושני `const` באותו שם בהיקף הגלובלי
+   זורקים SyntaxError שמפיל את הקובץ כולו. התוצאה בפועל: cart.js
+   הוסר מ-checkout.html כדי לעקוף את ההתנגשות — וכפתור העגלה
+   שמוזרק לכותרת של **כל** דף נשאר מת דווקא בדף התשלום, כי
+   `openCart` לא היה מוגדר שם. דביר: "העגלה לא נפתחת לי בדף
+   התשלום שלנו".
+
+   ⚠️ עכשיו cart.js נטען לפני checkout.js ומספק את הקבוע ואת
+   `sanitizeCartItems`. המימוש שלו גם טוב יותר: הוא משלים `id` חסר,
+   ובלעדיו פריט ישן נתקע בעגלה לנצח כי removeFromCart מסנן לפי id. */
 const PAYMENT_API_URL = "https://script.google.com/macros/s/AKfycbwuW5tgiRDhoIEFNkHHWgkVot6FyHFEUBa1mx41ck1lp74ChzT8pciMV9qaI0NcDw-sKA/exec";
 
 /* לתצוגה בלבד — השרת (4-payment-api.gs) מחשב את זה מחדש ובאופן עצמאי,
@@ -59,18 +69,9 @@ function escHtml(s){
 /* אותה הגנה כמו ב-cart.js: שורה פגומה (בלי name/price, או מגרסת עגלה
    ישנה) הופכת ל-"undefined" ו-NaN ₪ בדף התשלום. משמיטים אותה במקום
    להציג ללקוח סכום שגוי. השרת ממילא מתמחר מחדש לפי sku בלבד. */
-function sanitizeCartItems(list){
-  if(!Array.isArray(list)) return [];
-  return list.filter(i =>
-    i && typeof i === "object" &&
-    typeof i.name === "string" && i.name &&
-    Number.isFinite(Number(i.price)) && Number(i.price) >= 0 &&
-    Number.isFinite(Number(i.qty)) && Number(i.qty) >= 1
-  ).map(i => Object.assign({}, i, {
-    price: Number(i.price),
-    qty: Math.min(Math.floor(Number(i.qty)), 20)   // 20 = התקרה שהשרת אוכף ב-priceCart_
-  }));
-}
+/* ⚠️ `sanitizeCartItems` הוסר מכאן — הוא היה עותק כמעט זהה של זה
+   שב-cart.js, אבל **בלי** השלמת ה-id. כפילות פונקציה אינה שגיאת
+   תחביר, ולכן היא שרדה בשקט; מי שנטען אחרון היה גובר. */
 
 /* הרכיבים שבלעדיהם אין מחשב עובד. אם כולם בעגלה כפריטים נפרדים —
    הלקוח בעצם מרכיב מחשב "ידנית", ואז כדאי להסביר לו שההרכבה חינם
@@ -329,12 +330,19 @@ function renderCheckoutPage(){
    רק נקודת האיסוף היא אבן שמואל. */
 const DVT_SHIPPING = [
   { key:"pickup",   he:"איסוף עצמי",  en:"Self pickup",       price:0,  etaHe:"אבן שמואל — בתיאום מראש", etaEn:"Even Shmuel — by prior arrangement" },
-  /* ✅ 29 ₪ — אושר על ידי דביר (14.08.2026). משלוח מהיר נשאר 49.
-     ⚠️ שינוי מחיר כאן מחייב שינוי **זהה** ב-SHIPPING_OPTIONS_ שב-
-     4-payment-api.gs, אחרת הלקוח יראה סכום אחד וייגבה ממנו אחר —
-     והשרת הוא הקובע, כי הוא זה שמתמחר מחדש. */
+  /* ✅ רגיל 29 ₪ · מהיר 59 ₪ — אושר על ידי דביר (20.08.2026).
+     המהיר עודכן מ-49 ל-59 כדי להתיישר עם הפריט ב-SUMIT (CLI-4029).
+
+     🔴 **מחיר המשלוח חי בארבעה מקומות ושינוי חייב לגעת בכולם:**
+       1. כאן — מה שהלקוח רואה בקופה
+       2. `SHIPPING_OPTIONS_` ב-4-payment-api.gs — מה שנגבה בפועל
+          (השרת הוא הקובע; הוא מתמחר מחדש ומתעלם מהדפדפן)
+       3. סעיף 5.1 בתקנון, עברית — `Web/terms.js`
+       4. אותו סעיף באנגלית
+     ⚠️ 3 ו-4 אינם קוסמטיים: התקנון **מצהיר את המחיר**, ופער בינו
+     לבין מה שנגבה הוא בעיה חוזית ולא באג תצוגה. */
   { key:"standard", he:"משלוח רגיל", en:"Standard delivery", price:29, etaHe:"3-7 ימי עסקים", etaEn:"3-7 business days" },
-  { key:"express",  he:"משלוח מהיר", en:"Express delivery",  price:49, etaHe:"2-5 ימי עסקים", etaEn:"2-5 business days" }
+  { key:"express",  he:"משלוח מהיר", en:"Express delivery",  price:59, etaHe:"2-5 ימי עסקים", etaEn:"2-5 business days" }
 ];
 let shippingKey = "standard";
 
@@ -490,6 +498,13 @@ const DVT_SERVICES_ON_REQUEST = [
 ];
 
 let selectedServices = [];   // מפתחות בלבד — זה גם מה שנשלח לשרת
+
+/* נצרך פעם אחת בלבד לכל טעינת דף — ראה ההודעה ב-submitCheckout. */
+let lowStockAcked = false;
+function btnRestore(){
+  const b = document.getElementById("checkoutSubmitBtn");
+  if(b){ b.disabled = false; b.textContent = t("submitOrderBtn"); }
+}
 
 /* ⚠️ **בלי זה הבאנר "ההרכבה שלך ללא עלות" הוא שקר.** לקוח שבחר את ששת
    הרכיבים מהקטלוג רואה שההרכבה חינם — אבל בלי שורת הרכבה בהזמנה, דביר
@@ -848,6 +863,31 @@ async function submitCheckout(){
                            "Out of stock, cannot be ordered: ") +
                         gone.map(g => g.name).join(", ") +
                         tr(". הסר מהעגלה ונסה שוב.", ". Please remove and try again.");
+      return;
+    }
+  }
+
+  /* ⚠️ **הודעה, לא חסימה.** דביר: "אני לא רוצה מצב שהלקוח מנסה
+     להזמין, יוצר איתי קשר, ועד שאני מברר מול הספק הוא כבר קנה
+     במקום אחר — עדיף שיזמין ונסתדר אחרי זה."
+     ולכן: מיידעים ומאפשרים להמשיך. אין תיבת אישור — עיכוב אפשרי
+     באספקה אינו מחייב הסכמה מפורשת, וצ'קבוקס היה מלחיץ בלי צורך.
+     ⚠️ מוצגת פעם אחת: `lowStockAcked` מונע חזרה על אותה הודעה בכל
+     לחיצה, אחרת הלקוח לא יכול להשלים את ההזמנה בכלל. */
+  if(!lowStockAcked && typeof dvtCartLowStock === "function"){
+    const low = dvtCartLowStock(items);
+    if(low.length){
+      lowStockAcked = true;
+      box.style.display = "block";
+      box.className = "checkout-note-warn";
+      box.textContent =
+        tr("שים לב: ", "Please note: ") +
+        low.map(l => l.name).join(", ") +
+        tr(low.length === 1 ? " מסומן בזמינות מלאי נמוכה. " : " מסומנים בזמינות מלאי נמוכה. ",
+           low.length === 1 ? " is marked as low stock. " : " are marked as low stock. ") +
+        tr("אפשר להזמין כרגיל — רק ייתכן שזמן האספקה יהיה ארוך מהמצוין. אעדכן אותך אם כן. לחיצה נוספת על הכפתור תמשיך בהזמנה.",
+           "You can order as usual — delivery may simply take longer than stated. I will update you if it does. Press the button again to continue.");
+      btnRestore();
       return;
     }
   }

@@ -1594,3 +1594,17 @@ footer::after{ content:""; display:block; height: var(--fab-safe) }
   padding:4px 0}
 .svc-onreq-row::before{content:"•";color:var(--ink-soft,#5F7590)}
 .svc-onreq-link{display:inline-block;margin-top:7px;font-size:12px;font-weight:800;color:var(--blue,#1B6FE0)}
+
+/* תצלום קטגוריה בתפריט. ⚠️ cover ולא contain: העיגול קטן (26px)
+   ותמונה עם שוליים לבנים הייתה נראית כמו כתם. */
+.navcat-ic--photo{background-size:cover;background-position:center;background-repeat:no-repeat}
+.navcat-link:hover .navcat-ic--photo{filter:brightness(1.06)}
+
+/* בורר תחום החיפוש בראש החלונית */
+.ss-scope{display:flex;gap:6px;padding:8px 10px;border-bottom:1px solid var(--line,#E2EAF2);
+  background:var(--surface-2,#F7FAFD);position:sticky;top:0;z-index:2}
+.ss-scope-btn{border:1px solid var(--line,#E2EAF2);background:#fff;color:var(--ink-soft,#5F7590);
+  border-radius:999px;padding:5px 13px;font-family:'Heebo',sans-serif;font-size:12px;font-weight:700;
+  cursor:pointer;transition:.15s}
+.ss-scope-btn:hover{border-color:var(--blue,#1B6FE0);color:var(--blue,#1B6FE0)}
+.ss-scope-btn.is-on{background:var(--blue,#1B6FE0);border-color:var(--blue,#1B6FE0);color:#fff}

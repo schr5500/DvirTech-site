@@ -142,6 +142,13 @@
      בשורות שיש בהן כמות** (flex-basis:100%), וכך השם מקבל ~140px
      בכל השורות. המחיר נשאר בשורה הראשונה עם התמונה, כדרישת דביר. */
   .bld-sum-price{order:1; flex:none}
+  /* כפתור ההסרה. ⚠️ order:1 יחד עם המחיר — הוא שייך לשורה הראשונה
+     ליד המחיר, ולא לשורה השנייה עם בורר הכמות.
+     ⚠️ 22px ולא פחות: זה שטח נגיעה בנייד, וכפתור שמוחק בחירה חייב
+     להיות קל ללחיצה מכוונת אבל לא כזה שנלחץ בטעות בגלילה. */
+  .bld-sum-x{order:1; flex:none; width:22px; height:22px; margin-top:1px;
+    border:1px solid transparent; background:none; color:#B3C1D1; cursor:pointer;
+    border-radius:7px; font-size:15px; line-height:1; padding:0; transition:.15s}
   .bld-sum-qty{order:2; flex:0 0 100%; justify-content:flex-end; margin-top:3px}
   /* ⚠️ רצפת 96px. בלעדיה, בשורות שיש בהן בורר כמות ה-flex מעך את השם
      ל-20px ו-53 תווים נפרסו על 23 שורות. 275px תוכן פחות תמונה 34,
@@ -456,6 +463,10 @@
               </span>
             </sc-if>
             <span class="bld-sum-price" style="font-family:'Rubik',sans-serif;font-size:13.5px;font-weight:700;color:{{ row.priceColor }};white-space:nowrap">{{ row.price }}</span>
+            <sc-if value="{{ row.canRemove }}" hint-placeholder-val="{{ false }}">
+              <button class="bld-sum-x" onClick="{{ row.remove }}" title="{{ row.removeTitle }}"
+                      aria-label="{{ row.removeTitle }}" style-hover="background:#FDECEA;color:#B4231B;border-color:#F3BDB8">×</button>
+            </sc-if>
           </li>
         </sc-for>
       </ul>
@@ -1121,6 +1132,34 @@ class Component extends DCLogic {
       return next;
     });
   }
+  /* ==================== הסרת רכיב בודד ====================
+     🔴 עד עכשיו היה רק "נקה הכל". לקוח שבחר תשעה רכיבים ורצה להחליף
+     את המארז היה צריך למחוק את הכל ולהתחיל מחדש — או להשאיר בחירה
+     שהוא כבר לא רוצה.
+
+     ⚠️ **הסרה היא setState אחד, וכל השאר נגזר ממנו.** זה לא מקרי:
+     הדגם התלת-ממדי (`stageConfig`), בדיקת התאימות (`compatResult`),
+     פאנל הממצאים, הסכום והכמויות — כולם נגזרים מ-`state.sel` בכל
+     רנדר ואינם מחזיקים עותק משלהם. לכן אין כאן שום קריאה ל"רענן
+     את הדגם" או "חשב מחדש אזהרות": ברגע שהמפתח יורד מ-sel, המצב
+     החדש הוא "חסר מארז" — בדיוק כמו לפני שנבחר — וכל המסכים
+     מתיישרים לבד. אילו היה צריך לרענן ידנית, זה היה סימן שהמצב
+     משוכפל במקום שלא צריך.
+
+     ⚠️ הכמות של אותה קטגוריה מתאפסת גם היא. בלי זה, בחירת מוצר
+     חדש באותה קטגוריה הייתה יורשת "3 יחידות" מהמוצר הקודם בשקט. */
+  removeSel(cat){
+    this.setState(s => {
+      const sel = Object.assign({}, s.sel);
+      delete sel[cat];
+      const qty = Object.assign({}, s.qty);
+      delete qty[cat];
+      const next = { sel: sel, qty: qty, last: null };
+      if(window.dvtSaveBuild) window.dvtSaveBuild(Object.assign({}, s, next));
+      return next;
+    });
+  }
+
   qtyOf(cat){ return this.state.qty[cat] || 1; }
   bump(cat, d){
     this.setState(s => {
@@ -1265,6 +1304,9 @@ class Component extends DCLogic {
           imgSize: this.renderOf(c.key, it) ? "82%" : "cover",
           imgOp: it ? "1" : "0.25",
           thumbBg: it ? "#F3F8FF" : "#F5F8FC",
+          canRemove: !!it,
+          remove: () => this.removeSel(c.key),
+          removeTitle: it ? ("הסר " + c.label + " מההרכבה") : "",
           hasQty, qty: q, qtyMax: cap, atMax: q >= cap,
           /* ⚠️ קומפקטי: המספר בלבד, והתקרה מוצגת רק כשמגיעים אליה — שם
              היא באמת מידע. העמודה 246px, וכל 20px משנים שורה בשם. */
