@@ -797,11 +797,21 @@ footer a{color:#C4D7E8}
 /* בהעדפת "פחות אנימציות": המגירה פשוט מופיעה ונעלמת. ⚠️ ‎.closing חייב
    להיות ‎display:none כאן, אחרת השכבה נתקעת מוצגת עד שה-JS מסיר אותה. */
 @media(prefers-reduced-motion:reduce){
-  .cart-overlay{transition:none}
-  .cart-panel{animation:none}
-  .cart-overlay.closing{display:none}
-  .cart-overlay.closing .cart-panel{animation:none}
+  /* 🔴 קודם היה כאן `transition:none` + `animation:none` — כלומר
+     המגירה **קופצת** במכה אחת. דביר ראה את זה במחשב (ההגדרה דלוקה
+     ב-Windows) ולא בטלפון, ותיאר את זה בדיוק: "נפתח בבום".
+
+     ⚠️ ההגדרה מבקשת **פחות תנועה, לא אפס מעבר**. ההמלצה המקובלת
+     היא להחליף תנועה במרחב בהעלמה/הופעה — העין לא נגררת אחרי
+     אובייקט שחוצה את המסך, ובכל זאת אין קפיצה מבהילה.
+     ⚠️ אנימציית ה"טיסה לעגלה" נשארת מבוטלת (cart.js) — היא קישוט
+     נע ממש, וזה מה שההגדרה נועדה למנוע. */
+  .cart-panel{animation:cartFadeIn .22s ease both}
+  .cart-overlay.closing .cart-panel{animation:cartFadeOut .18s ease both}
+  .cart-overlay.closing{display:block}
 }
+@keyframes cartFadeIn{from{opacity:0}to{opacity:1}}
+@keyframes cartFadeOut{from{opacity:1}to{opacity:0}}
 
 /* כותרת דביקה עם הגרדיאנט של המותג */
 .cart-panel-head{position:sticky;top:0;z-index:2;display:flex;align-items:center;
