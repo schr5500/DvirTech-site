@@ -171,6 +171,12 @@
   .bld-sum-total-label{font-size:13px;color:#5F7590;line-height:1.4}
   .bld-sum-price{font-family:'Rubik',sans-serif;font-size:34px;font-weight:800;line-height:1;color:#0B2C4D;letter-spacing:-.5px}
   .bld-btn-continue{display:flex;align-items:center;justify-content:center;gap:10px;border:none;cursor:pointer;font-family:'Heebo',sans-serif;font-weight:700;font-size:15.5px;border-radius:14px;padding:16px 18px;width:100%;margin-top:16px;background:linear-gradient(100deg,#1B6FE0,#2FC4B0);color:#fff;box-shadow:0 10px 24px rgba(27,111,224,.22);transition:.18s}
+  /* ⚠️ אותו גובה ומשקל ככפתור חוות הדעת, בכחול במקום ירוק —
+     שניהם משניים ל"הוסף לסל" ואף אחד מהם לא מתחרה בו. */
+  .bld-btn-share{display:flex;align-items:center;justify-content:center;gap:9px;cursor:pointer;
+    font-family:'Heebo',sans-serif;font-weight:700;font-size:14px;border-radius:14px;
+    padding:13px 18px;width:100%;margin-top:8px;background:#fff;color:#1B6FE0;
+    border:1.5px solid #C9DEF8;transition:.18s}
   .bld-btn-whatsapp{display:flex;align-items:center;justify-content:center;gap:9px;cursor:pointer;font-family:'Heebo',sans-serif;font-weight:700;font-size:14px;border-radius:14px;padding:13px 18px;width:100%;margin-top:10px;background:#fff;color:#0C8467;border:1.5px solid #BDE6D8;transition:.18s}
   .bld-sum-minor{display:flex;gap:10px;margin-top:10px}
   .bld-btn-minor{flex:1;border:1px solid #EDF2F8;background:#fff;color:#5F7590;border-radius:12px;padding:12px;font-family:'Heebo',sans-serif;font-size:12.5px;font-weight:600;cursor:pointer;transition:.15s}
@@ -518,7 +524,16 @@
       </button>
       <button class="bld-btn-whatsapp" onClick="{{ sendWhatsapp }}" style-hover="background:#F2FBF8;border-color:#8FD6C1">
         <svg viewBox="0 0 24 24" style="width:16px;height:16px;fill:currentColor"><path d="M17.5 14.4c-.3-.2-1.7-.9-2-1-.3-.1-.5-.2-.7.1-.2.3-.7 1-.9 1.2-.2.2-.3.2-.6.1-.3-.2-1.2-.5-2.3-1.4-.9-.8-1.4-1.7-1.6-2-.2-.3 0-.5.1-.6l.5-.6c.1-.2.2-.3.3-.5 0-.2 0-.4 0-.5 0-.2-.7-1.6-.9-2.2-.2-.6-.5-.5-.7-.5h-.6c-.2 0-.5.1-.8.4-.3.3-1 1-1 2.5s1.1 2.9 1.2 3.1c.2.2 2.1 3.2 5.1 4.5.7.3 1.3.5 1.7.6.7.2 1.4.2 1.9.1.6-.1 1.7-.7 2-1.4.2-.7.2-1.3.2-1.4-.1-.1-.3-.2-.6-.3zM12 2C6.5 2 2 6.5 2 12c0 1.8.5 3.4 1.3 4.9L2 22l5.3-1.4c1.4.8 3 1.2 4.7 1.2 5.5 0 10-4.5 10-10S17.5 2 12 2z"></path></svg>
-        שליחת ההרכבה בוואטסאפ
+        קבלת חוות דעת על ההרכבה
+      </button>
+
+      <!-- ⚠️ שיתוף להרכבה, לא למוצר: הקישור נושא את ההרכבה עצמה
+           ב-hash, וכל מי שפותח אותו רואה אותה מורכבת. זה מה שהופך
+           את הבונה למשהו שאפשר להראות לחבר לפני שקונים. -->
+      <button class="bld-btn-share" onClick="{{ shareBuild }}"
+              style-hover="background:#EEF5FF;border-color:#9FC6F5">
+        <svg viewBox="0 0 24 24" style="width:16px;height:16px;fill:none;stroke:currentColor;stroke-width:1.7"><circle cx="18" cy="5" r="3"></circle><circle cx="6" cy="12" r="3"></circle><circle cx="18" cy="19" r="3"></circle><path d="M8.6 13.5l6.8 4M15.4 6.5l-6.8 4"></path></svg>
+        שיתוף ההרכבה
       </button>
       <!-- ⚠️ כאן היה כפתור "שמור לרשימת משאלות" — **בלי onClick ובלי
            שום פיצ'ר מאחוריו** בשום מקום באתר. כפתור שלא עושה כלום גרוע
@@ -940,6 +955,25 @@ class Component extends DCLogic {
              : "url(" + (CATS.find(c => c.key === cat) || {}).img + ")";
   }
 
+  /* 🔴 **אוויר או נוזלי — שלושה שמות, כי לכל מקור שם אחר.**
+       `cool`       — נתוני הדמו ב-builder-assets
+       `type`       — העמודה בגיליון החי, זו שהייתה מתפספסת
+       `coolerType` — כינוי שמופיע בייבוא מספקים
+     ואם שלושתם ריקים — נגזר מהשם: רדיאטור 240/280/360/420 או
+     המילים AIO / Liquid / Water מזהים קירור נוזלי בוודאות סבירה.
+
+     ⚠️ ברירת המחדל היא air בכוונה. קירור אוויר הוא הנפוץ, ומודל
+     אוויר על מוצר נוזלי הוא טעות ויזואלית; מודל נוזלי על גוף
+     אוויר היה מצייר רדיאטור שלא קיים במארז — טעות גרועה יותר. */
+  coolKind(it){
+    const raw = String(it.cool || it.type || it.coolerType || "").toLowerCase();
+    if(raw === "aio" || raw === "liquid" || raw === "water") return "aio";
+    if(raw === "air") return "air";
+    const n = (it.name || "") + " " + (it.spec || "");
+    if(/AIO|liquid|water\s*cool|\u05e0\u05d5\u05d6\u05dc\u05d9|(^|[^\d])(240|280|360|420)\s*mm/i.test(n)) return "aio";
+    return "air";
+  }
+
   /* תצורת הבמה התלת-ממדית: מה נבחר, ומזהה לכל רכיב כדי שהבמה תדע
      איזה חלק חדש ותכניס אותו באנימציה. */
   stageCfg(){
@@ -950,7 +984,7 @@ class Component extends DCLogic {
     if(cs){ cfg.case = { form: cs.form || "mid", argb: !!cs.argb }; cfg.caseKey = cs.id; }
     if(mb){ cfg.mobo = { form: mb.form || "atx" }; cfg.moboKey = mb.id; }
     if(cp){ cfg.cpu = { brand: /intel|core\s*i/i.test(cp.name) ? "intel" : "amd" }; cfg.cpuKey = cp.id; }
-    if(cl){ cfg.cooling = { type: cl.cool === "aio" ? "aio" : "air", fans: cl.fans || 2 }; cfg.coolKey = cl.id; }
+    if(cl){ cfg.cooling = { type: this.coolKind(cl), fans: cl.fans || 2 }; cfg.coolKey = cl.id; }
     if(rm){ cfg.ram = { sticks: Math.min(4, 2 * (this.state.qty.ram || 1)) }; cfg.ramKey = rm.id + "x" + (this.state.qty.ram || 1); }
     if(gp){
       const cls = /(90|XTX)/.test(gp.name) ? 3 : /(80|800)/.test(gp.name) ? 2 : /(70|700)/.test(gp.name) ? 1 : 0;
@@ -1355,7 +1389,42 @@ class Component extends DCLogic {
         window.location.href = "checkout.html";
       },
 
-      /* שליחת ההרכבה בוואטסאפ — גם לו לא היה קישור. */
+      /* ⚠️ שיתוף ההרכבה. `navigator.share` פותח את גיליון השיתוף
+         של המכשיר (וואטסאפ/מייל/כל דבר) ולכן הוא הנתיב המועדף בנייד,
+         שם רוב הלקוחות. בדסקטופ הוא לרוב לא קיים, ואז מעתיקים את
+         הקישור ללוח ומודיעים על כך.
+         ⚠️ הכפתור לא נחסם כשההרכבה ריקה — קישור ריק פשוט פותח בונה
+         ריק, וזה לא נזק. חסימה כאן הייתה מוסיפה מצב בלי להוסיף ערך. */
+      shareBuild: () => {
+        const url = window.dvtBuildShareUrl
+          ? window.dvtBuildShareUrl(st.sel, st.qty)
+          : location.href;
+        const lines = CATS.map(c => {
+          const it = this.item(c.key);
+          return it ? c.label + ": " + it.name : null;
+        }).filter(Boolean);
+        const text = lines.length
+          ? "הרכבתי מחשב ב-DvirTech:\n\n" + lines.join("\n") +
+            "\n\nסה\"כ: " + this.money(total) + " ₪"
+          : "בונה המחשבים של DvirTech";
+
+        if(navigator.share){
+          navigator.share({ title: "הרכבה ב-DvirTech", text: text, url: url })
+            .catch(() => {});
+          return;
+        }
+        const done = () => window.alert("הקישור להרכבה הועתק. אפשר להדביק ולשלוח.");
+        if(navigator.clipboard && navigator.clipboard.writeText){
+          navigator.clipboard.writeText(url).then(done).catch(() => window.prompt("העתק את הקישור:", url));
+        } else {
+          window.prompt("העתק את הקישור:", url);
+        }
+      },
+
+      /* ⚠️ **זו בקשת ייעוץ, לא הזמנה.** הכפתור נקרא "קבלת חוות דעת"
+         והנוסח מנוסח כשאלה בכוונה: לקוח שמתלבט לא מחפש לשלוח הודעה,
+         הוא מחפש אישור שההרכבה שלו נכונה. הודעה שמנוסחת כדיווח
+         ("הרכבתי מחשב") מקבלת פחות תשובות מהודעה ששואלת שאלה. */
       sendWhatsapp: () => {
         const lines = CATS.map(c => {
           const it = this.item(c.key);
@@ -1363,8 +1432,10 @@ class Component extends DCLogic {
           const q = st.qty[c.key] || 1;
           return c.label + ": " + it.name + (q > 1 ? " ×" + q : "");
         }).filter(Boolean);
-        const msg = "היי דביר, הרכבתי מחשב בבונה:\n\n" + lines.join("\n") +
-                    "\n\nסה\"כ: " + this.money(total) + " ₪";
+        const msg = "היי, הרכבתי מחשב בבונה ואשמח לחוות דעת לפני שאני מזמין:\n\n" +
+                    lines.join("\n") +
+                    "\n\nסה\"כ: " + this.money(total) + " ₪" +
+                    "\n\nהאם ההרכבה הזו מתאימה למה שאני צריך?";
         window.open("https://wa.me/972502000373?text=" + encodeURIComponent(msg), "_blank");
       },
 

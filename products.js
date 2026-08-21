@@ -43,6 +43,13 @@ const SHOP_CATEGORY_ORDER = [
    בגיליון פשוט לא מייצר קבוצת סינון — אין קבוצות ריקות באתר. */
 /* ⚠️ "all" ו-"sale" לא מופיעות כאן בכוונה: הן מערבבות קטגוריות, ורשימת
    הסינונים שלהן נבנית מהפריטים שבדף — ראו facetKeysFor(). */
+/* ⚠️ **"tier" הוסר מכאן ב-21.08 לבקשת דביר, ואין להחזיר אותו.**
+   סינון בחנות מחשבים מתבסס על **מפרט** — תושבת, נפח, סוג זיכרון,
+   דברים שכתובים על הקופסה. "רמת ביצועים" הוא דירוג פנימי שלנו,
+   שיפוט ולא עובדה, ואין לו מקבילה ב-KSP או באיווri. הוא גם הציג
+   ללקוח מספר חשוף כשהסולם גדל ל-5 והתוויות נשארו ב-4.
+   ⚠️ השדה `tier` **נשאר בנתונים** ומשמש את הבונה לניקוד המלצות.
+   מה שהוסר הוא רק החשיפה שלו כקבוצת סינון ללקוח. */
 const FACETS = {
   readyPc:     ["brand", "useCase", "ramGb", "storageGb", "warrantyMonths"],
   // נייד נמכר לפי המסך לא פחות מאשר לפי המעבד, ולכן גודל/רזולוציה/רענון
@@ -52,9 +59,9 @@ const FACETS = {
   // כאן כולם מסכים ממילא, וקבוצת סינון עם ערך יחיד לא מסננת כלום.
   monitor:     ["brand", "sizeInch", "refreshHz", "resolution", "panel", "connection"],
   peripherals: ["subType", "brand", "connection", "switchType", "sizeInch", "refreshHz", "resolution", "panel", "rgb"],
-  cpu:         ["brand", "socket", "tier", "ramType", "overclockable"],
-  gpu:         ["chipset", "brand", "vramGb", "tier"],
-  mobo:        ["brand", "socket", "ramType", "formFactor", "tier"],
+  cpu:         ["brand", "socket", "ramType", "overclockable"],
+  gpu:         ["chipset", "brand", "vramGb"],
+  mobo:        ["brand", "socket", "ramType", "formFactor"],
   ram:         ["brand", "capacityGb", "ramType", "speedMhz"],
   storage:     ["brand", "driveType", "capacityGb", "pcieGen"],
   cooling:     ["brand", "type", "radiatorMm", "heightMm"],
@@ -164,6 +171,11 @@ let onlyInStock = true;
    ל-activeFilters — הוא רק מאפשר ל-itemMatchesFilters לדעת שהיא
    מבקשת ספירה *של* מסנן המלאי ולכן אסור לה להחיל אותו על עצמו. */
 const STOCK_FACET_KEY = "inStock";
+
+/* מפתח דמה לסינון המחיר, באותו רעיון כמו STOCK_FACET_KEY: הוא לא
+   שדה על הפריט, אלא סימן ל-itemMatchesFilters לדלג על בדיקת
+   המחיר. בלעדיו priceBounds היה מסנן לפי המחיר שהוא עצמו מודד. */
+const PRICE_FACET_KEY = "__price";
 
 /* ==================== עימוד ====================
    1,269 כרטיסי מוצר בבת אחת מקפיאים את הדפדפן בגלילה. 48 לעמוד מתחלק
@@ -295,8 +307,14 @@ function priceStepFor(span){
   return 100;
 }
 
+/* 🔴 הגבולות נגזרים מהפריטים שעוברים את **שאר** הסינונים, לא מכל
+   הקטגוריה. "כל המוצרים" נותן את טווח הקטלוג המלא; בחירת כרטיסי מסך
+   מצמצמת אליהם; הוספת 16GB מצמצמת שוב. בדיוק מה שדביר ביקש.
+   ⚠️ `PRICE_FACET_KEY` מחריג את המחיר מעצמו — ראה itemMatchesFilters. */
 function priceBounds(){
-  const prices = sellableItems(currentCat).map(it => Number(it.price)).filter(p => p > 0);
+  const prices = sellableItems(currentCat)
+    .filter(it => itemMatchesFilters(it, PRICE_FACET_KEY))
+    .map(it => Number(it.price)).filter(p => p > 0);
   if(prices.length < 2) return null;                    // מוצר יחיד — אין מה לסנן
   const lowest = Math.min.apply(null, prices), highest = Math.max.apply(null, prices);
   if(lowest === highest) return null;
@@ -332,7 +350,10 @@ function shopInStock(item){
 }
 
 function itemMatchesFilters(item, exceptKey){
-  if(!itemMatchesPrice(item)) return false;
+  /* ⚠️ exceptKey === PRICE_FACET_KEY מדלג על בדיקת המחיר. זה מה
+     שמאפשר ל-priceBounds למדוד את הטווח של התוצאות בלי שהמחיר
+     יסנן את עצמו — ובלי שהסרגל יתכווץ תוך כדי גרירה. */
+  if(exceptKey !== PRICE_FACET_KEY && !itemMatchesPrice(item)) return false;
   // ⚠️ לפני שאר הסינונים: זה המסנן שקובע כמה תוצאות יש בכלל
   if(onlyInStock && exceptKey !== STOCK_FACET_KEY && !shopInStock(item)) return false;
   for(const key in activeFilters){

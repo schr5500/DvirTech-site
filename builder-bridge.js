@@ -235,9 +235,56 @@
      מחדל: אם אין רשומה שמורה, הבונה מתחיל בלי אף מוצר. */
   const BUILD_KEY = "dvirtech_build_v1";
 
+  /* ==================== שיתוף הרכבה בקישור ====================
+     ההרכבה נדחסת ל-hash: `#b=cpu.CPU-1000~ram.RAM-4059*2`
+     קטגוריה ומזהה מופרדים בנקודה, פריטים בטילדה, כמות אחרי כוכבית.
+     קצר מספיק לוואטסאפ ולא דורש שום שרת.
+
+     ⚠️ hash ולא query — מה שאחרי ה-# לא נשלח לשרת ולא נכנס ללוגים.
+     ⚠️ מזהה שכבר לא קיים בקטלוג נשמט בשקט ב-loadSavedBuild, בדיוק
+        כמו הרכבה שמורה — קישור ישן לא ישבור את הדף. */
+  function buildToHash(sel, qty){
+    const parts = Object.keys(sel || {}).map(function(cat){
+      const q = (qty && qty[cat] > 1) ? "*" + qty[cat] : "";
+      return cat + "." + sel[cat] + q;
+    });
+    return parts.length ? "#b=" + parts.join("~") : "";
+  }
+
+  function buildFromHash(){
+    try{
+      const m = String(location.hash || "").match(/[#&]b=([^&]+)/);
+      if(!m) return null;
+      const sel = {}, qty = {};
+      decodeURIComponent(m[1]).split("~").forEach(function(tok){
+        if(!tok) return;
+        const star = tok.split("*");
+        const dot  = star[0].indexOf(".");
+        if(dot < 1) return;
+        const cat = star[0].slice(0, dot), id = star[0].slice(dot + 1);
+        if(!cat || !id) return;
+        sel[cat] = id;
+        const q = parseInt(star[1], 10);
+        if(q > 1) qty[cat] = q;
+      });
+      return Object.keys(sel).length ? { sel: sel, qty: qty } : null;
+    }catch(e){ return null; }
+  }
+
+  /* הכתובת המלאה להרכבה הנוכחית. נקראת מ-builder.html. */
+  window.dvtBuildShareUrl = function(sel, qty){
+    const h = buildToHash(sel, qty);
+    return location.origin + location.pathname + h;
+  };
+
   function loadSavedBuild(){
     try{
-      const raw = localStorage.getItem(BUILD_KEY);
+      /* 🔴 קישור משותף גובר על ההרכבה השמורה — מי שפתח קישור רוצה
+         לראות את מה ששלחו לו, לא את מה שהוא בנה אתמול.
+         ⚠️ ה-localStorage לא נמחק: ההרכבה שלו חוזרת ברגע שייכנס
+         לבונה בלי hash. */
+      const shared = buildFromHash();
+      const raw = shared ? JSON.stringify(shared) : localStorage.getItem(BUILD_KEY);
       if(!raw) return null;
       const o = JSON.parse(raw);
       if(!o || typeof o !== "object" || !o.sel) return null;
