@@ -1467,24 +1467,10 @@ const DVT_RULES = [
     }
   },
 
-  /* ============ קירור ↔ משחה ============ */
-  {
-    id:"cooling-paste-included", cats:["cooling","paste"], on:"paste", level:"info",
-    needs:["cooling.pasteIncluded"],
-    run:({cooling,paste}) => (dvtBoolOf(cooling,"pasteIncluded") === true && Number(paste.price) > 0)
-      ? `ל-${cooling.name} כבר מצורפת משחה תרמית — משחה נוספת אינה נחוצה.`
-      : null
-  },
-  {
-    id:"cooling-paste-missing", cats:["cooling"], on:"paste", level:"warn",
-    needs:["cooling.pasteIncluded"],
-    run:({cooling,sel}) => {
-      if(sel.paste && Number(sel.paste.price) > 0) return null;
-      return dvtBoolOf(cooling,"pasteIncluded") === false
-        ? `ל-${cooling.name} לא מצורפת משחה תרמית — צריך להוסיף אחת.`
-        : null;
-    }
-  },
+  /* 🔴 שני כללי "קירור ↔ משחה" הוסרו 21.08 יחד עם הקטגוריה.
+     `cooling-paste-missing` היה האחראי לאזהרה "צריך להוסיף משחה" —
+     ובלי קטגוריה לבחור ממנה הוא היה שולח את הלקוח למצוא משהו שלא
+     קיים באתר. אזהרה שאי אפשר לפעול לפיה גרועה מאין אזהרה. */
 
   /* ============ איזון מעבד ↔ כרטיס מסך ============ */
   {
@@ -1914,7 +1900,7 @@ const DVT_AUTO_REMOVE_RULES = new Set([
 
 /* מי נשאר כשיש התנגשות: הרכיב המרכזי יותר. מעבד גובר על לוח, לוח על
    מארז וכו' — כי סביר שהלקוח בחר את היקר/החשוב קודם ובנה סביבו. */
-const DVT_CAT_KEEP_ORDER = ["cpu","mobo","gpu","ram","case","psu","cooling","storage","caseFans","wifi","paste","extras"];
+const DVT_CAT_KEEP_ORDER = ["cpu","mobo","gpu","ram","case","psu","cooling","storage","caseFans","wifi","extras"];
 
 function dvtInvalidateSelection(sel, qty, keepCat){
   const cur = Object.assign({}, sel || {});
