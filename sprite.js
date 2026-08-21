@@ -418,6 +418,8 @@ var DVT_CAT_PHOTO = {
   cooling:     "images/categories/cooling.jpg",
   psu:         "images/categories/psu.jpg",
   "case":      "images/categories/case.jpg",
+  /* ⚠️ בתמונה הכללית "מארזים" ו"מאווררי מארז" חולקים כרטיס אחד,
+     ולכן זו אותה תמונה. לא באג. */
   caseFans:    "images/categories/casefans.jpg",
   wifi:        "images/categories/wifi.jpg",
   paste:       "images/categories/paste.jpg",
