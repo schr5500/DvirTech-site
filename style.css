@@ -1085,8 +1085,14 @@ header.site-header--blue #mainNav > a.nav-accent{background:none;
 header.site-header--blue #mainNav > a.nav-accent:hover,
 header.site-header--blue #mainNav > a.nav-accent.active{color:#fff}
 header.site-header--blue .head-search{background:rgba(255,255,255,.10);border-color:rgba(255,255,255,.18)}
-header.site-header--blue .head-search input{color:#fff}
-header.site-header--blue .head-search input::placeholder{color:rgba(220,232,244,.65)}
+/* 🔴 **אין כאן override לצבע הטקסט — בכוונה.**
+   קודם היה `color:#fff` לשדה החיפוש בכותרת הכחולה, בזמן שה-input
+   ממשיך לצייר `--surface-2` (כמעט לבן) מכלל הבסיס. התוצאה: טקסט
+   לבן על רקע לבן — שדה שנראה ריק בדיוק כשמקלידים בו. דביר דיווח
+   על זה מדף צור קשר, הדף היחיד באתר שמשתמש בכותרת הכחולה.
+   ⚠️ אל תחזיר צבע טקסט בהיר כאן בלי לתת ל-input רקע כהה **אטום**
+   באותה הכרזה. שקיפות מעל הכותרת נראית נכון בקוד ונכשלת במסך. */
+header.site-header--blue .head-search{background:transparent;border-color:transparent}
 header.site-header--blue .head-search .ui-ic{color:rgba(220,232,244,.8)}
 header.site-header--blue .head-ic{background:rgba(255,255,255,.10);border-color:rgba(255,255,255,.18);color:#DCE8F4}
 header.site-header--blue .head-ic:hover{background:rgba(255,255,255,.2);color:#fff}
