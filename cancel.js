@@ -60,6 +60,15 @@ function cxlSubmit(){
     document.getElementById("cxlPhone").focus();
     return;
   }
+  /* ⚠️ מספר ההזמנה נדרש כדי לאתר את השורה ב-CRM, אבל ההודעה
+     **מציעה מוצא** במקום לחסום. ביטול לא ייעצר בגלל מספר שאבד. */
+  if(!order){
+    cxlShowError(cxlTr(
+      "צריך מספר הזמנה כדי שנאתר אותה. לא מצאת? כתוב \u201cלא ידוע\u201d ונחפש לפי הפרטים.",
+      "We need an order number to locate it. Can't find it? Write \u201cunknown\u201d and we'll search by your details."));
+    document.getElementById("cxlOrder").focus();
+    return;
+  }
 
   btn.disabled = true;
   btn.textContent = cxlTr("שולח…", "Sending…");

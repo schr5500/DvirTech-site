@@ -146,15 +146,15 @@
       </div>
 
       <div class="cxl-field">
-        <label for="cxlOrder">
-          <span data-he="מספר הזמנה" data-en="Order number">מספר הזמנה</span>
-          <span class="cxl-opt" data-he="· אם יש לך אותו" data-en="· if you have it">· אם יש לך אותו</span>
-        </label>
-        <input id="cxlOrder" type="text" placeholder="DVT-4532">
+        <label for="cxlOrder" data-he="מספר הזמנה" data-en="Order number">מספר הזמנה</label>
+        <input id="cxlOrder" type="text" placeholder="DVT-4532" required>
+        <!-- ⚠️ נדרש כדי לאתר את ההזמנה, אבל **לא חוסם ביטול**: מי
+             שלא מוצא את המספר כותב "לא ידוע" והבקשה מתקבלת. חסימה
+             מלאה כאן הייתה מכשול שהתקנות באות למנוע. -->
         <p class="cxl-hint"
-           data-he="מופיע בקבלה ובמייל האישור. לא מצאת? זה בסדר — נאתר לפי הפרטים."
-           data-en="It appears on your receipt and confirmation email. Can't find it? That's fine — we'll locate it.">
-          מופיע בקבלה ובמייל האישור. לא מצאת? זה בסדר — נאתר לפי הפרטים.</p>
+           data-he="מופיע בקבלה ובמייל האישור. לא מצאת? כתוב 'לא ידוע' — נאתר לפי שאר הפרטים."
+           data-en="It appears on your receipt and confirmation email. Can't find it? Write 'unknown' — we'll locate it from the other details.">
+          מופיע בקבלה ובמייל האישור. לא מצאת? כתוב "לא ידוע" — נאתר לפי שאר הפרטים.</p>
       </div>
 
       <!-- 🔴 השדה הזה חייב להישאר רשות. החוק מתיר ביטול בלי נימוק,
