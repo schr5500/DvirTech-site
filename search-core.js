@@ -708,7 +708,11 @@ const VALUE_LABELS = {
   type:       { air:{he:"אוויר",en:"Air"}, aio:{he:"נוזלי (AIO)",en:"Liquid (AIO)"} },
   driveType:  { nvme:{he:"SSD NVMe (M.2)",en:"NVMe SSD (M.2)"}, "sata-ssd":{he:"SSD SATA",en:"SATA SSD"}, hdd:{he:"דיסק מכני (HDD)",en:"Hard drive (HDD)"} },
   pcieGen:    { 3:{he:"PCIe 3.0",en:"PCIe 3.0"}, 4:{he:"PCIe 4.0",en:"PCIe 4.0"}, 5:{he:"PCIe 5.0",en:"PCIe 5.0"} },
-  tier:       { 1:{he:"בסיסי",en:"Entry"}, 2:{he:"בינוני",en:"Mid"}, 3:{he:"גבוה",en:"High"}, 4:{he:"פרימיום",en:"Premium"} }
+  /* ⚠️ **חייב לכסות את כל הסולם.** `deriveTier` מייצר 1-5, וכל ערך
+     בלי תווית מוצג ללקוח כמספר חשוף בתוך רשימת סינון עברית —
+     "בינוני · גבוה · פרימיום · 5". נראה כמו אתר שבור. */
+  tier:       { 1:{he:"בסיסי",en:"Entry"}, 2:{he:"בינוני",en:"Mid"}, 3:{he:"גבוה",en:"High"},
+                4:{he:"פרימיום",en:"Premium"}, 5:{he:"עילית",en:"Enthusiast"} }
 };
 
 // יחידת מידה שנוספת לערך מספרי בתצוגת הסינון בלבד

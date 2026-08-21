@@ -548,11 +548,16 @@ function pdWarrantyHtml(it){
    אחת גנרית ואחת ספציפית, סותרות זו את זו כשהספציפית אומרת משהו אחר
    ("אחריות במעבדת מור לוי" איננה אחריות יבואן). מה שנשאר הוא התשלומים,
    שנכון תמיד. */
+/* ⚠️ **"3 תשלומים ללא עמלה" מוביל, לא "עד 12".**
+   "עד 12 תשלומים" מספר ללקוח שאפשר לפרוס — אבל לא שזה חינם. ההטבה
+   האמיתית היא שלושת הראשונים בלי אגורה, וזו גם הפריסה שהכי משתלמת
+   לדביר. אמירה שמובילה עם המספר הגדול מוכרת את הפריסה היקרה. */
 function pdPriceNote(it){
+  const free = tr("3 תשלומים ללא עמלה", "3 installments, no fee");
+  const upTo = tr("עד 12 תשלומים", "up to 12");
   return pdWarrantyText(it)
-    ? tr("עד 12 תשלומים", "Up to 12 installments")
-    : tr("כולל אחריות יבואן רשמי · עד 12 תשלומים",
-         "Official importer warranty · up to 12 installments");
+    ? free + " · " + upTo
+    : tr("אחריות יבואן רשמי", "Official importer warranty") + " · " + free + " · " + upTo;
 }
 
 function pdStockHtml(it){
@@ -672,6 +677,30 @@ function pdRenderBody(){
           <li><svg class="ui-ic"><use href="#ui-chat"/></svg>${tr("שאלה על המוצר?","Questions about this product?")}
             <a class="pd-wa" href="${pdWhatsappHref(it)}" target="_blank" rel="noopener"
                >${tr("דברו איתנו","Talk to us")}</a></li>
+        </ul>
+
+        <!-- ⚠️ פס אמון. ארבע העובדות שלקוח מחפש רגע לפני שהוא לוחץ
+             "הוסף לסל", ושעד עכשיו היו קבורות בתקנון בלבד. הן אינן
+             הבטחות חדשות — כל אחת מהן כבר נכונה במערכת:
+               · 1-3 תשלומים חינם ..... 4-payment-api.gs
+               · איסוף עצמי ללא עלות .. תקנון §5.3
+               · ביטול 14 יום ......... תקנון §8, חובה בדין
+               · סליקה חיצונית ........ תקנון §4, PCI-DSS
+             ⚠️ אין להוסיף כאן שורה שאין לה כיסוי במערכת ובתקנון. -->
+        <ul class="pd-perks pd-perks-trust">
+          <li><svg class="ui-ic"><use href="#ui-spark"/></svg><b>${
+            tr("3 תשלומים ללא עמלה","3 installments, no fee")}</b> — ${
+            tr("הסכום זהה למחיר המוצג","the amount matches the listed price")}</li>
+          <li><svg class="ui-ic"><use href="#ui-box"/></svg>${
+            tr("איסוף עצמי ללא עלות מ","Free pickup from ") + (typeof dvtText === "function"
+              ? dvtText("shipping.pickupPlace") : tr("אבן שמואל","Even Shmuel"))} ${
+            tr("· בתיאום מראש","· by prior arrangement")}</li>
+          <li><svg class="ui-ic"><use href="#ui-check"/></svg>${
+            tr("ביטול עסקה עד 14 יום","Cancel within 14 days")} — <a href="terms.html#s8">${
+            tr("בהתאם לחוק","as provided by law")}</a></li>
+          <li><svg class="ui-ic"><use href="#ui-lock"/></svg>${
+            tr("תשלום בדף סליקה מאובטח","Payment on a secure page")} — ${
+            tr("פרטי האשראי לא עוברים דרך האתר","card details never pass through this site")}</li>
         </ul>
       </div>
     </div>

@@ -411,6 +411,11 @@ function buildFacetData(){
       if(!itemMatchesFilters(item, key)) return;
       valuesOf(item, key).forEach(v => {
         const k = String(v);
+        /* 🔴 `tier: 0` אינו דרג אלא "לא סווג" — פריט שלא קיבל דירוג.
+           הוא הופיע בכרטיסי מסך כאפשרות סינון בשם "0", ליד "בסיסי"
+           ו"פרימיום". תווית לא תפתור את זה: אפשרות בשם "לא ידוע"
+           היא רעש שאף לקוח לא ילחץ עליו. נשמט. */
+        if(key === "tier" && (k === "0" || k === "")) return;
         counts.set(k, (counts.get(k) || 0) + 1);
       });
     });
