@@ -1,0 +1,209 @@
+<!DOCTYPE html>
+<!--
+  =====================================================================
+  DvirTech — ביטול עסקה (cancel.html)
+  =====================================================================
+  🔴 **הדף הזה הוא חובה בחוק, לא פיצ'ר.**
+  תקנות הגנת הצרכן (ביטול עסקה) מחייבות עוסק שמנהל אתר מכירות
+  להעמיד **קישור ייעודי לביטול עסקה**, נגיש מכל עמוד — ולא להסתפק
+  בטלפון או במייל. הקישור יושב בפוטר (site-footer.js).
+
+  ---------------------------------------------------------------------
+  שלושה כללים שאסור לשבור כאן
+  ---------------------------------------------------------------------
+  1. **שדה הסיבה הוא רשות, וכתוב במפורש שהוא רשות.**
+     החוק מתיר ביטול בלי נימוק. שדה חובה כאן יוצר מכשול שלא קיים בדין.
+
+  2. **אין הרשמה, אין התחברות, אין טוקן.**
+     כל מכשול בדרך לביטול הוא בדיוק מה שהתקנות באות למנוע. מבקשים
+     את המינימום שמאפשר למצוא את הלקוח — שם, ודרך אחת ליצור קשר.
+
+  3. **מסך אישור עם תאריך ושעה.**
+     ללקוח חייבת להישאר הוכחה שהבקשה הוגשה ומתי, כי מניין הימים
+     נספר מהמועד הזה. מוצג גם מזהה פנייה.
+
+  ⚠️ הדף **מתעד בקשה ולא מבצע ביטול.** אין כאן זיכוי כרטיס. ההחזר
+  נעשה ידנית מול SUMIT — פעולה כספית בלתי הפיכה לא רצה מטופס ציבורי.
+
+  ⚠️ עוסק פטור — אין אזכור מע"מ בשום מקום בדף.
+  =====================================================================
+-->
+<html lang="he" dir="rtl">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>DvirTech — ביטול עסקה</title>
+<meta name="description" content="טופס ביטול עסקה מקוון של DvirTech, בהתאם לחוק הגנת הצרכן.">
+<script>
+  (function(){
+    var saved = "he";
+    try { saved = localStorage.getItem("dvirtech_lang") || "he"; } catch(e) {}
+    document.documentElement.lang = saved;
+    document.documentElement.dir = saved === "he" ? "rtl" : "ltr";
+  })();
+</script>
+<link rel="preconnect" href="https://script.google.com" crossorigin>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link href="https://fonts.googleapis.com/css2?family=Rubik:wght@400;500;600;700;800;900&family=Heebo:wght@300;400;500;700&display=swap" rel="stylesheet">
+<link rel="stylesheet" href="style.css">
+<style>
+  .cxl-wrap{max-width:680px;margin:0 auto;padding:28px 16px 64px}
+  .cxl-card{background:var(--surface);border:1px solid var(--line);border-radius:20px;
+    box-shadow:var(--shadow);padding:26px 24px 30px}
+  .cxl-card h1{font-size:24px;margin:0 0 8px;color:var(--ink)}
+  .cxl-lead{font-size:14px;line-height:1.75;color:var(--ink-soft);margin:0 0 6px}
+
+  /* ⚠️ קופסת הזכויות ראשונה ולפני הטופס בכוונה: הלקוח צריך לדעת מה
+     מגיע לו **לפני** שהוא ממלא, לא אחרי. */
+  .cxl-rights{margin:18px 0 22px;background:#F3F8FF;border:1px solid #D7E7FB;
+    border-radius:14px;padding:15px 17px}
+  .cxl-rights h2{font-size:14.5px;margin:0 0 8px;color:var(--navy-900,#0E2A47)}
+  .cxl-rights ul{margin:0;padding-inline-start:18px}
+  .cxl-rights li{font-size:13px;line-height:1.75;color:var(--ink-soft);margin-bottom:5px}
+  .cxl-rights a{color:var(--blue,#1B6FE0)}
+
+  .cxl-field{margin-bottom:15px}
+  .cxl-field label{display:block;font-size:13.5px;font-weight:700;
+    color:var(--navy-900,#0E2A47);margin-bottom:6px}
+  .cxl-opt{font-weight:400;color:var(--ink-soft);font-size:12.5px}
+  .cxl-field input,.cxl-field textarea{width:100%;border:1px solid var(--line);
+    border-radius:11px;padding:11px 13px;font-family:'Heebo',sans-serif;font-size:14px;
+    background:var(--surface-2);color:var(--ink);transition:.15s}
+  .cxl-field input:focus,.cxl-field textarea:focus{outline:none;border-color:var(--blue);
+    background:#fff;box-shadow:0 0 0 3px rgba(27,111,224,.12)}
+  .cxl-field textarea{min-height:92px;resize:vertical}
+  .cxl-hint{font-size:12px;color:var(--ink-soft);margin:5px 2px 0;line-height:1.6}
+
+  .cxl-submit{width:100%;margin-top:8px}
+  .cxl-err{display:none;margin-top:12px;background:#FDECEA;border:1px solid #F3BDB8;
+    color:#B4231B;border-radius:11px;padding:11px 13px;font-size:13.5px}
+
+  /* מסך האישור */
+  .cxl-done{display:none;text-align:center;padding:8px 0 4px}
+  .cxl-done-ic{width:62px;height:62px;margin:0 auto 14px;border-radius:50%;
+    background:#DCFCE7;color:#166534;display:flex;align-items:center;justify-content:center;
+    font-size:32px;font-weight:800}
+  .cxl-done h2{font-size:21px;margin:0 0 10px;color:var(--ink)}
+  .cxl-done p{font-size:14px;line-height:1.75;color:var(--ink-soft);margin:0 0 10px}
+  .cxl-stamp{display:inline-block;margin:6px 0 14px;background:var(--surface-2);
+    border:1px solid var(--line);border-radius:12px;padding:12px 18px;text-align:start}
+  .cxl-stamp b{display:block;font-family:'Rubik',sans-serif;font-size:16px;color:var(--ink)}
+  .cxl-stamp span{font-size:12.5px;color:var(--ink-soft)}
+</style>
+</head>
+<body>
+<div id="siteHeader"></div>
+
+<main class="cxl-wrap">
+  <div class="cxl-card">
+
+    <!-- ================= הטופס ================= -->
+    <div id="cxlForm">
+      <h1 data-he="ביטול עסקה" data-en="Cancel a purchase">ביטול עסקה</h1>
+      <p class="cxl-lead"
+         data-he="אפשר לבטל כאן, בטופס. אין צורך להתקשר, ואין צורך להסביר למה."
+         data-en="You can cancel right here. No phone call, and no need to explain why.">
+        אפשר לבטל כאן, בטופס. אין צורך להתקשר, ואין צורך להסביר למה.</p>
+
+      <!-- ⚠️ הזכויות לפני הטופס. הלקוח צריך לדעת מה מגיע לו לפני
+           שהוא ממלא, לא אחרי שהוא שולח. -->
+      <div class="cxl-rights">
+        <h2 data-he="מה מגיע לך לפי חוק" data-en="Your rights under the law">מה מגיע לך לפי חוק</h2>
+        <ul>
+          <li data-he="אפשר לבטל תוך 14 יום מקבלת המוצר או ממסירת מסמך העסקה — המאוחר מביניהם."
+              data-en="You may cancel within 14 days of receiving the product or the transaction document — whichever is later.">
+            אפשר לבטל תוך 14 יום מקבלת המוצר או ממסירת מסמך העסקה — המאוחר מביניהם.</li>
+          <li data-he="אין חובה לנמק. שדה הסיבה בטופס הוא רשות בלבד."
+              data-en="No reason is required. The reason field below is entirely optional.">
+            אין חובה לנמק. שדה הסיבה בטופס הוא רשות בלבד.</li>
+          <li data-he="לאדם עם מוגבלות, אזרח ותיק או עולה חדש — תקופת הביטול ארוכה יותר לפי דין."
+              data-en="For a person with a disability, a senior citizen or a new immigrant — a longer cancellation period applies by law.">
+            לאדם עם מוגבלות, אזרח ותיק או עולה חדש — תקופת הביטול ארוכה יותר לפי דין.</li>
+          <li data-he="הפירוט המלא, לרבות דמי ביטול ומוצרים שהדין מחריג — בסעיף 8 בתקנון."
+              data-en="Full details, including cancellation fees and items excluded by law — in Section 8 of the Terms.">
+            הפירוט המלא, לרבות דמי ביטול ומוצרים שהדין מחריג —
+            <a href="terms.html">בסעיף 8 בתקנון</a>.</li>
+        </ul>
+      </div>
+
+      <div class="cxl-field">
+        <label for="cxlName" data-he="שם מלא" data-en="Full name">שם מלא</label>
+        <input id="cxlName" type="text" autocomplete="name" required>
+      </div>
+
+      <div class="cxl-field">
+        <label for="cxlPhone" data-he="טלפון" data-en="Phone">טלפון</label>
+        <input id="cxlPhone" type="tel" inputmode="tel" autocomplete="tel" placeholder="050-0000000">
+      </div>
+
+      <div class="cxl-field">
+        <label for="cxlEmail" data-he="דוא״ל" data-en="Email">דוא״ל</label>
+        <input id="cxlEmail" type="email" inputmode="email" autocomplete="email">
+        <p class="cxl-hint"
+           data-he="מספיק אחד מהשניים — טלפון או דוא״ל — כדי שנוכל לחזור אליך."
+           data-en="Either one is enough — phone or email — so we can get back to you.">
+          מספיק אחד מהשניים — טלפון או דוא״ל — כדי שנוכל לחזור אליך.</p>
+      </div>
+
+      <div class="cxl-field">
+        <label for="cxlOrder">
+          <span data-he="מספר הזמנה" data-en="Order number">מספר הזמנה</span>
+          <span class="cxl-opt" data-he="· אם יש לך אותו" data-en="· if you have it">· אם יש לך אותו</span>
+        </label>
+        <input id="cxlOrder" type="text" placeholder="DVT-4532">
+        <p class="cxl-hint"
+           data-he="מופיע בקבלה ובמייל האישור. לא מצאת? זה בסדר — נאתר לפי הפרטים."
+           data-en="It appears on your receipt and confirmation email. Can't find it? That's fine — we'll locate it.">
+          מופיע בקבלה ובמייל האישור. לא מצאת? זה בסדר — נאתר לפי הפרטים.</p>
+      </div>
+
+      <!-- 🔴 השדה הזה חייב להישאר רשות. החוק מתיר ביטול בלי נימוק,
+           והפיכתו לחובה היא מכשול שאין לו בסיס בדין. -->
+      <div class="cxl-field">
+        <label for="cxlReason">
+          <span data-he="סיבת הביטול" data-en="Reason for cancelling">סיבת הביטול</span>
+          <span class="cxl-opt" data-he="· רשות בלבד" data-en="· optional">· רשות בלבד</span>
+        </label>
+        <textarea id="cxlReason"
+          data-ph-he="אפשר להשאיר ריק. אם תכתוב — זה יעזור לנו להשתפר."
+          data-ph-en="You can leave this empty. If you do write — it helps us improve."></textarea>
+      </div>
+
+      <button class="btn btn-primary cxl-submit" id="cxlSend"
+              data-he="שליחת בקשת ביטול" data-en="Submit cancellation request">שליחת בקשת ביטול</button>
+      <div class="cxl-err" id="cxlErr"></div>
+    </div>
+
+    <!-- ================= האישור ================= -->
+    <!-- ⚠️ תאריך ושעה חובה: מניין הימים נספר מהמועד הזה, וללקוח
+         חייבת להישאר הוכחה מתי הבקשה הוגשה. -->
+    <div class="cxl-done" id="cxlDone">
+      <div class="cxl-done-ic">✓</div>
+      <h2 data-he="בקשת הביטול התקבלה" data-en="Your cancellation request was received">בקשת הביטול התקבלה</h2>
+      <div class="cxl-stamp">
+        <b id="cxlRef">—</b>
+        <span id="cxlAt">—</span>
+      </div>
+      <p data-he="נחזור אליך בהקדם כדי להשלים את הטיפול. שמור את המזהה הזה — הוא ההוכחה שהבקשה הוגשה ומתי."
+         data-en="We'll get back to you shortly to complete the process. Keep this reference — it is proof of when the request was submitted.">
+        נחזור אליך בהקדם כדי להשלים את הטיפול. שמור את המזהה הזה — הוא ההוכחה שהבקשה הוגשה ומתי.</p>
+      <p data-he="לשאלות דחופות: 050-200-0373" data-en="Urgent questions: 050-200-0373">
+        לשאלות דחופות: 050-200-0373</p>
+    </div>
+
+  </div>
+</main>
+
+<div id="siteFooter"></div>
+
+<script src="sprite.js"></script>
+<script src="i18n.js"></script>
+<script src="site-content.js"></script>
+<script src="search-core.js"></script>
+<script src="site-search.js"></script>
+<script src="site-header.js"></script>
+<script src="site-footer.js"></script>
+<script src="cancel.js"></script>
+<script src="cart.js"></script>
+</body>
+</html>

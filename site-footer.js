@@ -65,7 +65,10 @@ const SF_COLUMNS = [
       ["why-dvirtech.html", "למה DvirTech?", "Why DvirTech?"],
       ["about.html",        "אודות",         "About"],
       ["contact.html",      "צור קשר",       "Contact"],
-      ["terms.html",        "תקנון",         "Terms"]
+      ["terms.html",        "תקנון",         "Terms"],
+      /* 🔴 חובה לפי תקנות הגנת הצרכן (ביטול עסקה): קישור ייעודי
+         לביטול, נגיש מכל עמוד. אין להסיר. */
+      ["cancel.html",       "ביטול עסקה",    "Cancel a purchase"]
   ]}
 ];
 
@@ -100,6 +103,8 @@ function sfBuildHtml(minimal){
       '<a href="contact.html">' + sfEsc(sfTr("צור קשר","Contact")) + "</a>" +
       '<a href="terms.html">'   + sfEsc(sfTr("תקנון","Terms"))   + "</a>" +
       '<a href="privacy.html">' + sfEsc(sfTr("פרטיות","Privacy")) + "</a>" +
+      /* 🔴 גם כאן, ולא רק בעמודת "מידע" — הדרישה היא נגישות מכל עמוד. */
+      '<a href="cancel.html">'  + sfEsc(sfTr("ביטול עסקה","Cancel")) + "</a>" +
     "</div>";
 
   /* ⚠️ עוסק פטור — מספר העוסק מוצג בפוטר בכוונה. זו דרישת שקיפות

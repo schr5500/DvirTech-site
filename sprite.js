@@ -397,19 +397,56 @@ var DVT_CAT_ICON = {
 
    ⚠️ מי שאין לו תצלום (תת-סוגים כמו "מאווררי מארז", "עכבר") נופל
    חזרה לאיור — עדיף איור מדויק מתצלום של קטגוריה אחרת. */
+/* ==================== תמונות קטגוריה ====================
+   🔴 **מפתח לכל שורה בתפריט, לא רק לקטגוריות הראשיות.**
+   בלי זה `shEntry` נופל אחורה לתמונת האב, וחמש תת-קטגוריות של
+   "מחשבים מוכנים" מקבלות את אותה תמונה בדיוק — מה שנראה כמו תקלה.
+
+   ⚠️ **חלק מהקבצים עדיין לא קיימים, וזה בסדר.** שורה שמצביעה על
+   קובץ חסר מקבלת `onerror` שמסתיר את התמונה ומחזיר את האיור. ברגע
+   שהקובץ יופל לתיקייה הוא ייכנס לתפריט לבד, בלי לגעת בקוד כאן.
+
+   ⚠️ שמות המפתחות חייבים להתאים בדיוק לערכים ב-NAV_CATALOG_GROUPS
+   שב-site-header.js — כולל הקידומות `use:` / `sub:` / `q:`. */
 var DVT_CAT_PHOTO = {
+  /* --- רכיבי חומרה --- */
   cpu:         "images/categories/cpu.jpg",
   gpu:         "images/categories/gpu.jpg",
   ram:         "images/categories/ram.jpg",
   mobo:        "images/categories/mobo.jpg",
   storage:     "images/categories/storage.jpg",
-  psu:         "images/categories/psu.jpg",
   cooling:     "images/categories/cooling.jpg",
+  psu:         "images/categories/psu.jpg",
   "case":      "images/categories/case.jpg",
+  caseFans:    "images/categories/casefans.jpg",
+  wifi:        "images/categories/wifi.jpg",
+  paste:       "images/categories/paste.jpg",
+
+  /* --- מחשבים --- */
+  readyPc:            "images/categories/readyPc.jpg",
+  "use:gaming":       "images/categories/pc-gaming.jpg",
+  "use:creative":     "images/categories/pc-workstation.jpg",
+  "use:office":       "images/categories/pc-office.jpg",
+  "use:server":       "images/categories/pc-workstation.jpg",
+  "q:readyPc:מיני":   "images/categories/pc-mini.jpg",
+  laptop:             "images/categories/laptop.jpg",
+  "use:laptop:gaming":"images/categories/laptop-gaming.jpg",
+
+  /* --- ציוד היקפי --- */
   monitor:     "images/categories/monitor.jpg",
-  readyPc:     "images/categories/readyPc.jpg",
+  keyboard:    "images/categories/keyboard.jpg",
+  mouse:       "images/categories/mouse.jpg",
+  headset:     "images/categories/headset.jpg",
+  webcam:      "images/categories/webcam.jpg",
   peripherals: "images/categories/peripherals.jpg",
-  laptop:      "images/categories/laptop.jpg",
+  "sub:peripherals:speakers":   "images/categories/speakers.jpg",
+  "sub:peripherals:mousepad":   "images/categories/mousepad.jpg",
+  "sub:peripherals:microphone": "images/categories/microphone.jpg",
+
+  /* --- אביזרים ---
+     ⚠️ כאן הנפילה אחורה לתמונת האב **נכונה**: כולם אביזרים נלווים
+     ותמונה משותפת לא נראית כמו תקלה, בניגוד למחשבים. */
+  extras:      "images/categories/accessories.jpg",
   accessories: "images/categories/accessories.jpg"
 };
 function dvtCatPhoto(cat){ return DVT_CAT_PHOTO[cat] || null; }

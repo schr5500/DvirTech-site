@@ -1613,7 +1613,13 @@ footer::after{ content:""; display:block; height: var(--fab-safe) }
 
 /* תצלום קטגוריה בתפריט. ⚠️ cover ולא contain: העיגול קטן (26px)
    ותמונה עם שוליים לבנים הייתה נראית כמו כתם. */
-.navcat-ic--photo{background-size:cover;background-position:center;background-repeat:no-repeat}
+/* ⚠️ התמונה היא <img> ולא רקע — רק כך יש onerror שמחזיר לאיור.
+   האיור יושב מתחת (position:absolute) ומתגלה כשה-img מסיר את עצמו. */
+.navcat-ic--photo{position:relative; overflow:hidden; background:#F1F6FC}
+.navcat-ic--photo > img{position:absolute; inset:0; width:100%; height:100%;
+  object-fit:cover; z-index:1}
+.navcat-ic--photo > .navcat-fallback{position:absolute; inset:0; margin:auto;
+  width:60%; height:60%; z-index:0; opacity:.55}
 .navcat-link:hover .navcat-ic--photo{filter:brightness(1.06)}
 
 /* בורר תחום החיפוש בראש החלונית */
