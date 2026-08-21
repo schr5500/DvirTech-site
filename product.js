@@ -100,6 +100,89 @@ function pdPlaceholder(it, cat, withName){
 const PD_IMG_HOOKS =
   `onload="this.parentNode.classList.add('dvt-art-on')" onerror="this.remove()"`;
 
+/* ==================== זכוכית מגדלת ====================
+   🔴 **מופעלת רק כשיש תמונה אמיתית ורק במכשיר עם עכבר.**
+   `matchMedia("(hover: hover) and (pointer: fine)")` הוא הבדיקה
+   הנכונה — לא רוחב מסך. טאבלט רחב עדיין מגע, ולפטופ צר עדיין עכבר.
+
+   ⚠️ העדשה היא אלמנט אחד עם `background-image` של אותה תמונה
+   מוגדלת. אין טעינה שנייה מהרשת, ואין ספרייה. */
+const PD_ZOOM = 2.5;
+
+function pdZoomInit(){
+  const frame = document.getElementById("pdArtFrame");
+  const lens  = document.getElementById("pdZoomLens");
+  if(!frame || !lens) return;
+
+  const src = frame.getAttribute("data-zoom");
+  /* אין תמונה אמיתית → אין מה להגדיל. איור קטגוריה מוגדל נראה
+     כמו באג, לא כמו פיצ'ר. */
+  if(!src){ lens.remove(); return; }
+
+  const fine = window.matchMedia && window.matchMedia("(hover: hover) and (pointer: fine)").matches;
+  if(!fine){ lens.remove(); return; }
+
+  lens.style.backgroundImage = "url('" + src + "')";
+  frame.classList.add("pd-art-zoomable");
+
+  function move(e){
+    const r = frame.getBoundingClientRect();
+    const x = e.clientX - r.left, y = e.clientY - r.top;
+    if(x < 0 || y < 0 || x > r.width || y > r.height){ hide(); return; }
+    const px = (x / r.width) * 100, py = (y / r.height) * 100;
+    lens.style.backgroundSize = (r.width * PD_ZOOM) + "px " + (r.height * PD_ZOOM) + "px";
+    lens.style.backgroundPosition = px + "% " + py + "%";
+    /* העדשה נצמדת לפינה הנגדית לסמן כדי לא להסתיר את מה שמסתכלים עליו. */
+    lens.classList.toggle("pd-lens-left", px > 50);
+    lens.classList.add("on");
+  }
+  function hide(){ lens.classList.remove("on"); }
+
+  frame.addEventListener("mousemove", move);
+  frame.addEventListener("mouseleave", hide);
+}
+
+/* ==================== שירותי DvirTech בדף המוצר ====================
+   🔴 זה מה שמצדיק לקנות כאן ולא ב-KSP, ועד עכשיו הוא לא הופיע בדף
+   שבו הלקוח מחליט. שלוש הצעות, כולן קיימות בפועל:
+     · הרכבה והתקנה ....... נמכר בקופה (DVT_SERVICES ב-checkout.js)
+     · ביקור טכנאי ......... מתואם אישית, תקנון §6
+     · DvirTech Care ....... מנוי שנתי, support.html#care
+
+   ⚠️ **אין כאן מחירים ואין "הוסף לסל".** שירות דורש תיאום ותמחור
+   לפי מקרה, והצגת מחיר קבוע בדף מוצר תיצור הבטחה שלא תמיד אפשר
+   לעמוד בה. הקישור מוביל לדף התמיכה, שם המחירים מעודכנים במקום אחד.
+
+   ⚠️ לא מוצג על קטגוריית "שירותים" — שם זו כפילות. */
+function pdServicesHtml(cat){
+  if(cat === "services") return "";
+  const row = (icon, title, text, href, cta) => `
+    <a class="pd-svc" href="${href}">
+      <svg class="ui-ic" aria-hidden="true"><use href="#${icon}"/></svg>
+      <span class="pd-svc-txt"><b>${title}</b><span>${text}</span></span>
+      <span class="pd-svc-cta">${cta}</span>
+    </a>`;
+  return `
+    <section class="pd-section pd-services">
+      <h2>${tr("גם זה אצלנו","We also do this")}</h2>
+      <p class="pd-svc-lead">${tr(
+        "אנחנו לא רק מוכרים את הרכיב — אפשר גם שנרכיב, נתקין ונהיה שם אחר כך.",
+        "We don't just sell the part — we can build it, install it, and be there afterwards.")}</p>
+      ${row("ui-tools", tr("הרכבה והתקנה","Assembly & setup"),
+            tr("מרכיבים, מתקינים מערכת ובודקים שהכל עובד לפני שזה יוצא.",
+               "We build it, install the OS and test everything before it ships."),
+            "checkout.html", tr("נבחר בקופה","Choose at checkout"))}
+      ${row("ui-pin", tr("ביקור טכנאי","On-site visit"),
+            tr("קריית גת והסביבה, ולפי זמינות גם השפלה והמרכז — בתיאום מראש.",
+               "Kiryat Gat area, and by availability the Shfela and centre — by arrangement."),
+            "support.html", tr("לפרטים","Details"))}
+      ${row("ui-headset", "DvirTech Care",
+            tr("מנוי שנתי לתמיכה וייעוץ — מישהו לדבר איתו כשמשהו לא עובד.",
+               "A yearly support subscription — someone to call when something breaks."),
+            "support.html#care", tr("לחבילות","See plans"))}
+    </section>`;
+}
+
 function pdArt(it, cat){
   const ph = pdPlaceholder(it, cat, true);
   return it.image
@@ -614,10 +697,14 @@ function pdRenderBody(){
   const canBuy   = pdInStock(it);
   const onSale   = (typeof dvtIsOnSale === "function") && dvtIsOnSale(it) && canBuy;
 
+  /* ⚠️ אחרי כתיבת ה-HTML, אחרת האלמנטים עוד לא קיימים. */
+  const pdRenderDone = () => { try{ pdZoomInit(); }catch(e){} };
   document.getElementById("pdBody").innerHTML = `
     <div class="pd-main">
       <div class="pd-media">
-        <div class="pd-art pd-art-frame">${pdArt(it, PD_CAT)}</div>
+        <div class="pd-art pd-art-frame" id="pdArtFrame"
+             data-zoom="${it.image ? pdEsc(it.image) : ""}">${pdArt(it, PD_CAT)}</div>
+        <div class="pd-zoom-lens" id="pdZoomLens" aria-hidden="true"></div>
         <!-- גילוי נאות ליד התמונה עצמה. הנוסח המחייב המלא נמצא בסעיף 2
              בתקנון; כאן רק שורה קצרה שהלקוח באמת רואה. -->
         <p class="pd-img-note">${tr("תמונות להמחשה בלבד. המפרט הכתוב הוא המחייב.",
@@ -724,11 +811,16 @@ function pdRenderBody(){
         : `<p class="pd-spec-note">${tr("המפרט המלא של המוצר הזה עדיין לא הוזן. דברו איתנו ונשלים לכם את הפרטים.",
                                         "The full specification for this product hasn't been entered yet. Talk to us and we'll fill in the details.")}</p>`}
       </section>
+
+      ${pdServicesHtml(PD_CAT)}
     </div>`;
 
   // ⚠️ הטמפלייט נבנה מחדש בכל רינדור (החלפת שפה / רענון קטלוג ברקע),
   // ולכן הכמות והסה"כ חייבים להיכתב אחריו ולא להישאר על 1 של ה-HTML.
   pdRenderTotal();
+  /* ⚠️ אותה סיבה בדיוק: העדשה נקשרת לאלמנטים שנוצרו זה עתה, ולכן
+     חייבת להיקרא **אחרי** כתיבת ה-HTML ובכל רינדור מחדש. */
+  pdRenderDone();
 }
 
 /* תיאור: אם יש עמודת desc בגיליון — מציגים אותה. אין עדיין כזו, ולכן
