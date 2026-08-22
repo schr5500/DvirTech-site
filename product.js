@@ -158,8 +158,28 @@ function pdZoomInit(){
 
 /* ==================== שירותי DvirTech בדף המוצר ====================
    🔴 זה מה שמצדיק לקנות כאן ולא ב-KSP, ועד עכשיו הוא לא הופיע בדף
-   שבו הלקוח מחליט. שלוש הצעות, כולן קיימות בפועל:
-     · הרכבה והתקנה ....... נמכר בקופה (DVT_SERVICES ב-checkout.js)
+   שבו הלקוח מחליט.
+
+   🔴🔴 **תוקן 23.08 — השורה הראשונה כאן הייתה פשוט לא נכונה.**
+   דביר: "בדף המוצר — הרכבה והתקנה — נבחר בקופה — זה לא, זה מופיע
+   רק בדף השירות". נבדק ב-`DVT_SERVICES` (checkout.js) ואין בו שום
+   פריט הרכבה. מה שבאמת קיים הוא **שני דברים נפרדים** שהתערבבו:
+
+     · **הרכבה ללא עלות** — לא נבחרת ולא נמכרת. `withFreeAssemblyLine`
+       מוסיפה את השורה `assembly-included` ב-0 ₪ אוטומטית כשבעגלה
+       יש מחשב שלם. לכן "נבחר בקופה" היה שגוי פעמיים: גם לא נבחר,
+       וגם לא בתשלום.
+     · **התקנות** — Windows + רישיון 300 / בלי רישיון 200 / התקנת
+       תוכנות 80 / העברת נתונים 200. אלה **כן** בקופה, אבל רק
+       כשיש מחשב בעגלה (`requiresPc`), ולכן אי אפשר להבטיח אותם
+       מדף מוצר של עכבר.
+
+   ⚠️ **הקישור ל-checkout.html הוסר.** דף התשלום עם עגלה ריקה אינו
+   מציג שום שירות — הקישור הוביל למבוי סתום.
+
+   ארבע ההצעות כאן, כולן קיימות בפועל:
+     · הרכבה ללא עלות ..... withFreeAssemblyLine ב-checkout.js
+     · התקנות ............. DVT_SERVICES ב-checkout.js
      · ביקור טכנאי ......... מתואם אישית, תקנון §6
      · DvirTech Care ....... מנוי שנתי, support.html#care
 
@@ -182,10 +202,14 @@ function pdServicesHtml(cat){
       <p class="pd-svc-lead">${tr(
         "אנחנו לא רק מוכרים את הרכיב — אפשר גם שנרכיב, נתקין ונהיה שם אחר כך.",
         "We don't just sell the part — we can build it, install it, and be there afterwards.")}</p>
-      ${row("ui-tools", tr("הרכבה והתקנה","Assembly & setup"),
-            tr("מרכיבים, מתקינים מערכת ובודקים שהכל עובד לפני שזה יוצא.",
-               "We build it, install the OS and test everything before it ships."),
-            "checkout.html", tr("נבחר בקופה","Choose at checkout"))}
+      ${row("ui-tools", tr("הרכבה ללא עלות","Assembly at no charge"),
+            tr("קונים כאן את כל הרכיבים למחשב שלם? מרכיבים, בודקים התאמה ומריצים — בלי תוספת מחיר.",
+               "Buying all the parts for a complete PC here? We build it, check the fit and run it in — at no extra charge."),
+            "builder.html", tr("לבונה","Open the builder"))}
+      ${row("ui-check", tr("התקנת Windows ותוכנות","Windows & software setup"),
+            tr("מערכת, רישיון, תוכנות והעברת נתונים מדיסק שתביא. נבחר בקופה כשיש מחשב בהזמנה.",
+               "OS, license, software and data transfer from a drive you send along. Chosen at checkout when the order includes a PC."),
+            "support.html", tr("למחירים","See prices"))}
       ${row("ui-pin", tr("ביקור טכנאי","On-site visit"),
             tr("קריית גת והסביבה, ולפי זמינות גם השפלה והמרכז — בתיאום מראש.",
                "Kiryat Gat area, and by availability the Shfela and centre — by arrangement."),
@@ -777,7 +801,11 @@ function pdRenderBody(){
             ? tr("משלוח ", "Delivery in ") + dvtText("shipping.expressDays")
             : tr("משלוח 2-5 ימי עסקים","Delivery in 2-5 business days"))}</li>
           <li><svg class="ui-ic"><use href="#ui-shield"/></svg>${tr("אחריות מלאה על כל רכיב","Full warranty on every part")}</li>
-          <li><svg class="ui-ic"><use href="#ui-tools"/></svg>${tr("הרכבה והתקנה בתוספת תשלום","Assembly and setup available")}</li>
+          <!-- ⚠️ **היה "הרכבה והתקנה בתוספת תשלום" — הפוך מהאמת.**
+               הרכבת מחשב שלם שנקנה כאן היא **ללא עלות** ונוספת
+               אוטומטית (assembly-included ב-0 ₪). מה שכן בתשלום זה
+               ההתקנות, והן ממילא מפורטות בהמשך הדף ב-pdServicesHtml. -->
+          <li><svg class="ui-ic"><use href="#ui-tools"/></svg>${tr("הרכבה ללא עלות במחשב שלם","Free assembly on a complete PC")}</li>
           <li><svg class="ui-ic"><use href="#ui-chat"/></svg>${tr("שאלה על המוצר?","Questions about this product?")}
             <a class="pd-wa" href="${pdWhatsappHref(it)}" target="_blank" rel="noopener"
                >${tr("דברו איתנו","Talk to us")}</a></li>
@@ -802,9 +830,17 @@ function pdRenderBody(){
           <li><svg class="ui-ic"><use href="#ui-check"/></svg>${
             tr("ביטול עסקה עד 14 יום","Cancel within 14 days")} — <a href="terms.html#s8">${
             tr("בהתאם לחוק","as provided by law")}</a></li>
+          <!-- ⚠️ **נוסח 23.08.** קודם היה כתוב "פרטי האשראי לא עוברים
+               דרך האתר", ודביר שאל "מה זאת אומרת?". העובדה עצמה נכונה
+               ומדויקת — `beginredirect` ב-4-payment-api.gs מעביר את
+               הלקוח לדף של חברת הסליקה, והמספר מוקלד שם ולא כאן —
+               אבל **הניסוח תיאר מנגנון פנימי במקום להרגיע**. אם בעל
+               העסק לא הבין אותו, לקוח בוודאי לא.
+               ⚠️ הניסוח החדש אומר את אותה עובדה בדיוק, בלי להבטיח
+               יותר ממנה: אנחנו לא רואים ולא שומרים. ראה תקנון §10.3. -->
           <li><svg class="ui-ic"><use href="#ui-lock"/></svg>${
-            tr("תשלום בדף סליקה מאובטח","Payment on a secure page")} — ${
-            tr("פרטי האשראי לא עוברים דרך האתר","card details never pass through this site")}</li>
+            tr("התשלום מתבצע בדף המאובטח של חברת הסליקה","Payment happens on the clearing company's secure page")} — ${
+            tr("אנחנו לא רואים ולא שומרים את מספר הכרטיס","we never see or store your card number")}</li>
         </ul>
       </div>
     </div>
