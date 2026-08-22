@@ -422,8 +422,26 @@
 
 .pd-media { position: sticky; top: 90px; }
 
-/* ---------- זכוכית מגדלת ---------- */
-.pd-art-zoomable{cursor:zoom-in}
+/* ---------- זכוכית מגדלת ----------
+   🔴 **עיגול שנע עם הסמן**, לא פאנל בצד. הגרסה הקודמת הציגה ריבוע
+   קבוע ליד התמונה, וזה נקרא כמו תצוגה נפרדת ולא כמו הגדלה.
+
+   ⚠️ `pointer-events:none` הוא קריטי ולא קישוט: העדשה יושבת מתחת
+   לסמן, ובלעדיו היא תופסת את ה-mousemove, ה-mouseleave יורה מיד,
+   והעדשה מהבהבת ונעלמת.
+   ⚠️ `.pd-art` חייב `position:relative` — העדשה ממוקמת יחסית אליו. */
+.pd-art-frame{position:relative}
+.pd-art-zoomable{cursor:crosshair}
+.pd-zoom-lens{
+  position:absolute; width:190px; height:190px; border-radius:50%;
+  border:3px solid #fff; background-repeat:no-repeat; background-color:#fff;
+  box-shadow:0 6px 26px rgba(14,42,71,.28), 0 0 0 1px rgba(14,42,71,.12);
+  opacity:0; visibility:hidden; transition:opacity .12s;
+  pointer-events:none; z-index:30;
+}
+.pd-zoom-lens.on{opacity:1; visibility:visible}
+/* ⚠️ במגע העדשה מוסרת מה-DOM ב-JS; זו רשת ביטחון בלבד. */
+@media (hover: none), (pointer: coarse){ .pd-zoom-lens{display:none} }
 
 /* ---------- שירותי DvirTech ---------- */
 .pd-services .pd-svc-lead{margin:0 0 12px;font-size:13.5px;color:var(--ink-soft,#6B7A8D);line-height:1.6}
@@ -441,21 +459,7 @@
   .pd-svc{flex-wrap:wrap}
   .pd-svc-cta{width:100%;text-align:end}
 }
-.pd-zoom-lens{
-  position:absolute; inset-inline-end:-8px; top:0;
-  width:280px; height:280px; border-radius:14px;
-  border:1px solid var(--line,#E3EAF3); background:#fff;
-  background-repeat:no-repeat; box-shadow:0 12px 34px rgba(14,42,71,.18);
-  opacity:0; visibility:hidden; transition:opacity .12s;
-  pointer-events:none; z-index:20;
-}
-.pd-zoom-lens.on{opacity:1; visibility:visible}
-/* נצמדת לצד הנגדי לסמן, כדי לא להסתיר את מה שמסתכלים עליו */
-.pd-zoom-lens.pd-lens-left{inset-inline-end:auto; inset-inline-start:-8px}
-/* ⚠️ העדשה יוצאת מהמסגרת ולכן ההורה חייב להיות ממוקם ולא לחתוך */
 .pd-media{position:sticky; overflow:visible}
-/* ⚠️ במגע היא מוסרת מה-DOM ב-JS; הכלל כאן הוא רשת ביטחון בלבד */
-@media (hover: none), (pointer: coarse){ .pd-zoom-lens{display:none} }
 @media (max-width: 859px) { .pd-media { position: static; } }
 .pd-art {
   background: #fff; border: 1px solid var(--line, #e2eaf2); border-radius: var(--radius, 16px);

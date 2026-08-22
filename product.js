@@ -125,15 +125,29 @@ function pdZoomInit(){
   lens.style.backgroundImage = "url('" + src + "')";
   frame.classList.add("pd-art-zoomable");
 
+  /* 🔴 **עדשה עגולה שנעה עם הסמן, לא פאנל בצד.**
+     הגרסה הקודמת הציגה ריבוע קבוע ליד התמונה — דביר: "אני מצביע
+     על משהו ונפתח לי בצד ריבוע". זכוכית מגדלת אמורה להגדיל
+     **במקום שמצביעים עליו**, ולכן העדשה ממורכזת על הסמן.
+
+     ⚠️ `pointer-events:none` על העדשה הוא קריטי: בלעדיו העדשה
+     נמצאת מתחת לסמן, תופסת את ה-mousemove, ו-mouseleave יורה
+     מיד — העדשה מהבהבת ונעלמת. */
   function move(e){
     const r = frame.getBoundingClientRect();
     const x = e.clientX - r.left, y = e.clientY - r.top;
     if(x < 0 || y < 0 || x > r.width || y > r.height){ hide(); return; }
-    const px = (x / r.width) * 100, py = (y / r.height) * 100;
+
+    const size = lens.offsetWidth || 180;
+    /* מיקום העדשה: ממורכזת על הסמן. */
+    lens.style.left = (x - size/2) + "px";
+    lens.style.top  = (y - size/2) + "px";
+
+    /* התמונה בתוך העדשה מוגדלת פי PD_ZOOM, וממוקמת כך שהנקודה
+       שמתחת לסמן תופיע במרכז העדשה. */
     lens.style.backgroundSize = (r.width * PD_ZOOM) + "px " + (r.height * PD_ZOOM) + "px";
-    lens.style.backgroundPosition = px + "% " + py + "%";
-    /* העדשה נצמדת לפינה הנגדית לסמן כדי לא להסתיר את מה שמסתכלים עליו. */
-    lens.classList.toggle("pd-lens-left", px > 50);
+    lens.style.backgroundPosition =
+      (-(x * PD_ZOOM - size/2)) + "px " + (-(y * PD_ZOOM - size/2)) + "px";
     lens.classList.add("on");
   }
   function hide(){ lens.classList.remove("on"); }
@@ -702,9 +716,12 @@ function pdRenderBody(){
   document.getElementById("pdBody").innerHTML = `
     <div class="pd-main">
       <div class="pd-media">
+        <!-- ⚠️ העדשה **בתוך** המסגרת ולא לצידה. כשהיא הייתה אחות,
+             position:absolute נמדד יחסית ל-.pd-media (sticky) בזמן
+             שהקואורדינטות חושבו יחסית למסגרת — היסט קבוע. -->
         <div class="pd-art pd-art-frame" id="pdArtFrame"
-             data-zoom="${it.image ? pdEsc(it.image) : ""}">${pdArt(it, PD_CAT)}</div>
-        <div class="pd-zoom-lens" id="pdZoomLens" aria-hidden="true"></div>
+             data-zoom="${it.image ? pdEsc(it.image) : ""}">${pdArt(it, PD_CAT)}<div
+             class="pd-zoom-lens" id="pdZoomLens" aria-hidden="true"></div></div>
         <!-- גילוי נאות ליד התמונה עצמה. הנוסח המחייב המלא נמצא בסעיף 2
              בתקנון; כאן רק שורה קצרה שהלקוח באמת רואה. -->
         <p class="pd-img-note">${tr("תמונות להמחשה בלבד. המפרט הכתוב הוא המחייב.",
