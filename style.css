@@ -214,7 +214,10 @@ nav a.nav-accent:hover{filter:brightness(1.12)}
 }
 .hero-full .hero-copy{direction:rtl;max-width:430px}
 .hero-copy h1{margin-bottom:16px}
-.hero-copy .hero-lede{font-size:17.5px;color:var(--ink-soft);margin:0 0 30px;max-width:32ch;line-height:1.65}
+/* ⚠️ `margin-inline:auto` ולא רק `text-align`. הפסקה צרה מהמכל
+   (32ch מול 430px), ובלי שוליים אוטומטיים הבלוק נצמד לקצה
+   ההתחלה — שב-RTL הוא ימין. הטקסט נראה מרוכז, הבלוק לא היה. */
+.hero-copy .hero-lede{font-size:17.5px;color:var(--ink-soft);margin:0 auto 30px;max-width:32ch;line-height:1.65}
 /* .btn ברירת המחדל היא width:100% (נכון לכפתורים בתוך כרטיס/סיידבר),
    אבל כאן הכפתור יושב לצד טקסט וצריך רק לעטוף את התוכן שלו.
    ⚠️ הסלקטור מפורש כ-".hero-copy .hero-cta" (במקום ".hero-cta" בלבד)
@@ -1101,10 +1104,23 @@ header.site-header--blue .lang-btn.active{background:#fff;color:#0B2C4D}
 
 /* ---------- תמונת המחשב בתחתית דף צור קשר ----------
    הרנדר החדש מגיע עם רקע שקוף, ולכן הוא פשוט "צף" על הכרטיס הבהיר
-   בדיוק כמו במוקאפ — בלי מסגרת כהה ובלי מלבן שחור. */
+   בדיוק כמו במוקאפ — בלי מסגרת כהה ובלי מלבן שחור.
+
+   🔴 **הוזז ימינה 23.08.** שלוש תוויות היתרונות ("התאמה מלאה
+   לצרכים" · "מחירים הוגנים" · "אחריות יצרן") ממוקמות
+   `position:absolute; left:18px` בתוך אותו תא, והמחשב ישב צמוד
+   לקצה השמאלי — כך שהכיתוב נחת **על הפאנל הקדמי** ולא לידו.
+
+   ⚠️ התיקון הוא ב-`margin-inline-end` ולא ב-`left` של התוויות:
+   דביר ביקש במפורש ש**רק המחשב יזוז**, והתוויות יישארו במקומן
+   ורק יפסיקו לשבת עליו.
+
+   ⚠️ `margin-inline-end` בעברית (RTL) הוא השוליים ה**שמאליים**,
+   ולכן הגדלתו דוחפת את התמונה ימינה. 56px במקום 20px = הזזה של
+   36px, מספיק כדי שהתוויות ינשקו את הקצה ולא יכסו אותו. */
 .contact-pc-img{
   width:100%;max-width:420px;height:auto;display:block;
-  margin-inline-end:20px;margin-inline-start:auto;
+  margin-inline-end:56px;margin-inline-start:auto;
   filter:drop-shadow(0 22px 38px rgba(14,42,71,.28));
 }
 @media(max-width:760px){

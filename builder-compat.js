@@ -1737,7 +1737,13 @@ function dvtRecommendFor(cat, it, useCase){
 
   if(useCase === "gaming"){
     if(cat === "gpu")     return (t >= 4 && !dvtGpuIsWorkstation(it.name)) ? ok() : null;
-    if(cat === "cpu")     return (t >= 3 && (num("cores") || 0) >= 6) ? ok() : null;
+    /* 🔴 **הודק 23.08 מ-`t >= 3` ל-`t >= 4`.** נמדד על הקטלוג החי:
+       הרף הישן תייג **45 מתוך 59 המעבדים (76%)** כ"מומלץ למשחקים".
+       תג שמופיע על שלושה מכל ארבעה פריטים אינו המלצה אלא רעש — בדיוק
+       השיקול שכבר הוציא מכאן את ספקי הכוח (88%) ואת האחסון המשרדי.
+       ⚠️ `t >= 4 && cores >= 6` נותן 32 מתוך 59 (54%), ו-`cores >= 8`
+       כמעט לא משנה (30) — כלומר הדרג הוא המסנן האמיתי, לא הליבות. */
+    if(cat === "cpu")     return (t >= 4 && (num("cores") || 0) >= 6) ? ok() : null;
     if(cat === "ram")     return (gb >= 32 && (num("speedMhz") || 0) >= 6000) ? ok() : null;
     if(cat === "storage") return (dvtIsNvmeDrive(it) && (num("pcieGen") || 0) >= 4 && gb >= 1000) ? ok() : null;
     if(cat === "cooling") return (num("tdpRating") || 0) >= 180 ? ok() : null;
