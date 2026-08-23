@@ -206,9 +206,10 @@
        (16.08.2026) והמספרים הם כמות המוצרים בפועל:
          Gigabyte 270 · Antec 112 · Corsair 111 · ASUS 73 · Lenovo 63
          Western Digital 55 · Intel 36 · AMD 25   (נמדד 23.08 על הקטלוג החי)
-       ⚠️ **חסרים בפס ויש להם מוצרים:** Seagate 38 · Samsung 32 ·
-          Crucial 30 · Logitech 29. להוסיף — צריך את הלוגו שלהם
-          בתמונת המקור, ואז tools/crop-brands.py.
+       🔴 **חסרים בפס — Antec ו-ASUS.** הם היו בתמונת המקור הקודמת
+          ונשמטו מהחדשה, ושניהם גדולים: **Antec 112 מוצרים (שני
+          בגודלו) · ASUS 73**. להוסיף אותם לתמונת המקור ולהריץ
+          tools/crop-brands.py — הם יופיעו לבד.
        ⚠️ לפני שמוסיפים מותג — לוודא שיש לו מוצרים. הקישור מוביל
        לסינון לפי אותו מותג, כך שמותג בלי מוצרים ייתן דף ריק והלקוח
        יראה מיד שמשהו לא נכון.
@@ -236,19 +237,23 @@
        הדדית.** דפדפן **אינו טוען** תמונה עצלה שיושבת ב-`display:none`.
        ה-CSS מסתיר את הלוגו עד ש-`onload` יירה, ו-`onload` לא יירה
        כל עוד הוא מוסתר — כלומר הלוגואים לא הופיעו לעולם, בלי שום
-       שגיאה בקונסולה. שמונה קבצים של ~12KB לא צריכים טעינה עצלה.
+       שגיאה בקונסולה. שלושה-עשר קבצים של ~40KB לא צריכים טעינה עצלה.
        ⚠️ הלוגואים נחתכים ב-tools/crop-brands.py. -->
   <h2 class="brand-strip-h">מותגים שאנו מוכרים</h2>
   <div class="brand-strip">
     <a href="products.html?cat=all&brand=Gigabyte"><img class="brand-logo-img" src="images/brands/gigabyte.png" alt="GIGABYTE" onload="if(this.naturalWidth>1)this.closest('a').classList.add('has-logo')" onerror="this.remove()"><span>GIGABYTE</span></a>
-    <a href="products.html?cat=all&brand=Corsair"><img class="brand-logo-img" src="images/brands/corsair.png" alt="CORSAIR" onload="if(this.naturalWidth>1)this.closest('a').classList.add('has-logo')" onerror="this.remove()"><span>CORSAIR</span></a>
     <a href="products.html?cat=all&brand=Antec"><img class="brand-logo-img" src="images/brands/antec.png" alt="ANTEC" onload="if(this.naturalWidth>1)this.closest('a').classList.add('has-logo')" onerror="this.remove()"><span>ANTEC</span></a>
+    <a href="products.html?cat=all&brand=Corsair"><img class="brand-logo-img" src="images/brands/corsair.png" alt="CORSAIR" onload="if(this.naturalWidth>1)this.closest('a').classList.add('has-logo')" onerror="this.remove()"><span>CORSAIR</span></a>
     <a href="products.html?cat=all&brand=ASUS"><img class="brand-logo-img" src="images/brands/asus.png" alt="ASUS" onload="if(this.naturalWidth>1)this.closest('a').classList.add('has-logo')" onerror="this.remove()"><span>ASUS</span></a>
     <a href="products.html?cat=all&brand=Lenovo"><img class="brand-logo-img" src="images/brands/lenovo.png" alt="LENOVO" onload="if(this.naturalWidth>1)this.closest('a').classList.add('has-logo')" onerror="this.remove()"><span>LENOVO</span></a>
     <a href="products.html?cat=all&brand=Kingston"><img class="brand-logo-img" src="images/brands/kingston.png" alt="KINGSTON" onload="if(this.naturalWidth>1)this.closest('a').classList.add('has-logo')" onerror="this.remove()"><span>KINGSTON</span></a>
-    <a href="products.html?cat=all&brand=AMD"><img class="brand-logo-img" src="images/brands/amd.png" alt="AMD" onload="if(this.naturalWidth>1)this.closest('a').classList.add('has-logo')" onerror="this.remove()"><span>AMD</span></a>
     <a href="products.html?cat=all&brand=Western%20Digital"><img class="brand-logo-img" src="images/brands/western-digital.png" alt="WD" onload="if(this.naturalWidth>1)this.closest('a').classList.add('has-logo')" onerror="this.remove()"><span>WD</span></a>
+    <a href="products.html?cat=all&brand=Seagate"><img class="brand-logo-img" src="images/brands/seagate.png" alt="SEAGATE" onload="if(this.naturalWidth>1)this.closest('a').classList.add('has-logo')" onerror="this.remove()"><span>SEAGATE</span></a>
     <a href="products.html?cat=all&brand=Intel"><img class="brand-logo-img" src="images/brands/intel.png" alt="INTEL" onload="if(this.naturalWidth>1)this.closest('a').classList.add('has-logo')" onerror="this.remove()"><span>INTEL</span></a>
+    <a href="products.html?cat=all&brand=Samsung"><img class="brand-logo-img" src="images/brands/samsung.png" alt="SAMSUNG" onload="if(this.naturalWidth>1)this.closest('a').classList.add('has-logo')" onerror="this.remove()"><span>SAMSUNG</span></a>
+    <a href="products.html?cat=all&brand=Crucial"><img class="brand-logo-img" src="images/brands/crucial.png" alt="CRUCIAL" onload="if(this.naturalWidth>1)this.closest('a').classList.add('has-logo')" onerror="this.remove()"><span>CRUCIAL</span></a>
+    <a href="products.html?cat=all&brand=Logitech"><img class="brand-logo-img" src="images/brands/logitech.png" alt="LOGITECH" onload="if(this.naturalWidth>1)this.closest('a').classList.add('has-logo')" onerror="this.remove()"><span>LOGITECH</span></a>
+    <a href="products.html?cat=all&brand=AMD"><img class="brand-logo-img" src="images/brands/amd.png" alt="AMD" onload="if(this.naturalWidth>1)this.closest('a').classList.add('has-logo')" onerror="this.remove()"><span>AMD</span></a>
   </div>
   <!-- ⚠️ ההבהרה חייבת להיות **ליד** הלוגואים ולא רק בתקנון: לקוח
        שרואה לוגו של Intel לא ילך לקרוא §14 כדי להבין שאיננו נציגים
