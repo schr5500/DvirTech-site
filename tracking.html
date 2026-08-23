@@ -119,6 +119,27 @@
   .trk-card{padding:20px 16px 24px;border-radius:16px}
   .trk-ordno{font-size:19px}
 }
+
+/* שדה קוד המעקב — ראה ההערה ב-#trkEmpty. */
+.trk-code-form{display:flex;gap:9px;margin:16px 0 0;justify-content:center;flex-wrap:wrap}
+/* ⚠️ direction:ltr — הקוד הוא base64, רגיש לרישיות ולסדר. בשדה
+   עברי הדפדפן היה הופך את סדר התצוגה בזמן ההקלדה. */
+.trk-code-in{flex:1;min-width:220px;max-width:330px;direction:ltr;text-align:left;
+  font-family:Consolas,Menlo,monospace;font-size:15.5px;letter-spacing:1px;
+  padding:12px 14px;border:1px solid var(--line);border-radius:11px;
+  background:var(--surface);color:var(--ink)}
+.trk-code-in:focus{outline:none;border-color:var(--blue);box-shadow:0 0 0 3px rgba(27,111,224,.14)}
+.trk-code-btn{background:var(--blue);color:#fff;border:0;border-radius:11px;
+  padding:12px 26px;font-size:15px;font-weight:800;cursor:pointer}
+.trk-code-btn:hover{background:#1560c8}
+.trk-code-err{margin-top:11px;font-size:13px;color:#B42318}
+.trk-code-err[hidden]{display:none}
+
+.trk-mycode{margin-top:7px}
+.trk-mycode[hidden]{display:none}
+/* ⚠️ ltr — base64, רגיש לרישיות ולסדר. */
+.trk-mycode-v{font-family:Consolas,Menlo,monospace;font-weight:800;letter-spacing:.8px;
+  color:var(--ink);direction:ltr;display:inline-block;user-select:all}
 </style>
 </head>
 <body>
@@ -143,12 +164,27 @@
     </div>
   </div>
 
-  <!-- מצב ריק / טוקן שגוי -->
+  <!-- מצב ריק / טוקן שגוי / כניסה ישירה לדף
+       🔴 **נוסף 23.08 — שדה להזנת קוד מעקב.** דביר: "דף המעקב באתר
+       יכלול שורה שאפשר להכניס לשם את מספר המעקב".
+       ⚠️ עד עכשיו הדף היה שמיש **רק** דרך קישור עם טוקן. לקוח
+       שהגיע אליו ישירות מהתפריט ראה "לא מצאנו את ההזמנה" ולא הייתה
+       לו שום דרך להתקדם — מסך מבוי סתום.
+       ⚠️ הקוד שהלקוח מקליד זהה לטוקן שבקישור, רק מקובץ לשלישיות
+       לקריאות. `normTrackCode_` בשרת מסיר את המקפים. -->
   <div class="trk-card" id="trkEmpty" style="display:none">
     <div class="trk-msg">
-      <h2>לא מצאנו את ההזמנה</h2>
-      <p>ייתכן שהקישור חלקי או שפג תוקפו. אפשר לפנות אליי ואבדוק ידנית — עם מספר ההזמנה או הטלפון שאיתו בוצעה.</p>
-      <p class="trk-help"><a id="trkWa" href="#">שליחת הודעה בוואטסאפ ←</a></p>
+      <h2 id="trkEmptyH">מעקב אחרי הזמנה</h2>
+      <p id="trkEmptyP">יש לכם קוד מעקב? הזינו אותו כאן. הקוד נשלח אליכם במייל האישור, מתחת לכפתור המעקב.</p>
+
+      <form class="trk-code-form" id="trkCodeForm" autocomplete="off">
+        <input class="trk-code-in" id="trkCodeIn" type="text" inputmode="latin"
+               placeholder="לדוגמה: A3f-9Km-2Qp-xR7" aria-label="קוד מעקב" spellcheck="false">
+        <button class="trk-code-btn" type="submit">בדיקה</button>
+      </form>
+      <div class="trk-code-err" id="trkCodeErr" hidden>הקוד לא נמצא. בדקו שהעתקתם אותו במלואו — הוא רגיש לאותיות גדולות וקטנות.</div>
+
+      <p class="trk-help">אין לכם את הקוד? <a id="trkWa" href="#">שליחת הודעה בוואטסאפ ←</a></p>
     </div>
   </div>
 
@@ -158,6 +194,12 @@
       <div>
         <div class="trk-ordno" id="trkOrdNo">DVT-—</div>
         <div class="trk-sub" id="trkPlaced"></div>
+        <!-- ⚠️ קוד המעקב מוצג גם כאן לבקשת דביר: לקוח שהגיע דרך
+             הקישור לא ראה את הקוד בשום מקום, ולכן לא היה לו מה
+             לשמור אם ירצה לחזור בלי המייל. -->
+        <div class="trk-sub trk-mycode" id="trkMyCode" hidden>
+          קוד המעקב: <span class="trk-mycode-v" id="trkMyCodeV"></span>
+        </div>
       </div>
       <span class="trk-care" id="trkCare" style="display:none">
         <svg class="trk-care-ic" width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M12 2 4 5v6c0 5 3.4 8.5 8 11 4.6-2.5 8-6 8-11V5z"/></svg>
@@ -193,6 +235,12 @@
 
 </main>
 
+<!-- 🔴 **היה חסר, ולכן אייקון העגלה בכותרת יצא ריק.** sprite.js
+     מגדיר את כל ה-<symbol> (ui-cart, ui-search, ui-wa...) שהדפים
+     מפנים אליהם ב-<use href="#ui-...">. בלי הקובץ ההפניה תקינה
+     תחבירית ומצביעה על כלום — אין שגיאה, פשוט ריבוע ריק.
+     ⚠️ כל שאר הדפים כוללים אותו; רק tracking.html פוספס. -->
+<script src="sprite.js"></script>
 <script src="i18n.js"></script>
 <script src="site-content.js"></script>
 <script src="search-core.js"></script>

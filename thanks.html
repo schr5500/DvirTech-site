@@ -159,13 +159,26 @@
           </li>
         </ol>
 
-        <!-- ⚠️⚠️ **ההערה הזו נשארת.** אין לנו מערכת מעקב ואין הודעות SMS
-             אוטומטיות. עדיף לקוח שיודע את זה מראש מאשר לקוח שממתין
-             לקישור מעקב שלעולם לא יגיע. אין להחליף את זה ב"תקבל קישור
-             מעקב" כל עוד אין כזה בפועל. -->
+        <!-- 🔴 **הוחלף 23.08 — הטקסט הישן כבר לא היה נכון.**
+             היה כתוב "אין לנו מערכת מעקב אונליין ואין הודעות SMS
+             אוטומטיות". דביר: "זה לא נכון.. יש לנו." אכן —
+             `tracking.html` + `getOrderStatus_` קיימים ופועלים.
+             ⚠️ ההערה הישנה ביקשה במפורש לא להבטיח מעקב "כל עוד אין
+             כזה בפועל". התנאי הזה התקיים, ולכן ההבטחה מותרת עכשיו.
+             ⚠️ החלק שנשאר נכון — שאין SMS אוטומטי ושהעדכונים מגיעים
+             מדביר אישית — נשמר. -->
+        <div class="thx-track" id="thxTrack" hidden>
+          <div class="thx-track-h"
+               data-he="מעקב אחרי ההזמנה" data-en="Track your order">מעקב אחרי ההזמנה</div>
+          <a class="thx-track-btn" id="thxTrackLink" href="#"
+             data-he="לעמוד המעקב" data-en="Open tracking">לעמוד המעקב</a>
+          <div class="thx-track-code-l"
+               data-he="או הזינו את הקוד הזה בעמוד המעקב:" data-en="or enter this code on the tracking page:">או הזינו את הקוד הזה בעמוד המעקב:</div>
+          <div class="thx-track-code" id="thxTrackCode"></div>
+        </div>
         <p class="thx-honest"
-           data-he="אין לנו מערכת מעקב אונליין ואין הודעות SMS אוטומטיות — כל עדכון על ההזמנה מגיע ממני ישירות, בוואטסאפ או בטלפון. אם משהו מתעכב, תדע על זה ממני ולא תצטרך לרדוף אחריי."
-           data-en="We do not have an online tracker or automated SMS updates — every update comes from me directly, by WhatsApp or phone. If anything is delayed you will hear it from me; you will not have to chase me.">אין לנו מערכת מעקב אונליין ואין הודעות SMS אוטומטיות — כל עדכון על ההזמנה מגיע ממני ישירות, בוואטסאפ או בטלפון. אם משהו מתעכב, תדע על זה ממני ולא תצטרך לרדוף אחריי.</p>
+           data-he="אין הודעות SMS אוטומטיות — מעבר לעמוד המעקב, כל עדכון מגיע ממני ישירות בוואטסאפ או בטלפון. אם משהו מתעכב, תדע על זה ממני ולא תצטרך לרדוף אחריי."
+           data-en="There are no automated SMS updates — beyond the tracking page, every update comes from me directly by WhatsApp or phone. If anything is delayed you will hear it from me; you will not have to chase me.">אין הודעות SMS אוטומטיות — מעבר לעמוד המעקב, כל עדכון מגיע ממני ישירות בוואטסאפ או בטלפון. אם משהו מתעכב, תדע על זה ממני ולא תצטרך לרדוף אחריי.</p>
       </div>
 
       <!-- ================= מצב: לא אומת / נכשל / אין הזמנה ================= -->

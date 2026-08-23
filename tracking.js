@@ -59,20 +59,20 @@ function trkShow(id){
   });
 }
 
-function trkInit(){
-  var wa = document.getElementById("trkWa"), wa2 = document.getElementById("trkWa2");
-  if(wa) wa.href = trkWaHref();
-  if(wa2) wa2.href = trkWaHref();
+/* 🔴 **נוסף 23.08 — כניסה לפי קוד ולא רק לפי קישור.**
+   דביר: "דף המעקב באתר יכלול שורה שאפשר להכניס לשם את מספר המעקב".
+   ⚠️ עד עכשיו הדף היה שמיש **רק** דרך קישור עם טוקן; מי שהגיע אליו
+   ישירות ראה "לא מצאנו את ההזמנה" בלי שום דרך להתקדם.
 
-  var token = trkToken();
-  if(!token){ trkShow("trkEmpty"); return; }
-
-  // דמו לעיצוב
+   ⚠️ המקפים נשארים ב-URL ובשדה — השרת מסיר אותם (`normTrackCode_`).
+   ⚠️ **בלי `toLowerCase`**: הקוד הוא base64 web-safe ורגיש לרישיות. */
+function trkLookup(token, onFail){
+  TRK_LAST_CODE = token;
   if(TRK_DEMO[token]){ trkRender(TRK_DEMO[token]); return; }
 
   var api = (typeof DVT_API_URL === "string" && DVT_API_URL) ||
             (typeof PAYMENT_API_URL === "string" && PAYMENT_API_URL) || "";
-  if(!api){ trkShow("trkEmpty"); return; }
+  if(!api){ onFail(); return; }
 
   /* ⚠️ `cache:"no-store"` + חותמת זמן. הסטטוס משתנה בצד דביר בכל
      רגע, ולקוח שמרענן את הדף חייב לראות את המצב העדכני — לא עותק
@@ -81,12 +81,50 @@ function trkInit(){
   fetch(api + "?action=getOrderStatus&token=" + encodeURIComponent(token) +
         "&_=" + Date.now(), { cache: "no-store" })
     .then(function(r){ return r.json(); })
-    .then(function(d){ if(d && d.ok){ trkRender(d); } else { trkShow("trkEmpty"); } })
-    .catch(function(){ trkShow("trkEmpty"); });
+    .then(function(d){ if(d && d.ok){ trkRender(d); } else { onFail(); } })
+    .catch(function(){ onFail(); });
 }
+
+function trkInit(){
+  var wa = document.getElementById("trkWa"), wa2 = document.getElementById("trkWa2");
+  if(wa) wa.href = trkWaHref();
+  if(wa2) wa2.href = trkWaHref();
+
+  var form = document.getElementById("trkCodeForm");
+  if(form){
+    form.addEventListener("submit", function(e){
+      e.preventDefault();
+      var inp = document.getElementById("trkCodeIn");
+      var err = document.getElementById("trkCodeErr");
+      var val = (inp && inp.value ? inp.value : "").trim();
+      if(!val) return;
+      if(err) err.hidden = true;
+      trkShow("trkLoading");
+      trkLookup(val, function(){
+        trkShow("trkEmpty");
+        if(err) err.hidden = false;
+        /* ⚠️ הערך נשאר בשדה בכוונה — לקוח שהקליד 22 תווים ושגה
+           בתו אחד לא אמור להקליד הכל מחדש. */
+        if(inp) inp.focus();
+      });
+    });
+  }
+
+  var token = trkToken();
+  /* בלי טוקן בכתובת — מציגים את שדה הקוד, וזה **לא** שגיאה. */
+  if(!token){ trkShow("trkEmpty"); return; }
+
+  trkShow("trkLoading");
+  trkLookup(token, function(){ trkShow("trkEmpty"); });
+}
+
+var TRK_LAST_CODE = "";
 
 function trkRender(o){
   document.getElementById("trkOrdNo").textContent = o.orderNo || "DVT-—";
+  /* קוד המעקב שבו נעשה שימוש — כדי שהלקוח יוכל לשמור אותו. */
+  var mc = document.getElementById("trkMyCode"), mcv = document.getElementById("trkMyCodeV");
+  if(mc && mcv && TRK_LAST_CODE){ mcv.textContent = TRK_LAST_CODE; mc.hidden = false; }
   var placed = document.getElementById("trkPlaced");
   placed.textContent = o.placedAt ? ("הזמנה מתאריך " + trkFmtDate(o.placedAt)) : "";
 

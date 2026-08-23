@@ -264,6 +264,25 @@ async function verifyOnce(paymentId, orderId){
   }
 }
 
+/* ==================== מעקב אחרי ההזמנה ====================
+   🔴 עד 23.08 הדף הצהיר "אין לנו מערכת מעקב אונליין" — וזה היה
+   פשוט לא נכון. דביר: "זה לא נכון.. יש לנו."
+
+   ⚠️ **מוצג רק כשהשרת החזיר `code`.** הקוד נגזר מ-`TRACK_SECRET`
+   בצד השרת, ואי אפשר לחשב אותו כאן — וגם לא צריך: הזמנה שלא
+   אומתה לא אמורה להציג קוד מעקב שממילא לא יימצא.
+   ⚠️ שני מסלולים בכוונה — **קישור** למי שקורא במחשב, ו**קוד**
+   להקלדה למי שקיבל את המייל בטלפון ופותח את האתר במקום אחר. */
+function thShowTrack(data){
+  const box = document.getElementById("thxTrack");
+  if(!box || !data || !data.code) return;
+  const link = document.getElementById("thxTrackLink");
+  const code = document.getElementById("thxTrackCode");
+  if(link && data.track) link.href = data.track;
+  if(code) code.textContent = data.code;
+  box.hidden = false;
+}
+
 /* 🔴 **מסלול ביט — נוסף 23.08.**
    SUMIT מתעדת במפורש: *"פרמטרים לא יוחזרו כאשר התשלום מתבצע דרך
    Bit"*. כלומר הלקוח **כן** חוזר לדף הזה אחרי תשלום בביט, אבל בלי
@@ -327,6 +346,7 @@ async function runVerification(){
             thClearPending();
             if(data.orderId) TH.orderId = data.orderId;
             TH.amount = (typeof data.amount === "number") ? data.amount : null;
+            thShowTrack(data);
             TH.state = "confirmed";
             thRender();
             return;
@@ -355,6 +375,7 @@ async function runVerification(){
         /* ⚠️ orderId מהתשובה גובר: הוא מה שהשרת באמת אימת. */
         if(data.orderId) TH.orderId = data.orderId;
         TH.amount = (typeof data.amount === "number") ? data.amount : null;
+        thShowTrack(data);
         TH.state = "confirmed";
         thRender();
         return;
