@@ -446,10 +446,23 @@ var DVT_CAT_PHOTO = {
   "sub:peripherals:microphone": "images/categories/microphone.jpg",
 
   /* --- אביזרים ---
-     ⚠️ כאן הנפילה אחורה לתמונת האב **נכונה**: כולם אביזרים נלווים
-     ותמונה משותפת לא נראית כמו תקלה, בניגוד למחשבים. */
+     🔴 **תוקן 23.08 — לכל תת-סוג יש עכשיו תמונה משלו.**
+     דביר: "בקטגוריה של אביזרים כל תתי הקטגוריות עם אותה תמונה,
+     זה צריך להיראות ככה או שזה באג?" — התשובה הייתה "מכוון, כי
+     אין לנו תמונה לכל תת-סוג", והוא סיפק תמונה חדשה.
+     ⚠️ המפתחות חייבים להתאים **בדיוק** ל-NAV_CATALOG_GROUPS
+     ב-site-header.js. מפתח שגוי אינו מייצר שגיאה — התמונה פשוט
+     לא נטענת, ו-`onerror` מחזיר את האיור. שקט, לא כשל.
+     ⚠️ נחתכו ב-tools/crop-accessories.py. */
   extras:      "images/categories/accessories.jpg",
-  accessories: "images/categories/accessories.jpg"
+  accessories: "images/categories/accessories.jpg",
+  "sub:extras:external-drive": "images/categories/acc-external-drive.jpg",
+  "sub:extras:flash-drive":    "images/categories/acc-flash-drive.jpg",
+  "sub:extras:adapter":        "images/categories/acc-adapter.jpg",
+  "sub:extras:gpu-bracket":    "images/categories/acc-gpu-bracket.jpg",
+  "sub:extras:cable":          "images/categories/acc-cable.jpg"
+  /* ⚠️ `sub:extras:hub` נשאר בלי תמונה משלו בכוונה — אין לו כרטיס
+     בתמונת המקור, והוא נופל לתמונת האב. */
 };
 function dvtCatPhoto(cat){ return DVT_CAT_PHOTO[cat] || null; }
 

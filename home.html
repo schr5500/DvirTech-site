@@ -228,17 +228,23 @@
        ⚠️ הכיוון הזה בטוח בכל מצב: אין קובץ / 404 / שרת שמחזיר
        דף שגיאה / תמונה פגומה — הטקסט פשוט נשאר. הלוגו מופיע רק
        כשהוא באמת נטען (`naturalWidth > 1`).
-       ⚠️ להעדיף PNG/SVG שקוף ובגובה אחיד. -->
+
+       🔴 **ואין כאן `loading="lazy"` — בכוונה, אחרי שהוא יצר נעילה
+       הדדית.** דפדפן **אינו טוען** תמונה עצלה שיושבת ב-`display:none`.
+       ה-CSS מסתיר את הלוגו עד ש-`onload` יירה, ו-`onload` לא יירה
+       כל עוד הוא מוסתר — כלומר הלוגואים לא הופיעו לעולם, בלי שום
+       שגיאה בקונסולה. שמונה קבצים של ~12KB לא צריכים טעינה עצלה.
+       ⚠️ הלוגואים נחתכים ב-tools/crop-brands.py. -->
   <h2 class="brand-strip-h">מותגים שאנו מוכרים</h2>
   <div class="brand-strip">
-    <a href="products.html?cat=all&brand=Gigabyte"><img class="brand-logo-img" src="images/brands/gigabyte.png" alt="GIGABYTE" loading="lazy" onload="if(this.naturalWidth>1)this.closest('a').classList.add('has-logo')" onerror="this.remove()"><span>GIGABYTE</span></a>
-    <a href="products.html?cat=all&brand=Corsair"><img class="brand-logo-img" src="images/brands/corsair.png" alt="CORSAIR" loading="lazy" onload="if(this.naturalWidth>1)this.closest('a').classList.add('has-logo')" onerror="this.remove()"><span>CORSAIR</span></a>
-    <a href="products.html?cat=all&brand=Antec"><img class="brand-logo-img" src="images/brands/antec.png" alt="ANTEC" loading="lazy" onload="if(this.naturalWidth>1)this.closest('a').classList.add('has-logo')" onerror="this.remove()"><span>ANTEC</span></a>
-    <a href="products.html?cat=all&brand=ASUS"><img class="brand-logo-img" src="images/brands/asus.png" alt="ASUS" loading="lazy" onload="if(this.naturalWidth>1)this.closest('a').classList.add('has-logo')" onerror="this.remove()"><span>ASUS</span></a>
-    <a href="products.html?cat=all&brand=Lenovo"><img class="brand-logo-img" src="images/brands/lenovo.png" alt="LENOVO" loading="lazy" onload="if(this.naturalWidth>1)this.closest('a').classList.add('has-logo')" onerror="this.remove()"><span>LENOVO</span></a>
-    <a href="products.html?cat=all&brand=Kingston"><img class="brand-logo-img" src="images/brands/kingston.png" alt="KINGSTON" loading="lazy" onload="if(this.naturalWidth>1)this.closest('a').classList.add('has-logo')" onerror="this.remove()"><span>KINGSTON</span></a>
-    <a href="products.html?cat=all&brand=Western%20Digital"><img class="brand-logo-img" src="images/brands/western-digital.png" alt="WD" loading="lazy" onload="if(this.naturalWidth>1)this.closest('a').classList.add('has-logo')" onerror="this.remove()"><span>WD</span></a>
-    <a href="products.html?cat=all&brand=Intel"><img class="brand-logo-img" src="images/brands/intel.png" alt="INTEL" loading="lazy" onload="if(this.naturalWidth>1)this.closest('a').classList.add('has-logo')" onerror="this.remove()"><span>INTEL</span></a>
+    <a href="products.html?cat=all&brand=Gigabyte"><img class="brand-logo-img" src="images/brands/gigabyte.png" alt="GIGABYTE" onload="if(this.naturalWidth>1)this.closest('a').classList.add('has-logo')" onerror="this.remove()"><span>GIGABYTE</span></a>
+    <a href="products.html?cat=all&brand=Corsair"><img class="brand-logo-img" src="images/brands/corsair.png" alt="CORSAIR" onload="if(this.naturalWidth>1)this.closest('a').classList.add('has-logo')" onerror="this.remove()"><span>CORSAIR</span></a>
+    <a href="products.html?cat=all&brand=Antec"><img class="brand-logo-img" src="images/brands/antec.png" alt="ANTEC" onload="if(this.naturalWidth>1)this.closest('a').classList.add('has-logo')" onerror="this.remove()"><span>ANTEC</span></a>
+    <a href="products.html?cat=all&brand=ASUS"><img class="brand-logo-img" src="images/brands/asus.png" alt="ASUS" onload="if(this.naturalWidth>1)this.closest('a').classList.add('has-logo')" onerror="this.remove()"><span>ASUS</span></a>
+    <a href="products.html?cat=all&brand=Lenovo"><img class="brand-logo-img" src="images/brands/lenovo.png" alt="LENOVO" onload="if(this.naturalWidth>1)this.closest('a').classList.add('has-logo')" onerror="this.remove()"><span>LENOVO</span></a>
+    <a href="products.html?cat=all&brand=Kingston"><img class="brand-logo-img" src="images/brands/kingston.png" alt="KINGSTON" onload="if(this.naturalWidth>1)this.closest('a').classList.add('has-logo')" onerror="this.remove()"><span>KINGSTON</span></a>
+    <a href="products.html?cat=all&brand=Western%20Digital"><img class="brand-logo-img" src="images/brands/western-digital.png" alt="WD" onload="if(this.naturalWidth>1)this.closest('a').classList.add('has-logo')" onerror="this.remove()"><span>WD</span></a>
+    <a href="products.html?cat=all&brand=Intel"><img class="brand-logo-img" src="images/brands/intel.png" alt="INTEL" onload="if(this.naturalWidth>1)this.closest('a').classList.add('has-logo')" onerror="this.remove()"><span>INTEL</span></a>
   </div>
   <!-- ⚠️ ההבהרה חייבת להיות **ליד** הלוגואים ולא רק בתקנון: לקוח
        שרואה לוגו של Intel לא ילך לקרוא §14 כדי להבין שאיננו נציגים

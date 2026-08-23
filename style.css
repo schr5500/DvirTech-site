@@ -477,13 +477,20 @@ nav a.nav-accent:hover{filter:brightness(1.12)}
   letter-spacing:.2px}
 /* 🔴 **הלוגו מוסתר עד שהוא באמת נטען.** ראה ההסבר ב-home.html:
    הסתרת הטקסט כברירת מחדל הותירה פס ריק כששרת החזיר 200 לקובץ
-   חסר. הכיוון הזה נכשל תמיד לצד הבטוח — טקסט. */
-.brand-logo-img{display:none;height:26px;width:auto;max-width:110px;
-  object-fit:contain;filter:grayscale(1);opacity:.62;
-  transition:opacity .15s,filter .15s}
+   חסר. הכיוון הזה נכשל תמיד לצד הבטוח — טקסט.
+
+   ⚠️ **האריחים אטומים ולא שקופים, וזו החלטה מודעת.** בתמונת המקור
+   הנשר של GIGABYTE הוא (221,221,219) והרקע (225,225,223) — הפרש
+   של ארבעה ערכים, כך שאין סף שמסיר את הרקע בלי למחוק את הלוגו.
+   ראה `tile()` ב-tools/crop-brands.py.
+   ⚠️ לכן כולם באותו גודל ובאותו גוון בדיוק, עם פינות מעוגלות —
+   כדי שייקראו כ"צ'יפ מותג" מכוון ולא כמלבן אפור תקוע. */
+.brand-logo-img{display:none;height:38px;width:auto;object-fit:contain;
+  border-radius:8px;opacity:.9;transition:opacity .15s,transform .15s}
+.brand-strip a.has-logo{padding:0}
 .brand-strip a.has-logo .brand-logo-img{display:block}
 .brand-strip a.has-logo span{display:none}
-.brand-strip a:hover .brand-logo-img{filter:grayscale(0);opacity:1}
+.brand-strip a:hover .brand-logo-img{opacity:1;transform:translateY(-1px)}
 .brand-strip-note{font-size:11.5px;color:var(--ink-soft,#5F7590);text-align:center;
   margin:14px auto 0;max-width:640px;line-height:1.6;opacity:.85}
 
