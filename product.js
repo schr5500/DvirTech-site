@@ -160,28 +160,27 @@ function pdZoomInit(){
    🔴 זה מה שמצדיק לקנות כאן ולא ב-KSP, ועד עכשיו הוא לא הופיע בדף
    שבו הלקוח מחליט.
 
-   🔴🔴 **תוקן 23.08 — השורה הראשונה כאן הייתה פשוט לא נכונה.**
-   דביר: "בדף המוצר — הרכבה והתקנה — נבחר בקופה — זה לא, זה מופיע
-   רק בדף השירות". נבדק ב-`DVT_SERVICES` (checkout.js) ואין בו שום
-   פריט הרכבה. מה שבאמת קיים הוא **שני דברים נפרדים** שהתערבבו:
+   🔴 **הכותרת "הרכבה והתקנה" הייתה מטעה — תוקנה 23.08.**
+   דביר קרא אותה והבין **התקנה בבית הלקוח**, שזה שירות אחר לגמרי
+   שמחייב תיאום איתו טלפונית. הכותרת עכשיו אומרת במפורש
+   **"הרכבה והתקנת Windows 11"**, ולכן אי אפשר לטעות בה.
 
-     · **הרכבה ללא עלות** — לא נבחרת ולא נמכרת. `withFreeAssemblyLine`
-       מוסיפה את השורה `assembly-included` ב-0 ₪ אוטומטית כשבעגלה
-       יש מחשב שלם. לכן "נבחר בקופה" היה שגוי פעמיים: גם לא נבחר,
-       וגם לא בתשלום.
-     · **התקנות** — Windows + רישיון 300 / בלי רישיון 200 / התקנת
-       תוכנות 80 / העברת נתונים 200. אלה **כן** בקופה, אבל רק
-       כשיש מחשב בעגלה (`requiresPc`), ולכן אי אפשר להבטיח אותם
-       מדף מוצר של עכבר.
+   ⚠️ **שים לב שהשורה מכסה שני דברים שונים בכוונה**, וזה נכון:
+     · **הרכבה** — ללא עלות, ורק כשקונים כאן את **כל** הרכיבים
+       למחשב שלם. היא לא נבחרת בקופה: `withFreeAssemblyLine`
+       מוסיפה את `assembly-included` ב-0 ₪ אוטומטית.
+       דביר: "זה טוב שזה מופיע שם לפרסום המוצרים שלנו."
+     · **התקנות** — Windows 11 + רישיון 300 / בלי רישיון 200 /
+       תוכנות 80 / העברת נתונים 200. אלה **כן** נבחרות בקופה,
+       דרך `DVT_SERVICES`, וכולן דורשות מחשב בעגלה (`requiresPc`).
 
-   ⚠️ **הקישור ל-checkout.html הוסר.** דף התשלום עם עגלה ריקה אינו
-   מציג שום שירות — הקישור הוביל למבוי סתום.
+   ⚠️ **התקנה בבית הלקוח אינה כאן** — היא בשורת "ביקור טכנאי",
+   שמובילה ל-support.html ודורשת תיאום. זו בדיוק אי-ההבנה שתוקנה.
 
-   ארבע ההצעות כאן, כולן קיימות בפועל:
-     · הרכבה ללא עלות ..... withFreeAssemblyLine ב-checkout.js
-     · התקנות ............. DVT_SERVICES ב-checkout.js
-     · ביקור טכנאי ......... מתואם אישית, תקנון §6
-     · DvirTech Care ....... מנוי שנתי, support.html#care
+   ארבע ההצעות, כולן קיימות בפועל:
+     · הרכבה והתקנת Windows 11 ... checkout.js
+     · ביקור טכנאי ............... מתואם אישית, תקנון §6
+     · DvirTech Care ............. מנוי שנתי, support.html#care
 
    ⚠️ **אין כאן מחירים ואין "הוסף לסל".** שירות דורש תיאום ותמחור
    לפי מקרה, והצגת מחיר קבוע בדף מוצר תיצור הבטחה שלא תמיד אפשר
@@ -202,14 +201,10 @@ function pdServicesHtml(cat){
       <p class="pd-svc-lead">${tr(
         "אנחנו לא רק מוכרים את הרכיב — אפשר גם שנרכיב, נתקין ונהיה שם אחר כך.",
         "We don't just sell the part — we can build it, install it, and be there afterwards.")}</p>
-      ${row("ui-tools", tr("הרכבה ללא עלות","Assembly at no charge"),
-            tr("קונים כאן את כל הרכיבים למחשב שלם? מרכיבים, בודקים התאמה ומריצים — בלי תוספת מחיר.",
-               "Buying all the parts for a complete PC here? We build it, check the fit and run it in — at no extra charge."),
-            "builder.html", tr("לבונה","Open the builder"))}
-      ${row("ui-check", tr("התקנת Windows ותוכנות","Windows & software setup"),
-            tr("מערכת, רישיון, תוכנות והעברת נתונים מדיסק שתביא. נבחר בקופה כשיש מחשב בהזמנה.",
-               "OS, license, software and data transfer from a drive you send along. Chosen at checkout when the order includes a PC."),
-            "support.html", tr("למחירים","See prices"))}
+      ${row("ui-tools", tr("הרכבה והתקנת Windows 11","Assembly & Windows 11 setup"),
+            tr("ההרכבה ללא עלות כשקונים כאן את כל הרכיבים למחשב שלם. התקנת Windows 11 עם רישיון, תוכנות והעברת נתונים — נבחרות בקופה.",
+               "Assembly is free when you buy all the parts for a complete PC here. Windows 11 with a licence, software and data transfer are chosen at checkout."),
+            "checkout.html", tr("נבחר בקופה","Choose at checkout"))}
       ${row("ui-pin", tr("ביקור טכנאי","On-site visit"),
             tr("קריית גת והסביבה, ולפי זמינות גם השפלה והמרכז — בתיאום מראש.",
                "Kiryat Gat area, and by availability the Shfela and centre — by arrangement."),
@@ -595,6 +590,68 @@ function pdSpecValue(key, raw, label){
    כל שדה נוסף שקיים על הפריט ולא מוכר לה. השארית היא הביטוח: עמודה
    חדשה בגיליון תופיע בדף לבד, עם התווית מ-FACET_LABELS אם יש כזו,
    בלי שנצטרך לזכור לעדכן כאן. */
+/* ==================== מקטע המפרט ====================
+   🔴 **תוקן 23.08.** דביר: "יש מוצרים כמו פנל שערות 19 1U — שצריך
+   לבדוק אם יש מה לכתוב במפרט. אם אין, לא צריך להיות מפרט / צריך
+   להיות משהו במקום, כי הוא ריק וזה לא נראה טוב."
+
+   נמדד על הקטלוג החי: **116 מוצרים מתוך 1,229** בלי אף שדה מפרט,
+   ‏**103 מהם באביזרים** — שם יושבים פנלים, מסילות, ברגים וכבלים.
+
+   מה שהיה: כותרת "מפרט טכני" ומתחתיה שורת התנצלות "המפרט עדיין לא
+   הוזן". ⚠️ זה גרוע משתי בחינות — הוא **מכריז על חוסר** במקום
+   הבולט ביותר בדף, והוא **לא נכון** לגבי פנל אטימה 1U: אין לו מפרט
+   טכני, וזה לא פער בנתונים אלא טבע המוצר.
+
+   מה שיש עכשיו, בשלוש מדרגות:
+     1. יש שדות מפרט         → טבלה, כמו קודם.
+     2. אין מפרט אבל יש עובדות (יצרן / אחריות / מה מתאים לו)
+                             → כותרת "פרטי המוצר" והעובדות שיש.
+     3. אין כלום             → **המקטע לא נוצר בכלל.**
+
+   ⚠️ מדרגה 3 היא העיקר: מקטע שלא קיים לא נראה כמו תקלה, ומקטע ריק כן.
+
+   ⚠️ **זה תיקון תצוגה ולא תחליף לנתונים.** רוב 103 האביזרים כן
+   יקבלו מפרט מ-`mlParseSpecs_` (22-supplier-specs.gs) שמושך את כל
+   רשימת המפרט מעמוד הספק. מה שיישאר ריק אחרי זה — ריק בצדק. */
+function pdSpecSectionHtml(it, specRows){
+  if(specRows.length){
+    return `
+      <section class="pd-section">
+        <h2>${tr("מפרט טכני","Technical specifications")}</h2>
+        <table class="pd-spec">
+          <tbody>
+            ${specRows.map(r => `<tr><th>${pdEsc(r.label)}</th><td>${pdEsc(r.value)}</td></tr>`).join("")}
+          </tbody>
+        </table>
+        <p class="pd-spec-note">${tr("המפרט נמסר על ידי היצרן ועשוי להשתנות בין מהדורות. בכל שאלה — דברו איתנו לפני ההזמנה.",
+                                     "Specifications are supplied by the manufacturer and may vary between revisions. In doubt — talk to us before ordering.")}</p>
+      </section>`;
+  }
+
+  /* עובדות שקיימות כמעט תמיד, ואינן "מפרט טכני". ⚠️ רק שדות שבאמת
+     יש בהם ערך — שורה ריקה כאן מחזירה בדיוק את הבעיה שתוקנה. */
+  const facts = [];
+  if(it.brand)          facts.push([tr("יצרן","Brand"), it.brand]);
+  if(it.mfrSku)         facts.push([tr('מק"ט יצרן',"Manufacturer SKU"), it.mfrSku]);
+  if(it.compatibleWith) facts.push([tr("מתאים ל-","Fits"), it.compatibleWith]);
+  if(it.warranty)       facts.push([tr("אחריות","Warranty"), it.warranty]);
+
+  if(!facts.length) return "";          // ⚠️ מדרגה 3 — בלי מקטע כלל
+
+  return `
+      <section class="pd-section">
+        <h2>${tr("פרטי המוצר","Product details")}</h2>
+        <table class="pd-spec">
+          <tbody>
+            ${facts.map(f => `<tr><th>${pdEsc(f[0])}</th><td>${pdEsc(f[1])}</td></tr>`).join("")}
+          </tbody>
+        </table>
+        <p class="pd-spec-note">${tr("צריך פרט טכני שלא מופיע כאן? דברו איתנו ונבדוק מול היצרן.",
+                                     "Need a technical detail that isn't listed? Talk to us and we'll check with the manufacturer.")}</p>
+      </section>`;
+}
+
 function pdSpecRows(item, realCat){
   const src  = pdFlatten(item);
   const rows = [];
@@ -804,7 +861,7 @@ function pdRenderBody(){
           <!-- ⚠️ **היה "הרכבה והתקנה בתוספת תשלום" — הפוך מהאמת.**
                הרכבת מחשב שלם שנקנה כאן היא **ללא עלות** ונוספת
                אוטומטית (assembly-included ב-0 ₪). מה שכן בתשלום זה
-               ההתקנות, והן ממילא מפורטות בהמשך הדף ב-pdServicesHtml. -->
+               התקנת Windows והתוכנות, והן מפורטות ב-pdServicesHtml. -->
           <li><svg class="ui-ic"><use href="#ui-tools"/></svg>${tr("הרכבה ללא עלות במחשב שלם","Free assembly on a complete PC")}</li>
           <li><svg class="ui-ic"><use href="#ui-chat"/></svg>${tr("שאלה על המוצר?","Questions about this product?")}
             <a class="pd-wa" href="${pdWhatsappHref(it)}" target="_blank" rel="noopener"
@@ -836,11 +893,15 @@ function pdRenderBody(){
                הלקוח לדף של חברת הסליקה, והמספר מוקלד שם ולא כאן —
                אבל **הניסוח תיאר מנגנון פנימי במקום להרגיע**. אם בעל
                העסק לא הבין אותו, לקוח בוודאי לא.
-               ⚠️ הניסוח החדש אומר את אותה עובדה בדיוק, בלי להבטיח
-               יותר ממנה: אנחנו לא רואים ולא שומרים. ראה תקנון §10.3. -->
+               ⚠️ **ונוסח שוב 23.08 אחרי הערה שנייה של דביר:** "אנחנו
+               לא רואים ולא שומרים" נכון לגבינו, אבל דביר צדק שהוא
+               נשמע כאילו **אף אחד** לא שומר — ו-SUMIT כן שומרת.
+               אמירה שנשמעת רחבה מהאמת בענייני אשראי היא בדיוק מה
+               שאסור. הנוסח עכשיו זהה במשמעותו לתקנון §10.3: הפרטים
+               נמסרים **לחברת הסליקה** ולא מגיעים אלינו. -->
           <li><svg class="ui-ic"><use href="#ui-lock"/></svg>${
             tr("התשלום מתבצע בדף המאובטח של חברת הסליקה","Payment happens on the clearing company's secure page")} — ${
-            tr("אנחנו לא רואים ולא שומרים את מספר הכרטיס","we never see or store your card number")}</li>
+            tr("פרטי הכרטיס נמסרים לה ישירות ולא מגיעים אלינו","card details go straight to them and never reach us")}</li>
         </ul>
       </div>
     </div>
@@ -851,19 +912,7 @@ function pdRenderBody(){
         <p class="pd-desc">${pdEsc(pdDescription(it, catName))}</p>
       </section>
 
-      <section class="pd-section">
-        <h2>${tr("מפרט טכני","Technical specifications")}</h2>
-        ${specRows.length ? `
-        <table class="pd-spec">
-          <tbody>
-            ${specRows.map(r => `<tr><th>${pdEsc(r.label)}</th><td>${pdEsc(r.value)}</td></tr>`).join("")}
-          </tbody>
-        </table>
-        <p class="pd-spec-note">${tr("המפרט נמסר על ידי היצרן ועשוי להשתנות בין מהדורות. בכל שאלה — דברו איתנו לפני ההזמנה.",
-                                     "Specifications are supplied by the manufacturer and may vary between revisions. In doubt — talk to us before ordering.")}</p>`
-        : `<p class="pd-spec-note">${tr("המפרט המלא של המוצר הזה עדיין לא הוזן. דברו איתנו ונשלים לכם את הפרטים.",
-                                        "The full specification for this product hasn't been entered yet. Talk to us and we'll fill in the details.")}</p>`}
-      </section>
+      ${pdSpecSectionHtml(it, specRows)}
 
       ${pdServicesHtml(PD_CAT)}
     </div>`;

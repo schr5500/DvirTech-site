@@ -264,6 +264,45 @@ async function verifyOnce(paymentId, orderId){
   }
 }
 
+/* 🔴 **מסלול ביט — נוסף 23.08.**
+   SUMIT מתעדת במפורש: *"פרמטרים לא יוחזרו כאשר התשלום מתבצע דרך
+   Bit"*. כלומר הלקוח **כן** חוזר לדף הזה אחרי תשלום בביט, אבל בלי
+   `og-paymentid` ובלי `og-externalidentifier`. הדף ראה "אין מזהה"
+   והציג "לא נמצאה הזמנה" — בזמן שהכסף כבר ירד. בדיוק מה שקרה לדביר.
+
+   ⚠️ **זו לא תקלה שאפשר לתקן בצד SUMIT** — זו התנהגות מתועדת.
+   מה שכן אפשר: `checkout.js` שומר את מספר ההזמנה ב-localStorage
+   **לפני** היציאה לדף התשלום, ומכאן מאמתים לפיו מול SUMIT.
+
+   ⚠️ תוקף שעתיים. הזמנה ישנה שנשארה באחסון לא אמורה "לאמת את
+   עצמה" בביקור אקראי בדף התודה חודש אחר כך. */
+const TH_PENDING_MAX_MS = 2 * 60 * 60 * 1000;
+
+function thPendingOrder(){
+  try{
+    const raw = localStorage.getItem("dvtPendingOrder");
+    if(!raw) return "";
+    const o = JSON.parse(raw);
+    if(!o || !o.order) return "";
+    if(Date.now() - Number(o.at || 0) > TH_PENDING_MAX_MS) return "";
+    return String(o.order);
+  }catch(e){ return ""; }
+}
+
+function thClearPending(){
+  try{ localStorage.removeItem("dvtPendingOrder"); }catch(e){}
+}
+
+async function verifyByOrderOnce(orderId){
+  const url = `${WEBAPP_URL}?action=verifyByOrder&orderId=${encodeURIComponent(orderId)}`;
+  const ctrl = new AbortController();
+  const timer = setTimeout(() => ctrl.abort(), 20000);
+  try{
+    const res = await fetch(url, { signal: ctrl.signal, cache: "no-store" });
+    return await res.json();
+  } finally { clearTimeout(timer); }
+}
+
 async function runVerification(){
   const paymentId = getParam(["OG-PaymentID", "og-paymentid", "PaymentID"]);
   const orderId   = getParam(["OG-ExternalIdentifier", "og-externalidentifier", "ExternalIdentifier"]);
@@ -272,9 +311,36 @@ async function runVerification(){
   TH.orderId   = orderId;
   thRender();
 
-  /* אין מזהה תשלום — אין מה לאמת. זה המצב של מי שהגיע לדף ישירות,
-     והוא **לא** שגיאה. */
+  /* אין מזהה תשלום — לפני שמוותרים, מנסים את מסלול ביט. */
   if(!paymentId){
+    const pending = thPendingOrder();
+    if(pending){
+      TH.orderId = pending;
+      thRender();
+      /* ⚠️ הקבלה נוצרת ב-SUMIT כמה שניות אחרי התשלום, ולכן מנסים
+         שוב ולא פעם אחת. אותו מספר ניסיונות כמו המסלול הרגיל. */
+      for(let attempt = 1; attempt <= MAX_ATTEMPTS; attempt++){
+        try{
+          const data = await verifyByOrderOnce(pending);
+          if(data.ok && data.status === "paid"){
+            clearCart();
+            thClearPending();
+            if(data.orderId) TH.orderId = data.orderId;
+            TH.amount = (typeof data.amount === "number") ? data.amount : null;
+            TH.state = "confirmed";
+            thRender();
+            return;
+          }
+        }catch(e){ /* ננסה שוב */ }
+        if(attempt < MAX_ATTEMPTS) await sleep(RETRY_DELAY_MS);
+      }
+      /* ⚠️ לא מציגים כישלון: ייתכן שהתשלום עבר והקבלה מתעכבת.
+         סריקת ההשלמה היומית תתפוס אותו בכל מקרה. */
+      TH.state = "pending";
+      thRender();
+      return;
+    }
+    /* באמת אין כלום — מי שהגיע לדף ישירות. זה **לא** שגיאה. */
     TH.state = "noorder";
     thRender();
     return;
