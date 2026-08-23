@@ -485,9 +485,33 @@ nav a.nav-accent:hover{filter:brightness(1.12)}
    ⚠️ העיגול הוא על ה-`<a>` ולא על התמונה: תמונה שקופה בתוך עיגול
    לבן נותנת את המראה הנקי, ועיגול על התמונה עצמה היה גוזם לוגו
    רחב כמו "Western Digital". */
-.brand-strip{gap:18px;flex-wrap:wrap;justify-content:center}
+/* 🔴 **שורה אחת שנגללת, לא שתי שורות עקומות — 23.08.**
+   דביר: "האתר כן מעודכן כולל התמונות אבל זה לא נראה טוב. צריך אולי
+   ליצור גלגלת כמו שיש במבצעים שאפשר להחליק, או להקטין את הלוגואים."
+
+   13 מותגים ב-88px נדחסו ל-10+3 — שורה שנייה עם שלושה בודדים
+   ומרווח ריק ענק. שתי הבעיות נפתרות יחד: **בלי גלישה** ועם גלילה
+   אופקית, כמו רצועת המבצעים.
+   ⚠️ `flex-wrap:nowrap` הוא העיקר. בלעדיו ההקטנה לבדה רק דוחסת
+   את השורה השנייה במקום לבטל אותה. */
+.brand-strip{
+  gap:14px;flex-wrap:nowrap;justify-content:flex-start;
+  overflow-x:auto;overflow-y:hidden;
+  /* ⚠️ שלושת אלה אינם קישוט. רצועה שאינה גולשת בתוך הורה מצומצם
+     קורסת לרוחב התוכן או דוחפת את העמוד לגלילה אופקית; שלושתם יחד
+     כולאים את הגלילה **בתוך הרצועה** ולא בעמוד. */
+  width:100%;max-width:100%;min-width:0;
+  scroll-snap-type:x proximity;
+  -webkit-overflow-scrolling:touch;
+  scrollbar-width:thin;
+}
+.brand-strip::-webkit-scrollbar{height:6px}
+.brand-strip::-webkit-scrollbar-thumb{background:var(--line,#E2EAF2);border-radius:99px}
+/* ⚠️ `flex-shrink:0` — בתוך רצועה שאינה נגללת פלקס היה מכווץ את
+   העיגולים לסגלגלים במקום לאפשר גלילה. */
+.brand-strip a.has-logo{flex:0 0 auto;scroll-snap-align:center}
 .brand-strip a.has-logo{
-  width:88px;height:88px;padding:0;border-radius:50%;
+  width:76px;height:76px;padding:0;border-radius:50%;
   background:#fff;border:1px solid var(--line,#E2EAF2);
   display:inline-flex;align-items:center;justify-content:center;
   box-shadow:0 3px 10px rgba(14,42,71,.06);
@@ -505,13 +529,16 @@ nav a.nav-accent:hover{filter:brightness(1.12)}
 .brand-strip a.has-logo .brand-logo-img{display:block}
 .brand-strip a.has-logo span{display:none}
 @media(max-width:600px){
-  .brand-strip a.has-logo{width:70px;height:70px}
+  .brand-strip a.has-logo{width:64px;height:64px}
 }
 .brand-strip-note{font-size:11.5px;color:var(--ink-soft,#5F7590);text-align:center;
   margin:14px auto 0;max-width:640px;line-height:1.6;opacity:.85}
 
+/* ⚠️ הכלל השני של הרצועה בקובץ. `justify-content` ו-`flex-wrap`
+   כאן היו גוברים על הכלל למעלה (אותה ספציפיות, מאוחר יותר) —
+   ולכן הם מיושרים אליו. */
 .brand-strip{background:var(--surface);border:1px solid var(--line);border-radius:var(--radius);
-  padding:18px 24px;margin:30px 0 10px;display:flex;align-items:center;justify-content:space-between;gap:18px;flex-wrap:wrap}
+  padding:18px 20px;margin:30px 0 10px;display:flex;align-items:center;justify-content:flex-start;gap:14px;flex-wrap:nowrap}
 .brand-strip span,.brand-strip a{font-family:'Rubik',sans-serif;font-weight:800;font-size:15px;
   color:#93A6BC;letter-spacing:.5px;transition:color .15s,opacity .15s;text-decoration:none}
 .brand-strip span:hover,.brand-strip a:hover{color:var(--blue)}
