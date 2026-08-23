@@ -209,20 +209,41 @@
        ⚠️ לפני שמוסיפים מותג — לוודא שיש לו מוצרים. הקישור מוביל
        לסינון לפי אותו מותג, כך שמותג בלי מוצרים ייתן דף ריק והלקוח
        יראה מיד שמשהו לא נכון.
-       ⚠️ טקסט ולא לוגואים: לוגו יצרן הוא סימן מסחר, ואין לנו רישיון
-       שימוש בקבצי הלוגו עצמם. פס מותגים טקסטואלי הוא מה שחנויות
-       אמיתיות עושות, והוא גם נשאר חד בכל רזולוציה ולא מוסיף בקשות
-       רשת לדף שכבר איטי. -->
+       🔴 **עודכן 23.08 — כותרת, לוגואים והבהרה משפטית.**
+       דביר בדק ואישר שהצגת לוגו יצרן מותרת לצורך **זיהוי המוצרים
+       הנמכרים**, כל עוד לא נוצר רושם של שיתוף פעולה או נציגות.
+       ⚠️ ולכן הכותרת "מותגים שאנו מוכרים" אינה קישוט — היא **החלק
+       שמונע את ההטעיה**. פס לוגואים בלי כותרת נקרא כמו "שותפים",
+       ובדיוק את זה אסור. אין להסיר אותה.
+       ⚠️ נוסף גם סעיף מפורש בתקנון §14 (סימני מסחר של יצרנים).
+
+       ⚠️ **הלוגואים הם drop-in ואינם קיימים עדיין.** כל קישור מכיל
+       `<img>` שמצביע ל-`images/brands/<slug>.png`, ולידו `<span>`
+       עם שם המותג. אותה מוסכמה כמו `DVT_CAT_PHOTO` ב-sprite.js.
+
+       🔴 **הלוגו מוסתר כברירת מחדל ומתגלה רק ב-`onload`** — ולא
+       להפך. הניסיון הראשון הסתיר את הטקסט תמיד וסמך על `onerror`
+       כדי להחזיר אותו; בבדיקה מקומית השרת החזיר 200 לקובץ שאינו
+       קיים, `onerror` לא נורה, והפס יצא **ריק לגמרי**.
+       ⚠️ הכיוון הזה בטוח בכל מצב: אין קובץ / 404 / שרת שמחזיר
+       דף שגיאה / תמונה פגומה — הטקסט פשוט נשאר. הלוגו מופיע רק
+       כשהוא באמת נטען (`naturalWidth > 1`).
+       ⚠️ להעדיף PNG/SVG שקוף ובגובה אחיד. -->
+  <h2 class="brand-strip-h">מותגים שאנו מוכרים</h2>
   <div class="brand-strip">
-    <a href="products.html?cat=all&brand=Gigabyte">GIGABYTE</a>
-    <a href="products.html?cat=all&brand=Corsair">CORSAIR</a>
-    <a href="products.html?cat=all&brand=Antec">ANTEC</a>
-    <a href="products.html?cat=all&brand=ASUS">ASUS</a>
-    <a href="products.html?cat=all&brand=Lenovo">LENOVO</a>
-    <a href="products.html?cat=all&brand=Kingston">KINGSTON</a>
-    <a href="products.html?cat=all&brand=Western%20Digital">WD</a>
-    <a href="products.html?cat=all&brand=Intel">INTEL</a>
+    <a href="products.html?cat=all&brand=Gigabyte"><img class="brand-logo-img" src="images/brands/gigabyte.png" alt="GIGABYTE" loading="lazy" onload="if(this.naturalWidth>1)this.closest('a').classList.add('has-logo')" onerror="this.remove()"><span>GIGABYTE</span></a>
+    <a href="products.html?cat=all&brand=Corsair"><img class="brand-logo-img" src="images/brands/corsair.png" alt="CORSAIR" loading="lazy" onload="if(this.naturalWidth>1)this.closest('a').classList.add('has-logo')" onerror="this.remove()"><span>CORSAIR</span></a>
+    <a href="products.html?cat=all&brand=Antec"><img class="brand-logo-img" src="images/brands/antec.png" alt="ANTEC" loading="lazy" onload="if(this.naturalWidth>1)this.closest('a').classList.add('has-logo')" onerror="this.remove()"><span>ANTEC</span></a>
+    <a href="products.html?cat=all&brand=ASUS"><img class="brand-logo-img" src="images/brands/asus.png" alt="ASUS" loading="lazy" onload="if(this.naturalWidth>1)this.closest('a').classList.add('has-logo')" onerror="this.remove()"><span>ASUS</span></a>
+    <a href="products.html?cat=all&brand=Lenovo"><img class="brand-logo-img" src="images/brands/lenovo.png" alt="LENOVO" loading="lazy" onload="if(this.naturalWidth>1)this.closest('a').classList.add('has-logo')" onerror="this.remove()"><span>LENOVO</span></a>
+    <a href="products.html?cat=all&brand=Kingston"><img class="brand-logo-img" src="images/brands/kingston.png" alt="KINGSTON" loading="lazy" onload="if(this.naturalWidth>1)this.closest('a').classList.add('has-logo')" onerror="this.remove()"><span>KINGSTON</span></a>
+    <a href="products.html?cat=all&brand=Western%20Digital"><img class="brand-logo-img" src="images/brands/western-digital.png" alt="WD" loading="lazy" onload="if(this.naturalWidth>1)this.closest('a').classList.add('has-logo')" onerror="this.remove()"><span>WD</span></a>
+    <a href="products.html?cat=all&brand=Intel"><img class="brand-logo-img" src="images/brands/intel.png" alt="INTEL" loading="lazy" onload="if(this.naturalWidth>1)this.closest('a').classList.add('has-logo')" onerror="this.remove()"><span>INTEL</span></a>
   </div>
+  <!-- ⚠️ ההבהרה חייבת להיות **ליד** הלוגואים ולא רק בתקנון: לקוח
+       שרואה לוגו של Intel לא ילך לקרוא §14 כדי להבין שאיננו נציגים
+       שלה. הטקסט קטן, אבל הוא נמצא בדיוק במקום שבו הוא נדרש. -->
+  <p class="brand-strip-note">כל הסימנים המסחריים והלוגואים המוצגים כאן הם רכושם של בעליהם הרשמיים, ומשמשים לזיהוי המוצרים שאנו מוכרים בלבד.</p>
 </div>
 
 <!-- הריווח מהתוכן מגיע מ-.footer-top-gap ב-style.css ולא מ-style inline:

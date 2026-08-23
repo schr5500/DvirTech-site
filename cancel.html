@@ -92,7 +92,24 @@
 </style>
 </head>
 <body>
-<div id="siteHeader"></div>
+<!-- 🔴 **תוקן 23.08 — לדף לא הייתה כותרת עליונה.**
+     דביר: "דף ביטול עסקה — אין לו פוטר, אין לו תפריט עליון".
+     הסיבה: `site-header.js` בונה את התפריט לתוך `document.querySelector("header")`
+     — כלומר הוא מחפש **תגית `<header>`**, ולא מזהה `id="siteHeader"`.
+     המעטפת הייתה `<div id="siteHeader">`, ולכן הסקריפט רץ, לא מצא
+     כלום, ויצא בשקט. אין שגיאה בקונסולה — פשוט אין תפריט.
+     ⚠️ שלד ה-headbar חייב להיות כאן ולא ריק: `buildSiteHeader`
+     מחפש `.headbar` בתוך ה-header ומוסיף אליו, ולא יוצר אותו.
+     ⚠️ כל דף חדש חייב להיפתח מהעתקת הבלוק הזה. -->
+<header>
+  <div class="wrap headbar">
+    <a class="brand" href="home.html" aria-label="DvirTech — לדף הבית"><img class="brand-logo" src="images/logo-dvirtech-transparent.png" alt="DvirTech"></a>
+    <div class="lang-switch">
+      <button class="lang-btn" data-lang="he" onclick="setLang('he')">עברית</button>
+      <button class="lang-btn" data-lang="en" onclick="setLang('en')">English</button>
+    </div>
+  </div>
+</header>
 
 <main class="cxl-wrap">
   <div class="cxl-card">
@@ -194,7 +211,7 @@
   </div>
 </main>
 
-<div id="siteFooter"></div>
+<footer></footer>
 
 <script src="sprite.js"></script>
 <script src="i18n.js"></script>

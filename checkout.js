@@ -378,7 +378,15 @@ const DVT_SHIPPING = [
   { key:"standard", he:"משלוח רגיל", en:"Standard delivery", price:29, etaHe:"3-7 ימי עסקים", etaEn:"3-7 business days" },
   { key:"express",  he:"משלוח מהיר", en:"Express delivery",  price:59, etaHe:"2-5 ימי עסקים", etaEn:"2-5 business days" }
 ];
-let shippingKey = "standard";
+/* 🔴 **ברירת המחדל היא איסוף עצמי — שונה 23.08.**
+   דביר: "אני לא רוצה שהלקוח ירגיש שאני דוחף לו מוצרים."
+
+   ⚠️ וזה גם פשוט הגון יותר: ברירת מחדל שעולה כסף היא בחירה שנעשתה
+   **עבור** הלקוח, ולקוח שלא שם לב משלם 29 ₪ שלא ביקש. איסוף עצמי
+   הוא **0 ₪** — מי שרוצה משלוח בוחר אותו במודע.
+   ⚠️ שים לב שזה גם מסתיר את שדות הכתובת (`shippingKey === "pickup"`
+   בשורות למטה) — כלומר הקופה נפתחת קצרה יותר, וזו הטבה נוספת. */
+let shippingKey = "pickup";
 
 function shippingOption(){
   return DVT_SHIPPING.find(s => s.key === shippingKey) || null;
