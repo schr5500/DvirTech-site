@@ -479,18 +479,34 @@ nav a.nav-accent:hover{filter:brightness(1.12)}
    הסתרת הטקסט כברירת מחדל הותירה פס ריק כששרת החזיר 200 לקובץ
    חסר. הכיוון הזה נכשל תמיד לצד הבטוח — טקסט.
 
-   ⚠️ **האריחים אטומים ולא שקופים, וזו החלטה מודעת.** בתמונת המקור
-   הנשר של GIGABYTE הוא (221,221,219) והרקע (225,225,223) — הפרש
-   של ארבעה ערכים, כך שאין סף שמסיר את הרקע בלי למחוק את הלוגו.
-   ראה `tile()` ב-tools/crop-brands.py.
-   ⚠️ לכן כולם באותו גודל ובאותו גוון בדיוק, עם פינות מעוגלות —
-   כדי שייקראו כ"צ'יפ מותג" מכוון ולא כמלבן אפור תקוע. */
-.brand-logo-img{display:none;height:38px;width:auto;object-fit:contain;
-  border-radius:8px;opacity:.9;transition:opacity .15s,transform .15s}
-.brand-strip a.has-logo{padding:0}
+   ✅ **עיגולים לבנים, לפי הבקשה של דביר.** תמונת המקור החדשה על
+   רקע לבן אפשרה להשקיף את הרקע (הקודמת, על אפור, לא — הנשר של
+   GIGABYTE היה באותו גוון). ראה tools/crop-brands.py.
+   ⚠️ העיגול הוא על ה-`<a>` ולא על התמונה: תמונה שקופה בתוך עיגול
+   לבן נותנת את המראה הנקי, ועיגול על התמונה עצמה היה גוזם לוגו
+   רחב כמו "Western Digital". */
+.brand-strip{gap:18px;flex-wrap:wrap;justify-content:center}
+.brand-strip a.has-logo{
+  width:88px;height:88px;padding:0;border-radius:50%;
+  background:#fff;border:1px solid var(--line,#E2EAF2);
+  display:inline-flex;align-items:center;justify-content:center;
+  box-shadow:0 3px 10px rgba(14,42,71,.06);
+  transition:transform .15s,box-shadow .15s;
+}
+.brand-strip a.has-logo:hover{
+  transform:translateY(-2px);
+  box-shadow:0 8px 20px rgba(14,42,71,.12);
+}
+/* ⚠️ 70%/42% ולא `width:100%`: הלוגואים שונים ביחס הרוחב-גובה
+   (‏AMD רחב פי 3.7, intel כמעט ריבועי). `contain` בתוך תיבה
+   מרובעת שומר על שניהם קריאים ובאותו משקל ויזואלי. */
+.brand-logo-img{display:none;max-width:70%;max-height:42%;
+  width:auto;height:auto;object-fit:contain}
 .brand-strip a.has-logo .brand-logo-img{display:block}
 .brand-strip a.has-logo span{display:none}
-.brand-strip a:hover .brand-logo-img{opacity:1;transform:translateY(-1px)}
+@media(max-width:600px){
+  .brand-strip a.has-logo{width:70px;height:70px}
+}
 .brand-strip-note{font-size:11.5px;color:var(--ink-soft,#5F7590);text-align:center;
   margin:14px auto 0;max-width:640px;line-height:1.6;opacity:.85}
 
