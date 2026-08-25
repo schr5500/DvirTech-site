@@ -246,6 +246,7 @@ function injectCartWidget(){
         </div>
 
         <button class="btn btn-accent" id="cartCheckoutBtn" style="display:none" onclick="location.href='checkout.html'"></button>
+        <button class="btn btn-secondary" id="cartShareBtn" style="display:none" onclick="cartShareOpen()"></button>
         <button class="btn btn-secondary" id="cartContinueBtn" onclick="closeCart()"></button>
       </div>
     </div>
@@ -282,11 +283,15 @@ function renderCart(){
     emptyMsg.style.display = "block";
     totalRow.style.display = "none";
     checkoutBtn.style.display = "none";
+    const sb = document.getElementById("cartShareBtn");
+    if (sb) sb.style.display = "none";
     return;
   }
   emptyMsg.style.display = "none";
   totalRow.style.display = "flex";
   checkoutBtn.style.display = "block";
+  const shareBtn = document.getElementById("cartShareBtn");
+  if (shareBtn) shareBtn.style.display = "block";
 
   list.innerHTML = cartItems.map(i => {
     // ה-SKU בעגלה הוא "קטגוריה:מזהה" — בדיוק מה שדף המוצר מצפה לו,
@@ -389,6 +394,8 @@ function renderCartStaticText(){
   document.getElementById("cartTotalLabel").textContent = t("checkoutTotalLabel");
   document.getElementById("cartCheckoutBtn").textContent = t("checkoutBtn");
   document.getElementById("cartContinueBtn").textContent = t("continueBrowsing");
+  const sb = document.getElementById("cartShareBtn");
+  if (sb) sb.textContent = tr("שתף את העגלה", "Share this cart");
 }
 
 /* עוטפים setLang הקיים (מוגדר ב-landing.js/app.js של כל דף) כדי לרענן גם את
@@ -403,6 +410,8 @@ function hookCartIntoLangSwitch(){
 function initCart(){
   loadCartItems();
   injectCartWidget();
+  /* ⚠️ אחרי injectCartWidget — הוא צריך את המגירה כדי לפתוח אותה. */
+  try { cartShareMaybeOpen(); } catch (e) { /* קישור פגום לא ישבור את העגלה */ }
   renderCartStaticText();
   renderCart();
   hookCartIntoLangSwitch();
@@ -412,4 +421,234 @@ if(document.readyState === "loading"){
   document.addEventListener("DOMContentLoaded", initCart);
 }else{
   initCart();
+}
+
+
+/* =====================================================================
+   🔗 שיתוף עגלה — דביר מרכיב סל בשיחה ושולח ללקוח לאישור
+   =====================================================================
+   דביר: "אם אני מרכיב יחד עם הלקוח בשיחה סל של מחשב — אני רוצה לשלוח
+   לו שיעבור ויבדוק שלא חסר כלום. השאלה היא מה יקרה כשהלקוח ילחץ —
+   האם זה יגרוס לו את העגלה שלו?"
+
+   🔴 **התשובה: לא, ואי אפשר שכן.** הקישור **לעולם אינו מחיל את עצמו.**
+   הוא פותח חלון שמראה מה יש בו, ורק לחיצה מפורשת של הלקוח משנה משהו:
+     • "הוסף לסל שלי"   — מיזוג. פריט קיים מקבל את הכמות הגבוהה מביניהן
+     • "החלף את הסל שלי" — מוצג **רק** אם יש לו כבר סל, ודורש אישור שני
+     • "לא עכשיו"        — סוגר, אפס שינוי
+   עגלה של לקוח היא רכוש שלו; לינק אף פעם לא מוחק אותה בשקט.
+
+   🔴 **הקישור נושא מק"ט וכמות בלבד — אף פעם לא מחיר.** זה אותו כלל
+   שהשרת אוכף בקופה: מחיר שמגיע מהדפדפן אינו מחיר. שני רווחים מזה:
+     1. אי אפשר לזייף מחיר ע"י עריכת הכתובת
+     2. קישור מלפני שבוע מציג את **המחיר של היום**, לא מחיר מת
+   ⚠️ המשמעות: הדף שמקבל את הקישור **חייב** את הקטלוג (search-core.js).
+   דף שאין בו — מפנה ל-products.html עם אותה מטענה.
+
+   ⚠️ מוצר שהוסר או נחסם מאז שהקישור נשלח פשוט לא נמצא בקטלוג, ומוצג
+   ללקוח כ"לא זמין יותר" במקום להיעלם בשקט. */
+
+const CART_SHARE_PARAM_ = "cart";
+const CART_SHARE_LANDING_ = "products.html";
+
+/* "cat:id" + כמות → "cat:id*3". פסיק בין פריטים. */
+function cartSharePayload(){
+  return cartItems
+    .filter(i => typeof i.sku === "string" && i.sku)
+    .map(i => i.sku + (Number(i.qty) > 1 ? "*" + Math.floor(Number(i.qty)) : ""))
+    .join(",");
+}
+
+function cartShareUrl(){
+  const base = location.origin + location.pathname.replace(/[^/]*$/, "") + CART_SHARE_LANDING_;
+  return base + "?" + CART_SHARE_PARAM_ + "=" + encodeURIComponent(cartSharePayload());
+}
+
+function cartShareOpen(){
+  const url = cartShareUrl();
+  const n = cartCount();
+  const nHe = n === 1 ? "פריט אחד" : n + " פריטים";
+  const msg = tr("הרכבתי עבורך סל ב-DvirTech (" + nHe + "). מוזמן לעבור ולוודא שלא חסר כלום:",
+                 "I've put together a DvirTech cart for you (" + n + (n === 1 ? " item" : " items") + "). Take a look and check nothing's missing:")
+              + "\n" + url;
+
+  const box = document.createElement("div");
+  box.className = "cart-overlay";
+  box.style.display = "flex";
+  box.innerHTML =
+    '<div class="cart-panel" style="max-width:460px;inset-block:auto;inset-inline:auto;position:relative;margin:auto;border-radius:16px">' +
+      '<div class="cart-panel-head"><h3>' + escHtml(tr("שיתוף העגלה", "Share this cart")) + "</h3>" +
+        '<button class="checkout-close" aria-label="close">✕</button></div>' +
+      "<p style=\"font-size:13.5px;line-height:1.6;margin:0 0 12px\">" +
+        escHtml(tr("הלקוח יראה את הפריטים ואת המחירים המעודכנים, ויבחר בעצמו אם להוסיף לסל שלו. הקישור לא מוחק לו כלום.",
+                   "Your customer sees the items at today's prices and chooses whether to add them. The link never clears their cart.")) +
+      "</p>" +
+      '<input type="text" readonly value="' + escHtml(url) + '" ' +
+        'style="width:100%;padding:10px;border:1px solid var(--line,#d8e2ef);border-radius:8px;font-size:12px;direction:ltr;text-align:left;margin-bottom:10px">' +
+      '<button class="btn btn-accent" data-act="wa" style="margin-bottom:8px">' +
+        escHtml(tr("שלח בוואטסאפ", "Send on WhatsApp")) + "</button>" +
+      '<button class="btn btn-secondary" data-act="copy">' +
+        escHtml(tr("העתק קישור", "Copy link")) + "</button>" +
+    "</div>";
+
+  const close = () => box.remove();
+  box.addEventListener("click", (ev) => {
+    if (ev.target === box) return close();
+    const act = ev.target.getAttribute && ev.target.getAttribute("data-act");
+    if (ev.target.classList && ev.target.classList.contains("checkout-close")) return close();
+    if (act === "wa"){
+      window.open("https://wa.me/?text=" + encodeURIComponent(msg), "_blank", "noopener");
+    } else if (act === "copy"){
+      const inp = box.querySelector("input");
+      inp.select();
+      const ok = () => { ev.target.textContent = tr("הועתק ✓", "Copied ✓"); };
+      if (navigator.clipboard && navigator.clipboard.writeText){
+        navigator.clipboard.writeText(url).then(ok, () => { try{ document.execCommand("copy"); ok(); }catch(e){} });
+      } else {
+        try{ document.execCommand("copy"); ok(); }catch(e){}
+      }
+    }
+  });
+  document.body.appendChild(box);
+}
+
+/* ---------- צד הלקוח: פתיחת קישור משותף ---------- */
+function cartShareParse_(payload){
+  return String(payload || "").split(",").map(function (tok){
+    const m = String(tok).trim().match(/^(.+?)(?:\*(\d{1,2}))?$/);
+    if (!m || !m[1]) return null;
+    return { sku: m[1], qty: Math.min(Math.max(parseInt(m[2] || "1", 10) || 1, 1), 20) };
+  }).filter(Boolean);
+}
+
+/* מק"ט "cat:id" → הפריט החי מהקטלוג. המחיר מגיע **רק** מכאן. */
+function cartShareResolve_(catalog, sku){
+  const parts = String(sku).split(":");
+  if (parts.length !== 2) return null;
+  const node = catalog && catalog[parts[0]];
+  const list = node && node.items;
+  if (!Array.isArray(list)) return null;
+  for (let i = 0; i < list.length; i++){
+    if (String(list[i].id) === parts[1]) return list[i];
+  }
+  return null;
+}
+
+function cartShareMaybeOpen(){
+  let payload = null;
+  try { payload = new URLSearchParams(location.search).get(CART_SHARE_PARAM_); }
+  catch (e) { return; }
+  if (!payload) return;
+
+  /* דף בלי קטלוג לא יכול לתמחר — מפנים לדף שכן יכול, עם אותה מטענה. */
+  if (typeof dvtGetCatalog !== "function"){
+    location.replace(CART_SHARE_LANDING_ + "?" + CART_SHARE_PARAM_ + "=" + encodeURIComponent(payload));
+    return;
+  }
+
+  const wanted = cartShareParse_(payload);
+  if (!wanted.length) return;
+
+  dvtGetCatalog().then(function (catalog){
+    const found = [], missing = [];
+    wanted.forEach(function (w){
+      const it = cartShareResolve_(catalog, w.sku);
+      if (it && Number.isFinite(Number(it.price))) {
+        found.push({ item: it, qty: w.qty, sku: w.sku });
+      } else {
+        missing.push(w.sku);
+      }
+    });
+    if (!found.length && !missing.length) return;
+    cartShareShowIncoming_(found, missing);
+  }).catch(function(){ /* אין קטלוג — לא מציגים חלון שגוי */ });
+}
+
+function cartShareShowIncoming_(found, missing){
+  const total = found.reduce((s, f) => s + Number(f.item.price) * f.qty, 0);
+  const hasOwn = cartItems.length > 0;
+
+  const rows = found.map(f =>
+    '<li class="cart-item"><div class="cart-item-name">' + escHtml(f.item.name) +
+    (f.qty > 1 ? ' <span style="opacity:.7">×' + f.qty + "</span>" : "") +
+    '</div><div class="cart-item-price">' +
+    (Number(f.item.price) * f.qty).toLocaleString() + " ₪</div></li>").join("");
+
+  /* ⚠️ "1 פריטים" זו עברית שבורה, והלקוח רואה את זה. */
+  const missHe = missing.length === 1
+    ? "פריט אחד כבר אינו זמין והושמט."
+    : missing.length + " פריטים כבר אינם זמינים והושמטו.";
+  const missEn = missing.length === 1
+    ? "One item is no longer available and was left out."
+    : missing.length + " items are no longer available and were left out.";
+  const miss = missing.length
+    ? '<p style="font-size:12.5px;color:var(--red,#c0392b);margin:8px 0 0">' +
+      escHtml(tr(missHe, missEn)) + "</p>"
+    : "";
+
+  const box = document.createElement("div");
+  box.className = "cart-overlay";
+  box.style.display = "flex";
+  box.innerHTML =
+    '<div class="cart-panel" style="max-width:480px;inset-block:auto;inset-inline:auto;position:relative;margin:auto;border-radius:16px">' +
+      '<div class="cart-panel-head"><h3>' +
+        escHtml(tr("הכנו עבורך סל", "A cart was prepared for you")) + "</h3>" +
+        '<button class="checkout-close" aria-label="close">✕</button></div>' +
+      '<ul class="cart-items">' + rows + "</ul>" +
+      '<div class="checkout-total-row"><span>' + escHtml(tr("סה״כ", "Total")) +
+        "</span><span>" + total.toLocaleString() + " ₪</span></div>" + miss +
+      '<button class="btn btn-accent" data-act="merge" style="margin:12px 0 8px">' +
+        escHtml(hasOwn ? tr("הוסף לסל שלי", "Add to my cart")
+                       : tr("קבל את הסל", "Use this cart")) + "</button>" +
+      (hasOwn ? '<button class="btn btn-secondary" data-act="replace" style="margin-bottom:8px">' +
+        escHtml(tr("החלף את הסל שלי", "Replace my cart")) + "</button>" : "") +
+      '<button class="btn btn-secondary" data-act="skip">' +
+        escHtml(tr("לא עכשיו", "Not now")) + "</button>" +
+    "</div>";
+
+  /* מנקים את הפרמטר מהכתובת כדי שרענון לא יפתח את החלון שוב. */
+  const clean = () => {
+    try {
+      const u = new URL(location.href);
+      u.searchParams.delete(CART_SHARE_PARAM_);
+      history.replaceState({}, "", u.pathname + (u.search || "") + u.hash);
+    } catch (e) { /* דפדפן ישן */ }
+  };
+  const close = () => { clean(); box.remove(); };
+
+  const apply = (replace) => {
+    if (replace) cartItems = [];
+    found.forEach(function (f){
+      const exist = cartItems.find(c => c.sku === f.sku);
+      if (exist) {
+        /* מיזוג = הכמות הגבוהה, לא סכום. לקוח שכבר שם 2 ומקבל לינק
+           עם 2 לא אמור לגלות 4 בעגלה. */
+        exist.qty = Math.min(Math.max(exist.qty, f.qty), 20);
+      } else {
+        cartItems.push({
+          id: "s" + Date.now() + Math.random().toString(36).slice(2, 7),
+          sku: f.sku, type: "product",
+          name: f.item.name, price: Number(f.item.price), qty: f.qty
+        });
+      }
+    });
+    saveCartItems();
+    renderCart();
+    close();
+    if (typeof openCart === "function") openCart();
+  };
+
+  box.addEventListener("click", function (ev){
+    if (ev.target === box) return close();
+    if (ev.target.classList && ev.target.classList.contains("checkout-close")) return close();
+    const act = ev.target.getAttribute && ev.target.getAttribute("data-act");
+    if (act === "merge")   return apply(false);
+    if (act === "skip")    return close();
+    if (act === "replace"){
+      /* אישור שני — זו הפעולה היחידה כאן שמוחקת משהו של הלקוח. */
+      if (confirm(tr("להחליף את הסל הקיים שלך? הפריטים שבו יוסרו.",
+                     "Replace your current cart? Its items will be removed."))) apply(true);
+    }
+  });
+  document.body.appendChild(box);
 }
