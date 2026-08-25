@@ -34,11 +34,13 @@ const DVT_CONTENT = {
      ול-SHIPPING_OPTIONS_ ב-4-payment-api.gs. אלה שלושה מקומות, וזה
      הרע במיעוטו: הראשון הוא תצוגה, השני חישוב, והשלישי גבייה. */
   shipping: {
-    expressDays: { he: "2-5 ימי עסקים",  en: "2-5 business days" },
+    /* ⚠️ expressDays נשאר כמפתח כדי לא לשבור דפים שנשמרו פתוחים,
+       אבל "משלוח מהיר" הוסר מהאתר (25.08) — הערך מפנה לרגיל. */
+    expressDays: { he: "3-7 ימי עסקים",  en: "3-7 business days" },
     standardDays:{ he: "3-7 ימי עסקים",  en: "3-7 business days" },
     pickupPlace: { he: "אבן שמואל",      en: "Even Shmuel" },
     // מוצג בפס היתרונות ובכרטיסי המוצר
-    shortLabel:  { he: "משלוח מהיר",     en: "Fast delivery" }
+    shortLabel:  { he: "משלוח עד הבית",  en: "Door-to-door delivery" }
   },
 
   /* ---------- אחריות ----------
@@ -55,8 +57,8 @@ const DVT_CONTENT = {
   /* ---------- תשלומים ---------- */
   payments: {
     short: { he: "עד 12 תשלומים", en: "Up to 12 installments" },
-    note:  { he: "1-3 תשלומים ללא עמלה. מ-4 ומעלה מוצגת עמלה מפורשת לפני האישור.",
-             en: "1-3 installments with no fee. From 4 up, the fee is shown before you confirm." }
+    note:  { he: "1-2 תשלומים ללא עמלה. מ-3 ומעלה מוצגת עמלה מפורשת לפני האישור.",
+             en: "1-2 installments with no fee. From 3 up, the fee is shown before you confirm." }
   },
 
   /* ---------- שירות ----------

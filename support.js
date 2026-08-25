@@ -134,16 +134,21 @@ const SQ = {
 const SUP_SERVICES = [
 
   /* ---------- הרכבה ---------- */
+  /* 🔴 **הפירוט "מה כלול" — הגדרת דביר, 25.08.** ההרכבה והתקנת
+     Windows התערבבו; מהיום כל פירוט יושב בשירות הנכון:
+       הרכבה  = כבלים, POST, תקינות רכיבים, עלייה עד BIOS (בלי OS!)
+       Windows = בדיקת רכיבים, דרייברים בסיסיים, טמפרטורות, יציבות
+     "דברים מהסוג הזה ממש מעשירים את האתר." */
   { key:"assembly-parts", sku:"CLI-4001", cat:"assembly", price:300,
     he:"הרכבת מחשב (החלקים שלך)", en:"PC assembly (your own parts)",
-    descHe:"הרכבה מלאה, סידור כבלים ובדיקת יציבות. בלי התקנת מערכת הפעלה.",
-    descEn:"Full build, cable management and a stability test. OS install not included.",
+    descHe:"הרכבה מלאה הכוללת: סידור כבלים בסיסי, בדיקת POST, בדיקת תקינות הרכיבים (איתור נזק חומרה) ואימות שהמערכת עולה עד ה-BIOS. בלי התקנת Windows.",
+    descEn:"A full build including: basic cable management, POST check, component health check (hardware damage) and verifying the system boots to BIOS. Windows install not included.",
     q:[ SQ.partsReady, SQ.partsList, SQ.handover ] },
 
   { key:"assembly-win", sku:"CLI-4002", cat:"assembly", price:400,
     he:"הרכבה + Windows + דרייברים", en:"Assembly + Windows + drivers",
-    descHe:"הרכבה, התקנת Windows ודרייברים. הרישיון לא כלול במחיר.",
-    descEn:"Build, Windows install and drivers. The license is not included.",
+    descHe:"כל מה שבהרכבה (כבלים, POST, תקינות רכיבים, עלייה ל-BIOS) + ערכת Windows מלאה: התקנה נקייה, דרייברים בסיסיים, בדיקת טמפרטורות ובדיקת יציבות. הרישיון לא כלול במחיר.",
+    descEn:"Everything in the build (cables, POST, component checks, BIOS boot) + the full Windows kit: clean install, basic drivers, temperature check and a stability test. License not included.",
     q:[ SQ.partsReady, SQ.partsList,
         { id:"hasKey", type:"select",
           he:"יש לך כבר מפתח Windows?", en:"Do you already have a Windows key?",
@@ -155,21 +160,21 @@ const SUP_SERVICES = [
 
   { key:"assembly-win-lic", sku:"CLI-4003", cat:"assembly", price:550,
     he:"הרכבה + Windows + דרייברים + רישיון", en:"Assembly + Windows + drivers + license",
-    descHe:"הכל כלול: הרכבה, מערכת הפעלה, דרייברים ורישיון Windows חוקי.",
-    descEn:"All included: build, OS, drivers and a genuine Windows license.",
+    descHe:"החבילה המלאה: ההרכבה על כל בדיקותיה, ערכת Windows מלאה (התקנה, דרייברים, טמפרטורות, יציבות) ורישיון Windows חוקי.",
+    descEn:"The complete package: the full build and its checks, the full Windows kit (install, drivers, temperatures, stability) and a genuine Windows license.",
     q:[ SQ.partsReady, SQ.partsList, SQ.winEdition ] },
 
   /* ---------- מערכת הפעלה ---------- */
   { key:"win11-license", sku:"CLI-4006", cat:"os", price:300,
     he:"התקנת Windows 11 + רישיון", en:"Windows 11 install + license",
-    descHe:"התקנה נקייה, דרייברים, עדכונים ורישיון חוקי.",
-    descEn:"Clean install, drivers, updates and a genuine license.",
+    descHe:"ערכת ההתקנה המלאה: התקנה נקייה, בדיקת רכיבים, התקנת דרייברים בסיסית, עדכונים, בדיקת טמפרטורות ובדיקת יציבות בסיסית — עם רישיון חוקי.",
+    descEn:"The full install kit: clean install, component check, basic drivers, updates, temperature check and a basic stability test — with a genuine license.",
     q:[ SQ.deskOrLaptop, SQ.files, SQ.boots, SQ.winEdition ] },
 
   { key:"win11-own-license", sku:"CLI-4007", cat:"os", price:200,
     he:"התקנת Windows (יש לך רישיון)", en:"Windows install (you have a license)",
-    descHe:"אותה התקנה, בלי עלות הרישיון.",
-    descEn:"The same install, without the cost of the license.",
+    descHe:"אותה ערכת התקנה מלאה (בדיקת רכיבים, דרייברים, טמפרטורות, יציבות) — בלי עלות הרישיון.",
+    descEn:"The same full install kit (component check, drivers, temperatures, stability) — without the cost of the license.",
     q:[ SQ.deskOrLaptop,
         { id:"licenseKind", type:"select",
           he:"איזה רישיון יש לך?", en:"What kind of license do you have?",
@@ -395,6 +400,22 @@ const SUP_SERVICES = [
           phEn:"e.g. i5-12400 CPU, B660 board, 550W PSU" },
         SQ.deskOrLaptop ] },
 
+  /* 🔴 **חדש 25.08 — לבקשת דביר.** מחיר 200 ₪ = אמצע טווח השוק
+     למעבדות בארץ (150-250 ₪ ל"האצת מחשב"); יושב מעל תמיכה מרחוק
+     (120) ומתחת לפירמוט (350), שהוא המדרגה הבאה כשאופטימיזציה לא
+     מספיקה. ⚠️ CLI-4033 עדיין לא קיים ב-SUMIT — ליצור שם ידנית. */
+  { key:"pc-optimize", sku:"CLI-4033", cat:"repairs", price:200,
+    he:"אופטימיזציה ושיפור ביצועים", en:"PC optimization & tune-up",
+    descHe:"ניקוי תוכנתי מעמיק: הסרת תוכנות מיותרות, עדכוני מערכת ודרייברים, כיוון תוכנות רקע ואתחול, ובדיקת טמפרטורות. המחשב מרגיש חדש — בלי פירמוט.",
+    descEn:"A deep software tune-up: junk removal, system and driver updates, startup and background-app tuning, and a temperature check. Feels new — without a format.",
+    q:[ SQ.deskOrLaptop,
+        { id:"optSymptom", type:"select",
+          he:"מה הכי מפריע?", en:"What bothers you most?",
+          options:[["איטי בהפעלה","Slow to start"],
+                   ["איטי בעבודה שוטפת","Slow in daily use"],
+                   ["משחקים לא רצים חלק","Games don't run smoothly"],
+                   ["הכל — תחזוקה כללית","Everything — a general tune-up"]] } ] },
+
   { key:"clean-thermal", sku:"CLI-4018", cat:"repairs", price:150,
     he:"ניקוי פנימי + משחה תרמית", en:"Internal cleaning + thermal paste",
     descHe:"פירוק, ניקוי אבק והחלפת משחה תרמית. מוריד חום ורעש.",
@@ -469,23 +490,10 @@ const SUP_SERVICES = [
           options:[["כן","Yes"],["לא — אשמח להמלצה","No — I'd like a recommendation"]] },
         SQ.budget ] },
 
-  { key:"bundle-yearly", sku:"CLI-4022", cat:"bundles", price:600,
-    he:"חבילת ליווי שנתית", en:"Annual support plan",
-    descHe:"זמין לך לאורך השנה — תקלות, תחזוקה וייעוץ, בלי לספור שיחות.",
-    descEn:"Available to you all year — faults, maintenance and advice, without counting calls.",
-    q:[ { id:"machines", type:"select",
-          he:"כמה מחשבים בליווי?", en:"How many computers in the plan?",
-          options:[["אחד","One"],["שניים","Two"],["שלושה עד חמישה","Three to five"],
-                   ["יותר מחמישה","More than five"]] },
-        { id:"homeOrBiz", type:"select",
-          he:"בית או עסק?", en:"Home or business?",
-          options:[["בית","Home"],["עסק קטן","Small business"]] },
-        { id:"planFocus", type:"multi",
-          he:"מה הכי חשוב לך?", en:"What matters most to you?",
-          options:[["זמינות מהירה כשיש תקלה","Fast response when something breaks"],
-                   ["תחזוקה תקופתית","Routine maintenance"],
-                   ["גיבויים","Backups"],
-                   ["ייעוץ ורכש","Advice & purchasing"]] } ] }
+  /* 🔴 **"חבילת ליווי שנתית" (CLI-4022) הוסרה מהדף — 25.08, הוראת
+     דביר:** "יש לנו כבר 3 כאלה של DvirTech Care." המסלולים CARE/PLUS/
+     PRO מוצגים באזור #care ומנוהלים בהצטרפות מתואמת (ראה תקנון 6.6).
+     המק"ט נשאר ב-SUMIT ובמחירון — להיסטוריית מסמכים בלבד. */
 ];
 
 /* ==================== מצב ==================== */

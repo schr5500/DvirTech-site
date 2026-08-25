@@ -726,16 +726,14 @@ function pdWarrantyHtml(it){
    אחת גנרית ואחת ספציפית, סותרות זו את זו כשהספציפית אומרת משהו אחר
    ("אחריות במעבדת מור לוי" איננה אחריות יבואן). מה שנשאר הוא התשלומים,
    שנכון תמיד. */
-/* ⚠️ **"3 תשלומים ללא עמלה" מוביל, לא "עד 12".**
-   "עד 12 תשלומים" מספר ללקוח שאפשר לפרוס — אבל לא שזה חינם. ההטבה
-   האמיתית היא שלושת הראשונים בלי אגורה, וזו גם הפריסה שהכי משתלמת
-   לדביר. אמירה שמובילה עם המספר הגדול מוכרת את הפריסה היקרה. */
+/* ⚠️ (עודכן 25.08) המדיניות החדשה: 1-2 תשלומים חינם, מ-3 עם עמלה
+   מוצגת מראש. "3 תשלומים ללא עמלה" הפך לא-נכון ולכן ירד; מובילים
+   עם הפריסה עצמה, והעמלה מוצגת בקופה לצד כל אפשרות. */
 function pdPriceNote(it){
-  const free = tr("3 תשלומים ללא עמלה", "3 installments, no fee");
-  const upTo = tr("עד 12 תשלומים", "up to 12");
+  const spread = tr("פריסה עד 12 תשלומים", "Up to 12 installments");
   return pdWarrantyText(it)
-    ? free + " · " + upTo
-    : tr("אחריות יבואן רשמי", "Official importer warranty") + " · " + free + " · " + upTo;
+    ? spread
+    : tr("אחריות יבואן רשמי", "Official importer warranty") + " · " + spread;
 }
 
 function pdStockHtml(it){
@@ -855,8 +853,8 @@ function pdRenderBody(){
 
         <ul class="pd-perks">
           <li><svg class="ui-ic"><use href="#ui-truck"/></svg>${(typeof dvtText === "function"
-            ? tr("משלוח ", "Delivery in ") + dvtText("shipping.expressDays")
-            : tr("משלוח 2-5 ימי עסקים","Delivery in 2-5 business days"))}</li>
+            ? tr("משלוח ", "Delivery in ") + dvtText("shipping.standardDays")
+            : tr("משלוח 3-7 ימי עסקים","Delivery in 3-7 business days"))}</li>
           <li><svg class="ui-ic"><use href="#ui-shield"/></svg>${tr("אחריות מלאה על כל רכיב","Full warranty on every part")}</li>
           <!-- ⚠️ **היה "הרכבה והתקנה בתוספת תשלום" — הפוך מהאמת.**
                הרכבת מחשב שלם שנקנה כאן היא **ללא עלות** ונוספת
@@ -871,15 +869,19 @@ function pdRenderBody(){
         <!-- ⚠️ פס אמון. ארבע העובדות שלקוח מחפש רגע לפני שהוא לוחץ
              "הוסף לסל", ושעד עכשיו היו קבורות בתקנון בלבד. הן אינן
              הבטחות חדשות — כל אחת מהן כבר נכונה במערכת:
-               · 1-3 תשלומים חינם ..... 4-payment-api.gs
+               · התאמת מחיר ........... מדיניות מוצהרת (25.08)
                · איסוף עצמי ללא עלות .. תקנון §5.3
                · ביטול 14 יום ......... תקנון §8, חובה בדין
                · סליקה חיצונית ........ תקנון §4, PCI-DSS
              ⚠️ אין להוסיף כאן שורה שאין לה כיסוי במערכת ובתקנון. -->
         <ul class="pd-perks pd-perks-trust">
+          <!-- 🔴 התאמת מחיר (דביר, 25.08): "מצאת זול יותר בישראל? שלח
+               לינק ונשווה" — מסיר את החשש שמפיל עגלות, ועולה כמעט
+               כלום כי רוב הלקוחות לא טורחים לבדוק. ההשוואה אינה
+               התחייבות אוטומטית — דביר עונה אישית על כל פנייה. -->
           <li><svg class="ui-ic"><use href="#ui-spark"/></svg><b>${
-            tr("3 תשלומים ללא עמלה","3 installments, no fee")}</b> — ${
-            tr("הסכום זהה למחיר המוצג","the amount matches the listed price")}</li>
+            tr("מצאת זול יותר בישראל?","Found it cheaper in Israel?")}</b> <a class="pd-wa" href="${pdWhatsappHref(it)}" target="_blank" rel="noopener">${
+            tr("שלח לינק ונשווה","Send the link — we'll match")}</a></li>
           <li><svg class="ui-ic"><use href="#ui-box"/></svg>${
             tr("איסוף עצמי ללא עלות מ","Free pickup from ") + (typeof dvtText === "function"
               ? dvtText("shipping.pickupPlace") : tr("אבן שמואל","Even Shmuel"))} ${
