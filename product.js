@@ -851,6 +851,16 @@ function pdRenderBody(){
 
         ${pdShareHtml()}
 
+        <!-- 🔴 **כפתור ההשוואה — דלת כניסה, לא איסוף.**
+             דביר: "אני לא עף על אתרים שאתה מסמן מוצר ואז עוד אחד."
+             לכן אין כאן תיבת סימון ואין מונה שמצטבר בהדר: לחיצה אחת
+             פותחת את דף ההשוואה **עם המוצר הזה בפנים**, ומשם הלקוח
+             בוחר מול מי להשוות — או לוחץ "הוסף דגמים דומים". -->
+        <a class="btn btn-secondary pd-compare"
+           href="compare.html?cat=${encodeURIComponent(PD_CAT)}&ids=${encodeURIComponent(it.id)}">
+          <svg class="ui-ic" aria-hidden="true"><use href="#ui-scale"/></svg>
+          ${tr("השווה מול דגמים אחרים", "Compare with other models")}</a>
+
         <ul class="pd-perks">
           <li><svg class="ui-ic"><use href="#ui-truck"/></svg>${(typeof dvtText === "function"
             ? tr("משלוח ", "Delivery in ") + dvtText("shipping.standardDays")
@@ -1250,7 +1260,18 @@ async function loadProduct(){
   });
 }
 
-loadProduct();
+/* 🔴 **שער כניסה — נוסף 25.08 כשנולד דף ההשוואה.**
+   הקובץ הזה מחזיק את אוצר המילים של המפרט (`PD_TECH_FIELDS`,
+   `pdSpecRows`, התוויות והפורמט), ודף ההשוואה צריך **בדיוק** את
+   אותם שדות. השכפול היחיד שהיה נמנע ממנו הוא שכפול של רשימות —
+   וזה בדיוק סוג הכפילות שגורמת לשני דפים להציג מפרט שונה לאותו
+   מוצר אחרי שמישהו עדכן רק אחד מהם.
+
+   ⚠️ עד עכשיו השורה הזו רצה בלי תנאי, ולכן טעינת הקובץ בכל דף אחר
+   הייתה מנסה לרנדר מוצר ונופלת על `#pdBody` שלא קיים.
+   ⚠️ `#pdBody` קיים **רק** ב-product.html — זה מה שהופך אותו לתנאי
+   הנכון, ולא בדיקה של הכתובת. */
+if (document.getElementById("pdBody")) loadProduct();
 
 
 /* ==================== שיתוף מוצר ====================
