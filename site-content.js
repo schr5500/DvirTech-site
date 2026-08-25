@@ -57,8 +57,8 @@ const DVT_CONTENT = {
   /* ---------- תשלומים ---------- */
   payments: {
     short: { he: "עד 12 תשלומים", en: "Up to 12 installments" },
-    note:  { he: "1-2 תשלומים ללא עמלה. מ-3 ומעלה מוצגת עמלה מפורשת לפני האישור.",
-             en: "1-2 installments with no fee. From 3 up, the fee is shown before you confirm." }
+    note:  { he: "תשלום אחד ללא עמלה. מ-2 תשלומים ומעלה מוצגת עמלה מפורשת לפני האישור.",
+             en: "One payment with no fee. From 2 installments up, the fee is shown before you confirm." }
   },
 
   /* ---------- שירות ----------

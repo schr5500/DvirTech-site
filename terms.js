@@ -21,7 +21,7 @@
    נגזרה מקובץ אמיתי, ואלה המקורות:
      • קבלה (DocumentType 2) ולא חשבונית מס .... 4-payment-api.gs:84-86
      • סליקת SUMIT/UPAY בדף חיצוני ............. 4-payment-api.gs / checkout.js:38
-     • 1-2 תשלומים ללא עמלה, 3+ עם עמלה ........ checkout.js (עודכן 25.08)
+     • תשלום אחד ללא עמלה, 2+ עם עמלה .......... checkout.js (עודכן 25.08 ערב)
      • משלוח 29/49/0 ₪ + זמנים ................. checkout.js:229-237
      • איסוף עצמי באבן שמואל ................... checkout.js:230
      • שירותים שנמכרים בקופה ................... checkout.js:315-329
@@ -84,9 +84,9 @@ const TERMS_SECTIONS = {
       title: "4. תשלום, סליקה ותשלומים",
       html: `<p><b>סליקה חיצונית מאובטחת.</b> התשלום אינו מתבצע באתר עצמו. עם אישור ההזמנה מופנה הלקוח לדף סליקה מאובטח חיצוני, העומד בתקן אבטחת המידע PCI-DSS ומופעל על ידי חברת הסליקה (SUMIT/UPAY). פרטי כרטיס האשראי אינם עוברים דרך האתר, אינם נראים לבית העסק ואינם נשמרים אצלו — הם מוזנים ומעובדים מול חברת הסליקה בלבד. החיוב עשוי להופיע בפירוט כרטיס האשראי תחת שם חברת הסליקה לצד שם בית העסק.</p>
              <p><b>מספר תשלומים.</b> ניתן לבחור עד 12 תשלומים בעמוד התשלום.</p>
-             <p><b>תשלום אחד או שניים — ללא כל עמלה.</b> הסכום שייגבה זהה למחיר המוצג לצד המוצר, ללא תוספת כלשהי. המחיר המוצג באתר הוא אפוא המחיר המלא והכולל של המוצר, והוא זמין לכל לקוח ללא תשלום נוסף.</p>
-             <p><b>3 תשלומים ומעלה — עמלת תשלומים.</b> בחירה ב-3 תשלומים ומעלה היא בחירה אופציונלית של הלקוח, שאינה תנאי לרכישה, וכרוכה בעמלה המשקפת את עלות המימון בפועל <b>ואינה עולה עליה</b>. העמלה מחושבת לכל חודש תשלום, ולכן היא עולה ככל שמספר התשלומים גדל: 6 תשלומים עולים יותר מ-3, ו-12 יותר מ-6. הלקוח רשאי בכל עת לבחור תשלום אחד או שניים ולא לשלם עמלה כלל. סכום העמלה המדויק בשקלים, שיעורה והסכום הכולל לתשלום מוצגים ללקוח בעמוד התשלום, לצד כל אפשרות פריסה, <b>לפני</b> אישור העסקה — ולא לאחריו.</p>
-             <p>מאחר שהעמלה נגבית רק בפריסה שהלקוח בוחר בה מרצונו, והמחיר המוצג באתר הוא המחיר המלא בתשלום אחד או שניים — אין בגבייתה משום תוספת ל"מחיר הכולל" כמשמעותו בחוק הגנת הצרכן, החל על תשלומי חובה שהצרכן אינו יכול לוותר עליהם.</p>
+             <p><b>תשלום אחד — ללא כל עמלה.</b> הסכום שייגבה זהה למחיר המוצג לצד המוצר, ללא תוספת כלשהי. המחיר המוצג באתר הוא אפוא המחיר המלא והכולל של המוצר, והוא זמין לכל לקוח ללא תשלום נוסף.</p>
+             <p><b>2 תשלומים ומעלה — עמלת תשלומים.</b> בחירה ב-2 תשלומים ומעלה היא בחירה אופציונלית של הלקוח, שאינה תנאי לרכישה, וכרוכה בעמלה המשקפת את עלות המימון בפועל <b>ואינה עולה עליה</b>. העמלה מחושבת לכל חודש תשלום, ולכן היא עולה ככל שמספר התשלומים גדל: 6 תשלומים עולים יותר מ-2, ו-12 יותר מ-6. הלקוח רשאי בכל עת לבחור תשלום אחד ולא לשלם עמלה כלל. סכום העמלה המדויק בשקלים, שיעורה והסכום הכולל לתשלום מוצגים ללקוח בעמוד התשלום, לצד כל אפשרות פריסה, <b>לפני</b> אישור העסקה — ולא לאחריו.</p>
+             <p>מאחר שהעמלה נגבית רק בפריסה שהלקוח בוחר בה מרצונו, והמחיר המוצג באתר הוא המחיר המלא בתשלום אחד — אין בגבייתה משום תוספת ל"מחיר הכולל" כמשמעותו בחוק הגנת הצרכן, החל על תשלומי חובה שהצרכן אינו יכול לוותר עליהם.</p>
              <p>לא ייגבה מהלקוח סכום שלא הוצג לו על המסך לפני אישור העסקה, ולא ייגבה סכום העולה על הסכום הכולל שהוצג ואושר על ידו.</p>
              <p>המעבר לדף התשלום מותנה בסימון תיבת אישור פעילה, המעידה כי הלקוח קרא ומסכים לתקנון זה (ראה סעיף 17).</p>`
     },
@@ -225,7 +225,7 @@ const TERMS_SECTIONS = {
     },
     {
       title: "3. Exempt-Dealer Status & Transaction Documents",
-      html: `<p>The Business is an <b>exempt dealer (עוסק פטור)</b> and does not charge VAT separately. <b>No VAT is added to the prices shown on the Site</b>; those are the prices the customer pays for the product or service itself. The only amounts added to the transaction total are ones the customer expressly selects and sees on screen before confirming: the delivery charge (section 5.1), and the installment fee where 3 or more installments are chosen (section 4).</p>
+      html: `<p>The Business is an <b>exempt dealer (עוסק פטור)</b> and does not charge VAT separately. <b>No VAT is added to the prices shown on the Site</b>; those are the prices the customer pays for the product or service itself. The only amounts added to the transaction total are ones the customer expressly selects and sees on screen before confirming: the delivery charge (section 5.1), and the installment fee where 2 or more installments are chosen (section 4).</p>
              <p><b>Every transaction on the Site produces a receipt (קבלה) — not a tax invoice (חשבונית מס).</b> An exempt dealer is not permitted to issue a tax invoice, and the Business does not present itself as charging VAT and does not issue any document it is not permitted to issue.</p>
              <p>The receipt is generated automatically upon completion of payment and sent to the email address provided at checkout. A customer who ticked "business/company" and entered a company name will see that company name on the receipt as the payer; <b>the document type does not change</b> and remains a receipt.</p>
              <p>The binding price for a transaction is the price displayed and confirmed on the payment page, subject to Section 13 (errors).</p>`
@@ -234,8 +234,8 @@ const TERMS_SECTIONS = {
       title: "4. Payment, Card Processing & Installments",
       html: `<p><b>External secure processing.</b> Payment does not take place on the Site itself. On confirming the order, the customer is redirected to an <b>external secure payment page</b> operated by the payment processor (SUMIT/UPAY). <b>Credit card details do not pass through the Site, are not visible to the Business and are not stored by it</b> — they are entered and processed by the payment processor alone.</p>
              <p><b>Number of installments.</b> Up to <b>12 installments</b> may be selected on the payment page.</p>
-             <p><b>1 or 2 installments — no fee whatsoever.</b> The amount charged is identical to the displayed price, with no addition.</p>
-             <p><b>3 installments or more — installment fee.</b> Choosing 3 or more installments is an optional choice by the customer, is not a condition of purchase, and carries a fee reflecting — <b>and not exceeding</b> — the actual financing cost. The fee is calculated per payment month and therefore rises with the number of installments: 6 installments cost more than 3, and 12 more than 6. The customer may at any time choose 1 or 2 installments and pay no fee at all. The exact fee in shekels, its rate, and the total payable are shown next to every installment option on the payment page, <b>before</b> the transaction is confirmed — not after.</p>
+             <p><b>One payment — no fee whatsoever.</b> The amount charged is identical to the displayed price, with no addition.</p>
+             <p><b>2 installments or more — installment fee.</b> Choosing 2 or more installments is an optional choice by the customer, is not a condition of purchase, and carries a fee reflecting — <b>and not exceeding</b> — the actual financing cost. The fee is calculated per payment month and therefore rises with the number of installments: 6 installments cost more than 2, and 12 more than 6. The customer may at any time choose a single payment and pay no fee at all. The exact fee in shekels, its rate, and the total payable are shown next to every installment option on the payment page, <b>before</b> the transaction is confirmed — not after.</p>
              <p><b>No amount will be charged that was not displayed on screen before the transaction was confirmed, and no amount exceeding the total the customer saw and approved will be charged.</b></p>
              <p>How the fee is presented, and its full compliance with the "total price" requirements of the Consumer Protection Law — ${LEGAL_TODO_EN}</p>
              <p>Proceeding to the payment page requires actively ticking a confirmation checkbox stating that the customer has read and agrees to these Terms (see Section 17).</p>`
