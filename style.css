@@ -1747,3 +1747,181 @@ footer::after{ content:""; display:block; height: var(--fab-safe) }
   max-width:46ch;
 }
 .cxl-notfound a{ color:var(--blue,#1B6FE0); font-weight:700 }
+
+
+/* ==================== 🎁 מתנות ====================
+   שלושה רכיבים: מד ההתקדמות הצף (בכל דף), אזור המתנה בקופה,
+   ומודאל בחירת המוצר.
+
+   ⚠️ המד יושב בפינה **הפותחת** (inset-inline-start) בכוונה: שתי
+   הפינות הסוגרות תפוסות — עגלה ב-24px ו-וואטסאפ ב-94px. פינה
+   משותפת הייתה מכסה את כפתור העגלה בדיוק ברגע שהלקוח רוצה ללחוץ
+   עליו.
+   ⚠️ צבע סגול (#7C3AED) ולא הכחול/טורקיז של המותג: המד הוא הודעה
+   ולא רכיב ניווט, וצריך להיקרא כמשהו אחר מכל השאר במסך.
+   ⚠️ prefers-reduced-motion מכובד בשתי נקודות — כניסת המד והקונפטי. */
+
+.gift-meter{
+  position:fixed; bottom:24px; inset-inline-start:24px; z-index:95;
+  width:min(280px, calc(100vw - 96px));
+  background:var(--surface,#fff);
+  border:1px solid #E9D5FF;
+  border-inline-start:4px solid #7C3AED;
+  border-radius:14px; padding:12px 14px 13px;
+  box-shadow:0 12px 32px rgba(11,44,77,.16);
+  font-family:'Heebo',sans-serif; cursor:pointer;
+  animation:giftMeterIn .32s cubic-bezier(.22,.9,.3,1);
+}
+.gift-meter[hidden]{ display:none }
+.gift-meter.is-won{ border-color:#C4B5FD; background:linear-gradient(180deg,#FBF7FF 0%,#fff 60%) }
+@keyframes giftMeterIn{ from{ opacity:0; transform:translateY(14px) } to{ opacity:1; transform:translateY(0) } }
+
+.gift-meter-x{
+  position:absolute; top:4px; inset-inline-end:6px;
+  border:none; background:none; color:var(--ink-soft,#5F7590);
+  font-size:13px; line-height:1; padding:4px; cursor:pointer; border-radius:6px;
+}
+.gift-meter-x:hover{ background:var(--line-soft,#EDF2F8); color:var(--ink,#0E2A47) }
+
+.gift-meter-head{ display:flex; align-items:flex-start; gap:8px; margin-inline-end:14px }
+.gift-meter-emoji{ font-size:17px; line-height:1.3; flex-shrink:0 }
+.gift-meter-text{ font-size:12.5px; line-height:1.5; color:var(--ink,#0E2A47) }
+.gift-meter-text b{ color:#6D28D9; font-weight:800 }
+
+.gift-meter-bar{
+  height:6px; border-radius:99px; background:var(--line-soft,#EDF2F8);
+  margin:9px 0 0; overflow:hidden;
+}
+.gift-meter-bar > i{
+  display:block; height:100%; width:0;
+  background:linear-gradient(90deg,#7C3AED 0%,#2FC4B0 100%);
+  border-radius:99px; transition:width .45s cubic-bezier(.22,.9,.3,1);
+}
+.gift-meter-sub{ margin-top:7px; font-size:11px; color:#0E9C8A; font-weight:700; line-height:1.45 }
+.gift-meter-sub[hidden]{ display:none }
+
+/* קונפטי — 14 חלקיקים, בלי ספרייה. ⚠️ pointer-events:none כדי שלא
+   יחטפו את הלחיצה על המד בדיוק בשנייה שהוא חוגג. */
+.gift-confetti{ position:absolute; inset:0; overflow:hidden; pointer-events:none; border-radius:14px }
+.gift-confetti > i{
+  position:absolute; top:-10px; width:7px; height:11px; border-radius:2px;
+  animation:giftConfetti 1.25s ease-in forwards;
+}
+@keyframes giftConfetti{
+  0%{ transform:translateY(0) rotate(0); opacity:1 }
+  100%{ transform:translateY(150px) rotate(420deg); opacity:0 }
+}
+
+@media(max-width:600px){
+  .gift-meter{ bottom:16px; inset-inline-start:12px; width:min(255px, calc(100vw - 84px)); padding:10px 12px 11px }
+  .gift-meter-text{ font-size:12px }
+}
+@media print{ .gift-meter{ display:none } }
+@media(prefers-reduced-motion:reduce){
+  .gift-meter{ animation:none }
+  .gift-meter-bar > i{ transition:none }
+  .gift-confetti{ display:none }
+}
+
+/* ---------- אזור המתנה בקופה ---------- */
+.gift-block{
+  margin:18px 0 12px; padding:14px 15px;
+  background:linear-gradient(180deg,#FBF7FF 0%,var(--surface,#fff) 70%);
+  border:1px solid #E9D5FF; border-radius:14px;
+}
+.gift-block-flash{ animation:giftFlash 1.1s ease }
+@keyframes giftFlash{ 0%,100%{ box-shadow:0 0 0 0 rgba(124,58,237,0) } 35%{ box-shadow:0 0 0 6px rgba(124,58,237,.16) } }
+
+.gift-block-head{ display:flex; align-items:center; gap:10px; margin-bottom:11px }
+.gift-block-emoji{ font-size:24px; line-height:1 }
+.gift-block-title{ font-size:15px; font-weight:800; color:#6D28D9 }
+.gift-block-sub{ font-size:12.5px; color:var(--ink-soft,#5F7590); margin-top:2px }
+.gift-block-note{ font-size:11.5px; color:var(--ink-soft,#5F7590); margin:8px 0 0; text-align:center }
+.gift-pick-btn{ width:100% }
+
+.gift-chosen{
+  display:flex; align-items:center; gap:11px;
+  background:var(--surface,#fff); border:1px solid var(--line,#E2EAF2);
+  border-radius:11px; padding:9px 11px;
+}
+.gift-chosen-main{ flex:1; min-width:0 }
+.gift-chosen-name{
+  font-size:13.5px; font-weight:700; color:var(--ink,#0E2A47);
+  overflow:hidden; text-overflow:ellipsis; white-space:nowrap;
+}
+.gift-chosen-price{ font-size:12px; color:var(--ink-soft,#5F7590); margin-top:2px }
+.gift-chosen-price b{ color:#0E9C8A }
+.gift-chosen-swap{
+  flex-shrink:0; border:1px solid var(--line,#E2EAF2); background:none;
+  color:var(--blue,#1B6FE0); border-radius:99px; padding:6px 13px;
+  font-family:'Heebo',sans-serif; font-size:12px; font-weight:700; cursor:pointer; transition:.15s;
+}
+.gift-chosen-swap:hover{ border-color:var(--blue,#1B6FE0); background:var(--blue-soft,#E9F2FE) }
+
+/* ---------- מודאל בחירת המתנה ---------- */
+.gift-modal{
+  position:fixed; inset:0; z-index:130; display:none;
+  background:rgba(11,44,77,.45);
+  backdrop-filter:blur(3px); -webkit-backdrop-filter:blur(3px);
+}
+.gift-modal.show{ display:flex; align-items:center; justify-content:center; padding:20px }
+.gift-modal-panel{
+  background:var(--surface,#fff); border-radius:18px;
+  width:min(760px,100%); max-height:min(86vh,780px);
+  display:flex; flex-direction:column; overflow:hidden;
+  box-shadow:0 24px 70px rgba(11,44,77,.3);
+}
+.gift-modal-head{
+  display:flex; align-items:center; justify-content:space-between;
+  padding:16px 18px 12px; border-bottom:1px solid var(--line-soft,#EDF2F8);
+}
+.gift-modal-head h3{ margin:0; font-size:16.5px; color:#6D28D9 }
+.gift-modal-search{
+  margin:12px 18px 0; padding:10px 13px;
+  border:1px solid var(--line,#E2EAF2); border-radius:10px;
+  font-family:'Heebo',sans-serif; font-size:13.5px; color:var(--ink,#0E2A47);
+}
+.gift-modal-search:focus{ outline:none; border-color:#7C3AED }
+.gift-modal-cats{ display:flex; gap:7px; overflow-x:auto; padding:12px 18px 4px; flex-shrink:0 }
+.gift-cat{
+  flex-shrink:0; border:1px solid var(--line,#E2EAF2); background:none;
+  color:var(--ink-soft,#5F7590); border-radius:99px; padding:5px 12px;
+  font-family:'Heebo',sans-serif; font-size:12px; font-weight:700; cursor:pointer; transition:.15s;
+}
+.gift-cat span{ opacity:.6; font-size:11px }
+.gift-cat:hover{ border-color:#7C3AED; color:#6D28D9 }
+.gift-cat.on{ background:#7C3AED; border-color:#7C3AED; color:#fff }
+.gift-cat.on span{ opacity:.75 }
+
+.gift-modal-grid{
+  flex:1; overflow-y:auto; padding:14px 18px;
+  display:grid; gap:10px;
+  grid-template-columns:repeat(auto-fill,minmax(150px,1fr));
+  align-content:start;
+}
+.gift-card{
+  display:flex; flex-direction:column; align-items:center; gap:6px;
+  border:1px solid var(--line,#E2EAF2); background:var(--surface,#fff);
+  border-radius:12px; padding:11px 9px; cursor:pointer;
+  font-family:'Heebo',sans-serif; text-align:center; transition:.16s;
+}
+.gift-card:hover{ border-color:#7C3AED; transform:translateY(-2px); box-shadow:0 8px 20px rgba(124,58,237,.14) }
+.gift-card.on{ border-color:#7C3AED; background:#FBF7FF; box-shadow:0 0 0 2px rgba(124,58,237,.18) }
+.gift-card-name{
+  font-size:12px; font-weight:700; color:var(--ink,#0E2A47); line-height:1.35;
+  /* ⚠️ שתי שורות ואז חיתוך — שם מלא בכרטיס של 150px הורס את הרשת. */
+  display:-webkit-box; -webkit-line-clamp:2; -webkit-box-orient:vertical; overflow:hidden;
+}
+.gift-card-price{ font-size:12.5px; font-weight:800; color:#6D28D9 }
+.gift-modal-empty{ grid-column:1/-1; text-align:center; color:var(--ink-soft,#5F7590); font-size:13px; padding:30px 0 }
+.gift-modal-foot{
+  display:flex; gap:9px; padding:12px 18px 16px;
+  border-top:1px solid var(--line-soft,#EDF2F8); flex-shrink:0;
+}
+.gift-modal-foot .btn{ flex:1; margin:0 }
+
+@media(max-width:600px){
+  .gift-modal.show{ padding:0 }
+  .gift-modal-panel{ max-height:100vh; height:100%; border-radius:0 }
+  .gift-modal-grid{ grid-template-columns:repeat(auto-fill,minmax(126px,1fr)); padding:12px }
+}

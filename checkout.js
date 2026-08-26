@@ -351,6 +351,7 @@ function renderCheckoutPage(){
   cartSubtotal = cartTotalOf(items);
   document.getElementById("checkoutTotalPrice").textContent = cartSubtotal.toLocaleString() + " ₪";
   renderCheckoutTotals();
+  renderGiftBlock();
 }
 
 /* ⚠️ **חייב להישאר תואם ל-SHIPPING_OPTIONS_ ב-4-payment-api.gs.**
@@ -992,7 +993,13 @@ async function submitCheckout(){
         // רק המפתח נשלח. המחיר נקבע בשרת — ראה SHIPPING_OPTIONS_.
         shipping: shippingKey,
         // אותו דבר לשירותים: מפתחות בלבד, השרת מתמחר (SERVICE_OPTIONS_).
-        services: selectedServices
+        services: selectedServices,
+        /* 🎁 **מק"ט המתנה בלבד — לא מחיר, לא תקרה, לא זהות מדרגה.**
+           השרת בודק מחדש שהלקוח באמת זכאי, שהמוצר קיים ובמלאי,
+           שמחירו בתוך התקרה, ושאינו כבר בעגלה (giftResolvePick_).
+           ⚠️ **אסור** להוסיף כאן שדה שאומר כמה ההטבה שווה. השדה הזה
+           הוא בקשה, לא הענקה — ראה ההערה בראש מנוע ההטבות. */
+        giftSku: (typeof dvtGiftPicked === "function" ? dvtGiftPicked() : "")
       })
     });
     const data = await res.json();
@@ -1058,6 +1065,261 @@ window.addEventListener("pageshow", function (e) {
 });
 
 /* ================= static text (language switch) ================= */
+/* =====================================================================
+   🎁 בחירת המתנה — אזור בקופה + מודאל קטלוג מסונן
+   =====================================================================
+   דביר: *"ברגע שלקוח זכאי למתנה — הוא לוחץ על 'בחר מתנה' וזה פותח לו
+   את הקטלוג עם סינון."*
+
+   🔴 **המסך הזה הוא נוחות, לא אבטחה.** הוא מציג רק מה שמותר, אבל
+   הדפדפן ניתן לעריכה — ולכן `giftResolvePick_` בשרת בודק כל אחד
+   מהתנאים האלה מחדש, על העגלה **הסופית**:
+     קיים בקטלוג · במלאי · לא חסום/מוסתר · מחיר ≤ התקרה של המדרגה
+     שהלקוח באמת עבר · אינו כבר בעגלה.
+   מי שיעקוף את המודאל וישלח מק"ט ידנית פשוט לא יקבל מתנה.
+
+   ⚠️ **הבחירה נשמרת ב-localStorage ולא ב-state של הדף** — הלקוח
+   עשוי לחזור לקטלוג להוסיף עוד משהו ולחזור. היא נבדקת מחדש בכל
+   רינדור, ומתאפסת אם כבר לא תקפה (הסל קטן, המוצר אזל, המחיר עלה).
+
+   ⚠️ הרשימה ממוינת **מהיקר לזול**: מי שמקבל מתנה עד 87 ₪ רוצה לראות
+   את מה ששווה 85 ₪, לא כבל ב-12 ₪. */
+
+let giftPickerState = { cap: 0, term: "", cat: "all", limit: 48 };
+
+/* התקרה שהלקוח באמת זכאי לה **לפי החישוב המקומי**. השרת מכריע שוב.
+   מחזיר 0 כשאין זכאות. */
+function giftActiveCap(){
+  if(typeof dvtGiftProgress !== "function") return 0;
+  const p = dvtGiftProgress();
+  return p ? (p.pickCap || 0) : 0;
+}
+
+/* כל המוצרים שאפשר לקחת כמתנה בתקרה הזו.
+   ⚠️ `dvtCanBuy` מכסה גם "מוצר אמיתי" (לא `id:none`, לא תת-סוג מוסתר,
+   לא "הופסק") וגם "במלאי" — אותם שני תנאים שהשרת בודק. */
+function giftCandidates(cap){
+  const cat = (typeof dvtCatalogNow === "function") ? dvtCatalogNow() : null;
+  if(!cat || !cap) return [];
+
+  const inCart = {};
+  readCartFromStorage().forEach(function(i){
+    if(i.sku) inCart[i.sku] = true;
+    if(i.type === "build" && Array.isArray(i.parts)){
+      i.parts.forEach(function(p){ if(p.sku) inCart[p.sku] = true; });
+    }
+  });
+
+  const out = [];
+  Object.keys(cat).forEach(function(key){
+    /* `services` — שירות אינו מתנה (השרת דוחה `services:`).
+       `content` — תוכן האתר, לא קטגוריית מוצרים. */
+    if(key === "services" || key === "content") return;
+    const g = cat[key];
+    if(!g || !Array.isArray(g.items)) return;
+    g.items.forEach(function(it){
+      const price = Number(it.price) || 0;
+      if(!(price > 0) || price > cap) return;
+      if(typeof dvtCanBuy === "function" && !dvtCanBuy(it, key)) return;
+      const sku = key + ":" + it.id;
+      if(inCart[sku]) return;
+      out.push({ sku: sku, cat: key, item: it, price: price });
+    });
+  });
+  out.sort(function(a, b){ return b.price - a.price; });
+  return out;
+}
+
+/* אזור המתנה בקופה. */
+function renderGiftBlock(){
+  const box = document.getElementById("giftBlock");
+  if(!box) return;
+
+  const cap = giftActiveCap();
+  if(!cap){
+    box.style.display = "none";
+    box.innerHTML = "";
+    /* ⚠️ הסל ירד מתחת לרף — מנקים בחירה ישנה, אחרת היא תישלח לשרת
+       ותיפסל שם בשקט (וגם תיצור התראת WARN מיותרת אצל דביר). */
+    if(typeof dvtGiftSetPicked === "function") dvtGiftSetPicked("");
+    return;
+  }
+
+  const picked = (typeof dvtGiftPicked === "function") ? dvtGiftPicked() : "";
+  let pickedItem = null;
+  if(picked){
+    const hit = giftCandidates(cap).filter(function(c){ return c.sku === picked; })[0];
+    if(hit) pickedItem = hit;
+    /* בחירה שכבר לא עומדת בתנאים — נמחקת מיד ולא נשלחת. */
+    else if(typeof dvtGiftSetPicked === "function") dvtGiftSetPicked("");
+  }
+
+  const head = '<div class="gift-block-head">' +
+      '<span class="gift-block-emoji" aria-hidden="true">🎁</span>' +
+      '<div><div class="gift-block-title">' +
+        escHtml(tr("מגיעה לך מתנה!", "You have earned a gift!")) + '</div>' +
+      '<div class="gift-block-sub">' +
+        escHtml(tr("מוצר לבחירתך עד " + cap + " ₪ — על חשבוננו",
+                   "Any product up to " + cap + " ₪ — on us")) + '</div></div></div>';
+
+  if(pickedItem){
+    const nm = (typeof dvtDisplayName === "function")
+      ? dvtDisplayName(pickedItem.item.name) : pickedItem.item.name;
+    box.innerHTML = head +
+      '<div class="gift-chosen">' +
+        ((typeof dvtThumbHtml === "function") ? dvtThumbHtml(pickedItem.item, pickedItem.cat) : "") +
+        '<div class="gift-chosen-main">' +
+          '<div class="gift-chosen-name">' + escHtml(nm) + '</div>' +
+          '<div class="gift-chosen-price">' +
+            escHtml(tr("שווי ", "Worth ")) + pickedItem.price.toLocaleString() + ' ₪ · ' +
+            '<b>' + escHtml(tr("במתנה", "free")) + '</b></div>' +
+        '</div>' +
+        '<button type="button" class="gift-chosen-swap" onclick="giftPickerOpen()">' +
+          escHtml(tr("החלף", "Change")) + '</button>' +
+      '</div>';
+  }else{
+    box.innerHTML = head +
+      '<button type="button" class="btn btn-accent gift-pick-btn" onclick="giftPickerOpen()">' +
+        escHtml(tr("בחר את המתנה שלך", "Choose your gift")) + '</button>' +
+      '<p class="gift-block-note">' +
+        escHtml(tr("אפשר להחליף עד הרגע האחרון.", "You can change it up to the last moment.")) +
+      '</p>';
+  }
+  box.style.display = "block";
+}
+
+/* ---------- המודאל ---------- */
+function giftPickerOpen(){
+  const cap = giftActiveCap();
+  if(!cap) return;
+  giftPickerState = { cap: cap, term: "", cat: "all", limit: 48 };
+
+  let ov = document.getElementById("giftPicker");
+  if(!ov){
+    ov = document.createElement("div");
+    ov.id = "giftPicker";
+    ov.className = "gift-modal";
+    ov.innerHTML =
+      '<div class="gift-modal-panel" role="dialog" aria-modal="true">' +
+        '<div class="gift-modal-head">' +
+          '<h3 id="giftModalTitle"></h3>' +
+          '<button class="checkout-close" type="button" onclick="giftPickerClose()" aria-label="close">✕</button>' +
+        '</div>' +
+        '<input class="gift-modal-search" id="giftModalSearch" type="search" autocomplete="off">' +
+        '<div class="gift-modal-cats" id="giftModalCats"></div>' +
+        '<div class="gift-modal-grid" id="giftModalGrid"></div>' +
+        '<div class="gift-modal-foot">' +
+          '<button class="btn btn-secondary" type="button" id="giftModalMore" style="display:none"></button>' +
+          '<button class="btn btn-secondary" type="button" onclick="giftPickerChoose(\'\')" id="giftModalNone"></button>' +
+        '</div>' +
+      '</div>';
+    document.body.appendChild(ov);
+    ov.addEventListener("click", function(e){ if(e.target === ov) giftPickerClose(); });
+    document.getElementById("giftModalSearch").addEventListener("input", function(e){
+      giftPickerState.term = e.target.value || "";
+      giftPickerState.limit = 48;
+      giftPickerRender();
+    });
+    document.getElementById("giftModalMore").addEventListener("click", function(){
+      giftPickerState.limit += 48;
+      giftPickerRender();
+    });
+    document.addEventListener("keydown", function(e){
+      if(e.key === "Escape" && document.getElementById("giftPicker").classList.contains("show")) giftPickerClose();
+    });
+  }
+
+  document.getElementById("giftModalTitle").textContent =
+    tr("בחר מוצר עד " + cap + " ₪", "Pick a product up to " + cap + " ₪");
+  document.getElementById("giftModalSearch").placeholder = tr("חיפוש...", "Search...");
+  document.getElementById("giftModalSearch").value = "";
+  document.getElementById("giftModalNone").textContent = tr("בלי מתנה, תודה", "No gift, thanks");
+  document.getElementById("giftModalMore").textContent = tr("הצג עוד", "Show more");
+  ov.classList.add("show");
+  document.body.style.overflow = "hidden";
+  giftPickerRender();
+}
+
+function giftPickerClose(){
+  const ov = document.getElementById("giftPicker");
+  if(ov) ov.classList.remove("show");
+  document.body.style.overflow = "";
+}
+
+function giftPickerChoose(sku){
+  if(typeof dvtGiftSetPicked === "function") dvtGiftSetPicked(sku || "");
+  giftPickerClose();
+  renderGiftBlock();
+}
+
+function giftPickerRender(){
+  const grid = document.getElementById("giftModalGrid");
+  const cats = document.getElementById("giftModalCats");
+  if(!grid) return;
+
+  const all = giftCandidates(giftPickerState.cap);
+
+  /* שבבי קטגוריה — נגזרים ממה שיש בפועל בתקרה הזו ולא מרשימה קבועה.
+     בתקרה של 65 ₪ אין כרטיסי מסך, ושבב ריק הוא מבוי סתום. */
+  const counts = {};
+  all.forEach(function(c){ counts[c.cat] = (counts[c.cat] || 0) + 1; });
+  const keys = Object.keys(counts).sort(function(a, b){ return counts[b] - counts[a]; });
+  cats.innerHTML = [{ k: "all", n: all.length }]
+    .concat(keys.map(function(k){ return { k: k, n: counts[k] }; }))
+    .map(function(o){
+      /* ⚠️ הקבוצה מהקטלוג נשלחת כארגומנט שני: dvtCatLabel מכיר רק
+         את קטגוריות החנות (DVT_CAT_LABEL), ולקטגוריות כמו extras/
+         caseFans הוא נופל למפתח האנגלי הגולמי אם אין לו לאן ליפול.
+         נתפס בבדיקה — השבבים הציגו "extras" ו-"caseFans". */
+      const grp = (typeof dvtCatalogNow === "function" && dvtCatalogNow()) ? dvtCatalogNow()[o.k] : null;
+      const label = o.k === "all" ? tr("הכל", "All")
+        : ((typeof dvtCatLabel === "function") ? dvtCatLabel(o.k, grp) : o.k);
+      return '<button type="button" class="gift-cat' +
+        (giftPickerState.cat === o.k ? " on" : "") + '" data-cat="' + escHtml(o.k) + '">' +
+        escHtml(label) + ' <span>' + o.n + '</span></button>';
+    }).join("");
+  Array.prototype.forEach.call(cats.querySelectorAll(".gift-cat"), function(b){
+    b.addEventListener("click", function(){
+      giftPickerState.cat = b.getAttribute("data-cat");
+      giftPickerState.limit = 48;
+      giftPickerRender();
+    });
+  });
+
+  const term = giftPickerState.term.trim().toLowerCase();
+  const list = all.filter(function(c){
+    if(giftPickerState.cat !== "all" && c.cat !== giftPickerState.cat) return false;
+    if(!term) return true;
+    return String(c.item.name || "").toLowerCase().indexOf(term) !== -1;
+  });
+
+  if(!list.length){
+    grid.innerHTML = '<p class="gift-modal-empty">' +
+      escHtml(tr("לא נמצא מוצר מתאים. נסה חיפוש אחר או קטגוריה אחרת.",
+                 "No matching product. Try another search or category.")) + '</p>';
+    document.getElementById("giftModalMore").style.display = "none";
+    return;
+  }
+
+  const shown = list.slice(0, giftPickerState.limit);
+  const picked = (typeof dvtGiftPicked === "function") ? dvtGiftPicked() : "";
+  grid.innerHTML = shown.map(function(c){
+    const nm = (typeof dvtDisplayName === "function") ? dvtDisplayName(c.item.name) : c.item.name;
+    return '<button type="button" class="gift-card' + (c.sku === picked ? " on" : "") + '" ' +
+      'onclick="giftPickerChoose(\'' + escHtml(c.sku) + '\')">' +
+      ((typeof dvtThumbHtml === "function") ? dvtThumbHtml(c.item, c.cat) : "") +
+      '<span class="gift-card-name">' + escHtml(nm) + '</span>' +
+      '<span class="gift-card-price">' + c.price.toLocaleString() + ' ₪</span>' +
+      '</button>';
+  }).join("");
+
+  const more = document.getElementById("giftModalMore");
+  more.style.display = list.length > shown.length ? "block" : "none";
+  more.textContent = tr("הצג עוד " + Math.min(48, list.length - shown.length),
+                        "Show " + Math.min(48, list.length - shown.length) + " more");
+}
+
+
 function renderCheckoutStaticText(){
   document.getElementById("backLink").textContent = t("continueBrowsing");
   document.getElementById("pageTitle").textContent = t("checkoutTitle");
@@ -1107,3 +1369,15 @@ function setLang(lang){
 renderCheckoutStaticText();
 renderCheckoutPage();
 renderCancelledNotice();
+
+/* ⚠️ **אזור המתנה תלוי בשני מקורות אסינכרוניים**, ושניהם עלולים
+   להגיע אחרי הרינדור הראשון:
+     1. מדרגות ההטבות מהשרת — cart.js קורא ל-renderGiftBlock כשהן חוזרות
+     2. הקטלוג — בלעדיו giftCandidates() ריק, כלומר "בחר מתנה" נפתח
+        על רשימה ריקה, והמתנה שכבר נבחרה נראית כאילו נמחקה
+   לכן רינדור נוסף כשהקטלוג מוכן. ריצה כפולה אינה מזיקה: הפונקציה
+   בונה את האזור מאפס בכל קריאה. */
+if(typeof dvtGetCatalog === "function"){
+  dvtGetCatalog().then(function(){ renderGiftBlock(); })
+                 .catch(function(){ /* אין קטלוג — האזור פשוט לא יוצג */ });
+}

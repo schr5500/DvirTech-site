@@ -175,6 +175,15 @@
       <div id="servicesOnRequest" class="svc-onreq"></div>
       </details>
 
+      <!-- 🎁 אזור המתנה. נבנה כולו ב-renderGiftBlock() ב-checkout.js
+           ונשאר display:none עד שהעגלה באמת עוברת רף.
+           ⚠️ יושב **אחרי** השירותים ולפני התשלומים בכוונה: זה הרגע
+           שבו הלקוח כבר יודע מה הוא קונה וטרם החליט איך לשלם, וזו
+           הנקודה שבה "מגיעה לך מתנה" משנה החלטה ולא סתם מקשט.
+           ⚠️ **תצוגה בלבד.** הזכאות והתקרה נקבעות בשרת
+           (giftsEarned_/giftResolvePick_); כאן רק נשלח מק"ט. -->
+      <div id="giftBlock" class="gift-block" style="display:none"></div>
+
       <div style="margin:18px 0 12px">
         <label class="field-label" style="margin-bottom:6px;display:block" id="installmentsLabel"></label>
         <select id="installmentsCount" onchange="renderCheckoutTotals()">

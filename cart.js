@@ -230,6 +230,16 @@ function injectCartWidget(){
       🛒 <span class="cart-fab-badge" id="cartFabBadge" style="display:none">0</span>
     </button>
 
+    <div class="gift-meter" id="giftMeter" hidden>
+      <button class="gift-meter-x" id="giftMeterX" aria-label="close">✕</button>
+      <div class="gift-meter-head">
+        <span class="gift-meter-emoji" aria-hidden="true">🎁</span>
+        <span class="gift-meter-text" id="giftMeterText"></span>
+      </div>
+      <div class="gift-meter-bar"><i id="giftMeterFill"></i></div>
+      <div class="gift-meter-sub" id="giftMeterSub"></div>
+    </div>
+
     <div class="cart-overlay" id="cartOverlay" onclick="if(event.target===this) closeCart()">
       <div class="cart-panel">
         <div class="cart-panel-head">
@@ -285,6 +295,7 @@ function renderCart(){
     checkoutBtn.style.display = "none";
     const sb = document.getElementById("cartShareBtn");
     if (sb) sb.style.display = "none";
+    dvtGiftMeterRender();
     return;
   }
   emptyMsg.style.display = "none";
@@ -330,6 +341,7 @@ function renderCart(){
   }).join("");
 
   document.getElementById("cartTotalPrice").textContent = cartTotal().toLocaleString() + " ₪";
+  dvtGiftMeterRender();
 }
 
 /* ================= פתיחה / סגירה =================
@@ -422,6 +434,295 @@ if(document.readyState === "loading"){
 }else{
   initCart();
 }
+
+
+/* =====================================================================
+   🎁 מד ההתקדמות למתנה — יושב בכל דף שיש בו עגלה
+   =====================================================================
+   דביר: *"אוטומציה/מדד שיהיה בצד ויראה התקדמות על כל מוצר שנבחר —
+   עם מטרה למדרגה השנייה."*
+
+   🔴 **הרפים מגיעים מהשרת, לא מקובעים כאן.** דביר משנה שורה בלשונית
+   "🎁 הטבות" — האתר מתעדכן תוך רבע שעה בלי פריסה מחדש. רף שמקובע
+   ב-JS הוא רף שיפגר אחרי הגיליון, והלקוח יראה "עוד 200 ₪" למדרגה
+   שכבר לא קיימת.
+
+   🔴 **המד הוא תצוגה, לא הכרעה.** הזכאות האמיתית נקבעת ב-
+   `giftsEarned_` בשרת, על העגלה **הסופית** ברגע התשלום. לכן:
+     • לקוח שממלא סל, מקבל "מגיעה לך מתנה", ואז מרוקן — לא יקבל.
+     • החישוב כאן חייב להיות **זהה** ל-`giftBase_` בשרת. מד שמבטיח
+       מתנה שהשרת לא ייתן הוא באג שהלקוח רואה לפני שדביר יודע.
+
+   ⚠️ **הבקשה נשלחת רק כשיש עגלה.** מבקר שרק גולש לא משלם על קריאה
+   ל-Apps Script, וזה חשוב: זו קריאה נוספת בכל דף אחרת.
+   ⚠️ נכשלה הבקשה? אין מד. אין הודעת שגיאה ואין דף שבור — מד התקדמות
+   הוא נחמד-שיהיה, לא תנאי לקנייה. */
+
+const DVT_GIFT_TIERS_KEY_ = "dvtGiftTiers_v1";
+const DVT_GIFT_TIERS_TTL_ = 15 * 60 * 1000;   /* כמו מטמון הכללים בשרת */
+const DVT_GIFT_PICK_KEY_  = "dvirtech_gift_pick_v1";
+const DVT_GIFT_SEEN_KEY_  = "dvtGiftMeterSeen_v1";
+
+let dvtGiftTiers_ = null;      /* null = טרם נטען · [] = אין כללים פעילים */
+let dvtGiftLoading_ = false;
+
+/* המק"ט שהלקוח בחר. יושב ב-localStorage כדי לשרוד ניווט בין דפים —
+   הלקוח בוחר בקופה, אבל עשוי לחזור לקטלוג להוסיף עוד משהו.
+   ⚠️ **מק"ט בלבד.** לא מחיר, לא תקרה, לא זהות מדרגה — בדיוק כמו
+   שהעגלה נושאת מק"ט וכמות. השרת בודק הכל מחדש. */
+function dvtGiftPicked(){
+  try { return localStorage.getItem(DVT_GIFT_PICK_KEY_) || ""; } catch(e){ return ""; }
+}
+function dvtGiftSetPicked(sku){
+  try {
+    if(sku) localStorage.setItem(DVT_GIFT_PICK_KEY_, String(sku));
+    else    localStorage.removeItem(DVT_GIFT_PICK_KEY_);
+  } catch(e){ /* storage unavailable */ }
+}
+
+/* 🔴 **חייב להישאר זהה ל-`giftBase_` ב-4-payment-api.gs.**
+   שירות אינו מוצר: הוא זמן של דביר, ואסור שיממן מתנה. משלוח ועמלת
+   תשלומים ממילא אינם בעגלה בשלב הזה. */
+function dvtGiftBase(){
+  let sum = 0;
+  cartItems.forEach(function(i){
+    if(String(i.sku || "").indexOf("services:") === 0) return;
+    if(i.type === "service") return;
+    sum += (Number(i.price) || 0) * (Number(i.qty) || 0);
+  });
+  return Math.round(sum * 100) / 100;
+}
+
+/* פורט של `cartHasCompletePc_` — עבור כללים עם "דורש מחשב שלם".
+   ⚠️ מכוון להיות **זהה** לשרת: מחשב מוכן/נייד, או כל שבעת רכיבי
+   הליבה. הרכבה מהבונה מתפרקת ל-parts ולכן נמדדת באותה דרך בדיוק. */
+const DVT_GIFT_PC_CORE_  = ["cpu","mobo","ram","storage","psu","case","cooling"];
+const DVT_GIFT_WHOLE_PC_ = ["readyPc","laptop"];
+function dvtGiftHasPc(){
+  const cats = Object.create(null);
+  const mark = function(sku){
+    const c = String(sku || "").split(":")[0];
+    if(c) cats[c] = true;
+  };
+  cartItems.forEach(function(i){
+    if(i.type === "build" && Array.isArray(i.parts)) i.parts.forEach(function(p){ mark(p.sku); });
+    else if(i.sku) mark(i.sku);
+  });
+  if(DVT_GIFT_WHOLE_PC_.some(function(c){ return cats[c]; })) return true;
+  return DVT_GIFT_PC_CORE_.every(function(c){ return cats[c]; });
+}
+
+function dvtGiftApi_(){
+  return (typeof DVT_API_URL === "string" && DVT_API_URL) ||
+         (typeof PAYMENT_API_URL === "string" && PAYMENT_API_URL) || "";
+}
+
+/* טעינת המדרגות. מוחזרת Promise תמיד, ולעולם לא נדחית. */
+function dvtGiftLoadTiers(){
+  if(dvtGiftTiers_) return Promise.resolve(dvtGiftTiers_);
+  try{
+    const raw = sessionStorage.getItem(DVT_GIFT_TIERS_KEY_);
+    if(raw){
+      const o = JSON.parse(raw);
+      if(o && (Date.now() - o.at) < DVT_GIFT_TIERS_TTL_ && Array.isArray(o.tiers)){
+        dvtGiftTiers_ = o.tiers;
+        return Promise.resolve(dvtGiftTiers_);
+      }
+    }
+  }catch(e){ /* sessionStorage חסום — פשוט מביאים מהרשת */ }
+
+  const api = dvtGiftApi_();
+  if(!api){ dvtGiftTiers_ = []; return Promise.resolve(dvtGiftTiers_); }
+
+  return fetch(api + "?action=giftTiers")
+    .then(function(r){ return r.json(); })
+    .then(function(d){
+      dvtGiftTiers_ = (d && d.ok && Array.isArray(d.tiers)) ? d.tiers : [];
+      try{
+        sessionStorage.setItem(DVT_GIFT_TIERS_KEY_,
+          JSON.stringify({ at: Date.now(), tiers: dvtGiftTiers_ }));
+      }catch(e){}
+      return dvtGiftTiers_;
+    })
+    .catch(function(){ dvtGiftTiers_ = []; return dvtGiftTiers_; });
+}
+
+/* מצב ההתקדמות: מה כבר הורווח, מה הבא בתור, וכמה חסר.
+   ⚠️ **קבוצה = סולם.** רק המדרגה הגבוהה שהורווחה בכל קבוצה נספרת,
+   בדיוק כמו בשרת. כלל בלי קבוצה (משלוח חינם) מצטבר לצידה. */
+function dvtGiftProgress(){
+  const tiers = dvtGiftTiers_;
+  if(!tiers || !tiers.length) return null;
+
+  const base = dvtGiftBase();
+  const hasPc = dvtGiftHasPc();
+  const usable = tiers.filter(function(x){ return !x.requiresPc || hasPc; });
+  if(!usable.length) return null;
+
+  const earned = [];
+  const byGroup = {};
+  usable.forEach(function(x){
+    if(base < x.min) return;
+    if(!x.group){ earned.push(x); return; }
+    if(!byGroup[x.group] || x.min > byGroup[x.group].min) byGroup[x.group] = x;
+  });
+  Object.keys(byGroup).forEach(function(g){ earned.push(byGroup[g]); });
+
+  const ahead = usable.filter(function(x){ return x.min > base; })
+                      .sort(function(a,b){ return a.min - b.min; });
+  const next = ahead.length ? ahead[0] : null;
+
+  /* הפס נמדד **מהמדרגה הקודמת** ולא מאפס — אחרת המעבר מ-1,500
+     ל-2,500 מתחיל ב-60% ומרגיש כאילו כבר כמעט הגעת. */
+  let prevMin = 0;
+  usable.forEach(function(x){ if(x.min <= base && x.min > prevMin) prevMin = x.min; });
+  const span = next ? (next.min - prevMin) : 0;
+  const pct  = next ? Math.max(2, Math.min(100, ((base - prevMin) / (span || 1)) * 100)) : 100;
+
+  /* מזהה מצב — משמש לזיהוי "עכשיו עברנו מדרגה" (קונפטי) ולאיפוס
+     הסגירה הידנית. */
+  const level = earned.map(function(x){ return x.group + "@" + x.min; }).sort().join("|");
+
+  return {
+    base: base, earned: earned, next: next, pct: pct, level: level,
+    remaining: next ? Math.max(0, Math.ceil(next.min - base)) : 0,
+    /* התקרה של המדרגה הגבוהה מסוג "מוצר לבחירה" שהורווחה. 0 = אין. */
+    pickCap: earned.reduce(function(m, x){
+      return (x.kind === "pick" && x.cap > m) ? x.cap : m;
+    }, 0)
+  };
+}
+
+/* טקסט המדרגה — כותרת מהגיליון בעברית, ניסוח נגזר באנגלית.
+   ⚠️ הכותרות בגיליון נכתבות בעברית ע"י דביר ואין להן תרגום; באנגלית
+   בונים משפט מהסוג ומהתקרה במקום להציג עברית באמצע אנגלית. */
+function dvtGiftTierLabel(x){
+  const en = (typeof LANG !== "undefined" && LANG === "en");
+  if(!en) return x.title || (x.kind === "pick" ? ("מוצר עד " + x.cap + " ₪ במתנה")
+                          : x.kind === "shipping" ? "משלוח חינם" : "הטבה");
+  if(x.kind === "pick")     return "a free product up to " + x.cap + " ₪";
+  if(x.kind === "shipping") return "free delivery";
+  if(x.kind === "service")  return "a free service";
+  return "a gift";
+}
+
+function dvtGiftMeterDismiss(){
+  const el = document.getElementById("giftMeter");
+  if(el) el.hidden = true;
+  const p = dvtGiftProgress();
+  try{ sessionStorage.setItem(DVT_GIFT_SEEN_KEY_, p ? p.level + "#closed" : "closed"); }catch(e){}
+}
+
+let dvtGiftLastLevel_ = null;
+
+function dvtGiftMeterRender(){
+  const el = document.getElementById("giftMeter");
+  if(!el) return;
+
+  /* אין עגלה — אין מד, ובעיקר: **אין בקשה לשרת.** */
+  if(!cartItems.length){ el.hidden = true; return; }
+
+  if(dvtGiftTiers_ === null){
+    if(dvtGiftLoading_) return;
+    dvtGiftLoading_ = true;
+    dvtGiftLoadTiers().then(function(){
+      dvtGiftLoading_ = false;
+      dvtGiftMeterRender();
+      /* 🔴 **תוקן לפני שהגיע לדביר.** אזור "בחר מתנה" בקופה נבנה
+         ב-renderCheckoutPage(), שרץ **לפני** שהמדרגות חוזרות מהשרת —
+         ולכן giftActiveCap() החזיר 0 והאזור נשאר מוסתר לנצח. המד
+         הצף כן הופיע, כי הוא זה שמחכה לתשובה. התוצאה בבדיקה:
+         `cap=65, cands=108` ובכל זאת `display:none`.
+         ⚠️ הקריאה כאן ולא בקופה, כי כאן יושב הרגע היחיד שבו ידוע
+         שהמדרגות הגיעו. */
+      if(typeof renderGiftBlock === "function") renderGiftBlock();
+    });
+    return;
+  }
+
+  const p = dvtGiftProgress();
+  if(!p){ el.hidden = true; return; }
+
+  /* נסגר ידנית — מכבדים, אבל **פותחים שוב כשמדרגה חדשה מורווחת**.
+     זה בדיוק הרגע שבשבילו המד קיים. */
+  let seen = "";
+  try{ seen = sessionStorage.getItem(DVT_GIFT_SEEN_KEY_) || ""; }catch(e){}
+  if(seen === p.level + "#closed"){ el.hidden = true; return; }
+
+  const txt = document.getElementById("giftMeterText");
+  const sub = document.getElementById("giftMeterSub");
+  const fill = document.getElementById("giftMeterFill");
+
+  if(p.next){
+    txt.innerHTML = tr("עוד ", "Add ") +
+      '<b>' + p.remaining.toLocaleString() + ' ₪</b>' +
+      tr(" ומגיע לך ", " more and you get ") +
+      '<b>' + escHtml(dvtGiftTierLabel(p.next)) + '</b>';
+  }else{
+    txt.innerHTML = '<b>' + tr("קיבלת את כל ההטבות 🎉", "You have unlocked every reward 🎉") + '</b>';
+  }
+
+  fill.style.width = p.pct.toFixed(1) + "%";
+
+  if(p.earned.length){
+    sub.hidden = false;
+    sub.innerHTML = "✓ " + tr("כבר הרווחת: ", "Already earned: ") +
+      p.earned.map(function(x){ return escHtml(dvtGiftTierLabel(x)); }).join(" · ");
+  }else{
+    sub.hidden = true;
+    sub.textContent = "";
+  }
+
+  el.classList.toggle("is-won", !!p.earned.length);
+  el.hidden = false;
+
+  /* עברנו מדרגה בדיוק עכשיו — חגיגה קצרה. ⚠️ לא בטעינת הדף הראשונה
+     (dvtGiftLastLevel_ עדיין null), אחרת כל ניווט מפוצץ קונפטי. */
+  if(dvtGiftLastLevel_ !== null && p.level !== dvtGiftLastLevel_ && p.earned.length){
+    try{ sessionStorage.removeItem(DVT_GIFT_SEEN_KEY_); }catch(e){}
+    dvtGiftCelebrate(el);
+  }
+  dvtGiftLastLevel_ = p.level;
+}
+
+/* קונפטי — דרישה מפורשת של דביר. ~14 חלקיקים, CSS בלבד, בלי ספרייה.
+   ⚠️ מכבד prefers-reduced-motion: מי שביקש פחות תנועה מקבל את המד
+   בלי החגיגה, ולא חגיגה מושבתת שמשאירה אלמנטים תקועים. */
+function dvtGiftCelebrate(host){
+  try{
+    if(window.matchMedia && window.matchMedia("(prefers-reduced-motion: reduce)").matches) return;
+  }catch(e){}
+  const wrap = document.createElement("div");
+  wrap.className = "gift-confetti";
+  const colors = ["#1B6FE0","#2FC4B0","#D9822B","#E0453F","#7C3AED"];
+  for(let i = 0; i < 14; i++){
+    const s = document.createElement("i");
+    s.style.background = colors[i % colors.length];
+    s.style.insetInlineStart = (6 + Math.random() * 88) + "%";
+    s.style.animationDelay = (Math.random() * 0.25).toFixed(2) + "s";
+    s.style.transform = "rotate(" + Math.floor(Math.random() * 360) + "deg)";
+    wrap.appendChild(s);
+  }
+  host.appendChild(wrap);
+  setTimeout(function(){ if(wrap.parentNode) wrap.parentNode.removeChild(wrap); }, 1600);
+}
+
+/* לחיצה על המד: בקופה — גלילה לאזור בחירת המתנה; בכל דף אחר —
+   פתיחת העגלה, שזו הפעולה הבאה הטבעית. */
+document.addEventListener("click", function(e){
+  const x = e.target.closest && e.target.closest("#giftMeterX");
+  if(x){ e.stopPropagation(); dvtGiftMeterDismiss(); return; }
+  const m = e.target.closest && e.target.closest("#giftMeter");
+  if(!m) return;
+  const block = document.getElementById("giftBlock");
+  if(block && block.style.display !== "none"){
+    block.scrollIntoView({ behavior: "smooth", block: "center" });
+    block.classList.add("gift-block-flash");
+    setTimeout(function(){ block.classList.remove("gift-block-flash"); }, 1200);
+  }else if(typeof openCart === "function"){
+    openCart();
+  }
+});
 
 
 /* =====================================================================

@@ -237,6 +237,8 @@ function cmpRender(){
       tr("שורות מודגשות = יש הבדל בין הדגמים. שורות מעומעמות = כולם זהים.",
          "Highlighted rows differ between models. Dimmed rows are identical.")
     }</p>` : ""}
+
+    ${chosen.length >= 2 ? cmpRecommendHtml(chosen, CMP_CAT) : ""}
   `;
 }
 
@@ -367,3 +369,226 @@ async function cmpInit(){
 }
 
 if(document.getElementById("cmpMain")) cmpInit();
+
+
+/* =====================================================================
+   🏆 "ההמלצה שלנו"
+   =====================================================================
+   דביר: *"ההמלצה שלנו — אהבתי."* וגם, על כלל הנושא:
+   *"אף פעם לא להמציא — תמיד מידע מאומת."*
+
+   🔴 **ולכן ההמלצה כאן אינה דעה — היא ניקוד על שדות מדודים,
+   וההנמקה מצטטת את הערכים עצמם.** אם הנתונים לא מספיקים כדי
+   להכריע, הדף **אומר את זה** במקום להמציא מנצח.
+
+   שלושה כללים שהופכים את זה לישר, ולא לקידום מכירות:
+
+   1. **כל שיקול חייב שדה אמיתי.** אין "איכות בנייה" ואין "מותג
+      מוביל" — רק ערכים שיושבים בגיליון וגלויים ללקוח באותה טבלה.
+   2. **הפרש זניח אינו הכרעה.** שני מוצרים במרחק פחות מ-8% בניקוד
+      מוצגים כ"שקולים", עם ההבדל המעשי ביניהם.
+   3. **המחיר תמיד נשקל.** בלי זה ההמלצה תמיד תצביע על היקר ביותר,
+      וזו בדיוק ההטיה שתשרוף את אמון הלקוח בביקורת אחת.
+
+   ⚠️ **מה שבמפורש לא נעשה כאן:** אין שקלול של רווח, מרווח או מלאי.
+   המלצה שמוטה לטובת המוכר מתגלה, ומחיר הגילוי גבוה מהרווח על
+   עסקה אחת.
+   ===================================================================== */
+
+/* לכל קטגוריה: אילו שדות נחשבים, לאיזה כיוון, ובאיזה משקל.
+   dir=1 → גבוה יותר עדיף · dir=-1 → נמוך יותר עדיף
+   ⚠️ נבחרו רק שדות עם כיסוי 70%+ בקטלוג החי (נמדד 25.08). שדה דליל
+   היה הופך את ההמלצה למקרית — מנצח לפי מי שבמקרה מולא. */
+const CMP_SCORE_FIELDS = {
+  gpu: [
+    { k: "vramGb",         dir: 1, w: 3, label: "זיכרון גרפי",  unit: "GB" },
+    { k: "boostClockMhz",  dir: 1, w: 2, label: "תדר Boost",    unit: "MHz" },
+    { k: "memBusBit",      dir: 1, w: 2, label: "רוחב פס",      unit: "bit" },
+    { k: "coolerFans",     dir: 1, w: 2, label: "מאווררים",     unit: "" },
+    { k: "tdpWatts",       dir: -1, w: 1, label: "צריכת חשמל",  unit: "W" }
+  ],
+  cpu: [
+    { k: "cores",          dir: 1, w: 3, label: "ליבות",        unit: "" },
+    { k: "boostClockGhz",  dir: 1, w: 2, label: "תדר Boost",    unit: "GHz" },
+    { k: "cacheMb",        dir: 1, w: 2, label: "מטמון",        unit: "MB" },
+    { k: "tdp",            dir: -1, w: 1, label: "פליטת חום",   unit: "W" }
+  ],
+  ram: [
+    { k: "capacityGb",     dir: 1, w: 3, label: "נפח",          unit: "GB" },
+    { k: "speedMhz",       dir: 1, w: 2, label: "מהירות",       unit: "MHz" },
+    { k: "cl",             dir: -1, w: 2, label: "השהיה (CL)",  unit: "" }
+  ],
+  storage: [
+    { k: "capacityGb",     dir: 1, w: 3, label: "נפח",          unit: "GB" },
+    { k: "readMbs",        dir: 1, w: 2, label: "קריאה",        unit: "MB/s" },
+    { k: "writeMbs",       dir: 1, w: 2, label: "כתיבה",        unit: "MB/s" },
+    { k: "tbw",            dir: 1, w: 1, label: "עמידות (TBW)", unit: "" }
+  ],
+  psu: [
+    { k: "wattage",        dir: 1, w: 3, label: "הספק",         unit: "W" },
+    { k: "warrantyMonths", dir: 1, w: 2, label: "אחריות",       unit: "חודשים" }
+  ],
+  "case": [
+    { k: "fanMounts",      dir: 1, w: 2, label: "עמדות מאוורר", unit: "" },
+    { k: "includedFans",   dir: 1, w: 2, label: "מאווררים כלולים", unit: "" },
+    { k: "maxGpuLengthMm", dir: 1, w: 2, label: "אורך כרטיס מירבי", unit: 'מ"מ' },
+    { k: "maxAirCoolerHeightMm", dir: 1, w: 1, label: "גובה קירור מירבי", unit: 'מ"מ' }
+  ],
+  caseFans: [
+    { k: "fans",           dir: 1, w: 2, label: "כמות בערכה",   unit: "" },
+    { k: "noiseDb",        dir: -1, w: 2, label: "רעש",          unit: "dBA" }
+  ]
+};
+
+/* משקל המחיר — נשקל תמיד, בכל קטגוריה. */
+const CMP_PRICE_WEIGHT = 3;
+
+/* 🔴 **קיצור שם מוצר — ובגבול מילה בלבד.**
+   חיתוך עיוור ב-34 תווים הפיק "Gigabyte GeForce RTX 305" מתוך
+   "RTX 3050", כלומר **שם של כרטיס אחר**. בטקסט שהלקוח קורא כדי
+   להחליט מה לקנות, זו לא בעיית תצוגה אלא מידע שגוי.
+   ⚠️ נחתך בגבול מילה, ורק אם באמת ארוך מדי. */
+function cmpShortName(s){
+  s = String(s == null ? "" : s).trim();
+  if (s.length <= 40) return s;
+  const cut = s.slice(0, 40);
+  const sp = cut.lastIndexOf(" ");
+  return (sp > 20 ? cut.slice(0, sp) : cut) + "…";
+}
+
+function cmpNum(v){
+  if (v === null || v === undefined || v === "") return null;
+  const n = Number(String(v).replace(/[^\d.]/g, ""));
+  return isFinite(n) && n > 0 ? n : null;
+}
+
+/* ניקוד יחסי: כל שדה מנורמל ל-0..1 מול הטווח שבין המושווים בלבד.
+   ⚠️ נורמליזציה מול הקטלוג כולו הייתה הופכת ארבעה כרטיסים מאותה
+   רמה לארבעה ציונים כמעט זהים — ואז ההמלצה מקרית. */
+function cmpRecommend(items, cat){
+  if (!items || items.length < 2) return null;
+
+  const fields = (CMP_SCORE_FIELDS[cat] || []).slice();
+  const rows = [];
+
+  fields.forEach(f => {
+    const vals = items.map(it => cmpNum(it[f.k]));
+    const known = vals.filter(v => v !== null);
+    /* שדה שאינו קיים אצל **כולם** אינו בר-השוואה. */
+    if (known.length !== items.length) return;
+    const min = Math.min.apply(null, known);
+    const max = Math.max.apply(null, known);
+    if (max === min) return;                      // כולם זהים — לא מבדיל
+    rows.push({ f: f, vals: vals, min: min, max: max });
+  });
+
+  const prices = items.map(it => cmpNum(it.price));
+  const pKnown = prices.filter(v => v !== null).length === items.length;
+  const pMin = pKnown ? Math.min.apply(null, prices) : null;
+  const pMax = pKnown ? Math.max.apply(null, prices) : null;
+
+  /* אין במה להשוות — אומרים את זה, לא ממציאים מנצח. */
+  if (!rows.length && !(pKnown && pMax > pMin)) return { undecided: true };
+
+  const scores = items.map((it, i) => {
+    let s = 0, wsum = 0;
+    rows.forEach(r => {
+      const norm = (r.vals[i] - r.min) / (r.max - r.min);
+      s += (r.f.dir === 1 ? norm : 1 - norm) * r.f.w;
+      wsum += r.f.w;
+    });
+    if (pKnown && pMax > pMin){
+      s += (1 - (prices[i] - pMin) / (pMax - pMin)) * CMP_PRICE_WEIGHT;
+      wsum += CMP_PRICE_WEIGHT;
+    }
+    return wsum ? s / wsum : 0;
+  });
+
+  let best = 0;
+  for (let i = 1; i < scores.length; i++) if (scores[i] > scores[best]) best = i;
+
+  let second = -1;
+  for (let i = 0; i < scores.length; i++){
+    if (i !== best && (second === -1 || scores[i] > scores[second])) second = i;
+  }
+  const gap = second >= 0 ? scores[best] - scores[second] : 1;
+
+  /* ההנמקה: רק שדות שבהם המנצח באמת מוביל, עם הערכים עצמם. */
+  const reasons = [];
+  rows.forEach(r => {
+    const mine = r.vals[best];
+    const bestOfRest = r.f.dir === 1
+      ? Math.max.apply(null, r.vals.filter((_, i) => i !== best))
+      : Math.min.apply(null, r.vals.filter((_, i) => i !== best));
+    const wins = r.f.dir === 1 ? mine > bestOfRest : mine < bestOfRest;
+    if (wins) reasons.push(r.f.label + " " + mine + (r.f.unit ? " " + r.f.unit : ""));
+  });
+  if (pKnown && prices[best] === pMin && pMax > pMin) reasons.push("גם הזול מבין המושווים");
+
+  /* 🔴 **המקרה שדביר שאל עליו: "MSI מול PNY — מה ההבדל בפועל?"**
+     שני דגמים של אותו שבב יוצאים **זהים בכל שדה מדוד**, ואז אין
+     שום "מוביל ב-X" להגיד — הרשימה יוצאת ריקה והדף מכריז "אין
+     הכרעה". אבל יש כאן הכרעה, והיא הכי שימושית שיש: **אותו מפרט,
+     מחיר נמוך יותר.**
+     ⚠️ נבדק על נתונים אמיתיים: RTX 3050 Windforce מול RTX 3050 —
+     זהים ב-VRAM, Boost, רוחב פס ו-TDP, והפרש של 25 ₪.
+     ⚠️ נאמר רק כשהזהות היא **בכל** השדות שנוקדו, ולא בחלקם. */
+  if (!reasons.length && pKnown && rows.length){
+    for (let j = 0; j < items.length; j++){
+      if (j === best) continue;
+      const identical = rows.every(r => r.vals[j] === r.vals[best]);
+      if (identical && prices[best] < prices[j]){
+        const diff = Math.round(prices[j] - prices[best]);
+        reasons.push("מפרט זהה ל-" + cmpShortName(itemName ? itemName(items[j]) : items[j].name) +
+                     ", וזול ב-" + diff.toLocaleString() + " ₪");
+        break;
+      }
+    }
+  }
+
+  return {
+    index: best,
+    close: gap < 0.08,
+    closeIndex: gap < 0.08 ? second : -1,
+    reasons: reasons,
+    /* ⚠️ נשמר כדי שאפשר יהיה להסביר גם כשאין הנמקה חיובית. */
+    scored: rows.length
+  };
+}
+
+function cmpRecommendHtml(items, cat){
+  const r = cmpRecommend(items, cat);
+  if (!r) return "";
+
+  if (r.undecided || !r.reasons.length){
+    return `<div class="cmp-rec cmp-rec-none">
+      <div class="cmp-rec-ico">⚖️</div>
+      <div><b>${tr("אין כאן הכרעה ברורה","No clear winner here")}</b>
+        <p>${tr("הדגמים האלה קרובים מדי במפרט שבידינו. אם תגיד לנו למה המחשב מיועד — נמליץ לפי זה.",
+                "These models are too close on the specs we hold. Tell us what the PC is for and we'll advise.")}
+        <a href="contact.html">${tr("דברו איתנו","Talk to us")}</a></p></div></div>`;
+  }
+
+  const win = items[r.index];
+  const name = itemName ? itemName(win) : win.name;
+  const alt = r.close && r.closeIndex >= 0 ? items[r.closeIndex] : null;
+
+  return `<div class="cmp-rec">
+    <div class="cmp-rec-ico">🏆</div>
+    <div class="cmp-rec-body">
+      <div class="cmp-rec-title">${tr("ההמלצה שלנו","Our pick")}</div>
+      <div class="cmp-rec-name">${escHtml(name)}</div>
+      <p class="cmp-rec-why">${escHtml(r.reasons.join(" · "))}</p>
+      ${alt ? `<p class="cmp-rec-close">${
+        escHtml(tr("קרוב מאוד אליו: ", "Very close: ") + (itemName ? itemName(alt) : alt.name))
+      } — ${escHtml(tr("ההפרש קטן, ושווה לבחור לפי מה שחשוב לך.",
+                        "The gap is small; pick by what matters to you."))}</p>` : ""}
+      <p class="cmp-rec-note">${escHtml(tr(
+        "ההמלצה מחושבת מהמפרט והמחיר שבטבלה למעלה בלבד.",
+        "Computed only from the specs and prices in the table above."))}</p>
+    </div>
+    <a class="btn btn-accent cmp-rec-cta"
+       href="product.html?cat=${encodeURIComponent(cat)}&id=${encodeURIComponent(win.id)}">
+      ${tr("למוצר","View product")}</a>
+  </div>`;
+}

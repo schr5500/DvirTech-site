@@ -243,3 +243,36 @@
   .cmp-toolbar-actions{ width:100% }
   .cmp-toolbar-actions .btn{ flex:1 }
 }
+
+/* ==================== ההמלצה שלנו ====================
+   ⚠️ הבלוק בולט אבל **לא צועק**: הוא נשען על אותו נייבי של פס
+   הכותרת, כדי שייקרא כהמשך של הדף ולא כפרסומת שהודבקה עליו. */
+.cmp-rec{
+  display:flex; align-items:flex-start; gap:14px;
+  margin-top:18px; padding:18px 20px;
+  border:1px solid var(--line);
+  border-inline-start:4px solid var(--teal);
+  border-radius:14px;
+  background:linear-gradient(180deg, var(--surface) 0%, var(--surface-2) 100%);
+}
+.cmp-rec-ico{ font-size:26px; line-height:1; flex:none }
+.cmp-rec-body{ flex:1; min-width:0 }
+.cmp-rec-title{
+  font-size:11.5px; font-weight:800; letter-spacing:.4px;
+  text-transform:uppercase; color:var(--teal-dark); margin-bottom:3px;
+}
+.cmp-rec-name{ font-size:15.5px; font-weight:800; color:var(--ink); line-height:1.4 }
+.cmp-rec-why{ margin:6px 0 0; font-size:13.5px; color:var(--ink); font-weight:600 }
+.cmp-rec-close{ margin:6px 0 0; font-size:12.5px; color:var(--ink-soft) }
+/* 🔴 שורת השקיפות — למה ההמלצה אומרת מה שהיא אומרת. לא להסיר. */
+.cmp-rec-note{ margin:8px 0 0; font-size:11.5px; color:var(--ink-soft); opacity:.85 }
+.cmp-rec-cta{ flex:none; align-self:center; padding:10px 18px; font-size:13.5px; text-decoration:none }
+
+.cmp-rec-none{ border-inline-start-color:var(--ink-soft) }
+.cmp-rec-none p{ margin:4px 0 0; font-size:13px; color:var(--ink-soft) }
+.cmp-rec-none a{ color:var(--blue) }
+
+@media (max-width:560px){
+  .cmp-rec{ flex-direction:column; gap:10px }
+  .cmp-rec-cta{ width:100%; text-align:center; align-self:stretch }
+}
