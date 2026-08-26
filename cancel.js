@@ -85,6 +85,30 @@ function cxlSubmit(){
     document.getElementById("cxlRef").textContent = res.ref || "—";
     document.getElementById("cxlAt").textContent =
       cxlTr("התקבל בתאריך ", "Received on ") + (res.at || "");
+
+    /* 🔴 **ההזמנה לא אותרה — ליידע, לא להסתיר.**
+       הבקשה נרשמה ותקפה, אבל בלי מספר הזמנה תואם היא דורשת איתור
+       ידני. לקוח שלא יודע את זה מניח שהכל טופל וממתין לשווא.
+       ⚠️ הניסוח נמנע מהאשמה ("לא הצלחנו לאתר" ולא "הזנת מספר שגוי")
+       — ייתכן מאוד שההזמנה קיימת ורק המספר הוקלד אחרת. */
+    const warn = document.getElementById("cxlNotFound");
+    if (warn && res.found === false) {
+      warn.innerHTML = cxlTr(
+        res.noOrder
+          ? "לא צוין מספר הזמנה, ולכן נאתר אותה לפי הפרטים שמסרת. כדי לזרז — "
+          : "הבקשה נרשמה, אבל <b>לא הצלחנו לאתר הזמנה עם המספר הזה</b>. הביטול תקף ממועד הפנייה; כדי שנטפל מהר — ",
+        res.noOrder
+          ? "No order number was given, so we'll locate it from your details. To speed things up — "
+          : "Your request is recorded, but <b>we couldn't find an order with that number</b>. The cancellation is valid from the moment you contacted us; to handle it faster — ") +
+        '<a href="https://wa.me/972502000373?text=' +
+        encodeURIComponent(cxlTr(
+          "שלום, הגשתי בקשת ביטול " + (res.ref || "") + " ולא אותרה ההזמנה שלי.",
+          "Hi, I submitted cancellation request " + (res.ref || "") + " and my order wasn't found.")) +
+        '" target="_blank" rel="noopener">' +
+        cxlTr("שלח לנו הודעה בוואטסאפ", "message us on WhatsApp") + "</a>";
+      warn.style.display = "block";
+    }
+
     document.getElementById("cxlForm").style.display = "none";
     document.getElementById("cxlDone").style.display = "block";
     window.scrollTo({ top: 0, behavior: "smooth" });
