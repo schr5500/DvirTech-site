@@ -415,3 +415,9 @@
    גלילה משלה (‎.care-table-wrap{overflow-x:auto}), זו רק התנהגות
    האינרציה במגע. */
 .care-table-wrap{-webkit-overflow-scrolling:touch}
+
+/* המחיר הדו-שכבתי בכרטיס שירות (27.08): טכנאי מחוק, DvirTech פעיל. */
+.sup-price{display:flex;flex-direction:column;align-items:flex-end;gap:1px}
+.sup-price-was{color:var(--ink-soft,#5F7590);font-weight:600;font-size:12px;opacity:.75}
+.sup-price-now{color:var(--blue,#1B6FE0);font-weight:800;font-size:15px}
+.sup-price-tag{font-size:9.5px;font-weight:700;color:var(--teal-dark,#0E9C8A);white-space:nowrap}

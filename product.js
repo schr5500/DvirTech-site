@@ -166,7 +166,7 @@ function pdZoomInit(){
    **"הרכבה והתקנת Windows 11"**, ולכן אי אפשר לטעות בה.
 
    ⚠️ **שים לב שהשורה מכסה שני דברים שונים בכוונה**, וזה נכון:
-     · **הרכבה** — ללא עלות, ורק כשקונים כאן את **כל** הרכיבים
+     · **הרכבה** — 199 ₪ כשקונים כאן את **כל** הרכיבים
        למחשב שלם. היא לא נבחרת בקופה: `withFreeAssemblyLine`
        מוסיפה את `assembly-included` ב-0 ₪ אוטומטית.
        דביר: "זה טוב שזה מופיע שם לפרסום המוצרים שלנו."
@@ -202,8 +202,8 @@ function pdServicesHtml(cat){
         "אנחנו לא רק מוכרים את הרכיב — אפשר גם שנרכיב, נתקין ונהיה שם אחר כך.",
         "We don't just sell the part — we can build it, install it, and be there afterwards.")}</p>
       ${row("ui-tools", tr("הרכבה והתקנת Windows 11","Assembly & Windows 11 setup"),
-            tr("ההרכבה ללא עלות כשקונים כאן את כל הרכיבים למחשב שלם. התקנת Windows 11 עם רישיון, תוכנות והעברת נתונים — נבחרות בקופה.",
-               "Assembly is free when you buy all the parts for a complete PC here. Windows 11 with a licence, software and data transfer are chosen at checkout."),
+            tr("הרכבה במחיר מוזל — 199 ₪ במקום 300 ₪ — כשקונים כאן את כל הרכיבים למחשב שלם. התקנת Windows 11 עם רישיון, תוכנות והעברת נתונים — נבחרות בקופה.",
+               "Assembly at a reduced price — 199 ₪ instead of 300 ₪ — when you buy all the parts for a complete PC here. Windows 11 with a licence, software and data transfer are chosen at checkout."),
             "checkout.html", tr("נבחר בקופה","Choose at checkout"))}
       ${row("ui-pin", tr("ביקור טכנאי","On-site visit"),
             tr("קריית גת והסביבה, ולפי זמינות גם השפלה והמרכז — בתיאום מראש.",
@@ -867,10 +867,11 @@ function pdRenderBody(){
             : tr("משלוח 3-7 ימי עסקים","Delivery in 3-7 business days"))}</li>
           <li><svg class="ui-ic"><use href="#ui-shield"/></svg>${tr("אחריות מלאה על כל רכיב","Full warranty on every part")}</li>
           <!-- ⚠️ **היה "הרכבה והתקנה בתוספת תשלום" — הפוך מהאמת.**
-               הרכבת מחשב שלם שנקנה כאן היא **ללא עלות** ונוספת
+               הרכבת מחשב שלם שנקנה כאן היא **199 ₪** (במקום 300),
+               ונבחרת
                אוטומטית (assembly-included ב-0 ₪). מה שכן בתשלום זה
                התקנת Windows והתוכנות, והן מפורטות ב-pdServicesHtml. -->
-          <li><svg class="ui-ic"><use href="#ui-tools"/></svg>${tr("הרכבה ללא עלות במחשב שלם","Free assembly on a complete PC")}</li>
+          <li><svg class="ui-ic"><use href="#ui-tools"/></svg>${tr("הרכבה ב-199 ₪ במקום 300 ₪ במחשב שלם","Assembly at 199 ₪ instead of 300 ₪ on a complete PC")}</li>
           <li><svg class="ui-ic"><use href="#ui-chat"/></svg>${tr("שאלה על המוצר?","Questions about this product?")}
             <a class="pd-wa" href="${pdWhatsappHref(it)}" target="_blank" rel="noopener"
                >${tr("דברו איתנו","Talk to us")}</a></li>

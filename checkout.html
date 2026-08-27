@@ -171,6 +171,8 @@
           </span>
         </summary>
         <p class="svc-hint" id="servicesHint"></p>
+        <!-- ⚠️ נבנה ב-renderBundleNudge מהמחירים בפועל. -->
+        <p class="svc-bundle-nudge" id="servicesBundleNudge" hidden></p>
         <div id="servicesOptions" class="svc-opts"></div>
       <div id="servicesOnRequest" class="svc-onreq"></div>
       </details>
@@ -192,6 +194,9 @@
           <option value="10">10</option><option value="12">12</option>
         </select>
         <p style="font-size:11.5px;color:var(--ink-soft);margin:6px 0 0" id="installmentsHint"></p>
+        <!-- ⚠️ נבנה ב-renderInstallmentOptions מהמספרים בפועל. אל תכתוב
+             כאן טקסט קבוע — העמלות משתנות. -->
+        <p class="pay-best-hint" id="installmentsBest" hidden></p>
       </div>
 
       <ul class="summary-list" id="shipRow" style="display:none;margin-bottom:8px">

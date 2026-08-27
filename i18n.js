@@ -47,7 +47,10 @@ const UI_TEXT = {
     checkoutValidationBasic:"נא למלא שם וטלפון תקין",
     continueBrowsing:"⟵ המשך גלישה באתר",
     addToCartBtn:"הוסף לעגלה", finishBuildBtn:"🛒 סיום הרכבה + הוספה לעגלה",
-    freeAssemblyEligibilityNote:"⚠️ שימו לב: זכאות ל\"הרכבה חינם\" (0 ₪) חלה רק על הרכבים שנבנו ונרכשו במלואם דרכנו/דרך האתר. השלימו את כל השלבים הנדרשים כדי להמשיך.",
+    /* 🔴 **"הרכבה חינם" בוטלה 26.08.** ההטבה היום היא מחיר מוזל —
+       199 ₪ במקום 300 ₪ — ולא אפס. ראה SERVICE_ASSEMBLY_KEY_
+       ב-4-payment-api.gs. */
+    freeAssemblyEligibilityNote:"⚠️ שימו לב: מחיר ההרכבה המוזל (199 ₪ במקום 300 ₪) חל רק כשכל רכיבי המחשב נרכשים דרכנו/דרך האתר. השלימו את כל השלבים הנדרשים כדי להמשיך.",
     catalogTitle:"קטלוג מוצרים", catalogSubtitle:"מחשבים מוכנים וציוד היקפי — הדגמה ראשונית, המחירים והמלאי עוד לא סופיים.",
     footerText:"DvirTech © 2026 — הרכבה מקצועית, אחריות רשמית, יחס אישי.",
     notSelected:"טרם נבחר", addBtn:"הוסף", oneOption:"בחר אפשרות אחת", optional:"אופציונלי",
@@ -152,7 +155,7 @@ const UI_TEXT = {
     checkoutValidationBasic:"Please enter a name and a valid phone number",
     continueBrowsing:"⟵ Continue Browsing",
     addToCartBtn:"Add to Cart", finishBuildBtn:"🛒 Finish Build + Add to Cart",
-    freeAssemblyEligibilityNote:"⚠️ Note: eligibility for \"free assembly\" (₪0) applies only to builds fully configured and purchased through us / the site. Please complete all required steps to continue.",
+    freeAssemblyEligibilityNote:"⚠️ Note: the reduced assembly price (199 ₪ instead of 300 ₪) applies only when every component is purchased through us / the site. Please complete all required steps to continue.",
     catalogTitle:"Product Catalog", catalogSubtitle:"Ready-made PCs and peripherals — early preview, prices and stock not final yet.",
     footerText:"DvirTech © 2026 — Professional builds, official warranty, personal service.",
     notSelected:"Not selected yet", addBtn:"Add", oneOption:"Choose one option", optional:"Optional",

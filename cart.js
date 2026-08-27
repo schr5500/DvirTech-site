@@ -211,15 +211,11 @@ function addBuildToCart(buildLines, buildTotal, parts){
   const noteLines = buildLines.map(l => `${l.label}: ${l.name}${l.qty>1?` ×${l.qty}`:""}`);
   const buildId = "c" + Date.now() + Math.random().toString(36).slice(2,7);
   cartItems.push({ id: buildId, type:"build", name: tr("הרכבה בהתאמה אישית","Custom PC Build"), price: buildTotal, qty:1, noteLines: noteLines, parts: parts || [] });
-  addToCartSilently({ type:"service", sku:"assembly-included", name: tr("הרכבה (כשקונים חלקים ממני)","Assembly (when buying parts from me)"), price:0, qty:1, buildId: buildId });
-  saveCartItems(); renderCart();
-  // אותו משוב כמו בכל האתר — בלי פתיחה אוטומטית של העגלה.
-  window.__lastAddSourceEl = document.getElementById("finishBuildBtn") ||
-                             document.querySelector(".summary, .total-row") || null;
-  flyToCart(1);
-}
-function addToCartSilently(item){
-  cartItems.push(Object.assign({ id: "c" + Date.now() + Math.random().toString(36).slice(2,7), qty: 1 }, item));
+  /* ⚠️ שורת "הרכבה 0 ₪" שנוספה כאן הוסרה 26.08 (ההרכבה היא שירות
+     בתשלום), ו-addToCartSilently — שנותרה בלי אף קורא — הוסרה 27.08
+     בסריקת הפונקציות המתות. */
+  saveCartItems();
+  renderCart();
 }
 
 /* ================= widget markup (injected once per page) ================= */
@@ -238,6 +234,8 @@ function injectCartWidget(){
       </div>
       <div class="gift-meter-bar"><i id="giftMeterFill"></i></div>
       <div class="gift-meter-sub" id="giftMeterSub"></div>
+      <div class="gift-meter-toggle" id="giftMeterToggle"></div>
+      <div class="gift-meter-all" id="giftMeterAll" hidden></div>
     </div>
 
     <div class="cart-overlay" id="cartOverlay" onclick="if(event.target===this) closeCart()">
@@ -300,9 +298,13 @@ function renderCart(){
   }
   emptyMsg.style.display = "none";
   totalRow.style.display = "flex";
-  checkoutBtn.style.display = "block";
+  /* ⚠️ `""` ולא `"block"` — הערך המוטבע גובר על ה-CSS, ו-`block`
+     ביטל את ה-`display:flex` של `.btn` (וממנו את `justify-content:
+     center`). התוצאה: שני כפתורים מיושרים למרכז ואחד לא, באותה
+     מגירה. ריק = "תחזור למה שה-CSS אומר". */
+  checkoutBtn.style.display = "";
   const shareBtn = document.getElementById("cartShareBtn");
-  if (shareBtn) shareBtn.style.display = "block";
+  if (shareBtn) shareBtn.style.display = "";
 
   list.innerHTML = cartItems.map(i => {
     // ה-SKU בעגלה הוא "קטגוריה:מזהה" — בדיוק מה שדף המוצר מצפה לו,
@@ -596,6 +598,20 @@ function dvtGiftProgress(){
 /* טקסט המדרגה — כותרת מהגיליון בעברית, ניסוח נגזר באנגלית.
    ⚠️ הכותרות בגיליון נכתבות בעברית ע"י דביר ואין להן תרגום; באנגלית
    בונים משפט מהסוג ומהתקרה במקום להציג עברית באמצע אנגלית. */
+/* 🔴 **"במתנה" בצבע בולט — בקשת דביר: "שיבלוט וילך עם העיצוב ויהיה
+   מרגש".** נבחר ורוד-אדום חי (#E11D48) ולא ה-`--red` של האתר:
+   ‏`--red` הוא צבע **שגיאה** (שדה לא תקין, מוצר שאזל), ושימוש בו
+   לבשורה טובה מלמד את העין הפוך.
+   ⚠️ ההחלפה רצה **אחרי** escHtml. המילים כאן הן עברית/אנגלית נקייה
+   בלי תווים שה-escape נוגע בהם, ולכן הן שורדות אותו כמו שהן —
+   אבל אם מישהו יוסיף כאן מילה עם גרש או &, זה יישבר בשקט.
+   ⚠️ מוחל רק על טקסט שכבר עבר escape, אחרת זו הזרקת HTML מהגיליון. */
+const DVT_GIFT_HOT_WORDS_ = /(במתנה|חינם|מתנה!|free|gift)/g;
+function dvtGiftHot(escaped){
+  return String(escaped || "").replace(DVT_GIFT_HOT_WORDS_,
+    '<b class="gift-hot">$1</b>');
+}
+
 function dvtGiftTierLabel(x){
   const en = (typeof LANG !== "undefined" && LANG === "en");
   if(!en) return x.title || (x.kind === "pick" ? ("מוצר עד " + x.cap + " ₪ במתנה")
@@ -657,7 +673,7 @@ function dvtGiftMeterRender(){
     txt.innerHTML = tr("עוד ", "Add ") +
       '<b>' + p.remaining.toLocaleString() + ' ₪</b>' +
       tr(" ומגיע לך ", " more and you get ") +
-      '<b>' + escHtml(dvtGiftTierLabel(p.next)) + '</b>';
+      '<b>' + dvtGiftHot(escHtml(dvtGiftTierLabel(p.next))) + '</b>';
   }else{
     txt.innerHTML = '<b>' + tr("קיבלת את כל ההטבות 🎉", "You have unlocked every reward 🎉") + '</b>';
   }
@@ -667,11 +683,13 @@ function dvtGiftMeterRender(){
   if(p.earned.length){
     sub.hidden = false;
     sub.innerHTML = "✓ " + tr("כבר הרווחת: ", "Already earned: ") +
-      p.earned.map(function(x){ return escHtml(dvtGiftTierLabel(x)); }).join(" · ");
+      p.earned.map(function(x){ return dvtGiftHot(escHtml(dvtGiftTierLabel(x))); }).join(" · ");
   }else{
     sub.hidden = true;
     sub.textContent = "";
   }
+
+  dvtGiftRenderTiers(p);
 
   el.classList.toggle("is-won", !!p.earned.length);
   el.hidden = false;
@@ -683,6 +701,194 @@ function dvtGiftMeterRender(){
     dvtGiftCelebrate(el);
   }
   dvtGiftLastLevel_ = p.level;
+}
+
+/* 🔴 **"הצג הכל" — בקשת דביר: "שיפתח לי סוג של הצג הכל שמראה את כל
+   ה-TIERS והם אפורים, כדי שהוא יבין מה הוא מקבל ולאן לשאוף."**
+
+   ⚠️ מדרגה שלא הושגה מוצגת **מעומעמת אבל קריאה** — לא נעלמת ולא
+   מטושטשת. כל העניין הוא שהלקוח יראה מה מחכה לו; מדרגה שאי אפשר
+   לקרוא לא מושכת לשום מקום.
+   ⚠️ הסכומים מגיעים מהשרת (`giftTiers`) ולא מקובעים כאן — שינוי
+   שורה בלשונית משתקף באתר תוך רבע שעה. */
+let dvtGiftAllOpen_ = false;
+
+function dvtGiftRenderTiers(p){
+  const host = document.getElementById("giftMeterAll");
+  const tog  = document.getElementById("giftMeterToggle");
+  if(!host || !tog) return;
+
+  const tiers = (dvtGiftTiers_ || []).slice().sort(function(a,b){ return a.min - b.min; });
+  if(tiers.length < 2){          /* מדרגה אחת — אין מה "להציג הכל" */
+    tog.hidden = true; host.hidden = true; return;
+  }
+  tog.hidden = false;
+  tog.textContent = dvtGiftAllOpen_
+    ? tr("הסתר מדרגות ▴", "Hide tiers ▴")
+    : tr("הצג את כל המדרגות ▾", "Show all tiers ▾");
+
+  const earnedIds = {};
+  p.earned.forEach(function(x){ earnedIds[x.group + "@" + x.min] = true; });
+
+  host.innerHTML = tiers.map(function(x){
+    const key = x.group + "@" + x.min;
+    const won = !!earnedIds[key];
+    /* מדרגה בקבוצה שהושגה אבל אינה הגבוהה — עברת אותה, אבל היא
+       "נבלעה" בסולם. מסומנת כהושגה-ולא-פעילה כדי לא לשקר. */
+    const passed = !won && p.base >= x.min;
+    const gap = Math.max(0, Math.ceil(x.min - p.base));
+    return '<div class="gift-tier' + (won ? " is-won" : passed ? " is-passed" : "") + '">' +
+      '<span class="gift-tier-min">' + x.min.toLocaleString() + ' ₪</span>' +
+      '<span class="gift-tier-title">' + dvtGiftHot(escHtml(dvtGiftTierLabel(x))) + '</span>' +
+      '<span class="gift-tier-state">' +
+        (won ? "✓" : passed ? tr("נכלל", "included")
+             : tr("עוד ", "+") + gap.toLocaleString() + " ₪") +
+      '</span></div>';
+  }).join("");
+
+  host.hidden = !dvtGiftAllOpen_;
+}
+
+/* =====================================================================
+   🎁 מודעת "קנית? קיבלת!" — דף הבית, דף המתנות ובאנר הקטלוג
+   =====================================================================
+   DVT-NEXT-BUILD §10.8-10.9. יושב כאן ולא ב-home.js משתי סיבות:
+   ‏1) cart.js נטען אחרי home.js, אז home.js לא יכול לקרוא למנגנון
+   המדרגות בזמן טעינה; 2) כל לוגיקת המתנות בקובץ אחד — מקור אחד.
+
+   כללי העיצוב שנקבעו שם, וכולם מיושמים כאן:
+     • **סדר RTL: המדרגה הנמוכה הכי ימנית** — בעברית העין מתחילה
+       מימין, ו-2,500 ראשון הוא סכום שהלקוח מוותר עליו מראש.
+     • **הכרטיסים גדלים** — goal-gradient עובד רק כשהמדרגה נראית
+       עולה. rank 0-3 קובע גודל/רוויה, העליון מקבל מסגרת.
+     • **תמונת מוצר אמיתית, לא 🎁 גנרי** — "קופסה מצוירת שווה אפס
+       במוח; פד עכבר מצולם שווה את מחירו." נשלף חי מהקטלוג.
+     • **"המשתלם ביותר"** ולא "הכי פופולרי" — אין עדיין לקוחות,
+       ו"פופולרי" הוא הטעיה לפי חוק הגנת הצרכן §2.
+     • **"בקנייה מעל…"** ולא "סכום למימוש" (שפת מחסן).
+     • **"משלוח חינם עד הבית"** — לא "מהיר". אין אקספרס.
+   ⚠️ אין תאריך תוקף במודעה — דביר לא קבע דדליין, ולא ממציאים.
+   התנאים המלאים ב-gifts.html (נדרש משפטית — §10.9#5). */
+
+function dvtGiftSampleFor_(cap){
+  const cat = (typeof dvtCatalogNow === "function") ? dvtCatalogNow() : null;
+  if(!cat || !(cap > 0)) return null;
+  let best = null;
+  Object.keys(cat).forEach(function(key){
+    if(key === "services" || key === "content") return;
+    const g = cat[key];
+    if(!g || !Array.isArray(g.items)) return;
+    g.items.forEach(function(it){
+      const price = Number(it.price) || 0;
+      if(!(price > 0) || price > cap || !it.image) return;
+      if(typeof dvtCanBuy === "function" && !dvtCanBuy(it, key)) return;
+      /* היקר ביותר בתקרה — זה מה שמוכר את המדרגה. */
+      if(!best || price > best.price) best = { name: it.name, image: it.image, price: price };
+    });
+  });
+  return best;
+}
+
+function dvtGiftPromoRender(){
+  const host = document.getElementById("giftPromo");
+  const wrap = document.getElementById("giftPromoWrap");
+  const strip = document.getElementById("giftCatalogBanner");
+  if(!host && !strip) return;
+
+  dvtGiftLoadTiers().then(function(tiers){
+    const picks = (tiers || []).filter(function(x){ return x.kind === "pick" && x.min > 0; })
+                               .sort(function(a,b){ return a.min - b.min; });
+    const ship  = (tiers || []).filter(function(x){ return x.kind === "shipping"; })[0] || null;
+
+    /* --- באנר הקטלוג: שורה אחת, קיים גם בלי מודאה מלאה --- */
+    if(strip){
+      if(picks.length){
+        strip.innerHTML = "🎁 " +
+          tr("<b>קנית? קיבלת!</b> מוצר במתנה לבחירתך בקנייה מעל " +
+               picks[0].min.toLocaleString() + " ₪ — לכל המדרגות ←",
+             "<b>Buy & get!</b> A free product of your choice on orders over " +
+               picks[0].min.toLocaleString() + " ₪ — see all tiers →");
+        strip.hidden = false;
+      }else{
+        strip.hidden = true;
+      }
+    }
+
+    if(!host) return;
+    if(!picks.length){ if(wrap) wrap.hidden = true; return; }
+
+    const top = picks[picks.length - 1];
+    const cards = picks.map(function(x, i){
+      const sample = dvtGiftSampleFor_(x.cap);
+      const img = sample
+        ? '<span class="gp-img"><img src="' + escHtml(sample.image) + '" alt="' +
+          escHtml(tr("לדוגמה: ", "e.g. ") + sample.name) + '" loading="lazy"></span>'
+        : '<span class="gp-img gp-img-empty" aria-hidden="true">🎁</span>';
+      return '<div class="gp-card gp-r' + i + (x === top ? ' gp-top' : '') + '">' +
+        (x === top ? '<span class="gp-best">' + escHtml(tr("המשתלם ביותר","Best value")) + '</span>' : '') +
+        img +
+        '<span class="gp-min">' + escHtml(tr("בקנייה מעל ","Orders over ")) +
+          '<b>' + x.min.toLocaleString() + ' ₪</b></span>' +
+        '<span class="gp-what">' + dvtGiftHot(escHtml(
+          tr("מוצר עד " + x.cap + " ₪ במתנה", "A product up to " + x.cap + " ₪ free"))) + '</span>' +
+        (sample ? '<span class="gp-sample">' + escHtml(tr("לדוגמה: ","e.g. ") +
+          ((typeof dvtDisplayName === "function") ? dvtDisplayName(sample.name) : sample.name)) + '</span>' : '') +
+        '</div>';
+    }).join("");
+
+    /* 🎨 v2 (27.08) — הכיוון של המודעה שדביר עיצב (רקע נייבי כהה,
+       שלושת השלבים בצד, כרטיסים בוהקים), אבל **HTML חי ולא תמונה**:
+       המספרים מהשרת, קורא מסך קורא, ושינוי רף לא דורש רג'נרוט.
+       מה שלא נכנס מהתמונה — בכוונה:
+         • "הכי פופולרי" → "המשתלם ביותר" (אין עדיין לקוחות — הטעיה)
+         • "משלוח מהיר עד הבית" → "משלוח חינם" מהמדרגה החיה (אין מהיר)
+         • מדרגת 300 ₪ שלא קיימת — רק מה שבאמת פעיל בלשונית */
+    const flow =
+      '<div class="gp-flow">' +
+        '<div class="gp-step"><span class="gp-step-ic">🛒</span><div><b>' +
+          escHtml(tr("קונים באתר","Shop the site")) + '</b><span>' +
+          escHtml(tr("ממלאים עגלה כרגיל","Fill your cart as usual")) + '</span></div></div>' +
+        '<div class="gp-step-arr" aria-hidden="true">⌄</div>' +
+        '<div class="gp-step"><span class="gp-step-ic">🎯</span><div><b>' +
+          escHtml(tr("מגיעים לרף","Hit a tier")) + '</b><span>' +
+          escHtml(tr("מד ההתקדמות מראה כמה נשאר","The meter shows how close you are")) + '</span></div></div>' +
+        '<div class="gp-step-arr" aria-hidden="true">⌄</div>' +
+        '<div class="gp-step"><span class="gp-step-ic">🎁</span><div><b>' +
+          escHtml(tr("בוחרים מתנה","Pick your gift")) + '</b><span>' +
+          escHtml(tr("מוצר אמיתי מהקטלוג, בקבלה ב-0 ₪","A real product, on the receipt at 0 ₪")) + '</span></div></div>' +
+      '</div>';
+
+    host.innerHTML =
+      '<div class="gp-head">' +
+        '<h2>' + escHtml(tr("קנית? ","Buy? ")) + '<em>' + escHtml(tr("קיבלת!","Get!")) + '</em></h2>' +
+        '<p>' + escHtml(tr("קונים יותר — מקבלים מתנה שווה יותר. אתם בוחרים אותה, מהקטלוג האמיתי.",
+                           "The more you buy, the bigger the gift — and you pick it, from the real catalogue.")) + '</p>' +
+      '</div>' +
+      '<div class="gp-body">' + flow + '<div class="gp-row">' + cards + '</div></div>' +
+      (ship ? '<p class="gp-ship">🚚 ' + dvtGiftHot(escHtml(
+        tr("ומעל " + ship.min.toLocaleString() + " ₪ — גם משלוח חינם עד הבית",
+           "And over " + ship.min.toLocaleString() + " ₪ — free home delivery too"))) + '</p>' : '') +
+      '<div class="gp-foot">' +
+        '<a class="btn btn-accent gp-cta" href="products.html">' +
+          escHtml(tr("לקטלוג — מתחילים לצבור 🎁","To the catalogue — start earning 🎁")) + '</a>' +
+        '<a class="gp-terms" href="gifts.html">' +
+          escHtml(tr("איך זה עובד + תנאי המבצע","How it works + terms")) + '</a>' +
+      '</div>' +
+      '<p class="gp-tag">' + escHtml(tr("כל מה שהמחשב שלך צריך — DvirTech","Everything your PC needs — DvirTech")) + '</p>';
+    if(wrap) wrap.hidden = false;
+
+    /* תמונות הדוגמה תלויות בקטלוג, שנטען במקביל — רינדור שני כשהוא
+       מוכן. ריצה כפולה בונה מחדש מאפס, אז אין כפילות. */
+    if(typeof dvtGetCatalog === "function" && !dvtCatalogNow()){
+      dvtGetCatalog().then(function(){ dvtGiftPromoRender(); }).catch(function(){});
+    }
+  });
+}
+
+if(document.readyState === "loading"){
+  document.addEventListener("DOMContentLoaded", dvtGiftPromoRender);
+}else{
+  dvtGiftPromoRender();
 }
 
 /* קונפטי — דרישה מפורשת של דביר. ~14 חלקיקים, CSS בלבד, בלי ספרייה.
@@ -707,22 +913,43 @@ function dvtGiftCelebrate(host){
   setTimeout(function(){ if(wrap.parentNode) wrap.parentNode.removeChild(wrap); }, 1600);
 }
 
-/* לחיצה על המד: בקופה — גלילה לאזור בחירת המתנה; בכל דף אחר —
-   פתיחת העגלה, שזו הפעולה הבאה הטבעית. */
+/* לחיצה על המד **פותחת את רשימת כל המדרגות** — זו הבקשה של דביר.
+   ⚠️ לחיצה על שורת מדרגה שכבר הורווחה, כשאנחנו בקופה, קופצת לאזור
+   בחירת המתנה — כי זו הפעולה שהלקוח באמת רוצה באותו רגע. */
 document.addEventListener("click", function(e){
-  const x = e.target.closest && e.target.closest("#giftMeterX");
-  if(x){ e.stopPropagation(); dvtGiftMeterDismiss(); return; }
-  const m = e.target.closest && e.target.closest("#giftMeter");
-  if(!m) return;
-  const block = document.getElementById("giftBlock");
-  if(block && block.style.display !== "none"){
-    block.scrollIntoView({ behavior: "smooth", block: "center" });
-    block.classList.add("gift-block-flash");
-    setTimeout(function(){ block.classList.remove("gift-block-flash"); }, 1200);
-  }else if(typeof openCart === "function"){
-    openCart();
+  if(!e.target.closest) return;
+
+  if(e.target.closest("#giftMeterX")){
+    e.stopPropagation(); dvtGiftMeterDismiss(); return;
   }
+
+  /* שורת מדרגה שהורווחה → לבחירת המתנה */
+  const won = e.target.closest("#giftMeterAll .gift-tier.is-won");
+  if(won){
+    e.stopPropagation();
+    if(dvtGiftJumpToPicker_()) return;
+  }
+
+  if(!e.target.closest("#giftMeter")) return;
+
+  dvtGiftAllOpen_ = !dvtGiftAllOpen_;
+  const host = document.getElementById("giftMeterAll");
+  const tog  = document.getElementById("giftMeterToggle");
+  if(host) host.hidden = !dvtGiftAllOpen_;
+  if(tog)  tog.textContent = dvtGiftAllOpen_
+    ? tr("הסתר מדרגות ▴", "Hide tiers ▴")
+    : tr("הצג את כל המדרגות ▾", "Show all tiers ▾");
 });
+
+/* קופץ לאזור בחירת המתנה בקופה. מחזיר false אם אין כזה בדף הזה. */
+function dvtGiftJumpToPicker_(){
+  const block = document.getElementById("giftBlock");
+  if(!block || block.style.display === "none") return false;
+  block.scrollIntoView({ behavior: "smooth", block: "center" });
+  block.classList.add("gift-block-flash");
+  setTimeout(function(){ block.classList.remove("gift-block-flash"); }, 1200);
+  return true;
+}
 
 
 /* =====================================================================

@@ -54,8 +54,10 @@ function supTr(he, en){ return (typeof LANG !== "undefined" && LANG === "en") ? 
 /* אותן שש קטגוריות ובאותו סדר כמו במחירון. */
 const SUP_CATS = [
   { key:"assembly", he:"הרכבה",        en:"Assembly",
-    noteHe:"קנית את החלקים דרך האתר או דרכי? ההרכבה כלולה ללא עלות ומתווספת לעגלה מעצמה — אין צורך לפנות דרך כאן.",
-    noteEn:"Bought the parts through the site? Assembly is included at no cost and is added to your cart automatically — no need to request it here." },
+    /* 🔴 **תוקן 26.08 — דביר: "זה כבר לא נכון".** ההרכבה אינה חינם
+       ואינה מתווספת לעגלה מעצמה: היא שירות בתשלום שנבחר בקופה. */
+    noteHe:"קונה את החלקים דרך האתר? מחיר לקוחות DvirTech (הרכבה מ-250 ₪ במקום 450 ₪) נבחר ישירות בקופה תחת \"שירותים נוספים\" — אין צורך לפנות דרך כאן.",
+    noteEn:"Buying the parts through the site? The DvirTech customer price (assembly from 250 ₪ instead of 450 ₪) is picked right at checkout under \"Add-on services\" — no need to request it here." },
   { key:"os",       he:"מערכת הפעלה",  en:"Operating system" },
   { key:"visit",    he:"ביקור בית",    en:"Home visit",
     noteHe:"המחיר נקבע לפי זמן הנסיעה אליך. לא בטוח לאיזו מדרגה אתה שייך? בחר את הקרובה ביותר — בטופס תתבקש רק לציין את היישוב, ואני אאשר לך את המחיר המדויק לפני שנקבע.",
@@ -139,14 +141,30 @@ const SUP_SERVICES = [
        הרכבה  = כבלים, POST, תקינות רכיבים, עלייה עד BIOS (בלי OS!)
        Windows = בדיקת רכיבים, דרייברים בסיסיים, טמפרטורות, יציבות
      "דברים מהסוג הזה ממש מעשירים את האתר." */
-  { key:"assembly-parts", sku:"CLI-4001", cat:"assembly", price:300,
-    he:"הרכבת מחשב (החלקים שלך)", en:"PC assembly (your own parts)",
+  /* 🔴 **המחירון הדו-שכבתי (27.08, DVT-NEXT-BUILD §1.2).**
+     `price` = מחיר טכנאי (לכל אחד) · `dvt` = מחיר לקוחות DvirTech —
+     מי שרכש אצלנו 1,000 ₪+ ב-12 החודשים. שני המחירים אמיתיים
+     ונגבים בפועל — לכן מותר להציגם זה לצד זה. */
+  { key:"assembly-parts", sku:"CLI-4001", cat:"assembly", price:450, dvt:250,
+    he:"הרכבת מחשב", en:"PC assembly",
     descHe:"הרכבה מלאה הכוללת: סידור כבלים בסיסי, בדיקת POST, בדיקת תקינות הרכיבים (איתור נזק חומרה) ואימות שהמערכת עולה עד ה-BIOS. בלי התקנת Windows.",
     descEn:"A full build including: basic cable management, POST check, component health check (hardware damage) and verifying the system boots to BIOS. Windows install not included.",
     q:[ SQ.partsReady, SQ.partsList, SQ.handover ] },
 
-  { key:"assembly-win", sku:"CLI-4002", cat:"assembly", price:400,
-    he:"הרכבה + Windows + דרייברים", en:"Assembly + Windows + drivers",
+  { key:"assembly-full", sku:"CLI-4040", cat:"assembly", price:620, dvt:390,
+    he:"הרכבה מלאה (נוזלי / RGB / זכוכית)", en:"Full build (AIO / RGB / glass)",
+    descHe:"כל מה שבהרכבה + קירור נוזלי או מערך מאווררים מורחב, כבלים מוקפדים למארז זכוכית, עקומות מאווררים ו-RGB, הפעלת XMP/EXPO וכוננים נוספים.",
+    descEn:"Everything in the standard build + liquid cooling or an extended fan array, show-ready cabling for glass cases, fan curves and RGB, XMP/EXPO and extra drives.",
+    q:[ SQ.partsReady, SQ.partsList, SQ.handover ] },
+
+  { key:"assembly-premium", sku:"CLI-4041", cat:"assembly", price:950, dvt:650,
+    he:"הרכבת פרימיום — עם דוח מסירה", en:"Premium build — with a hand-over report",
+    descHe:"כל מה שבהרכבה המלאה + בדיקת עומס של 3 שעות (טמפרטורות, תדרים, יציבות), דוח מסירה חתום עם התוצאות, וכיול עקומות לשקט או לביצועים.",
+    descEn:"Everything in the full build + a 3-hour stress test (temperatures, clocks, stability), a signed hand-over report, and fan curves tuned for silence or performance.",
+    q:[ SQ.partsReady, SQ.partsList, SQ.handover ] },
+
+  { key:"assembly-win", sku:"CLI-4002", cat:"assembly", price:180, dvt:100,
+    he:"תוספת Windows להרכבה (+דרייברים ועדכונים)", en:"Windows add-on to a build (+drivers & updates)",
     descHe:"כל מה שבהרכבה (כבלים, POST, תקינות רכיבים, עלייה ל-BIOS) + ערכת Windows מלאה: התקנה נקייה, דרייברים בסיסיים, בדיקת טמפרטורות ובדיקת יציבות. הרישיון לא כלול במחיר.",
     descEn:"Everything in the build (cables, POST, component checks, BIOS boot) + the full Windows kit: clean install, basic drivers, temperature check and a stability test. License not included.",
     q:[ SQ.partsReady, SQ.partsList,
@@ -158,21 +176,15 @@ const SUP_SERVICES = [
                    ["לא — אשמח שתוסיף רישיון","No — please add a license"],
                    ["לא בטוח","Not sure"]] } ] },
 
-  { key:"assembly-win-lic", sku:"CLI-4003", cat:"assembly", price:550,
-    he:"הרכבה + Windows + דרייברים + רישיון", en:"Assembly + Windows + drivers + license",
-    descHe:"החבילה המלאה: ההרכבה על כל בדיקותיה, ערכת Windows מלאה (התקנה, דרייברים, טמפרטורות, יציבות) ורישיון Windows חוקי.",
-    descEn:"The complete package: the full build and its checks, the full Windows kit (install, drivers, temperatures, stability) and a genuine Windows license.",
-    q:[ SQ.partsReady, SQ.partsList, SQ.winEdition ] },
+  /* 🔴 CLI-4003 ("הרכבה+Windows+רישיון" 550) ו-CLI-4006 ("Windows+
+     רישיון" 300) **נמחקו 27.08** — הרישיון לבדו עולה 200-300 ₪ דילר,
+     כלומר מכירה בהפסד ודאי. עד שיש מפיץ מורשה: הלקוח מביא מפתח
+     (CLI-4007), ורישיון נסגר רק בתיאום, בלי מחיר מפורסם (§1.4).
+     ללקוח עסקי — מקורי בלבד, תמיד. */
 
   /* ---------- מערכת הפעלה ---------- */
-  { key:"win11-license", sku:"CLI-4006", cat:"os", price:300,
-    he:"התקנת Windows 11 + רישיון", en:"Windows 11 install + license",
-    descHe:"ערכת ההתקנה המלאה: התקנה נקייה, בדיקת רכיבים, התקנת דרייברים בסיסית, עדכונים, בדיקת טמפרטורות ובדיקת יציבות בסיסית — עם רישיון חוקי.",
-    descEn:"The full install kit: clean install, component check, basic drivers, updates, temperature check and a basic stability test — with a genuine license.",
-    q:[ SQ.deskOrLaptop, SQ.files, SQ.boots, SQ.winEdition ] },
-
-  { key:"win11-own-license", sku:"CLI-4007", cat:"os", price:200,
-    he:"התקנת Windows (יש לך רישיון)", en:"Windows install (you have a license)",
+  { key:"win11-own-license", sku:"CLI-4007", cat:"os", price:200, dvt:100,
+    he:"התקנת Windows (המפתח שלך)", en:"Windows install (your key)",
     descHe:"אותה ערכת התקנה מלאה (בדיקת רכיבים, דרייברים, טמפרטורות, יציבות) — בלי עלות הרישיון.",
     descEn:"The same full install kit (component check, drivers, temperatures, stability) — without the cost of the license.",
     q:[ SQ.deskOrLaptop,
@@ -184,7 +196,13 @@ const SUP_SERVICES = [
                    ["לא בטוח","Not sure"]] },
         SQ.files, SQ.boots ] },
 
-  { key:"format-reinstall", sku:"CLI-4008", cat:"os", price:350,
+  { key:"win-laptop", sku:"CLI-4039", cat:"os", price:280, dvt:150,
+    he:"התקנת Windows למחשב נייד (כולל ציד דרייברים)", en:"Windows install on a laptop (incl. driver hunt)",
+    descHe:"התקנה נקייה למחשב נייד — כולל איתור והתקנה של הדרייברים הייעודיים של היצרן (טאצ'פד, מקשי פונקציה, סוללה), שזה החלק שלוקח את הזמן.",
+    descEn:"A clean install on a laptop — including hunting down the maker's dedicated drivers (touchpad, function keys, battery), which is the part that takes the time.",
+    q:[ SQ.files, SQ.boots ] },
+
+  { key:"format-reinstall", sku:"CLI-4008", cat:"os", price:320, dvt:250,
     he:"פירמוט + התקנה מחדש", en:"Format + clean reinstall",
     descHe:"מחיקה מלאה והתקנה מאפס, כולל דרייברים ותוכנות בסיס.",
     descEn:"Full wipe and a from-scratch install, including drivers and basic software.",
@@ -201,8 +219,14 @@ const SUP_SERVICES = [
      שלוש המדרגות נבדלות רק בזמן הנסיעה — נתון שהלקוח לא באמת יודע.
      לכן כל שלושתן שואלות קודם כל את היישוב, וההערה בראש הקטגוריה
      מסבירה שהמחיר הסופי מאושר לפני הקביעה. */
-  { key:"visit-30", sku:"CLI-4009", cat:"visit", price:250,
-    he:"ביקור בית — עד 30 דק' נסיעה", en:"Home visit — up to 30 min travel",
+  /* 🔴 **מודל הביקור השתנה (27.08):** דמי הגעה לפי מרחק (90/140/
+     ‏200 ₪ — זהים לכולם, "הנסיעה עולה לי אותו דבר") + עבודה לפי שעה
+     (‏180 ₪ / 140 ₪ ללקוחות DvirTech, שעה נוספת 150/120). הכרטיס
+     מציג "מ-" — הסכום המדויק מאושר בטלפון לפני שקובעים. */
+  { key:"visit-30", sku:"CLI-4009", cat:"visit", price:270, dvt:230, from:true,
+    he:"ביקור בית — אבחון וטיפול אצלך", en:"Home visit — diagnosis & help at your place",
+    descHe:"דמי הגעה 90–200 ₪ לפי מרחק הנסיעה + שעת עבודה ראשונה (180 ₪, או 140 ₪ ללקוחות DvirTech). שעה נוספת: 150/120 ₪. המחיר המדויק מאושר איתך לפני שקובעים.",
+    descEn:"A travel fee of 90–200 ₪ by distance + the first working hour (180 ₪, or 140 ₪ for DvirTech customers). Extra hour: 150/120 ₪. The exact price is confirmed with you before scheduling.",
     q:[ SQ.city,
         { id:"visitIssue", type:"textarea", max:500,
           he:"מה צריך לעשות בביקור?", en:"What needs to be done during the visit?",
@@ -213,26 +237,7 @@ const SUP_SERVICES = [
           options:[["אחד","One"],["שניים","Two"],["שלושה ומעלה","Three or more"]] },
         SQ.when ] },
 
-  { /* ⚠️ **שתי מדרגות בלבד — החלטת דביר 16.08.2026.** קודם היו שלוש
-       (30 דק' / שעה / שעה וחצי) ועוד "נסיעה בלבד". נסיעה של שעה ומעלה
-       אינה משתלמת — הזמן עולה יותר מהשירות — ולכן המדרגות מעל 45 דקות
-       בוטלו. אין "צור קשר לאזורים רחוקים" בכוונה: הבטחה מרומזת שאולי
-       כן נגיע גרועה מגבול ברור.
-       ⚠️ מק"ט CLI-4010 **ממוחזר** מ-"עד שעה נסיעה" — צריך לשנות את
-       השם והמחיר של אותו פריט ב-SUMIT ל-"עד 45 דק'" / 300 ₪. */
-    key:"visit-45", sku:"CLI-4010", cat:"visit", price:300,
-    he:"ביקור בית — עד 45 דק' נסיעה", en:"Home visit — up to 45 min travel",
-    q:[ SQ.city,
-        { id:"visitIssue", type:"textarea", max:500,
-          he:"מה צריך לעשות בביקור?", en:"What needs to be done during the visit?",
-          phHe:"המחשב לא עולה / להתקין ציוד חדש / הרשת נופלת…",
-          phEn:"PC won't boot / install new gear / the network keeps dropping…" },
-        { id:"deviceCount", type:"select",
-          he:"כמה מחשבים או מכשירים?", en:"How many computers or devices?",
-          options:[["אחד","One"],["שניים","Two"],["שלושה ומעלה","Three or more"]] },
-        SQ.when ] },
-
-  { key:"onsite-setup", sku:"CLI-4013", cat:"visit", price:400,
+  { key:"onsite-setup", sku:"CLI-4013", cat:"visit", price:450, dvt:300,
     he:"התקנת מחשב בעמדת הלקוח", en:"On-site PC setup",
     descHe:"מגיע, מחבר ומעמיד את העמדה לעבודה. כולל הגעה עד 30 דק' נסיעה.",
     descEn:"I come over, connect everything and get the workstation running. Includes travel of up to 30 minutes.",
@@ -250,9 +255,9 @@ const SUP_SERVICES = [
         SQ.when ] },
 
   /* ---------- תמיכה ---------- */
-  { key:"remote-support", sku:"CLI-4014", cat:"support", price:120,
-    he:"תמיכה מרחוק (שעה)", en:"Remote support (1 hour)",
-    descHe:"מתחבר למחשב שלך ופותר בזמן אמת. שעת עבודה.",
+  { key:"remote-support", sku:"CLI-4014", cat:"support", price:170, dvt:120,
+    he:"תמיכה מרחוק (עד 45 דק')", en:"Remote support (up to 45 min)",
+    descHe:"מתחבר למחשב שלך ופותר בזמן אמת. עד 45 דקות; כל 30 דקות נוספות — 80 ₪ (60 ₪ ללקוחות DvirTech).",
     descEn:"I connect to your PC and fix things live. One working hour.",
     q:[ { id:"remoteIssue", type:"textarea", max:500,
           he:"מה הבעיה?", en:"What's the problem?",
@@ -272,7 +277,7 @@ const SUP_SERVICES = [
         SQ.when ] },
 
   /* השירות המרכזי בדף — כאן השאלות הן בדיוק מה שטכנאי שואל בטלפון. */
-  { key:"diagnostics", sku:"CLI-4015", cat:"support", price:150,
+  { key:"diagnostics", sku:"CLI-4015", cat:"support", price:150, dvt:100,
     he:"אבחון תקלה", en:"Fault diagnosis",
     descHe:"בודק מה באמת התקלה ואומר לך מה צריך — לפני שמחליפים חלקים.",
     descEn:"I find out what's actually wrong and tell you what it needs — before anything gets replaced.",
@@ -306,7 +311,7 @@ const SUP_SERVICES = [
      "תיקון" ומשלם 150+300 על אותה עבודה. אותה טעות בדיוק שהיתה
      בחבילת "הכל כלול". המחיר חייב להישאר זהה ל-PRICE_LIST ב-
      2-pricelist-picker.gs ול-REAL_SUMIT_SKUS ב-4-payment-api.gs. */
-  { key:"diagnose-repair", sku:"CLI-4023", cat:"support", price:300,
+  { key:"diagnose-repair", sku:"CLI-4023", cat:"support", price:350, dvt:280,
     he:"אבחון + תיקון תקלה", en:"Diagnosis + repair",
     descHe:"כולל את האבחון — לא משלמים עליו פעמיים. אם התיקון דורש חלק חדש, אומר לך את המחיר לפני שמזמינים.",
     descEn:"The diagnosis is included — you don't pay for it twice. If the repair needs a new part, I'll quote it before ordering.",
@@ -336,7 +341,7 @@ const SUP_SERVICES = [
      הלקוח רואה מחיר אחד ומשלם אחר.
      ⚠️ מק"ט CLI-4024 **עדיין לא נוצר ב-SUMIT.** כאן זו פנייה בוואטסאפ
      בלבד ולכן אין סיכון, אבל בקופה השורה תיפול עד שהמק"ט ייווצר. */
-  { key:"software-install", sku:"CLI-4024", cat:"support", price:80,
+  { key:"software-install", sku:"CLI-4024", cat:"support", price:80, dvt:50,
     he:"התקנת תוכנות", en:"Software installation",
     descHe:"מתקין ומגדיר את מה שאתה צריך — אופיס, דרייברים, אנטי-וירוס, תוכנות עבודה.",
     descEn:"I install and set up what you need — Office, drivers, antivirus, work software.",
@@ -378,10 +383,12 @@ const SUP_SERVICES = [
           phEn:"Quiet, small footprint, RGB, room to upgrade later…" } ] },
 
   /* ---------- תיקונים ---------- */
-  { key:"part-upgrade", sku:"CLI-4017", cat:"repairs", price:150,
-    he:"שדרוג רכיב (התקנה בלבד)", en:"Component upgrade (installation only)",
-    descHe:"התקנה והרצה של הרכיב. מחיר הרכיב עצמו לא כלול.",
-    descEn:"Installing and running in the component. The part itself is not included.",
+  /* פוצל 27.08: פשוט (זיכרון/SSD) מול מורכב (ספק/קירור/לוח) —
+     ההשוואה לשוק הראתה ש-150 אחיד היה +114% מול Sagi על הפשוט. */
+  { key:"part-upgrade", sku:"CLI-4017", cat:"repairs", price:100, dvt:50,
+    he:"התקנת רכיב פשוט (זיכרון · SSD · כרטיס)", en:"Simple component install (RAM · SSD · card)",
+    descHe:"התקנה והרצה של רכיב בהחלפה פשוטה. מחיר הרכיב עצמו לא כלול.",
+    descEn:"Installing and running in a simple swap-in component. The part itself is not included.",
     q:[ { id:"whichPart", type:"multi",
           he:"איזה רכיב?", en:"Which component?",
           options:[["כרטיס מסך","Graphics card"],["מעבד","CPU"],["זיכרון RAM","RAM"],
@@ -400,6 +407,12 @@ const SUP_SERVICES = [
           phEn:"e.g. i5-12400 CPU, B660 board, 550W PSU" },
         SQ.deskOrLaptop ] },
 
+  { key:"part-complex", sku:"CLI-4042", cat:"repairs", price:200, dvt:120,
+    he:"התקנת רכיב מורכב (ספק · קירור · לוח אם)", en:"Complex component install (PSU · cooling · motherboard)",
+    descHe:"החלפה שדורשת פירוק והרכבה מחדש של חלק מהמחשב — ספק כוח, קירור או לוח אם — כולל בדיקת יציבות אחרי ההתקנה. מחיר הרכיב לא כלול.",
+    descEn:"A swap that needs partial teardown and rebuild — PSU, cooling or motherboard — including a stability check afterwards. The part itself is not included.",
+    q:[ SQ.deskOrLaptop ] },
+
   /* 🔴 **חדש 25.08 — לבקשת דביר.** מחיר 200 ₪ = אמצע טווח השוק
      למעבדות בארץ (150-250 ₪ ל"האצת מחשב"); יושב מעל תמיכה מרחוק
      (120) ומתחת לפירמוט (350), שהוא המדרגה הבאה כשאופטימיזציה לא
@@ -416,7 +429,7 @@ const SUP_SERVICES = [
                    ["משחקים לא רצים חלק","Games don't run smoothly"],
                    ["הכל — תחזוקה כללית","Everything — a general tune-up"]] } ] },
 
-  { key:"clean-thermal", sku:"CLI-4018", cat:"repairs", price:150,
+  { key:"clean-thermal", sku:"CLI-4018", cat:"repairs", price:180, dvt:140,
     he:"ניקוי פנימי + משחה תרמית", en:"Internal cleaning + thermal paste",
     descHe:"פירוק, ניקוי אבק והחלפת משחה תרמית. מוריד חום ורעש.",
     descEn:"Teardown, dust removal and fresh thermal paste. Lower temps and less noise.",
@@ -432,7 +445,7 @@ const SUP_SERVICES = [
           options:[["אף פעם","Never"],["לפני יותר משנה","Over a year ago"],
                    ["בשנה האחרונה","Within the past year"],["לא יודע","Not sure"]] } ] },
 
-  { key:"data-transfer", sku:"CLI-4019", cat:"repairs", price:200,
+  { key:"data-transfer", sku:"CLI-4019", cat:"repairs", price:250, dvt:180,
     he:"העברת נתונים / גיבוי", en:"Data transfer / backup",
     descHe:"מעביר קבצים, תמונות ומיילים — גם ממחשב שכבר לא עולה.",
     descEn:"Moving files, photos and mail — including off a PC that no longer boots.",
@@ -452,10 +465,12 @@ const SUP_SERVICES = [
                    ["500GB–1TB","500GB–1TB"],["מעל 1TB","Over 1TB"],["לא יודע","Not sure"]] } ] },
 
   /* ---------- חבילות ---------- */
-  { key:"bundle-new-pc", sku:"CLI-4020", cat:"bundles", price:700,
-    he:"חבילה: מחשב חדש — הכל כלול", en:"Bundle: new PC — everything included",
-    descHe:"הרכבה + Windows + רישיון + התקנה אצלך. הכל בפגישה אחת.",
-    descEn:"Assembly + Windows + license + setup at your place. All in one go.",
+  /* 🔴 עודכן 27.08 — המחירים והתכולה לפי DVT-NEXT-BUILD §1.2.
+     "רישיון" הוסר מהתכולה (‏§1.4 — אין מקור רישיונות עדיין). */
+  { key:"bundle-new-pc", sku:"CLI-4020", cat:"bundles", price:330,
+    he:"חבילה: מחשב חדש — מוכן לעבודה", en:"Bundle: new PC — ready to work",
+    descHe:"הרכבה + Windows (המפתח שלך) + דרייברים ועדכונים + תוכנות בסיס. בנפרד: 400 ₪ — חוסך 70 ₪. מחיר לקוחות DvirTech.",
+    descEn:"Assembly + Windows (your key) + drivers & updates + base software. Separately: 400 ₪ — you save 70 ₪. DvirTech customer price.",
     q:[ { id:"partsSource", type:"select",
           he:"מאיפה החלקים?", en:"Where are the parts coming from?",
           options:[["בניתי בבונה המחשבים באתר","I built it in the site's PC builder"],
@@ -472,10 +487,20 @@ const SUP_SERVICES = [
           he:"להעביר נתונים ממחשב ישן?", en:"Move data from an old PC?",
           options:[["כן","Yes"],["לא","No"],["אין לי מחשב ישן","I don't have an old PC"]] } ] },
 
-  { key:"bundle-upgrade", sku:"CLI-4021", cat:"bundles", price:350,
-    he:"חבילה: שדרוג מלא", en:"Bundle: full upgrade",
-    descHe:"בודק מה שווה לשדרג במחשב הקיים, מתקין ומריץ.",
-    descEn:"I work out what's worth upgrading in your current PC, then install and run it in.",
+  { key:"bundle-home", sku:"CLI-4036", cat:"bundles", price:790, dvt:650,
+    he:"חבילה: מחשב חדש עד הבית", en:"Bundle: new PC to your door",
+    descHe:"הכל — הרכבה, Windows, תוכנות, הגעה אליך, התקנה מלאה בעמדה, העברת נתונים מהישן והדרכה קצרה.",
+    descEn:"Everything — assembly, Windows, software, arrival, full desk setup, data transfer from the old PC and a short walkthrough.",
+    q:[ SQ.city,
+        { id:"bundleSpec2", type:"textarea", opt:true, max:400,
+          he:"מה החלקים או מה התקציב? (לא חובה)", en:"Which parts, or what budget? (optional)",
+          phHe:"רשימת חלקים אם יש, או תקציב משוער",
+          phEn:"A parts list if you have one, or an approximate budget" } ] },
+
+  { key:"bundle-upgrade", sku:"CLI-4021", cat:"bundles", price:240, dvt:190,
+    he:"חבילה: שדרוג מהיר", en:"Bundle: quick upgrade",
+    descHe:"התקנת עד 2 רכיבים + ניקוי פנימי + משחה תרמית + בדיקת ביצועים. מחיר הרכיבים לא כלול.",
+    descEn:"Up to 2 components installed + internal clean + thermal paste + a performance check. Parts not included.",
     q:[ { id:"currentPc", type:"textarea", max:400,
           he:"מה המחשב שיש לך היום?", en:"What PC do you have today?",
           phHe:"דגם או הרכיבים העיקריים, ואם ידוע — גיל המחשב",
@@ -494,6 +519,29 @@ const SUP_SERVICES = [
      דביר:** "יש לנו כבר 3 כאלה של DvirTech Care." המסלולים CARE/PLUS/
      PRO מוצגים באזור #care ומנוהלים בהצטרפות מתואמת (ראה תקנון 6.6).
      המק"ט נשאר ב-SUMIT ובמחירון — להיסטוריית מסמכים בלבד. */
+
+  { key:"bundle-full-upgrade", sku:"CLI-4037", cat:"bundles", price:620, dvt:500,
+    he:"חבילה: שדרוג מלא", en:"Bundle: full upgrade",
+    descHe:"כל מה שבשדרוג המהיר + פירמוט והתקנה מחדש של Windows + העברת הנתונים חזרה. המחשב חוזר כמו חדש.",
+    descEn:"Everything in the quick upgrade + a format and clean Windows reinstall + your data moved back. The PC comes back like new.",
+    q:[ { id:"currentPc2", type:"textarea", max:400,
+          he:"מה המחשב שיש לך היום?", en:"What PC do you have today?",
+          phHe:"דגם או הרכיבים העיקריים, ואם ידוע — גיל המחשב",
+          phEn:"Model or the main components, and its age if you know it" } ] },
+
+  /* ⭐ "החייאת מחשב" — החבילה החשובה ביותר לפי מחקר המודעות: אנשים
+     מחפשים תסמינים ("מחשב איטי", "לא נדלק") — לא שם של שירות. */
+  { key:"bundle-revive", sku:"CLI-4038", cat:"bundles", price:830, dvt:690,
+    he:"⭐ החייאת מחשב — איטי? תקוע? נחזיר אותו לחיים", en:"⭐ PC revival — slow? stuck? back to life",
+    descHe:"ביקור בית + אבחון מלא + פירמוט והתקנה מחדש + העברת כל הקבצים + התקנת התוכנות שלך. הכל בפגישה אחת, אצלך.",
+    descEn:"A home visit + full diagnosis + format and clean reinstall + all your files moved + your software installed. All in one visit, at your place.",
+    q:[ SQ.city,
+        { id:"reviveSymptom", type:"select",
+          he:"מה קורה עם המחשב?", en:"What's going on with the PC?",
+          options:[["איטי מאוד","Very slow"],["נתקע או קורס","Freezes or crashes"],
+                   ["לא נדלק בכלל","Won't turn on at all"],["וירוסים / פרסומות","Viruses / adware"],
+                   ["הכל ביחד","All of the above"]] },
+        SQ.when ] },
 ];
 
 /* ==================== מצב ==================== */
@@ -512,8 +560,45 @@ let supSpyObs = null;
 
 function supSvc(key){ return SUP_SERVICES.find(s => s.key === key) || null; }
 function supName(s){ return supTr(s.he, s.en); }
-function supPriceLabel(p){
-  return p === 0 ? supTr("חינם","Free") : p.toLocaleString() + " ₪";
+function supPriceLabel(p, from){
+  if(p === 0) return supTr("חינם","Free");
+  const n = p.toLocaleString() + " ₪";
+  return from ? supTr("מ-","from ") + n : n;
+}
+
+/* מנוי Care פעיל של הגולש — נכתב ע"י account.js אחרי כניסה מאומתת.
+   🔴 **תצוגה בלבד.** מה שקובע בפועל הוא המנוי בגיליון, שדביר שולף
+   בעצמו בעת החיוב — ערך מזויף ב-localStorage משנה מה מוצג על המסך
+   של המזייף, ולא שקל אחד במה שנגבה. תוקף מקומי שבוע — אחרי זה
+   הלקוח פשוט ייכנס שוב לאזור האישי. */
+function supPlan_(){
+  try{
+    const raw = localStorage.getItem("dvt_acct_plan");
+    if(!raw) return null;
+    const p = JSON.parse(raw);
+    if(!p || !(p.pct > 0) || !(p.exp > Date.now())) return null;
+    return p;
+  }catch(e){ return null; }
+}
+
+/* המחיר בכרטיס — שתי שכבות כשיש `dvt`, ושלישית כשיש מנוי פעיל:
+   מחיר הטכנאי מחוק, מחיר DvirTech פעיל, ומתחתיו "המחיר שלך עם PLUS".
+   ⚠️ שני המחירים העליונים נגבים בפועל — לכן הקו החתוך חוקי (§6.8).
+   הנחת המנוי חלה על מחיר DvirTech, כפי שקובע התקנון (על עבודה בלבד). */
+function supPriceHtml(s){
+  if(s.dvt != null && s.dvt < s.price){
+    const plan = supPlan_();
+    const planLine = plan
+      ? `<span class="sup-price-plan">${supEsc(supTr(
+          "שלך עם " + plan.plan + ": " + supPriceLabel(Math.round(s.dvt * (1 - plan.pct / 100)), s.from),
+          "Yours with " + plan.plan + ": " + supPriceLabel(Math.round(s.dvt * (1 - plan.pct / 100)), s.from)))}</span>`
+      : "";
+    return `<s class="sup-price-was">${supEsc(supPriceLabel(s.price, s.from))}</s>` +
+           `<span class="sup-price-now">${supEsc(supPriceLabel(s.dvt, s.from))}</span>` +
+           `<span class="sup-price-tag">${supEsc(supTr("ללקוחות DvirTech","DvirTech customers"))}</span>` +
+           planLine;
+  }
+  return supEsc(supPriceLabel(s.price, s.from));
 }
 function supAnsKey(key, qid){ return key + "|" + qid; }
 /* התווית להודעה — בלי הסיומת "(לא חובה)" שנועדה למסך בלבד. */
@@ -591,7 +676,8 @@ function supCardHtml(s){
   const qn = (s.q && s.q.length)
     ? supTr(s.q.length + " שאלות קצרות", s.q.length + " quick questions")
     : supTr("בלי שאלות","No questions");
-  const aria = supTr("הוספה לפנייה: ","Add to request: ") + supName(s) + " — " + supPriceLabel(s.price);
+  const aria = supTr("הוספה לפנייה: ","Add to request: ") + supName(s) + " — " +
+    supPriceLabel(s.dvt != null ? s.dvt : s.price, s.from);
 
   return `
     <article class="sup-card${on ? " is-on" : ""}"
@@ -602,7 +688,7 @@ function supCardHtml(s){
         <span class="sup-box" aria-hidden="true"></span>
         <span class="sup-head">
           <span class="sup-card-t">${supEsc(supName(s))}</span>
-          <span class="sup-price${s.price === 0 ? " is-free" : ""}">${supEsc(supPriceLabel(s.price))}</span>
+          <span class="sup-price${s.price === 0 ? " is-free" : ""}">${supPriceHtml(s)}</span>
         </span>
         ${desc}
       </label>
@@ -684,7 +770,7 @@ function supItemHtml(s, strict){
       <div class="sup-item-h">
         <span class="sup-plus" aria-hidden="true">+</span>
         <span class="sup-item-n">${supEsc(supName(s))}</span>
-        <span class="sup-item-p">${supEsc(supPriceLabel(s.price))}</span>
+        <span class="sup-item-p">${supEsc(supPriceLabel(s.dvt != null ? s.dvt : s.price, s.from))}</span>
         <button type="button" class="sup-item-x" data-drop="${supEsc(s.key)}"
                 aria-label="${supEsc(supTr("הסרה מהפנייה: ","Remove from request: ") + supName(s))}">✕</button>
       </div>
@@ -856,7 +942,12 @@ function supBuildMessage(items, c){
             "Hi Dvir, I'm interested in the following services:"));
 
   items.forEach(it => {
-    L.push("+ " + supName(it.s) + " — " + supPriceLabel(it.s.price));
+    /* ⚠️ בהודעה מצוינים שני המחירים כשיש שכבה כפולה — הזכאות למחיר
+       DvirTech (רכישות 1,000 ₪+ ב-12 חודשים) נבדקת בשיחה, ואסור
+       שההודעה "תבטיח" מראש את המחיר המוזל. */
+    L.push("+ " + supName(it.s) + " — " + (it.s.dvt != null && it.s.dvt < it.s.price
+      ? supPriceLabel(it.s.price, it.s.from) + supTr(" (ללקוחות DvirTech: "," (DvirTech customers: ") + supPriceLabel(it.s.dvt, it.s.from) + ")"
+      : supPriceLabel(it.s.price, it.s.from)));
     it.answers.forEach(a => L.push(SUP_SUBLINE + a.q + " — " + a.a));
   });
 
@@ -1205,16 +1296,26 @@ if(document.readyState === "loading"){
    (שעות תמיכה, בדיקת תחזוקה) הן שנתיות — מנוי חודשי היה מאפשר לממש
    שנה שלמה של הטבות בחודש הראשון ולבטל. ראה הנימוק המלא ב-PRICE_LIST
    שב-2-pricelist-picker.gs. */
+/* 🔴 **עודכן 27.08 — חייב להישאר זהה ל-CARE_TIERS ב-
+   5-care-subscriptions.gs ולמחירים ב-PRICE_LIST.** השינויים
+   (DVT-NEXT-BUILD §3.1): שעות 1/3/5 → 1/1.5/2 · הנחות 5/10/15 →
+   5/8/12 · "קדימות" הפכה לשני דברים מדידים — **זמן מענה** ו**מקום
+   בתור** (לעולם לא זמן תיקון: דביר אדם אחד) · נוסף **דוח בריאות
+   אוטומטי** — הרצת סקריפט האבחון ושליחת דוח; עולה כמעט אפס, אף
+   טכנאי לא נותן, ומייצר לידים לשדרוגים. */
 const CARE_PLANS = [
   { key:"CARE", monthly:50,  yearly:599,
-    priority:["רגילה","Standard"], checks:["פעם בשנה","Once a year"],
+    response:["יום עסקים","One business day"], queue:["לפי סדר הפנייה","In order of arrival"],
+    checks:["פעם בשנה","Once a year"], reports:["דוח שנתי","Yearly report"],
     remote:["עד שעה בשנה","Up to 1 hour a year"], discount:"5%" },
   { key:"PLUS", monthly:67,  yearly:799,
-    priority:["בינונית","Raised"], checks:["פעם בשנה","Once a year"],
-    remote:["עד 3 שעות בשנה","Up to 3 hours a year"], discount:"10%" },
+    response:["4 שעות עבודה","4 working hours"], queue:["מקדים פניות מזדמנות","Ahead of walk-ins"],
+    checks:["פעם בשנה","Once a year"], reports:["פעמיים בשנה","Twice a year"],
+    remote:["עד שעה וחצי בשנה","Up to 1.5 hours a year"], discount:"8%" },
   { key:"PRO",  monthly:92,  yearly:1099,
-    priority:["גבוהה","Highest"], checks:["פעמיים בשנה","Twice a year"],
-    remote:["עד 5 שעות בשנה","Up to 5 hours a year"], discount:"15%" }
+    response:["שעתיים","Two hours"], queue:["ראשון בתור","First in line"],
+    checks:["פעמיים בשנה","Twice a year"], reports:["רבעוני","Quarterly"],
+    remote:["עד שעתיים בשנה","Up to 2 hours a year"], discount:"12%" }
 ];
 
 function careMoney(n){ return n.toLocaleString("he-IL") + " ₪"; }
@@ -1243,13 +1344,12 @@ function careTableHtml(){
           ${CARE_PLANS.map(p => cell(p, supTr("12 חודשים","12 months"))).join("")}</tr>
         <tr><th scope="row">${supEsc(supTr("תמיכה וייעוץ טכני","Technical support & advice"))}</th>
           ${CARE_PLANS.map(p => `<td class="${cls[p.key]}">${yes}</td>`).join("")}</tr>
-        ${row(supTr("קדימות בשירות","Service priority"), p => supTr(p.priority[0], p.priority[1]))}
-        ${row(supTr("בדיקת תחזוקה","Maintenance check"), p => supTr(p.checks[0], p.checks[1]))}
+        ${row(supTr("זמן מענה","Response time"), p => supTr(p.response[0], p.response[1]))}
+        ${row(supTr("מקום בתור","Place in the queue"), p => supTr(p.queue[0], p.queue[1]))}
+        ${row(supTr("בדיקת תחזוקה (מרחוק)","Maintenance check (remote)"), p => supTr(p.checks[0], p.checks[1]))}
+        ${row(supTr("דוח בריאות אוטומטי","Automatic health report"), p => supTr(p.reports[0], p.reports[1]))}
         ${row(supTr("תמיכה מרחוק","Remote support"), p => supTr(p.remote[0], p.remote[1]))}
-        ${row(supTr("הנחה על שירותי DvirTech","Discount on DvirTech services"), p => p.discount)}
-        ${row(supTr("הנחה על ביקור טכנאי","Discount on technician visits"), p => p.discount)}
-        <tr><th scope="row">${supEsc(supTr("סיוע מול גורם האחריות","Help with the warranty provider"))}</th>
-          ${CARE_PLANS.map(p => `<td class="${cls[p.key]}">${yes}</td>`).join("")}</tr>
+        ${row(supTr("הנחה על עבודה","Discount on labour"), p => p.discount)}
       </tbody>
     </table>
     <p class="care-fine">${supTr(

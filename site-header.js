@@ -244,9 +244,10 @@ function buildSiteHeader(){
         <svg class="ui-ic" aria-hidden="true"><use href="#ui-cart"/></svg>
         <span class="head-ic-badge" id="headCartCount" style="display:none">0</span>
       </button>
-      <!-- אייקון החשבון מוסתר עד שתהיה התחברות אמיתית. להחזרה: להסיר
-           את המחלקה head-ic--hidden. -->
-      <a class="head-ic head-ic--hidden" href="contact.html" aria-label="${shEsc(shTr("חשבון","Account"))}">
+      <!-- 👤 האזור האישי — הודלק 27.08 כשההתחברות (OTP למייל) נבנתה.
+           ההערה הישנה אמרה "מוסתר עד שתהיה התחברות אמיתית" — יש. -->
+      <a class="head-ic" href="account.html" aria-label="${shEsc(shTr("האזור האישי","My account"))}"
+         title="${shEsc(shTr("האזור האישי","My account"))}">
         <svg class="ui-ic" aria-hidden="true"><use href="#ui-user"/></svg>
       </a>
     </div>

@@ -49,8 +49,26 @@ const TH_CART_KEY = "dvirtech_cart_items_v1";
    ⚠️ **דף "אנא המתן" נפרד לא היה עוזר** — העיכוב הוא בצד של SUMIT,
    לא בניווט. הדף הזה **הוא** דף ההמתנה: הוא מציג "מאמתים את
    התשלום…" עם ספינר ומסביר שבודקים מול חברת הסליקה. */
-const MAX_ATTEMPTS = 6;
-const RETRY_DELAYS_MS = [2000, 3000, 5000, 8000, 12000];
+/* 🔴 **כוונון 27.08 — דביר מדד ~45-50 שניות בביט אחרי שהאישור כבר
+   נראה על המסך.** החשבון של המצב הישן: 6 ניסיונות, כל קריאת
+   verifyByOrder עושה חיפוש מסמכים ב-SUMIT (~5-10 שניות בעצמה) ועוד
+   המתנות של 2+3+5+8+12 — ביחד 45-70 שניות כשהמסמך מופיע מאוחר.
+
+   מה שונה:
+     • **הסולם הוקדם** — הקבלה של ביט נוצרת בדרך כלל תוך שניות
+       בודדות, אז הניסיונות הראשונים צפופים (1.2-3 שניות) והארוכים
+       נשמרים רק לסוף. אותו חלון כולל, הצלחה מוקדמת = יציאה מוקדמת.
+     • 8 ניסיונות במקום 6 — בלי להאריך את החלון הכולל.
+     • הלקוח רואה מונה התקדמות ("בודקים מול חברת הסליקה · ניסיון
+       3/8") במקום ספינר סתום — 20 שניות עם חיווי מרגישות תקינות;
+       בלעדיו הן מרגישות תקיעה.
+
+   ⚠️ **התיקון האמיתי הוא ה-Webhook של SUMIT.** verifyByOrder_ בשרת
+   כבר יודע לענות מהמטמון כשה-Webhook סימן את ההזמנה — ואז הניסיון
+   הראשון עונה תוך ~2 שניות, בלי חיפוש מסמכים בכלל. אם עדיין איטי:
+   ‏dvtPaymentDiag() בעורך יגיד אם ה-Webhook מוגדר ופעיל. */
+const MAX_ATTEMPTS = 8;
+const RETRY_DELAYS_MS = [1200, 1500, 2000, 3000, 4000, 6000, 8000];
 const RETRY_DELAY_MS = 2500;   /* נשמר לתאימות אם מישהו קורא לו */
 /* בלי תקרה, fetch תקוע משאיר את הדף ב"מאמתים" לנצח. פסק זמן מוביל
    לניסיון חוזר ובסוף ל-"pending" — כלומר לכיוון הזהיר, לעולם לא
@@ -328,6 +346,21 @@ function thClearPending(){
   try{ localStorage.removeItem("dvtPendingOrder"); }catch(e){}
 }
 
+/* מונה ההתקדמות בזמן האימות — נכתב לתוך אלמנט המשנה של מסך
+   "מאמתים", אם קיים. ⚠️ לא בונה DOM חדש: אם המסך השתנה, המונה פשוט
+   לא מוצג — ולא שובר כלום. */
+function thProgress(attempt){
+  if(attempt < 2) return;                      /* בניסיון הראשון אין מה לספר */
+  /* ⚠️ תת-הכותרת האמיתית של הדף היא #thxSub (נבדק ב-thanks.html) —
+     והמונה נכתב רק כשעדיין במצב "מאמתים", לא אחרי אישור. */
+  if(TH.state !== "verifying") return;
+  const el = document.getElementById("thxSub");
+  if(!el) return;
+  el.textContent = tr(
+    "בודקים מול חברת הסליקה… ניסיון " + attempt + " מתוך " + MAX_ATTEMPTS + ". אל תסגרו את הדף.",
+    "Checking with the payment provider… attempt " + attempt + " of " + MAX_ATTEMPTS + ". Please keep this page open.");
+}
+
 async function verifyByOrderOnce(orderId){
   const url = `${WEBAPP_URL}?action=verifyByOrder&orderId=${encodeURIComponent(orderId)}`;
   const ctrl = new AbortController();
@@ -355,6 +388,7 @@ async function runVerification(){
       /* ⚠️ הקבלה נוצרת ב-SUMIT כמה שניות אחרי התשלום, ולכן מנסים
          שוב ולא פעם אחת. אותו מספר ניסיונות כמו המסלול הרגיל. */
       for(let attempt = 1; attempt <= MAX_ATTEMPTS; attempt++){
+        thProgress(attempt);
         try{
           const data = await verifyByOrderOnce(pending);
           if(data.ok && data.status === "paid"){
@@ -368,7 +402,9 @@ async function runVerification(){
             return;
           }
         }catch(e){ /* ננסה שוב */ }
-        if(attempt < MAX_ATTEMPTS) await sleep(RETRY_DELAY_MS);
+        /* ⚠️ אותו סולם מוקדם כמו המסלול הרגיל — 2.5 שניות קבועות היו
+           חלק מ-45 השניות שדביר מדד. */
+        if(attempt < MAX_ATTEMPTS) await sleep(RETRY_DELAYS_MS[attempt - 1] || 8000);
       }
       /* ⚠️ לא מציגים כישלון: ייתכן שהתשלום עבר והקבלה מתעכבת.
          סריקת ההשלמה היומית תתפוס אותו בכל מקרה. */
@@ -383,6 +419,7 @@ async function runVerification(){
   }
 
   for(let attempt = 1; attempt <= MAX_ATTEMPTS; attempt++){
+    thProgress(attempt);
     try{
       const data = await verifyOnce(paymentId, orderId);
 

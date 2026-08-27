@@ -156,7 +156,7 @@ function renderAssemblyNotice(pc){
   const box = document.getElementById("assemblyNotice");
   if(!box) return;
 
-  // הרכבה דרך הבונה כבר מזכה — אין מה להציע
+  /* הרכבה מהבונה כבר יושבת בעגלה כשורה משלה — אין מה להציע שוב. */
   if(pc.hasBuild || !pc.partsPc){ box.hidden = true; box.innerHTML = ""; return; }
 
   /* ⚠️ **שינוי מדיניות — 16.08.2026, החלטת דביר.** קודם ההטבה ניתנה
@@ -169,12 +169,20 @@ function renderAssemblyNotice(pc){
      המעבד, גודל המארז, הספק ספק הכוח). בעגלה מהקטלוג אף אחד לא בדק
      את זה, ולכן הטקסט אומר במפורש שנוודא התאמה לפני ההרכבה — במקום
      להבטיח בשקט שזה יעבוד. זו לא אזהרה משפטית אלא מה שבאמת קורה. */
+  /* 🔴 **"ללא עלות" הוסר 26.08 — החלטת דביר.** ההטבה נשארה, אבל
+     היא מחיר מוזל ולא אפס: 300 ₪ הופכים ל-199 ₪ כשהחלקים נקנו כאן.
+     ⚠️ הבאנר **לא מבטיח שההרכבה בהזמנה** — היא שירות שהלקוח מסמן
+     בעצמו למטה. באנר שאומר "ההרכבה שלך" על משהו שלא נבחר הוא שקר
+     שמתגלה רק בקבלה. */
+  /* ⚠️ המחירים נשלפים מ-DVT_SERVICES ולא מוקלדים כאן — מספר קשיח
+     בבאנר היה שקר ביום ששורת המחירון משתנה. */
+  const asm = serviceByKey("asm-basic") || { price: 250, wasPrice: 450 };
   box.hidden = false;
   box.innerHTML = `
-    <b>${tr("ההרכבה שלך ללא עלות ✓","Your assembly is free ✓")}</b>
+    <b>${tr("מגיע לך מחיר הרכבה של לקוחות DvirTech 🔧","You qualify for the DvirTech customer assembly price 🔧")}</b>
     <p>${tr(
-      "יש בעגלה את כל הרכיבים למחשב שלם, ולכן ההרכבה מתווספת להזמנה ללא עלות. לפני שמרכיבים אני עובר על ההתאמה בין הרכיבים (שקע המעבד, גודל המארז, הספק ספק הכוח) — ואם משהו לא מסתדר, אעדכן אותך לפני שמתחילים ולפני שנגבה כסף נוסף.",
-      "Your cart has every part of a complete PC, so assembly is added to the order at no cost. Before building I check that the parts fit together (CPU socket, case clearance, PSU headroom) — if something doesn't line up I'll tell you before starting, and before anything extra is charged.")}</p>
+      "יש בעגלה את כל הרכיבים למחשב שלם. הרכבה עם חלקים שנקנו כאן היא " + asm.price + " ₪ במקום " + asm.wasPrice + " ₪ (מחיר טכנאי) — אפשר להוסיף אותה למטה, תחת \"שירותים נוספים\". לפני שמרכיבים אני עובר על ההתאמה בין הרכיבים (שקע המעבד, גודל המארז, הספק ספק הכוח), ואם משהו לא מסתדר אעדכן אותך לפני שמתחילים.",
+      "Your cart has every part of a complete PC. Assembly with parts bought here is " + asm.price + " ₪ instead of " + asm.wasPrice + " ₪ (technician price) — add it below under \"Add-on services\". Before building I check that the parts fit together (CPU socket, case clearance, PSU headroom), and if something doesn't line up I'll tell you before starting.")}</p>
     <div id="cartCompatReport"></div>
     <a class="btn btn-secondary" href="builder.html">${tr("רוצה שאבדוק לך התאמה מראש? לבונה","Want compatibility checked up front? Open the Builder")}</a>`;
 }
@@ -508,20 +516,84 @@ function shippingAddressText(){
    מחשב חדש עם מערכת נקייה אין מה לגבות — השאלה הנכונה היא מה מעבירים
    *אליו*, מהמחשב הקודם של הלקוח. זה גם השירות שבאמת מבוקש בקנייה של
    מחשב חדש. */
+/* 🔴 **חייב להישאר זהה ל-SERVICE_OPTIONS_ ב-4-payment-api.gs.**
+   כאן מציגים, שם גובים. פער בין השניים = הלקוח רואה מחיר אחד ומחויב
+   באחר. `tools/check-service-parity.py` משווה את שניהם.
+
+   **המחירון הדו-שכבתי (DVT-NEXT-BUILD §1.2, 27.08):** `price` הוא
+   מחיר DvirTech — מי שקונה כאן חומרה זכאי לו מעצם ההזמנה. `wasPrice`
+   הוא מחיר הטכנאי, שנגבה בפועל מלקוחות שירות שלא רכשו חומרה — ולכן
+   מותר להציגו מחוק (חוק הגנת הצרכן: מחיר קודם חייב להיגבות באמת). */
 const DVT_SERVICES = [
-  { key:"win11-license",     he:"התקנת Windows 11 + רישיון",         en:"Windows 11 install + license",       price:300, group:"os", requiresPc:true },
-  { key:"win11-own-license", he:"התקנת Windows (ללא רישיון)",        en:"Windows install (license not included)", price:200, group:"os", requiresPc:true },
-  /* 🔴 היה בלי `requiresPc`, ולכן הוצע גם כשבעגלה יש רק מארז — דביר
-     ראה את זה בפועל וסימן אותו. אי אפשר להתקין תוכנות על מארז ריק.
-     ⚠️ הסינון עצמו כבר היה קיים ועבד (servicesForCart), פשוט לא סומן
-     על השירות הזה; שני שירותי ה-Windows שלידו כן סומנו. */
-  { key:"software-install",  he:"התקנת תוכנות",                      en:"Software installation",              price:80,  requiresPc:true },
-  /* ⚠️ הניסוח חייב לומר **מאיפה** מגיעים הנתונים. "העברת נתונים"
-     לבד יצר ציפייה שדביר נוסע ללקוח או מחלץ נתונים ממחשב שאין לו —
-     ואין לו. בפועל השירות אפשרי רק כשהדיסק הישן מגיע פיזית אליו,
-     ולכן זה כתוב בשם השירות עצמו ולא באותיות קטנות. */
-  /* ⚠️ requiresPc — צריך מחשב שאליו מעבירים. */
-  { key:"data-transfer",     he:"העברת נתונים מדיסק שתביא איתך",     en:"Data transfer from a drive you send with the order", price:200, requiresPc:true },
+  /* --- שלוש רמות הרכבה. group:"assembly" — נבחרת אחת. --- */
+  { key:"asm-basic", he:"הרכבת המחשב", en:"PC assembly", price:250, wasPrice:450, group:"assembly", requiresPc:true, hot:true,
+    details:[
+      ["הרכבה מלאה של כל הרכיבים במארז, עד 3 מאווררים","Full assembly of every component, up to 3 fans"],
+      ["בדיקת התאמה לפני ההרכבה — שקע, מארז, הספק","Compatibility check first — socket, clearance, PSU headroom"],
+      ["סידור כבלים ובדיקת תקינות מלאה עד BIOS","Cable management and a full health check to BIOS"],
+      ["עדכון BIOS אם נדרש","BIOS update if needed"]
+    ] },
+  { key:"asm-full", he:"הרכבה מלאה (נוזלי / RGB / זכוכית)", en:"Full build (AIO / RGB / glass)", price:390, wasPrice:620, group:"assembly", requiresPc:true,
+    details:[
+      ["כל מה שבהרכבה הרגילה","Everything in the standard build"],
+      ["קירור נוזלי או מערך מאווררים מורחב","Liquid cooling or an extended fan array"],
+      ["כבלים מוקפדים למארז זכוכית + עקומות מאווררים ו-RGB","Show-ready cabling for glass cases + fan curves and RGB"],
+      ["הפעלת XMP/EXPO וכוננים נוספים","XMP/EXPO enabled, extra drives installed"]
+    ] },
+  { key:"asm-premium", he:"הרכבת פרימיום", en:"Premium build", price:650, wasPrice:950, group:"assembly", requiresPc:true,
+    details:[
+      ["כל מה שבהרכבה המלאה","Everything in the full build"],
+      ["בדיקת עומס של 3 שעות — טמפרטורות, תדרים, יציבות","A 3-hour stress test — temperatures, clocks, stability"],
+      ["דוח מסירה חתום עם תוצאות הבדיקות","A signed hand-over report with the results"],
+      ["כיול עקומות מאווררים לשקט/ביצועים","Fan curves tuned for silence or performance"]
+    ] },
+
+  { key:"win-install", he:"התקנת Windows (המפתח שלך)", en:"Windows install (your key)", price:100, wasPrice:200, requiresPc:true,
+    details:[
+      ["התקנה נקייה, בלי תוכנות מיותרות","Clean install, no bloatware"],
+      ["כל הדרייברים מותקנים ומעודכנים + עדכוני Windows","All drivers installed and updated + Windows updates"],
+      ["⚠️ הרישיון שלך. אין לך מפתח? נסגור רישיון מקורי בשיחה","⚠️ You supply the license. No key? We'll sort a genuine one by phone"]
+    ] },
+  { key:"software-install", he:"התקנת תוכנות", en:"Software installation", price:50, wasPrice:80, requiresPc:true,
+    details:[
+      ["התקנת התוכנות שתבקש — דפדפן, אופיס, סטים, דיסקורד וכו'","Installing the software you ask for — browser, Office, Steam, Discord etc."],
+      ["הגדרות בסיסיות והתחברות לחשבונות שלך","Basic configuration and signing into your accounts"],
+      ["⚠️ רישיונות לתוכנות בתשלום אינם כלולים","⚠️ Licenses for paid software are not included"]
+    ] },
+  { key:"data-transfer", he:"העברת נתונים מדיסק שתביא איתך", en:"Data transfer from a drive you send with the order", price:180, wasPrice:250, requiresPc:true,
+    details:[
+      ["העתקת קבצים, תמונות ומסמכים מהדיסק הישן למחשב החדש","Copying files, photos and documents from the old drive to the new PC"],
+      ["שחזור פרופיל הדפדפן — סימניות וסיסמאות שמורות","Browser profile — bookmarks and saved passwords"],
+      ["⚠️ הדיסק הישן חייב להגיע פיזית יחד עם ההזמנה","⚠️ The old drive must physically arrive with the order"]
+    ] },
+  { key:"onsite-setup", he:"התקנת המחשב אצלך בבית", en:"Setup at your home", price:300, wasPrice:450, requiresPc:true,
+    details:[
+      ["הגעה אליך עם המחשב, חיבור מלא והתקנה בעמדה","I come to you with the PC, connect and set it up at your desk"],
+      ["חיבור מסך, עכבר, מקלדת ורשת","Monitor, mouse, keyboard and network hooked up"],
+      ["הסבר קצר על המחשב ועל מה שהותקן","A short walkthrough of the PC and what was installed"],
+      ["⚠️ עד 30 דק' נסיעה. רחוק יותר — נתאם בטלפון","⚠️ Up to 30 min drive. Further out — we'll arrange by phone"]
+    ] },
+
+  /* --- חבילות. `includes` — מה שמכוסה מוצג מסומן-נעול ב-0 ₪. --- */
+  { key:"bundle-new-pc", he:"חבילה: מחשב חדש — מוכן לעבודה", en:"Bundle: new PC — ready to work", price:330, group:"assembly", requiresPc:true,
+    includes:["asm-basic","win-install","software-install"],
+    noteHe:"הרכבה + Windows + תוכנות בסיס. בנפרד: 400 ₪ — חוסך 70 ₪.",
+    noteEn:"Assembly + Windows + base software. Separately: 400 ₪ — you save 70 ₪.",
+    details:[
+      ["הרכבת המחשב המלאה על כל בדיקותיה","The full assembly and all its checks"],
+      ["התקנת Windows עם המפתח שלך + כל הדרייברים","Windows installed with your key + every driver"],
+      ["תוכנות הבסיס שתבקש, מותקנות ומוגדרות","The base software you ask for, installed and configured"]
+    ] },
+  { key:"bundle-home", he:"חבילה: מחשב חדש עד הבית", en:"Bundle: new PC to your door", price:650, group:"assembly", requiresPc:true,
+    includes:["asm-basic","win-install","software-install","onsite-setup","data-transfer"],
+    noteHe:"הכל — כולל הגעה, התקנה בעמדה שלך, העברת נתונים והדרכה. בנפרד: 790 ₪ — חוסך 140 ₪.",
+    noteEn:"Everything — arrival, setup at your desk, data transfer and a walkthrough. Separately: 790 ₪ — you save 140 ₪.",
+    details:[
+      ["כל מה שבחבילת \"מוכן לעבודה\"","Everything in the ready-to-work bundle"],
+      ["הגעה אליך והתקנה מלאה בעמדה (עד 30 דק' נסיעה)","Arrival and full setup at your desk (up to 30 min drive)"],
+      ["העברת נתונים מהמחשב הישן","Data transfer from your old computer"],
+      ["הדרכה קצרה על המחשב החדש","A short walkthrough of the new PC"]
+    ] },
 ];
 
 /* 🔴 "ניקוי פנימי + משחה תרמית" הוסר מהתשלום המקוון (20.08). דביר:
@@ -534,18 +606,24 @@ const DVT_SERVICES = [
    תיאום — ולכן מקומו באותה רשימה עם ביקור הבית והתמיכה מרחוק.
    ⚠️ השירות עצמו לא בוטל: הוא ממשיך להיות מוצע דרך support.html. */
 
-/* שירותים שמוצגים בדף התשלום **לידיעה בלבד** — בלי תיבת סימון ובלי
-   מחיר שנכנס לסכום.
-   ⚠️ זו לא הסתרה ולא קישוט: כולם כרוכים בנסיעה, בתיאום או בהערכת
-   בעיה, ודביר לא יכול להתחייב עליהם מראש מבלי לדעת לאן ומתי. הצגתם
-   כשורה שאי אפשר לבחור מונעת גם את השאלה "אז אתם לא עושים את זה?"
-   וגם את ההתחייבות. הפנייה עצמה עוברת ל-support.html. */
-const DVT_SERVICES_ON_REQUEST = [
-  { he:"ניקוי פנימי + משחה תרמית",     en:"Internal cleaning + thermal paste" },
-  { he:"תמיכה מרחוק",                  en:"Remote support" },
-  { he:"התקנת מחשב בעמדת הלקוח",       en:"On-site setup at your desk" },
-  { he:"ביקור בית ואבחון תקלה",        en:"Home visit & fault diagnosis" }
-];
+/* 🔴 **הבלוק "בתיאום מראש — פנייה דרך העמוד שירות ותמיכה" הוסר
+   ב-26.08, לבקשת דביר. אל תחזיר אותו.**
+
+   דביר: *"זה לא נכון... צריך להשאיר שם רק את הדברים שרלוונטים
+   למחשב חדש. אבל לא קשור לכתוב שם משחה תרמית כי זה כבר חלק
+   מהשירות. אפשר גם לקבל את זה למחשב חדש גם בלי — פשוט צריך אופציה
+   להוספה של השירותים האלה לסל."*
+
+   מה קרה לארבעת הפריטים:
+     • **ניקוי פנימי + משחה תרמית** — הוסר. מחשב חדש מגיע נקי, וזה
+       ממילא חלק מההרכבה. נמכר ב-support.html למחשב קיים.
+     • **תמיכה מרחוק** — הוסר מכאן. הוא לא שירות של קנייה חדשה.
+     • **התקנת מחשב בעמדת הלקוח** — הפך לשירות **נבחר לגמרי**
+       (`onsite-setup`, 400 ₪). זה בדיוק שירות של מחשב חדש.
+     • **ביקור בית ואבחון תקלה** — הוסר. שייך למחשב קיים.
+
+   ⚠️ הקישור ל-support.html נשאר בתחתית האזור — מי שמחפש שירות
+   למחשב קיים עדיין מוצא את הדרך, בלי רשימה שמתחזה לתפריט. */
 
 let selectedServices = [];   // מפתחות בלבד — זה גם מה שנשלח לשרת
 
@@ -556,27 +634,16 @@ function btnRestore(){
   if(b){ b.disabled = false; b.textContent = t("submitOrderBtn"); }
 }
 
-/* ⚠️ **בלי זה הבאנר "ההרכבה שלך ללא עלות" הוא שקר.** לקוח שבחר את ששת
-   הרכיבים מהקטלוג רואה שההרכבה חינם — אבל בלי שורת הרכבה בהזמנה, דביר
-   מקבל הזמנה של שישה חלקים בלי שום סימן שצריך להרכיב אותם. זה לא באג
-   של כסף אלא באג של **עבודה שלא תתבצע**.
-
-   ⚠️ **שורה ולא שירות.** `assembly-included` מוגדר בשרת ב-EXTRA_SKUS
-   (מחיר 0) ולא ב-SERVICE_OPTIONS_. שליחתו בתוך `services` הייתה מוחזרת
-   כ-"שירות לא מוכר" ומפילה את כל התשלום. הוא נשלח כשורה, בדיוק כמו
-   שהבונה שולח אותו.
-
-   ⚠️ המחיר לא נשלח מכאן — השרת מתמחר לפי ה-SKU (0 ₪) כמו כל שורה
-   אחרת. מה שזה משיג: שורת "הרכבה" נפרדת בקבלה גם ב-0 ₪, כפי שהתקנון
-   מבטיח (סעיף 7.2), ודביר רואה שההזמנה כוללת עבודת הרכבה.
-
-   ⚠️ בדיקת כפילות: הרכבה מהבונה כבר מכניסה את השורה הזו לעגלה, ושתי
-   שורות הרכבה על אותה הזמנה נראות כמו טעות חיוב. */
-function withFreeAssemblyLine(lines){
-  if(!cartPc || !cartPc.partsPc || cartPc.hasBuild) return lines;
-  if(lines.some(l => l.sku === "assembly-included")) return lines;
-  return lines.concat([{ sku: "assembly-included", qty: 1 }]);
-}
+/* 🔴 **`withFreeAssemblyLine` הוסרה ב-26.08. אל תחזיר אותה.**
+   היא הוסיפה שורת `assembly-included` ב-0 ₪ לכל עגלה עם מחשב שלם,
+   כדי שהבאנר "ההרכבה שלך ללא עלות" לא יהיה שקר ושדביר יראה
+   שההזמנה כוללת עבודת הרכבה. היום אין באנר כזה: ההרכבה היא שירות
+   בתשלום (`assembly-site`, 199 ₪ במקום 300 ₪) שהלקוח מסמן בעצמו,
+   והיא מגיעה לקבלה כשורת שירות אמיתית עם מק"ט CLI-4005.
+   ⚠️ `cartHasCompletePc_` בשרת לא נשען עליה — הוא בודק גם את שבעת
+   רכיבי הליבה, וזה מה שמזהה עגלה כזו ממילא.
+   ⚠️ המפתח `assembly-included` עדיין **מוכר** בשרת, בשביל עגלות
+   ישנות ששמורות בדפדפן של לקוח. ראה REAL_SUMIT_SKUS. */
 let cartPc = { hasPc:false, hasBuild:false, missing:[], coreCount:0 };   // נקבע ב-renderCheckoutPage
 
 function serviceByKey(key){
@@ -618,8 +685,13 @@ function coveredServiceKeys(){
   return covered;
 }
 
+/* ⚠️ הנחת "הרכבה+Windows −50" הוחלפה (27.08) במודל החבילות של
+   DVT-NEXT-BUILD §1.2 — חבילה במחיר אחד, `includes` מכסה את השורות.
+   מה שנבחר וכלול בחבילה אינו נספר פעמיים: coveredServiceKeys. */
 function servicesTotal(){
+  const covered = coveredServiceKeys();
   return selectedServices.reduce((sum, key) => {
+    if(covered.indexOf(key) !== -1) return sum;   /* כלול בחבילה — 0 */
     const o = serviceByKey(key);
     return sum + (o ? o.price : 0);
   }, 0);
@@ -644,23 +716,27 @@ function renderServicesHint(){
         .join(tr(", ", ", "));
       el.textContent = tr(
         "שירותי ההתקנה נפתחים כשיש בהזמנה מחשב שלם. חסר בעגלה: " + missingNames +
-        ". אפשר להשלים מהקטלוג, או לבנות מחשב בבונה — שם גם ההרכבה ללא עלות.",
+        ". אפשר להשלים מהקטלוג, או לבנות מחשב בבונה — שם גם נבדקת ההתאמה בין הרכיבים.",
         "Installation services unlock once the order contains a complete PC. Missing from your cart: " + missingNames +
-        ". Add them from the catalogue, or configure a build in the PC Builder — assembly is free there.");
+        ". Add them from the catalogue, or configure a build in the PC Builder — which also checks part compatibility.");
     }else{
       el.textContent = tr(
-        "שירותי ההתקנה (Windows, התקנה בעמדת הלקוח, חבילות) נפתחים כשיש בהזמנה מחשב שלם — מחשב מוכן, נייד, או הרכבה מהבונה. השירותים שלמטה מתבצעים על המחשב הקיים שלך ולא דורשים קנייה.",
-        "Installation services (Windows, on-site setup, bundles) unlock once the order contains a complete PC — a ready-made PC, a laptop, or a build from the PC Builder. The services below are performed on your existing computer and require no purchase.");
+        /* 🔴 **"או הרכבה מהבונה" תוקן ל"מהבונה או מהקטלוג" — דביר:
+           "לא חייב שהמחשב יהיה מהבונה ספציפית, אפשר גם לבחור ידנית
+           מהקטלוג... במידה ויש באג בבונה, עדיף שהוא יבחר לבד."**
+           ⚠️ הניסוח הקודם שלח לקוח שכבר אסף את כל הרכיבים ידנית
+           להתחיל מחדש בבונה — בלי סיבה, כי הבדיקה בשרת מזהה את
+           שתי הדרכים בדיוק אותו דבר (cartHasCompletePc_). */
+        "שירותי ההתקנה וההרכבה נפתחים כשיש בהזמנה מחשב שלם — מחשב מוכן, נייד, או כל רכיבי הליבה: מהבונה או שנבחרו ידנית מהקטלוג.",
+        "Installation and assembly services unlock once the order contains a complete PC — a ready-made PC, a laptop, or all core components: from the PC Builder or picked manually from the catalogue.");
     }
     return;
   }
 
   el.classList.remove("is-locked");
-  el.textContent = cartPc.hasBuild
-    ? tr("ההרכבה כבר כלולה בהזמנה שלך ללא עלות, אז מופיעות כאן ההתקנות הבודדות בלבד. כל שירות מתואם איתך בטלפון אחרי ההזמנה.",
-         "Assembly is already included in your order at no cost, so only the standalone installs are listed. Every service is scheduled with you by phone after checkout.")
-    : tr("אופציונלי — אפשר גם לדלג. כל שירות מתואם איתך בטלפון אחרי ההזמנה.",
-         "Optional — feel free to skip. Every service is scheduled with you by phone after checkout.");
+  el.textContent = tr(
+    "אופציונלי — אפשר גם לדלג. כל שירות מתואם איתך בטלפון אחרי ההזמנה.",
+    "Optional — feel free to skip. Every service is scheduled with you by phone after checkout.");
 }
 
 function renderServiceOptions(){
@@ -680,44 +756,125 @@ function renderServiceOptions(){
     /* שירות שכלול בחבילה: מסומן, **מושבת** (disabled), ומחירו "כלול".
        disabled ולא רק "מתעלמים מהקליק" — כך גם מקלדת וקורא מסך יודעים
        שאי אפשר לשנות את זה, ולא רק מי שרואה את הצבע. */
+
+    /* המחיר שמוצג. שלושה מצבים:
+         כלול בחבילה  → 0 ₪
+         הנחת 1+1     → המחיר החדש, והישן מחוק לידו
+         רגיל         → המחיר, ואם יש `wasPrice` — גם המחיר המלא מחוק */
+    /* המחיר בשתי שכבות: מחיר הטכנאי מחוק, מחיר DvirTech פעיל.
+       ⚠️ הקו החתוך חוקי רק כי מחיר הטכנאי נגבה בפועל (ב-CRM) ממי
+       שלא רכש חומרה — ראה ההערה מעל DVT_SERVICES. */
+    let priceHtml;
+    if(isCovered){
+      priceHtml = t("included") + " · 0 ₪";
+    }else if(s.wasPrice && s.wasPrice > s.price){
+      priceHtml = `<s>${s.wasPrice.toLocaleString()} ₪</s> +${s.price.toLocaleString()} ₪`;
+    }else{
+      priceHtml = "+" + s.price.toLocaleString() + " ₪";
+    }
+
+    let note = "";
+    if(isCovered){
+      note = tr("כלול במחיר החבילה שבחרת — לא נגבה בנפרד.",
+                "Included in the bundle you selected — not charged separately.");
+    }else if(s.wasPrice && s.wasPrice > s.price){
+      note = tr("מחיר לקוחות DvirTech — כי החומרה נקנית כאן. חסכת " + (s.wasPrice - s.price) + " ₪.",
+                "DvirTech customer price — because the hardware is bought here. You save " + (s.wasPrice - s.price) + " ₪.");
+      if(s.noteHe) note = tr(s.noteHe, s.noteEn);
+    }else if(s.noteHe){
+      note = tr(s.noteHe, s.noteEn);
+    }
+
+    /* 🔴 **הפירוט יושב מחוץ ל-`<label>`, ואל תכניס אותו פנימה.**
+       כל קליק בתוך label מחליף את התיבה שלו — כלומר לחיצה על "מה
+       כלול?" הייתה מסמנת את השירות. זו בדיוק סוג התקלה שנראית
+       למשתמש כמו "האתר מסמן לי דברים לבד". */
+    const detId = "svcd-" + s.key;
+    const details = Array.isArray(s.details) && s.details.length
+      ? `<button type="button" class="svc-more" aria-expanded="false" aria-controls="${detId}"
+                 onclick="svcToggleDetails('${detId}', this)">${tr("מה כלול בשירות?","What's included?")}</button>
+         <ul class="svc-details" id="${detId}" hidden>${
+           s.details.map(d => `<li>${escHtml(tr(d[0], d[1]))}</li>`).join("")}</ul>`
+      : "";
+
     return `
-    <label class="svc-opt${on ? " is-on" : ""}${isCovered ? " is-covered" : ""}">
-      <input type="checkbox" ${on ? "checked" : ""} ${isCovered ? "disabled" : ""}
-             onchange="onServiceToggle('${s.key}', this.checked)">
-      <span class="svc-name">${tr(s.he, s.en)}</span>
-      <span class="svc-price">${isCovered
-        ? t("included") + " · 0 ₪"
-        : "+" + s.price.toLocaleString() + " ₪"}</span>
-      ${isCovered
-        ? `<span class="svc-note">${tr("כלול במחיר החבילה שבחרת — לא נגבה בנפרד.",
-                                       "Included in the bundle you selected — not charged separately.")}</span>`
-        : (s.noteHe ? `<span class="svc-note">${tr(s.noteHe, s.noteEn)}</span>` : "")}
-    </label>`;
+    <div class="svc-row${s.hot ? " is-hot" : ""}">
+      <label class="svc-opt${on ? " is-on" : ""}${isCovered ? " is-covered" : ""}">
+        <input type="checkbox" ${on ? "checked" : ""} ${isCovered ? "disabled" : ""}
+               onchange="onServiceToggle('${s.key}', this.checked)">
+        <span class="svc-name">${tr(s.he, s.en)}${
+          s.hot ? `<span class="svc-badge">${tr("מומלץ","Recommended")}</span>` : ""}</span>
+        <span class="svc-price">${priceHtml}</span>
+        ${note ? `<span class="svc-note">${note}</span>` : ""}
+      </label>
+      ${details}
+    </div>`;
   }).join("");
 
-  /* 🔴 `DVT_SERVICES_ON_REQUEST` הוגדר בקובץ הזה עם הערה מפורטת
-     שמסבירה שהוא "מוצג בדף התשלום לידיעה בלבד" — ו**מעולם לא רונדר
-     בשום מקום**. חיפוש בקובץ מחזיר מופע אחד: ההגדרה עצמה.
+  renderBundleNudge();
 
-     ⚠️ זה כבר הדפוס הרביעי מאותו סוג בפרויקט (כפתור רשימת המשאלות,
-     החיפוש בבונה, site-search.js בתשעה דפים, וזה) — תוכן או פקד
-     שהוגדר, תועד, ואף אחד לא חיבר אותו. שווה סריקה יזומה.
-
-     ⚠️ הם מוצגים כשורות טקסט בלי תיבת סימון ובלי מחיר, בכוונה: כולם
-     כרוכים בנסיעה או בתיאום, ואי אפשר להתחייב עליהם מראש בקופה. */
+  /* קישור בלבד — הרשימה עצמה הוסרה (ראה ההערה ליד DVT_SERVICES).
+     ⚠️ הניסוח מדבר על **מחשב קיים**, כי זה מה שבאמת נמצא שם. */
   const req = document.getElementById("servicesOnRequest");
   if(req){
     req.innerHTML =
-      `<div class="svc-onreq-h">${tr("בתיאום מראש — פנייה דרך העמוד שירות ותמיכה",
-                                     "By arrangement — request via the Support page")}</div>` +
-      DVT_SERVICES_ON_REQUEST.map(function(o){
-        return `<div class="svc-onreq-row"><span>${tr(o.he, o.en)}</span></div>`;
-      }).join("") +
-      `<a class="svc-onreq-link" href="support.html">${tr("לעמוד שירות ותמיכה ←",
-                                                          "Go to Support →")}</a>`;
+      `<div class="svc-onreq-h">${tr("יש לך מחשב קיים שצריך טיפול?",
+                                     "Got an existing computer that needs work?")}</div>` +
+      `<a class="svc-onreq-link" href="support.html">${tr("ניקוי, אבחון תקלה, תמיכה מרחוק וביקור בית — לעמוד שירות ותמיכה ←",
+                                                          "Cleaning, diagnostics, remote support and home visits — go to Support →")}</a>`;
   }
 
   renderServicesCounter();
+}
+
+function svcToggleDetails(id, btn){
+  const el = document.getElementById(id);
+  if(!el) return;
+  const open = el.hidden;
+  el.hidden = !open;
+  btn.setAttribute("aria-expanded", open ? "true" : "false");
+  btn.textContent = open ? tr("סגור פירוט","Hide details")
+                         : tr("מה כלול בשירות?","What's included?");
+}
+
+/* 🔴 **דחיפת החבילה — "טריגר שאם הוא פספס, זה קופץ לו" (דביר).**
+   ⚠️ הודעה, לא סימון אוטומטי — שירות בתשלום שמסומן בשם הלקוח הוא
+   בדיוק מה שחוק הגנת הצרפן אוסר, וגם קורא כתרגיל.
+   ⚠️ מוצגת רק כשהחבילה באמת זולה מהבחירה הנוכחית של הלקוח —
+   הצעה ש"חוסכת" וגם מייקרת היא שקר שנחשף בשורת הסכום. */
+function renderBundleNudge(){
+  const el = document.getElementById("servicesBundleNudge");
+  if(!el) return;
+
+  const offered = servicesForCart().map(s => s.key);
+  if(offered.indexOf("bundle-new-pc") === -1){ el.hidden = true; return; }
+  if(selectedServices.indexOf("bundle-new-pc") !== -1 ||
+     selectedServices.indexOf("bundle-home") !== -1){ el.hidden = true; return; }
+
+  const pkg = serviceByKey("bundle-new-pc");
+  /* כמה עולה ללקוח היום מה שהחבילה מכסה — רק ממה שכבר בחר. */
+  const coveredNow = pkg.includes.filter(k => selectedServices.indexOf(k) !== -1);
+  const nowCost = coveredNow.reduce((s2, k) => {
+    const o = serviceByKey(k); return s2 + (o ? o.price : 0);
+  }, 0);
+  const fullCost = pkg.includes.reduce((s2, k) => {
+    const o = serviceByKey(k); return s2 + (o ? o.price : 0);
+  }, 0);
+
+  if(coveredNow.length && nowCost >= pkg.price){
+    /* כבר בחר שירותים ששווים לפחות כמו החבילה — שדרוג משתלם נטו */
+    el.innerHTML = tr(
+      "💡 בחרת שירותים ב-" + nowCost.toLocaleString() + " ₪. <b>חבילת \"מחשב חדש — מוכן לעבודה\"</b> נותנת את כולם + השאר ב-" + pkg.price.toLocaleString() + " ₪.",
+      "💡 Your picks total " + nowCost.toLocaleString() + " ₪. The <b>ready-to-work bundle</b> covers them all + the rest for " + pkg.price.toLocaleString() + " ₪.");
+    el.hidden = false;
+  }else if(!coveredNow.length){
+    el.innerHTML = tr(
+      "💡 <b>הרכבה + Windows + תוכנות יחד</b> — " + pkg.price.toLocaleString() + " ₪ במקום " + fullCost.toLocaleString() + " ₪ בנפרד.",
+      "💡 <b>Assembly + Windows + software together</b> — " + pkg.price.toLocaleString() + " ₪ instead of " + fullCost.toLocaleString() + " ₪ separately.");
+    el.hidden = false;
+  }else{
+    el.hidden = true;
+  }
 }
 
 /* המונה בכותרת הוא כל מה שרואים כשהאזור סגור — בלעדיו אי אפשר לדעת
@@ -783,20 +940,74 @@ function onServiceToggle(key, on){
    ⚠️ נבנה מחדש בכל שינוי בעגלה/משלוח/שירותים, כי הסכום משתנה.
    ⚠️ הבחירה הקיימת נשמרת — בנייה מחדש שמאפסת ל-1 הייתה מוחקת
    בחירה של הלקוח בכל פעם שהוא מוסיף שירות. */
+/* 🔴 **"הכי משתלם" — נגזר מהנוסחה, ולעולם לא מספר קבוע.**
+
+   דביר: *"3 תשלומים זה עדיין במסלול היקר יותר עם עמלה של 0.9+מע"מ,
+   לעומת 4 תשלומים שכל אחד מהם 0.75+מע"מ. זה לא הכי זול אבל כן הכי
+   משתלם — שים לב לקפיצה באחוז בין 3 ל-4."*
+
+   ⚠️ **הוא צודק, ואני טעיתי כשהצעתי לשים את התווית על 3.** המספרים:
+     3 תשלומים → 0.9 × 3 × 1.18 = **3.19%**  (‏1.06% לכל תשלום)
+     4 תשלומים → 0.75 × 4 × 1.18 = **3.54%** (‏0.89% לכל תשלום)
+   כלומר התשלום הרביעי עולה 0.35% בלבד — פחות משליש ממה שעלה כל
+   אחד משלושת הראשונים. זו נקודת המעבר לפס ה-0.75%.
+
+   ⚠️ מ-4 והלאה **האחוז לתשלום זהה** (0.89%), ולכן "הכי משתלם" הוא
+   ה-n **הנמוך ביותר** בפס הזול — מעבר לו משלמים יותר סה"כ בלי
+   לשפר את התעריף. זה בדיוק מה שהחישוב למטה מוצא.
+   ⚠️ **לא לקבע "4".** אם ישתנו התעריפים ב-UPAY, התווית תזוז לבד
+   למקום הנכון. מספר קשיח כאן יהפוך לשקר ביום שהעמלות ישתנו. */
+function bestValueInstallments(base){
+  const sel = document.getElementById("installmentsCount");
+  if(!sel || !(base > 0)) return 0;
+  let best = 0, bestRate = Infinity;
+  Array.prototype.forEach.call(sel.options, function(opt){
+    const n = parseInt(opt.value, 10) || 1;
+    const fee = installmentFeeAmount(base, n);
+    if(!(fee > 0)) return;                 /* בלי עמלה — לא בהשוואה */
+    const rate = fee / n;                  /* עלות לכל תשלום */
+    /* `- 0.001` : רק שיפור אמיתי מנצח. שוויון נשאר אצל ה-n הנמוך. */
+    if(rate < bestRate - 0.001){ bestRate = rate; best = n; }
+  });
+  return best;
+}
+
 function renderInstallmentOptions(base){
   const sel = document.getElementById("installmentsCount");
   if(!sel) return;
   const keep = sel.value;
+  const best = bestValueInstallments(base);
   Array.prototype.forEach.call(sel.options, function(opt){
     const n = parseInt(opt.value, 10) || 1;
     const fee = installmentFeeAmount(base, n);
     const word = n === 1 ? tr("תשלום אחד", "1 payment")
                          : n + tr(" תשלומים", " payments");
-    opt.textContent = fee > 0
+    let txt = fee > 0
       ? word + "  ·  +" + Math.round(fee).toLocaleString() + " ₪"
       : word + "  ·  " + tr("ללא עמלה", "no fee");
+    if(n === best) txt += "  ·  " + tr("⭐ הכי משתלם", "⭐ best value");
+    opt.textContent = txt;
   });
   sel.value = keep;
+
+  /* הסבר קצר מתחת לבורר — אחרת "הכי משתלם" על אפשרות שיש בה עמלה
+     נראה כמו טעות. ⚠️ הטקסט נבנה מהמספרים בפועל ולא נכתב ידנית. */
+  const hint = document.getElementById("installmentsBest");
+  if(hint){
+    if(best > 1 && base > 0){
+      const prev = best - 1;
+      const delta = Math.round((installmentFeeAmount(base, best) -
+                                installmentFeeAmount(base, prev)) * 10) / 10;
+      hint.textContent = tr(
+        "⭐ מ-" + best + " תשלומים העמלה לכל תשלום יורדת. המעבר מ-" + prev +
+        " ל-" + best + " עולה " + delta.toLocaleString() + " ₪ בלבד.",
+        "⭐ From " + best + " payments the per-payment fee drops. Going from " +
+        prev + " to " + best + " costs only " + delta.toLocaleString() + " ₪.");
+      hint.hidden = false;
+    }else{
+      hint.hidden = true;
+    }
+  }
 }
 
 function renderCheckoutTotals(){
@@ -923,7 +1134,10 @@ async function submitCheckout(){
   box.style.display = "none";
 
   const items = readCartFromStorage();
-  const lines = withFreeAssemblyLine(cartItemsToLines(items));
+  /* ⚠️ **לא נוספת יותר שורת `assembly-included` ב-0 ₪.** ההרכבה היא
+     שירות בתשלום שהלקוח מסמן בעצמו — ראה ההערה ליד המקום שבו
+     `withFreeAssemblyLine` ישבה. */
+  const lines = cartItemsToLines(items);
   if(!lines.length){
     box.style.display = "block";
     box.textContent = t("cartEmpty");
@@ -1165,9 +1379,14 @@ function renderGiftBlock(){
   if(pickedItem){
     const nm = (typeof dvtDisplayName === "function")
       ? dvtDisplayName(pickedItem.item.name) : pickedItem.item.name;
+    /* אותה סיבה כמו בכרטיס — `.ssr-thumb` חסר CSS מחוץ לחיפוש. */
+    const chosenImg = pickedItem.item.image
+      ? '<img src="' + escHtml(pickedItem.item.image) + '" alt="" loading="lazy" ' +
+        'onerror="this.style.display=\'none\'">'
+      : '';
     box.innerHTML = head +
       '<div class="gift-chosen">' +
-        ((typeof dvtThumbHtml === "function") ? dvtThumbHtml(pickedItem.item, pickedItem.cat) : "") +
+        '<span class="gift-chosen-img">' + chosenImg + '</span>' +
         '<div class="gift-chosen-main">' +
           '<div class="gift-chosen-name">' + escHtml(nm) + '</div>' +
           '<div class="gift-chosen-price">' +
@@ -1305,9 +1524,22 @@ function giftPickerRender(){
   const picked = (typeof dvtGiftPicked === "function") ? dvtGiftPicked() : "";
   grid.innerHTML = shown.map(function(c){
     const nm = (typeof dvtDisplayName === "function") ? dvtDisplayName(c.item.name) : c.item.name;
+    /* 🔴 **תמונה משלנו ולא `dvtThumbHtml` — אל תחזיר אותו לכאן.**
+       כל ה-CSS של `.ssr-thumb` מוגדר תחת `.site-search-row` בלבד
+       (‏style.css ~145). מחוץ לחלונית החיפוש אין לו שום מידה, ולכן
+       ה-`<img>` נפרס בגודלו הטבעי — מאות פיקסלים — גלש מהכרטיס
+       וכיסה את השכנים. בדיוק מה שדביר ראה: "המוצרים נחתכים אחד
+       בשני, רק אם אני מצביע על אחד מהם הוא קופץ קדימה".
+       ⚠️ וגם ממלא המקום של הקטגוריה (אוזניות/מאוורר) הוצג יחד עם
+       תמונת המוצר, כי `.ssr-thumb.on .ssr-ph{opacity:0}` גם הוא
+       מקומט לחלונית החיפוש. דביר ביקש **רק את תמונת המוצר**. */
+    const img = c.item.image
+      ? '<img src="' + escHtml(c.item.image) + '" alt="" loading="lazy" ' +
+        'onerror="this.style.display=\'none\'">'
+      : '';
     return '<button type="button" class="gift-card' + (c.sku === picked ? " on" : "") + '" ' +
       'onclick="giftPickerChoose(\'' + escHtml(c.sku) + '\')">' +
-      ((typeof dvtThumbHtml === "function") ? dvtThumbHtml(c.item, c.cat) : "") +
+      '<span class="gift-card-img">' + img + '</span>' +
       '<span class="gift-card-name">' + escHtml(nm) + '</span>' +
       '<span class="gift-card-price">' + c.price.toLocaleString() + ' ₪</span>' +
       '</button>';

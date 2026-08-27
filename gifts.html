@@ -1,0 +1,136 @@
+<!DOCTYPE html>
+<!--
+  =====================================================================
+  DvirTech — מבצע המתנות: איך זה עובד + תנאים (gifts.html)
+  =====================================================================
+  DVT-NEXT-BUILD §10.9#5: "תנאים · תוקף · חריגים. נדרש משפטית."
+  מבצע בלי עמוד תנאים חשוף — כל המודעות והבאנרים מקשרים לכאן.
+
+  ⚠️ **הסולם עצמו לא כתוב בדף.** המדרגות מגיעות חיות מהשרת
+  (cart.js → dvtGiftPromoRender אל תוך #giftPromo) — שינוי בלשונית
+  ההטבות משתקף כאן בלי לגעת בקובץ. דף שמצטט מספרים קשיחים הופך
+  לשקר ברגע שדביר מזיז רף.
+
+  ⚠️ אין תאריך תוקף נקוב — דביר לא קבע דדליין, ולא ממציאים. סעיף
+  התוקף מנוסח "עד להודעה חדשה" ותקף משפטית.
+  ⚠️ טיוטה 27.08 — לאישור עו"ד יחד עם שאר סעיפי התקנון.
+  =====================================================================
+-->
+<html lang="he" dir="rtl">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>DvirTech — קנית? קיבלת! מתנות לפי גובה ההזמנה</title>
+<meta name="description" content="מבצע המתנות של DvirTech: מוצר לבחירתכם במתנה לפי גובה ההזמנה. איך זה עובד, המדרגות המעודכנות ותנאי המבצע.">
+<script>
+  (function(){
+    var saved = "he";
+    try { saved = localStorage.getItem("dvirtech_lang") || "he"; } catch(e) {}
+    document.documentElement.lang = saved;
+    document.documentElement.dir = saved === "he" ? "rtl" : "ltr";
+  })();
+</script>
+<link rel="preconnect" href="https://script.google.com" crossorigin>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link href="https://fonts.googleapis.com/css2?family=Rubik:wght@400;500;600;700;800;900&family=Heebo:wght@300;400;500;700&display=swap" rel="stylesheet">
+<link rel="stylesheet" href="style.css">
+<style>
+  .gf-wrap{max-width:860px;margin:0 auto;padding:28px 16px 64px}
+  .gf-hero{text-align:center;margin-bottom:22px}
+  .gf-hero h1{font-size:28px;margin:0 0 8px;color:#6D28D9}
+  .gf-hero p{font-size:14.5px;color:var(--ink-soft);margin:0}
+
+  .gf-steps{display:flex;gap:12px;flex-wrap:wrap;margin:24px 0}
+  .gf-step{flex:1 1 200px;background:var(--surface);border:1px solid var(--line);
+    border-radius:14px;padding:16px 15px;text-align:center}
+  .gf-step b{display:block;font-size:14.5px;color:var(--ink);margin:8px 0 5px}
+  .gf-step p{font-size:12.5px;color:var(--ink-soft);margin:0;line-height:1.6}
+  .gf-step .n{display:inline-flex;align-items:center;justify-content:center;
+    width:30px;height:30px;border-radius:50%;background:#7C3AED;color:#fff;
+    font-weight:800;font-family:'Rubik',sans-serif}
+
+  .gf-terms{background:var(--surface);border:1px solid var(--line);
+    border-radius:14px;padding:20px 22px;margin-top:26px}
+  .gf-terms h2{font-size:17px;margin:0 0 12px;color:var(--ink)}
+  .gf-terms ol{margin:0;padding-inline-start:20px}
+  .gf-terms li{font-size:13px;line-height:1.8;color:var(--ink);margin-bottom:9px}
+  .gf-note{font-size:11.5px;color:var(--ink-soft);margin-top:14px}
+</style>
+</head>
+<body>
+<!-- ⚠️ שלד ה-headbar חייב להיות כאן ולא ריק: buildSiteHeader מחפש
+     `.headbar` בתוך ה-header ומוסיף אליו, ולא יוצר אותו. header ריק =
+     דף בלי תפריט, בלי שגיאה. (המלכודת מתועדת גם ב-cancel.html —
+     ובכל זאת שני הדפים האלה נוצרו ריקים ונתפסו רק בבדיקה בדפדפן.) -->
+<header>
+  <div class="wrap headbar">
+    <a class="brand" href="home.html" aria-label="DvirTech — לדף הבית"><img class="brand-logo" src="images/logo-dvirtech-transparent.png" alt="DvirTech"></a>
+    <div class="lang-switch">
+      <button class="lang-btn" data-lang="he" onclick="setLang('he')">עברית</button>
+      <button class="lang-btn" data-lang="en" onclick="setLang('en')">English</button>
+    </div>
+  </div>
+</header>
+
+<main class="gf-wrap">
+  <div class="gf-hero">
+    <h1>🎁 <span data-he="קנית? קיבלת!" data-en="Buy & get!"></span></h1>
+    <p data-he="ככל שההזמנה גדלה — המתנה גדלה. בוחרים בעצמכם, מהקטלוג האמיתי."
+       data-en="The bigger the order, the bigger the gift. You pick it yourself, from the real catalogue."></p>
+  </div>
+
+  <!-- הסולם החי — נבנה ב-cart.js מהמדרגות שבשרת -->
+  <section id="giftPromoWrap" hidden><div id="giftPromo"></div></section>
+
+  <div class="gf-steps">
+    <div class="gf-step"><span class="n">1</span>
+      <b data-he="ממלאים עגלה" data-en="Fill your cart"></b>
+      <p data-he="מד ההתקדמות בצד המסך מראה בדיוק כמה נשאר עד המתנה הבאה."
+         data-en="The progress meter on screen shows exactly how far the next gift is."></p></div>
+    <div class="gf-step"><span class="n">2</span>
+      <b data-he="בוחרים מתנה" data-en="Pick your gift"></b>
+      <p data-he='בעמוד התשלום נפתח "בחר מתנה" — כל המוצרים שבתקרה שהגעתם אליה, לבחירתכם.'
+         data-en='At checkout, "Choose your gift" opens — every product within the tier you reached.'></p></div>
+    <div class="gf-step"><span class="n">3</span>
+      <b data-he="מקבלים אותה בהזמנה" data-en="It ships with the order"></b>
+      <p data-he="המתנה מופיעה בקבלה כשורה נפרדת ב-0 ₪ — רואים בדיוק מה קיבלתם."
+         data-en="The gift appears on the receipt as its own 0 ₪ line — you see exactly what you got."></p></div>
+  </div>
+
+  <section class="gf-terms">
+    <h2 data-he="תנאי המבצע" data-en="Promotion terms"></h2>
+    <ol>
+      <li data-he="הזכאות נמדדת על סכום המוצרים בהזמנה בלבד — אחרי הנחות, ולפני דמי משלוח, שירותים ועמלת תשלומים."
+          data-en="Eligibility is measured on the product subtotal only — after discounts, before shipping, services and installment fees."></li>
+      <li data-he="בכל הזמנה ניתנת מתנה אחת, לפי המדרגה הגבוהה ביותר שההזמנה עומדת בה. הטבת משלוח חינם, כשהיא פעילה, מצטברת בנפרד."
+          data-en="Each order earns one gift, per the highest tier it reaches. A free-shipping benefit, when active, stacks separately."></li>
+      <li data-he="המתנה נבחרת על ידי הלקוח בעמוד התשלום, מתוך מוצרי הקטלוג שמחירם באתר אינו עולה על תקרת המדרגה ושישנם במלאי. מוצר שכבר נמצא בהזמנה אינו יכול לשמש כמתנה."
+          data-en="The gift is chosen by the customer at checkout, from in-stock catalogue products priced within the tier cap. A product already in the order cannot serve as the gift."></li>
+      <li data-he="שווי המתנה הנקוב הוא מחיר המוצר באתר בעת ההזמנה."
+          data-en="The stated gift value is the product's site price at the time of ordering."></li>
+      <li data-he="המתנה אינה ניתנת להמרה לכסף, לזיכוי או להנחה, ואינה ניתנת להעברה בנפרד מההזמנה."
+          data-en="The gift cannot be converted to cash, credit or a discount, and cannot be transferred separately from the order."></li>
+      <li data-he="בביטול עסקה לפי התקנון, המתנה מוחזרת יחד עם המוצרים; לא הוחזרה — ינוכה שוויה מסכום ההחזר, בהתאם לדין."
+          data-en="If the order is cancelled per the site terms, the gift is returned with the products; if not returned, its value is deducted from the refund, as the law allows."></li>
+      <li data-he="לא בחרתם מתנה בעת התשלום? ההזמנה ממשיכה כרגיל, ולא ניתן לצרף מתנה בדיעבד."
+          data-en="Didn't pick a gift at checkout? The order proceeds normally, and a gift cannot be added retroactively."></li>
+      <li data-he="המבצע תקף עד להודעה חדשה. המדרגות המוצגות בעמוד זה הן המעודכנות; שינוי תנאים יחול על הזמנות חדשות בלבד ולא ייגרע ממתנה שכבר ניתנה."
+          data-en="The promotion runs until further notice. The tiers on this page are the current ones; changes apply to new orders only and never claw back a gift already given."></li>
+    </ol>
+    <p class="gf-note" data-he="שאלות? דברו איתנו בוואטסאפ 050-200-0373. המבצע כפוף לתקנון האתר."
+       data-en="Questions? WhatsApp us at 050-200-0373. The promotion is subject to the site terms."></p>
+  </section>
+</main>
+
+<footer></footer>
+
+<script src="sprite.js"></script>
+<script src="i18n.js"></script>
+<script src="site-content.js"></script>
+<script src="search-core.js"></script>
+<script src="site-search.js"></script>
+<script src="site-header.js"></script>
+<script src="site-footer.js"></script>
+<script src="cart.js"></script>
+</body>
+</html>

@@ -1,0 +1,96 @@
+<!DOCTYPE html>
+<!--
+  =====================================================================
+  DvirTech — האזור האישי (account.html)
+  =====================================================================
+  כניסה בקוד חד-פעמי למייל — **בלי סיסמאות** (ההחלטה והנימוק:
+  DVT-OPEN.md → "אזור אישי"). הצד השרתי: acctOtp*/acctData/acctUpdate
+  ב-4-payment-api.gs — שם יושבים כל כללי האבטחה (קצב, גיבוב, טוקן).
+
+  ⚠️ הדף הזה הוא תצוגה בלבד. שום החלטה כספית לא מתקבלת כאן:
+  הנחת המנוי שמוצגת בעמוד השירותים היא תצוגה — החיוב בפועל נעשה
+  ידנית מול דביר, כמו כל שירות.
+  =====================================================================
+-->
+<html lang="he" dir="rtl">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>DvirTech — האזור האישי</title>
+<meta name="description" content="האזור האישי של לקוחות DvirTech: הזמנות, מנוי ויתרות, ציוד באחריות ועדכון פרטים. כניסה בקוד חד-פעמי למייל.">
+<meta name="robots" content="noindex">
+<script>
+  (function(){
+    var saved = "he";
+    try { saved = localStorage.getItem("dvirtech_lang") || "he"; } catch(e) {}
+    document.documentElement.lang = saved;
+    document.documentElement.dir = saved === "he" ? "rtl" : "ltr";
+  })();
+</script>
+<link rel="preconnect" href="https://script.google.com" crossorigin>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link href="https://fonts.googleapis.com/css2?family=Rubik:wght@400;500;600;700;800;900&family=Heebo:wght@300;400;500;700&display=swap" rel="stylesheet">
+<link rel="stylesheet" href="style.css">
+</head>
+<body>
+<!-- ⚠️ שלד ה-headbar חייב להיות כאן ולא ריק — buildSiteHeader מוסיף
+     אליו ולא יוצר אותו (המלכודת מתועדת ב-cancel.html). -->
+<header>
+  <div class="wrap headbar">
+    <a class="brand" href="home.html" aria-label="DvirTech — לדף הבית"><img class="brand-logo" src="images/logo-dvirtech-transparent.png" alt="DvirTech"></a>
+    <div class="lang-switch">
+      <button class="lang-btn" data-lang="he" onclick="setLang('he')">עברית</button>
+      <button class="lang-btn" data-lang="en" onclick="setLang('en')">English</button>
+    </div>
+  </div>
+</header>
+
+<main class="acct-wrap">
+  <h1 id="acctTitle"></h1>
+
+  <!-- ========== שלב 1: טלפון ========== -->
+  <section class="acct-card" id="acctLogin" hidden>
+    <p class="acct-lead" id="acctLoginLead"></p>
+    <label class="field-label" for="acctPhone" id="acctPhoneLabel"></label>
+    <input id="acctPhone" type="tel" dir="ltr" autocomplete="tel" inputmode="numeric" maxlength="11">
+    <div class="validation-msg" id="acctLoginMsg" style="display:none"></div>
+    <button class="btn btn-primary" id="acctSendBtn" onclick="acctSendCode()"></button>
+    <p class="acct-note" id="acctLoginNote"></p>
+  </section>
+
+  <!-- ========== שלב 2: הקוד ========== -->
+  <section class="acct-card" id="acctCode" hidden>
+    <p class="acct-lead" id="acctCodeLead"></p>
+    <label class="field-label" for="acctCodeInput" id="acctCodeLabel"></label>
+    <input id="acctCodeInput" type="text" dir="ltr" inputmode="numeric" autocomplete="one-time-code" maxlength="6" class="acct-code-input">
+    <div class="validation-msg" id="acctCodeMsg" style="display:none"></div>
+    <button class="btn btn-primary" id="acctVerifyBtn" onclick="acctVerify()"></button>
+    <button class="btn btn-secondary" id="acctBackBtn" onclick="acctBackToPhone()"></button>
+  </section>
+
+  <!-- ========== הדשבורד ========== -->
+  <section id="acctDash" hidden>
+    <div class="acct-grid">
+      <div class="acct-card" id="acctProfileCard"></div>
+      <div class="acct-card" id="acctSubCard"></div>
+    </div>
+    <div class="acct-card" id="acctOrdersCard"></div>
+    <div class="acct-card" id="acctEquipCard"></div>
+    <div class="acct-card" id="acctSettingsCard"></div>
+    <button class="btn btn-secondary" id="acctLogoutBtn" onclick="acctLogout()"></button>
+  </section>
+</main>
+
+<footer></footer>
+
+<script src="sprite.js"></script>
+<script src="i18n.js"></script>
+<script src="site-content.js"></script>
+<script src="search-core.js"></script>
+<script src="site-search.js"></script>
+<script src="site-header.js"></script>
+<script src="site-footer.js"></script>
+<script src="account.js"></script>
+<script src="cart.js"></script>
+</body>
+</html>

@@ -1,0 +1,134 @@
+<!DOCTYPE html>
+<!--
+  =====================================================================
+  DvirTech — הצהרת נגישות (accessibility.html)
+  =====================================================================
+  DVT-NEXT-BUILD §6.2: **פרסום דרכי התקשרות נגישות ופרטי איש קשר הוא
+  חובה שחלה כבר היום, גם בפטור של עוסק פטור** (תקנה 35ו(ז) פוטרת את
+  התאמת האתר עצמו — לא את ההצהרה ואת איש הקשר).
+
+  🔴 שלושה כללים שאסור לשבור בעמוד הזה:
+  1. **טקסט HTML חי** — לא PDF, לא תמונה. עמוד נגישות שאינו נגיש
+     בעצמו הוא אוקסימורון שגם נראה רע בבית משפט.
+  2. **סעיף "מגבלות ידועות" חייב להיות כן.** הצהרה שכותבת "האתר
+     נגיש במלואו" כשהוא לא — מחמירה את החשיפה, לא מקטינה.
+     (ת"צ 52621-07-23: פנייה מוקדמת היא הפתרון הראוי — בתנאי שיש
+     למי לפנות.)
+  3. **בלי תוסף/overlay ובלי לטעון שתוסף מנגיש** — כלים אוטומטיים
+     מכסים 10-16% מהקריטריונים, וה-FTC קנס על טענת תאימות כוזבת.
+
+  ⚠️ סעיף המגבלות למטה נכתב לפי המצב האמיתי (27.08). כשמשהו מתוקן —
+  לעדכן גם כאן, כולל את תאריך העדכון בתחתית.
+  =====================================================================
+-->
+<html lang="he" dir="rtl">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>DvirTech — הצהרת נגישות</title>
+<meta name="description" content="הצהרת הנגישות של אתר DvirTech: רמת הנגישות, מגבלות ידועות, הסדרי נגישות חלופיים ופרטי רכז הנגישות.">
+<script>
+  (function(){
+    var saved = "he";
+    try { saved = localStorage.getItem("dvirtech_lang") || "he"; } catch(e) {}
+    document.documentElement.lang = saved;
+    document.documentElement.dir = saved === "he" ? "rtl" : "ltr";
+  })();
+</script>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link href="https://fonts.googleapis.com/css2?family=Rubik:wght@400;500;600;700;800;900&family=Heebo:wght@300;400;500;700&display=swap" rel="stylesheet">
+<link rel="stylesheet" href="style.css">
+<style>
+  .acc-wrap{max-width:760px;margin:0 auto;padding:28px 16px 64px}
+  .acc-wrap h1{font-size:26px;margin:0 0 6px;color:var(--ink)}
+  .acc-updated{font-size:12px;color:var(--ink-soft);margin:0 0 22px}
+  .acc-wrap h2{font-size:17px;margin:26px 0 8px;color:var(--navy-900,#12395F)}
+  .acc-wrap p, .acc-wrap li{font-size:13.5px;line-height:1.8;color:var(--ink)}
+  .acc-wrap ul{margin:0;padding-inline-start:20px}
+  .acc-card{background:var(--surface);border:1px solid var(--line);border-radius:14px;
+    padding:16px 18px;margin:10px 0}
+  .acc-contact{background:#F3F8FF;border:1px solid #D7E7FB}
+  .acc-limits{background:var(--amber-bg,#FFF6EA);border:1px solid rgba(217,130,43,.4)}
+  .acc-contact a{color:var(--blue);font-weight:700;text-decoration:none}
+  .acc-contact a:hover{text-decoration:underline}
+</style>
+</head>
+<body>
+<!-- ⚠️ שלד ה-headbar חייב להיות כאן ולא ריק: buildSiteHeader מחפש
+     `.headbar` בתוך ה-header ומוסיף אליו, ולא יוצר אותו. header ריק =
+     דף בלי תפריט, בלי שגיאה. (המלכודת מתועדת גם ב-cancel.html —
+     ובכל זאת שני הדפים האלה נוצרו ריקים ונתפסו רק בבדיקה בדפדפן.) -->
+<header>
+  <div class="wrap headbar">
+    <a class="brand" href="home.html" aria-label="DvirTech — לדף הבית"><img class="brand-logo" src="images/logo-dvirtech-transparent.png" alt="DvirTech"></a>
+    <div class="lang-switch">
+      <button class="lang-btn" data-lang="he" onclick="setLang('he')">עברית</button>
+      <button class="lang-btn" data-lang="en" onclick="setLang('en')">English</button>
+    </div>
+  </div>
+</header>
+
+<main class="acc-wrap">
+  <h1 data-he="הצהרת נגישות" data-en="Accessibility statement"></h1>
+  <p class="acc-updated" data-he="עודכן לאחרונה: 27 באוגוסט 2026" data-en="Last updated: August 27, 2026"></p>
+
+  <p data-he="אנחנו ב-DvirTech רואים חשיבות במתן שירות שוויוני, מכבד ונגיש לכל אדם, ובכלל זה לאנשים עם מוגבלות. אנחנו משקיעים באתר הזה כדי שכל אחד ואחת יוכלו לקנות, להשוות ולקבל שירות באופן עצמאי — ומשלימים בכל מקרה שבו האתר עוד לא מספיק, בשירות אישי בטלפון ובוואטסאפ."
+     data-en="At DvirTech we believe in equal, respectful and accessible service for every person, including people with disabilities. We invest in this site so anyone can shop, compare and get service independently — and wherever the site is not yet enough, we complete the gap with personal service by phone and WhatsApp."></p>
+
+  <h2 data-he="פרטי בית העסק" data-en="Business details"></h2>
+  <div class="acc-card">
+    <p data-he="DvirTech — דביר פרץ · עוסק פטור 322999582 · אבן שמואל. האתר הוא חנות מקוונת לרכיבי מחשב, מחשבים מורכבים ושירותי מחשוב."
+       data-en="DvirTech — Dvir Peretz · Exempt dealer 322999582 · Even Shmuel, Israel. The site is an online store for PC components, custom-built computers and computing services."></p>
+  </div>
+
+  <h2 data-he="רמת הנגישות שאנחנו מכוונים אליה" data-en="The accessibility level we aim for"></h2>
+  <p data-he="האתר נבנה בהתאם לעקרונות התקן הישראלי ת&quot;י 5568 ברמה AA (המבוסס על הנחיות WCAG 2.0). בין היתר: ניווט מלא במקלדת ברוב הדפים, מבנה כותרות סמנטי, תיאורי תמונות, טפסים עם תוויות מקושרות והודעות שגיאה ברורות, ותמיכה בהעדפת 'הפחתת תנועה' של מערכת ההפעלה."
+     data-en="The site is built following Israeli Standard 5568 at level AA (based on WCAG 2.0). Among others: full keyboard navigation on most pages, semantic heading structure, image descriptions, forms with associated labels and clear error messages, and support for the operating system's reduced-motion preference."></p>
+
+  <h2 data-he="מגבלות ידועות — בכנות" data-en="Known limitations — honestly"></h2>
+  <div class="acc-card acc-limits">
+    <ul>
+      <li data-he="בונה המחשבים — הכלי המורכב באתר — עדיין אינו נגיש במלואו להפעלה במקלדת ובקורא מסך. אנחנו עובדים על כך. בינתיים, נשמח לבנות איתך את ההרכב בליווי טלפוני מלא, ללא עלות: 050-200-0373."
+          data-en="The PC Builder — the most complex tool on the site — is not yet fully keyboard- and screen-reader-accessible. We are working on it. Meanwhile, we will gladly build your configuration with you over the phone, free of charge: +972-50-200-0373."></li>
+      <li data-he="חלק מתיאורי התמונות של מוצרים שמגיעים מספקים חיצוניים עדיין חלקיים."
+          data-en="Some product-image descriptions sourced from external suppliers are still partial."></li>
+      <li data-he="אנחנו בתהליך בדיקת ניגודיות צבעים מלאה בכל האתר, ומתקנים בהדרגה טקסטים שאינם עומדים ביחס הנדרש."
+          data-en="We are running a full color-contrast audit and progressively fixing any text that falls short of the required ratio."></li>
+    </ul>
+  </div>
+
+  <h2 data-he="הסדרי נגישות שאינם באתר" data-en="Accessibility arrangements beyond the site"></h2>
+  <ul>
+    <li data-he="שירות טלפוני מלא לכל פעולה שאפשר לעשות באתר — ייעוץ, הרכבת הזמנה, מעקב וביטול."
+        data-en="Full phone service for anything the site does — advice, placing an order, tracking and cancellation."></li>
+    <li data-he="מענה בוואטסאפ בכתב, למי שמעדיף תקשורת כתובה."
+        data-en="Written WhatsApp support, for anyone who prefers written communication."></li>
+    <li data-he="ביקורי בית ושירות עד הבית, בתיאום מראש."
+        data-en="Home visits and at-home service, by prior arrangement."></li>
+  </ul>
+
+  <h2 data-he="רכז הנגישות" data-en="Accessibility coordinator"></h2>
+  <div class="acc-card acc-contact">
+    <p>
+      <span data-he="דביר פרץ · טלפון/וואטסאפ: " data-en="Dvir Peretz · Phone/WhatsApp: "></span>
+      <a href="tel:+972502000373" dir="ltr">050-200-0373</a>
+      <span> · </span>
+      <a href="mailto:schr5500@gmail.com" dir="ltr">schr5500@gmail.com</a>
+    </p>
+    <p data-he="נתקלת בקושי נגישות באתר? ספרו לנו — נטפל ונחזור אליכם תוך 3 ימי עסקים, ונדאג שתקבלו את השירות המלא בדרך חלופית עוד באותו יום."
+       data-en="Hit an accessibility barrier on the site? Tell us — we will handle it and get back to you within 3 business days, and make sure you get full service through an alternative channel the same day."></p>
+  </div>
+</main>
+
+<footer></footer>
+
+<script src="sprite.js"></script>
+<script src="i18n.js"></script>
+<script src="site-content.js"></script>
+<script src="search-core.js"></script>
+<script src="site-search.js"></script>
+<script src="site-header.js"></script>
+<script src="site-footer.js"></script>
+<script src="cart.js"></script>
+</body>
+</html>

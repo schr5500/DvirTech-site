@@ -25,8 +25,13 @@
   var HOOK = {
     kicker:   tr("רגע 👋", "Hey 👋"),
     title:    tr("תמיד רצית לבנות מחשב משלך?", "Always wanted your own custom PC?"),
-    sub:      tr("הרכבה ללא עלות · אחריות מלאה · מחיר מראש.",
-                 "Free assembly · Full warranty · Price up front."),
+    /* 🔴 **"הרכבה ללא עלות" הוסר 26.08.** זה הטקסט הראשון שלקוח
+       רואה בכניסה לאתר — הבטחה שכבר לא נכונה כאן היא הגרועה
+       מכולן. ההטבה היום היא מחיר מוזל (199 ₪ במקום 300 ₪), אבל
+       באנר כניסה הוא לא המקום למספרים; הוא מוכר את **הסיבה**
+       לקנות, והמחיר מופיע בקופה. */
+    sub:      tr("רכיבים תואמים · אחריות מלאה · מחיר מראש.",
+                 "Compatible parts · Full warranty · Price up front."),
     cta:      tr("לבונה", "Builder"),
     ctaHref:  "builder.html",
     more:     tr("למה DvirTech?", "Why DvirTech?"),

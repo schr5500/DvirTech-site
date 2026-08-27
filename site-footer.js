@@ -103,6 +103,8 @@ function sfBuildHtml(minimal){
       '<a href="contact.html">' + sfEsc(sfTr("צור קשר","Contact")) + "</a>" +
       '<a href="terms.html">'   + sfEsc(sfTr("תקנון","Terms"))   + "</a>" +
       '<a href="privacy.html">' + sfEsc(sfTr("פרטיות","Privacy")) + "</a>" +
+      /* ⚠️ חובה חוקית גם בפטור — פרטי התקשרות נגישים (DVT-NEXT-BUILD §6.2). */
+      '<a href="accessibility.html">' + sfEsc(sfTr("נגישות","Accessibility")) + "</a>" +
       /* 🔴 גם כאן, ולא רק בעמודת "מידע" — הדרישה היא נגישות מכל עמוד. */
       '<a href="cancel.html">'  + sfEsc(sfTr("ביטול עסקה","Cancel")) + "</a>" +
     "</div>";
@@ -136,6 +138,9 @@ function sfBuildHtml(minimal){
       '<a class="footer-wa" href="https://wa.me/' + SF_WA_NUMBER + '" target="_blank" rel="noopener">' +
         sfEsc(sfTr("וואטסאפ 050-200-0373","WhatsApp 050-200-0373")) +
       "</a>" +
+      '<button type="button" class="footer-bug" onclick="dvtReportBug()">' +
+        sfEsc(sfTr("מצאת באג? ספר לי 🐞","Found a bug? Tell me 🐞")) +
+      "</button>" +
     "</div>";
 
   const cols = SF_COLUMNS.map(function(c){
@@ -147,6 +152,44 @@ function sfBuildHtml(minimal){
            '<div class="footer-grid">' + brand + cols + "</div>" +
            legalLine + legal + copy +
          "</div>";
+}
+
+/* =====================================================================
+   🐞 דיווח באג מהיר
+   =====================================================================
+   דביר: *"אפשר גם להוסיף לבונה כפתור 'מצאתי באג' לשליחת הודעת
+   וואטסאפ מהירה אליי + שתיכנס לרישום בעמודת באגים באחד הגליונות
+   (תגיד מה אתה חושב)."*
+
+   🔴 **המלצתי: וואטסאפ בלבד, בלי כתיבה לגיליון.** ולמה:
+     • כתיבה לגיליון דורשת endpoint **ציבורי וללא אימות** בפרויקט
+       שמנהל תשלומים. זו נקודת כתיבה חדשה שכל אחד באינטרנט יכול
+       להפעיל — ובוט אחד ממלא לך לשונית ושורף מכסת Apps Script
+       שמשותפת לסליקה.
+     • וואטסאפ כבר נותן בדיוק את מה שצריך: הודעה שלא הולכת לאיבוד,
+       עם זהות השולח, **ושאפשר לענות עליה**. באג שדווח בלי דרך
+       לחזור למדווח הוא בדרך כלל באג שאי אפשר לשחזר.
+     • אם בעתיד יהיו הרבה דיווחים — אפשר להוסיף לשונית ולהעביר
+       אליה ידנית, או לחבר endpoint עם מפתח. לא צריך את זה מהיום
+       הראשון.
+
+   ⚠️ ההודעה נושאת **כתובת הדף, שפה, וגודל מסך** — שלושת הדברים
+   שבלעדיהם "לא עובד לי" הוא לא ניתן לשחזור. אין בה שום מידע אישי.
+   ⚠️ `window.open` ולא `location.href`: הלקוח לא מאבד את מה שהיה
+   באמצע (עגלה, טופס, הרכבה בבונה). */
+function dvtReportBug(){
+  var lines = [
+    sfTr("מצאתי באג באתר:", "Found a bug on the site:"),
+    "",
+    sfTr("מה קרה: ", "What happened: "),
+    "",
+    "— — —",
+    sfTr("דף: ", "Page: ") + location.pathname + location.search,
+    sfTr("מסך: ", "Screen: ") + window.innerWidth + "x" + window.innerHeight,
+    sfTr("שפה: ", "Language: ") + (typeof LANG !== "undefined" ? LANG : "he")
+  ];
+  window.open("https://wa.me/" + SF_WA_NUMBER + "?text=" +
+              encodeURIComponent(lines.join("\n")), "_blank", "noopener");
 }
 
 function sfRender(){
