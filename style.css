@@ -1803,7 +1803,10 @@ footer::after{ content:""; display:block; height: var(--fab-safe) }
 .gift-meter-bar > i{
   display:block; height:100%; width:0;
   background:linear-gradient(90deg,#7C3AED 0%,#2FC4B0 100%);
-  border-radius:99px; transition:width .45s cubic-bezier(.22,.9,.3,1);
+  /* 🎢 ‏.8s במקום .45 — דביר: "שזה יעלה ביותר smooth, כרגע זה
+     קפיצות". הקפיצה המורגשת הייתה בעיקר בספרות — הן מתגלגלות
+     עכשיו ב-JS (dvtGiftRollNumber_) — והפס הואט להתאמה. */
+  border-radius:99px; transition:width .8s cubic-bezier(.22,1,.36,1);
 }
 .gift-meter-sub{ margin-top:7px; font-size:11px; color:#0E9C8A; font-weight:700; line-height:1.45 }
 .gift-meter-sub[hidden]{ display:none }
@@ -2294,3 +2297,133 @@ footer::after{ content:""; display:block; height: var(--fab-safe) }
 
 /* מחיר המנוי בעמוד השירותים */
 .sup-price-plan{ font-size:11px; font-weight:800; color:#6D28D9; white-space:nowrap }
+
+/* ==================== 🎨 מודעת המתנות v3 — "משדר מבצע" (27.08) ====
+   דביר: "צריך לשדר מבצע!!! (רק לשדר, לא לכתוב)". פינת 0 ₪ מסתובבת,
+   שווי מתנה גדול, CTA עם הבזק. יושב מעל בסיס v2 — אלה דריסות. */
+#giftPromo{ overflow:hidden }
+.gp-burst{
+  position:absolute; top:14px; inset-inline-start:-34px; z-index:3;
+  transform:rotate(38deg);
+  background:linear-gradient(135deg,#F59E0B,#EF4444);
+  color:#fff; font-weight:900; font-size:11.5px; letter-spacing:.2px;
+  padding:7px 44px; box-shadow:0 6px 16px rgba(239,68,68,.45);
+  pointer-events:none; white-space:nowrap;
+}
+html[dir="ltr"] .gp-burst{ transform:rotate(-38deg) }
+.gp-head h2{ font-size:clamp(30px,4.6vw,44px) }
+/* הסרט האלכסוני יושב בפינה — הטקסט לא נכנס מתחתיו */
+.gp-head p{ max-width:min(82%,560px); margin-inline:auto }
+.gp-head h2 em{
+  background:linear-gradient(90deg,#4FD9C7,#7DE3FF,#4FD9C7);
+  background-size:200% 100%;
+  -webkit-background-clip:text; background-clip:text; -webkit-text-fill-color:transparent;
+  animation:gpShine 3.2s linear infinite;
+}
+@keyframes gpShine{ to{ background-position:200% 0 } }
+.gp-card{ position:relative; overflow:visible }
+.gp-zero{
+  position:absolute; top:-12px; inset-inline-end:-10px; z-index:2;
+  width:46px; height:46px; border-radius:50%;
+  display:flex; align-items:center; justify-content:center;
+  background:radial-gradient(circle at 30% 30%,#FB7185,#E11D48);
+  color:#fff; font-family:'Rubik',sans-serif; font-weight:900; font-size:13px;
+  transform:rotate(-14deg);
+  box-shadow:0 6px 14px rgba(225,29,72,.4), inset 0 0 0 2px rgba(255,255,255,.35);
+}
+.gp-r3 .gp-zero{ width:54px; height:54px; font-size:15px; animation:gpZeroPulse 2.2s ease-in-out infinite }
+@keyframes gpZeroPulse{ 50%{ transform:rotate(-14deg) scale(1.12) } }
+.gp-what .gift-hot{ font-size:1.05em }
+.gp-cta{
+  position:relative; overflow:hidden; font-weight:900;
+  box-shadow:0 8px 22px rgba(79,217,199,.35);
+}
+.gp-cta::after{
+  content:""; position:absolute; top:0; bottom:0; width:44px;
+  inset-inline-start:-60px;
+  background:linear-gradient(100deg,transparent,rgba(255,255,255,.55),transparent);
+  animation:gpSweep 2.8s ease-in-out infinite;
+}
+@keyframes gpSweep{ 55%,100%{ inset-inline-start:130% } }
+@media (prefers-reduced-motion: reduce){
+  .gp-head h2 em{ animation:none }
+  .gp-r3 .gp-zero{ animation:none }
+  .gp-cta::after{ animation:none; display:none }
+  .gift-meter-bar > i{ transition:none }
+}
+@media (max-width:560px){ .gp-burst{ top:10px; font-size:10px; padding:6px 40px } }
+
+/* ==================== ❓ הסבר שני המחירים (support) ==================== */
+.sup-price-why{
+  border:0; background:none; cursor:pointer; text-decoration:underline dotted;
+  text-underline-offset:3px; padding:0; font:inherit;
+}
+.sup-price-why:hover{ color:var(--blue,#1B6FE0) }
+.sup-why-overlay{
+  position:fixed; inset:0; z-index:1200; background:rgba(10,26,43,.55);
+  display:flex; align-items:center; justify-content:center; padding:18px;
+}
+.sup-why-box{
+  position:relative; background:var(--surface,#fff); border-radius:16px;
+  max-width:460px; width:100%; padding:24px 26px;
+  box-shadow:0 24px 60px rgba(0,0,0,.3);
+}
+.sup-why-box h3{ margin:0 0 12px; font-size:18px; color:var(--ink,#0E2A47) }
+.sup-why-box p{ font-size:13.5px; line-height:1.75; color:var(--ink,#0E2A47); margin:0 0 10px }
+.sup-why-note{ color:var(--ink-soft,#5F7590); font-size:12.5px }
+.sup-why-x{
+  position:absolute; top:10px; inset-inline-start:12px; border:0; background:none;
+  font-size:16px; cursor:pointer; color:var(--ink-soft,#5F7590);
+}
+
+/* ==================== 👤 מצב מחובר בהדר ==================== */
+.head-acct{ position:relative; display:inline-flex }
+.head-ic.is-logged{ position:relative }
+.head-acct-dot{
+  position:absolute; top:6px; inset-inline-end:6px; width:9px; height:9px;
+  border-radius:50%; background:#22C55E; border:2px solid var(--surface,#fff);
+}
+.head-acct-menu{
+  position:absolute; top:calc(100% + 8px); inset-inline-end:0; z-index:1100;
+  min-width:210px; background:var(--surface,#fff); border:1px solid var(--line,#DEE6F0);
+  border-radius:14px; padding:8px; box-shadow:0 16px 40px rgba(11,44,77,.16);
+  display:flex; flex-direction:column;
+}
+/* ⚠️ display מפורש גובר על hidden — בלי זה התפריט נולד פתוח. */
+.head-acct-menu[hidden]{ display:none }
+.head-acct-hi{
+  font-weight:800; font-size:13.5px; color:var(--ink,#0E2A47);
+  padding:8px 10px 10px; border-bottom:1px solid var(--line-soft,#EDF2F8); margin-bottom:6px;
+}
+.head-acct-plan{
+  display:inline-block; margin-inline-start:8px; padding:2px 8px; border-radius:999px;
+  background:#EDE9FE; color:#6D28D9; font-size:10.5px; font-weight:800; vertical-align:1px;
+}
+.head-acct-menu a, .head-acct-menu button{
+  text-align:start; border:0; background:none; cursor:pointer;
+  font:inherit; font-size:13px; color:var(--ink,#0E2A47);
+  padding:8px 10px; border-radius:8px; text-decoration:none;
+}
+.head-acct-menu a:hover, .head-acct-menu button:hover{ background:var(--surface-2,#F2F7FC) }
+.head-acct-menu button{ color:#B4232E; border-top:1px solid var(--line-soft,#EDF2F8); border-radius:0 0 8px 8px; margin-top:4px }
+
+/* ==================== 👤 מחיקת חשבון + משוב שמירה ==================== */
+.acct-danger{
+  margin-top:16px; padding-top:12px; border-top:1px dashed var(--line,#DEE6F0);
+  font-size:11.5px; color:var(--ink-soft,#5F7590); line-height:1.6;
+}
+.acct-danger-link{
+  border:0; background:none; padding:0; cursor:pointer; font:inherit;
+  font-weight:800; color:#B4232E; text-decoration:underline; text-underline-offset:3px;
+}
+.acct-danger-link:hover{ color:#8F1B24 }
+.validation-msg.is-good{ color:#0E7A5F; background:#E9FBF3; border-color:#B5EAD3 }
+.btn.is-saved{ background:#16A34A !important }
+
+/* ==================== 👤 שורת ההשלמה בקופה ==================== */
+.prefill-hint{
+  margin:0 0 12px; padding:9px 12px; border-radius:10px;
+  background:#EFF8FF; border:1px solid #CBE5FB; color:#134E8D;
+  font-size:12.5px; line-height:1.6;
+}
+

@@ -143,27 +143,24 @@ const SUP_SERVICES = [
      "דברים מהסוג הזה ממש מעשירים את האתר." */
   /* 🔴 **המחירון הדו-שכבתי (27.08, DVT-NEXT-BUILD §1.2).**
      `price` = מחיר טכנאי (לכל אחד) · `dvt` = מחיר לקוחות DvirTech —
-     מי שרכש אצלנו 1,000 ₪+ ב-12 החודשים. שני המחירים אמיתיים
-     ונגבים בפועל — לכן מותר להציגם זה לצד זה. */
-  { key:"assembly-parts", sku:"CLI-4001", cat:"assembly", price:450, dvt:250,
+     מחשב שלם / 3,000 ₪+ ב-12 החודשים / מנוי פעיל (הרף עלה מ-1,000
+     בהחלטת דביר 27.08). שני המחירים אמיתיים ונגבים בפועל — לכן
+     מותר להציגם זה לצד זה. */
+  /* 🔴 שלוש רמות ההרכבה צומצמו לשתיים (27.08, החלטת דביר): מחיר
+     אחד לכל מחשב — כולל נוזלי/RGB/זכוכית — ופרימיום עם בדיקת עומס. */
+  { key:"assembly-parts", sku:"CLI-4010", cat:"assembly", price:450, dvt:250,
     he:"הרכבת מחשב", en:"PC assembly",
-    descHe:"הרכבה מלאה הכוללת: סידור כבלים בסיסי, בדיקת POST, בדיקת תקינות הרכיבים (איתור נזק חומרה) ואימות שהמערכת עולה עד ה-BIOS. בלי התקנת Windows.",
-    descEn:"A full build including: basic cable management, POST check, component health check (hardware damage) and verifying the system boots to BIOS. Windows install not included.",
+    descHe:"הרכבה מלאה של כל הרכיבים — כולל קירור נוזלי, RGB ומארז זכוכית, באותו מחיר. סידור כבלים, הפעלת XMP/EXPO, בדיקת POST ותקינות מלאה עד ה-BIOS. בלי התקנת Windows.",
+    descEn:"A full build of every component — liquid cooling, RGB and glass cases included, same price. Cable management, XMP/EXPO, POST check and full health check to BIOS. Windows install not included.",
     q:[ SQ.partsReady, SQ.partsList, SQ.handover ] },
 
-  { key:"assembly-full", sku:"CLI-4040", cat:"assembly", price:620, dvt:390,
-    he:"הרכבה מלאה (נוזלי / RGB / זכוכית)", en:"Full build (AIO / RGB / glass)",
-    descHe:"כל מה שבהרכבה + קירור נוזלי או מערך מאווררים מורחב, כבלים מוקפדים למארז זכוכית, עקומות מאווררים ו-RGB, הפעלת XMP/EXPO וכוננים נוספים.",
-    descEn:"Everything in the standard build + liquid cooling or an extended fan array, show-ready cabling for glass cases, fan curves and RGB, XMP/EXPO and extra drives.",
+  { key:"assembly-premium", sku:"CLI-4011", cat:"assembly", price:650, dvt:450,
+    he:"הרכבה פרימיום — עם דוח מסירה", en:"Premium build — with a hand-over report",
+    descHe:"כל מה שבהרכבת המחשב + בדיקת עומס של 3 שעות (טמפרטורות, תדרים, יציבות), דוח מסירה חתום עם התוצאות, וכיול עקומות לשקט או לביצועים.",
+    descEn:"Everything in the standard build + a 3-hour stress test (temperatures, clocks, stability), a signed hand-over report, and fan curves tuned for silence or performance.",
     q:[ SQ.partsReady, SQ.partsList, SQ.handover ] },
 
-  { key:"assembly-premium", sku:"CLI-4041", cat:"assembly", price:950, dvt:650,
-    he:"הרכבת פרימיום — עם דוח מסירה", en:"Premium build — with a hand-over report",
-    descHe:"כל מה שבהרכבה המלאה + בדיקת עומס של 3 שעות (טמפרטורות, תדרים, יציבות), דוח מסירה חתום עם התוצאות, וכיול עקומות לשקט או לביצועים.",
-    descEn:"Everything in the full build + a 3-hour stress test (temperatures, clocks, stability), a signed hand-over report, and fan curves tuned for silence or performance.",
-    q:[ SQ.partsReady, SQ.partsList, SQ.handover ] },
-
-  { key:"assembly-win", sku:"CLI-4002", cat:"assembly", price:180, dvt:100,
+  { key:"assembly-win", sku:"CLI-4012", cat:"assembly", price:180, dvt:100,
     he:"תוספת Windows להרכבה (+דרייברים ועדכונים)", en:"Windows add-on to a build (+drivers & updates)",
     descHe:"כל מה שבהרכבה (כבלים, POST, תקינות רכיבים, עלייה ל-BIOS) + ערכת Windows מלאה: התקנה נקייה, דרייברים בסיסיים, בדיקת טמפרטורות ובדיקת יציבות. הרישיון לא כלול במחיר.",
     descEn:"Everything in the build (cables, POST, component checks, BIOS boot) + the full Windows kit: clean install, basic drivers, temperature check and a stability test. License not included.",
@@ -223,7 +220,7 @@ const SUP_SERVICES = [
      ‏200 ₪ — זהים לכולם, "הנסיעה עולה לי אותו דבר") + עבודה לפי שעה
      (‏180 ₪ / 140 ₪ ללקוחות DvirTech, שעה נוספת 150/120). הכרטיס
      מציג "מ-" — הסכום המדויק מאושר בטלפון לפני שקובעים. */
-  { key:"visit-30", sku:"CLI-4009", cat:"visit", price:270, dvt:230, from:true,
+  { key:"visit-30", sku:"CLI-4040", cat:"visit", price:270, dvt:230, from:true,
     he:"ביקור בית — אבחון וטיפול אצלך", en:"Home visit — diagnosis & help at your place",
     descHe:"דמי הגעה 90–200 ₪ לפי מרחק הנסיעה + שעת עבודה ראשונה (180 ₪, או 140 ₪ ללקוחות DvirTech). שעה נוספת: 150/120 ₪. המחיר המדויק מאושר איתך לפני שקובעים.",
     descEn:"A travel fee of 90–200 ₪ by distance + the first working hour (180 ₪, or 140 ₪ for DvirTech customers). Extra hour: 150/120 ₪. The exact price is confirmed with you before scheduling.",
@@ -255,7 +252,7 @@ const SUP_SERVICES = [
         SQ.when ] },
 
   /* ---------- תמיכה ---------- */
-  { key:"remote-support", sku:"CLI-4014", cat:"support", price:170, dvt:120,
+  { key:"remote-support", sku:"CLI-4032", cat:"support", price:170, dvt:120,
     he:"תמיכה מרחוק (עד 45 דק')", en:"Remote support (up to 45 min)",
     descHe:"מתחבר למחשב שלך ופותר בזמן אמת. עד 45 דקות; כל 30 דקות נוספות — 80 ₪ (60 ₪ ללקוחות DvirTech).",
     descEn:"I connect to your PC and fix things live. One working hour.",
@@ -595,10 +592,44 @@ function supPriceHtml(s){
       : "";
     return `<s class="sup-price-was">${supEsc(supPriceLabel(s.price, s.from))}</s>` +
            `<span class="sup-price-now">${supEsc(supPriceLabel(s.dvt, s.from))}</span>` +
-           `<span class="sup-price-tag">${supEsc(supTr("ללקוחות DvirTech","DvirTech customers"))}</span>` +
+           `<button type="button" class="sup-price-tag sup-price-why" onclick="supWhyTiers(event)">${
+             supEsc(supTr("ללקוחות DvirTech · מה זה?","DvirTech customers · what's this?"))}</button>` +
            planLine;
   }
   return supEsc(supPriceLabel(s.price, s.from));
+}
+
+/* =====================================================================
+   ❓ ההסבר על שני המחירים — בקשת דביר (27.08): "צריך לתת ללקוח
+   אפשרות להבין מה ההבדל בין מחירי DvirTech לבין המחיר הרגיל."
+   =====================================================================
+   ⚠️ הרף המצוין כאן (3,000 ₪ / מחשב / מנוי) חייב להישאר זהה
+   ל-ACCT_ELIG_MIN_ בשרת ולתקנון §6.8. */
+function supWhyTiers(ev){
+  if(ev){ ev.preventDefault(); ev.stopPropagation(); }
+  let m = document.getElementById("supWhyModal");
+  if(!m){
+    m = document.createElement("div");
+    m.id = "supWhyModal";
+    m.className = "sup-why-overlay";
+    m.innerHTML =
+      '<div class="sup-why-box" role="dialog" aria-modal="true" aria-label="' +
+        supEsc(supTr("הסבר על המחירים","About the prices")) + '">' +
+        '<button class="sup-why-x" aria-label="close" onclick="document.getElementById(\'supWhyModal\').remove()">✕</button>' +
+        '<h3>' + supEsc(supTr("למה יש שני מחירים?","Why two prices?")) + '</h3>' +
+        '<p><b>' + supEsc(supTr("מחיר טכנאי","Technician price")) + '</b> — ' +
+          supEsc(supTr("המחיר הרגיל, לכל פונה. זה מחיר אמיתי שנגבה בפועל ממי שמגיע עם חומרה שנקנתה במקום אחר.",
+                       "The regular price, for anyone. It is a real price, actually charged when the hardware was bought elsewhere.")) + '</p>' +
+        '<p><b>' + supEsc(supTr("מחיר DvirTech","DvirTech price")) + '</b> — ' +
+          supEsc(supTr("מחיר מוזל ללקוחות הבית שלנו. מי נחשב? מספיק אחד מאלה: קניתם כאן מחשב שלם · קניתם מוצרים ב-3,000 ₪+ בשנה האחרונה · יש לכם מנוי Care פעיל.",
+                       "A reduced price for our house customers. Any one of these qualifies: you bought a full PC here · you bought 3,000 ₪+ of products in the last year · you hold an active Care plan.")) + '</p>' +
+        '<p class="sup-why-note">' +
+          supEsc(supTr("בקנייה באתר שכוללת מחשב — המחיר המוזל חל אוטומטית בקופה. בקריאת שירות — הזכאות נבדקת מול הרישום שלנו לפני החיוב.",
+                       "Buying a PC on the site applies the reduced price automatically at checkout. For service calls, eligibility is checked against our records before billing.")) + '</p>' +
+      '</div>';
+    m.addEventListener("click", function(e){ if(e.target === m) m.remove(); });
+    document.body.appendChild(m);
+  }
 }
 function supAnsKey(key, qid){ return key + "|" + qid; }
 /* התווית להודעה — בלי הסיומת "(לא חובה)" שנועדה למסך בלבד. */
@@ -943,8 +974,8 @@ function supBuildMessage(items, c){
 
   items.forEach(it => {
     /* ⚠️ בהודעה מצוינים שני המחירים כשיש שכבה כפולה — הזכאות למחיר
-       DvirTech (רכישות 1,000 ₪+ ב-12 חודשים) נבדקת בשיחה, ואסור
-       שההודעה "תבטיח" מראש את המחיר המוזל. */
+       DvirTech (‏3,000 ₪+ בשנה / מחשב שלם / מנוי — §6.8) נבדקת
+       בשיחה, ואסור שההודעה "תבטיח" מראש את המחיר המוזל. */
     L.push("+ " + supName(it.s) + " — " + (it.s.dvt != null && it.s.dvt < it.s.price
       ? supPriceLabel(it.s.price, it.s.from) + supTr(" (ללקוחות DvirTech: "," (DvirTech customers: ") + supPriceLabel(it.s.dvt, it.s.from) + ")"
       : supPriceLabel(it.s.price, it.s.from)));

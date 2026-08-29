@@ -178,6 +178,82 @@ function shEsc(s){
 }
 
 /* שם הקובץ הנוכחי, לצורך סימון הדף הפעיל. */
+/* =====================================================================
+   👤 מצב מחובר בהדר — "שלום דביר · PLUS" + תפריט
+   =====================================================================
+   דביר: "שלקוח מחובר יראה שהוא מחובר — לחצן שנפתח עם תפריט של
+   החשבון, ומתחת לשם יהיה כתוב חבילת Y. איך משתמש ידע אם הוא מחובר?"
+
+   ⚠️ קורא **מטמון תצוגה בלבד** (dvt_acct_profile שנכתב אחרי כניסה
+   מאומתת). אין כאן שום החלטה כספית — עריכת ה-localStorage משנה מה
+   כתוב על המסך של העורך, ותו לא. פג תוקף/אין מטמון → אייקון רגיל. */
+function shAcctProfile(){
+  try{
+    const raw = localStorage.getItem("dvt_acct_profile");
+    if(!raw) return null;
+    const p = JSON.parse(raw);
+    if(!p || !p.name || !(p.exp > Date.now())) return null;
+    return p;
+  }catch(e){ return null; }
+}
+
+function shAcctRender(){
+  const host = document.getElementById("headAcct");
+  if(!host) return;
+  const p = shAcctProfile();
+  if(!p){
+    host.innerHTML =
+      '<a class="head-ic" href="account.html" aria-label="' + shEsc(shTr("האזור האישי","My account")) +
+      '" title="' + shEsc(shTr("האזור האישי","My account")) + '">' +
+      '<svg class="ui-ic" aria-hidden="true"><use href="#ui-user"/></svg></a>';
+    return;
+  }
+  const first = shEsc(String(p.name).split(" ")[0]);
+  host.innerHTML =
+    '<button class="head-ic is-logged" id="headAcctBtn" aria-haspopup="true" aria-expanded="false"' +
+    ' title="' + first + '">' +
+      '<svg class="ui-ic" aria-hidden="true"><use href="#ui-user"/></svg>' +
+      '<i class="head-acct-dot" aria-hidden="true"></i>' +
+    '</button>' +
+    '<div class="head-acct-menu" id="headAcctMenu" hidden>' +
+      '<div class="head-acct-hi">' + shEsc(shTr("שלום ","Hi ")) + first + ' 👋' +
+        (p.plan ? '<span class="head-acct-plan">Care · ' + shEsc(p.plan) + '</span>' : '') + '</div>' +
+      '<a href="account.html">👤 ' + shEsc(shTr("האזור האישי","My account")) + '</a>' +
+      '<a href="account.html">📦 ' + shEsc(shTr("ההזמנות שלי","My orders")) + '</a>' +
+      '<a href="support.html">🔧 ' + shEsc(shTr("המחיר שלך בשירותים","Your service pricing")) + '</a>' +
+      '<button type="button" id="headAcctOut">⎋ ' + shEsc(shTr("התנתקות","Sign out")) + '</button>' +
+    '</div>';
+
+  const btn = document.getElementById("headAcctBtn");
+  const menu = document.getElementById("headAcctMenu");
+  btn.addEventListener("click", function(ev){
+    ev.stopPropagation();
+    const open = menu.hidden;
+    menu.hidden = !open;
+    btn.setAttribute("aria-expanded", String(open));
+  });
+  document.addEventListener("click", function(){ menu.hidden = true; btn.setAttribute("aria-expanded","false"); });
+  document.getElementById("headAcctOut").addEventListener("click", function(){
+    try{
+      localStorage.removeItem("dvt_acct_token");
+      localStorage.removeItem("dvt_acct_plan");
+      localStorage.removeItem("dvt_acct_profile");
+      sessionStorage.removeItem("dvtCartPulled");
+    }catch(e){}
+    /* בעמוד האזור האישי — לחזור למסך הכניסה; בכל דף אחר מספיק
+       שהאייקון יחזור לרגיל. */
+    if(location.pathname.indexOf("account.html") >= 0) location.reload();
+    else shAcctRender();
+  });
+}
+
+/* מצב מחובר — אחרי שההדר קיים ב-DOM, ושוב אם הדף נטען לאט. */
+if(document.readyState === "loading"){
+  document.addEventListener("DOMContentLoaded", shAcctRender);
+}else{
+  shAcctRender();
+}
+
 function shCurrentPage(){
   const p = location.pathname.split("/").pop();
   return p || "home.html";
@@ -245,11 +321,13 @@ function buildSiteHeader(){
         <span class="head-ic-badge" id="headCartCount" style="display:none">0</span>
       </button>
       <!-- 👤 האזור האישי — הודלק 27.08 כשההתחברות (OTP למייל) נבנתה.
-           ההערה הישנה אמרה "מוסתר עד שתהיה התחברות אמיתית" — יש. -->
-      <a class="head-ic" href="account.html" aria-label="${shEsc(shTr("האזור האישי","My account"))}"
-         title="${shEsc(shTr("האזור האישי","My account"))}">
-        <svg class="ui-ic" aria-hidden="true"><use href="#ui-user"/></svg>
-      </a>
+           לקוח מחובר מקבל נקודה ירוקה + תפריט (shAcctRender). -->
+      <span class="head-acct" id="headAcct">
+        <a class="head-ic" href="account.html" aria-label="${shEsc(shTr("האזור האישי","My account"))}"
+           title="${shEsc(shTr("האזור האישי","My account"))}">
+          <svg class="ui-ic" aria-hidden="true"><use href="#ui-user"/></svg>
+        </a>
+      </span>
     </div>
 
     <div class="lang-switch">
@@ -265,6 +343,11 @@ function buildSiteHeader(){
 
   header.dataset.shBuilt = "1";
   wireCatalogMenu(bar);
+  /* 👤 מצב מחובר — חייב לרוץ **אחרי** שה-innerHTML של ההדר קיים.
+     הקריאה ב-DOMContentLoaded לא מספיקה: סדר המאזינים תלוי בסדר
+     הרישום, וכשהבנייה רצה אחרי — ה-#headAcct עוד לא היה (נצפה
+     בבדיקה 27.08: menuBtn=false למרות פרופיל תקין). */
+  shAcctRender();
   if(typeof initSiteSearch === "function") initSiteSearch();
   // ⚠️ cart.js נטען אחרי הקובץ הזה ומזריק את ה-widget שלו רק ב-initCart.
   // קריאה ל-renderCart לפני כן נופלת על אלמנטים שעוד לא קיימים, ולכן

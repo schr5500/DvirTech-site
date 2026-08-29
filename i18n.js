@@ -18,7 +18,41 @@ function setLangCore(lang){
   try { localStorage.setItem("dvirtech_lang", lang); } catch(e) { /* storage unavailable — language just won't persist */ }
   document.documentElement.lang = lang;
   document.documentElement.dir = lang === "he" ? "rtl" : "ltr";
+  applyDataLang();
 }
+
+/* =====================================================================
+   טקסטים סטטיים ב-HTML — [data-he] / [data-en]
+   =====================================================================
+   🔴 **"העמוד השבור" — gifts.html בלי כותרת, שלבים ריקים (27.08).**
+   התבנית data-he שימשה 15+ דפים, אבל כל דף יישם אותה בסקריפט משלו
+   (home.js, support.js, terms.js…) — ודף חדש בלי סקריפט משלו קיבל
+   טקסט ריק בלי שום שגיאה. דביר לחץ על המודעה בקטלוג ונחת בדיוק שם.
+   מעכשיו i18n.js — שנטען בכל דף — מיישם את התבנית בעצמו: פעם אחת
+   בטעינה, ושוב בכל החלפת שפה. הדפים הוותיקים מריצים את זה גם
+   בעצמם — אותה תוצאה בדיוק, ריצה כפולה אינה מזיקה (idempotent).
+   ⚠️ textContent ולא innerHTML — הערכים הם טקסט; תגית שתוכנס לשם
+   תוצג כטקסט ולא תרונדר, וזה מכוון (אין הזרקת HTML מ-attributes). */
+function applyDataLang(root){
+  (root || document).querySelectorAll("[data-he]").forEach(function(el){
+    var v = LANG === "en" ? (el.dataset.en || el.dataset.he) : el.dataset.he;
+    if (v != null) el.textContent = v;
+  });
+}
+
+/* דף בלי setLang משלו (gifts.html, accessibility.html, account.html)
+   מקבל ברירת מחדל: החלפה + רענון הטקסטים הסטטיים. דף עם setLang
+   משלו מנצח — ההגדרה שלו נטענת אחרי הקובץ הזה ודורסת את החלון. */
+document.addEventListener("DOMContentLoaded", function(){
+  applyDataLang();
+  if (typeof window.setLang !== "function") {
+    window.setLang = function(lang){ setLangCore(lang); location.reload(); };
+  }
+  /* סימון כפתור השפה הפעיל — הדפים בלי סקריפט משלהם צריכים גם את זה. */
+  document.querySelectorAll(".lang-btn").forEach(function(b){
+    b.classList.toggle("active", b.dataset.lang === LANG);
+  });
+});
 
 const UI_TEXT = {
   he: {

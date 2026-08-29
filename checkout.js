@@ -408,9 +408,24 @@ function shippingOption(){
   return DVT_SHIPPING.find(s => s.key === shippingKey) || null;
 }
 
+/* 🎁 האם הזמנה זו הרוויחה משלוח חינם? נשען על מנגנון המדרגות של
+   cart.js (אותם כללים חיים מהשרת). ⚠️ **תצוגה בלבד** — השרת מכריע
+   מחדש ב-createPayment_ (gifts.freeShipping) וגובה לפי עצמו; כאן רק
+   דואגים שהלקוח יראה את אותו מספר. הבאג שדווח (27.08): "קיבלתי
+   משלוח חינם — והקופה עדיין מציגה 29 ₪". */
+function checkoutFreeShip(){
+  try{
+    if(typeof dvtGiftProgress !== "function") return false;
+    const p = dvtGiftProgress();
+    return !!(p && p.earned && p.earned.some(function(x){ return x.kind === "shipping"; }));
+  }catch(e){ return false; }
+}
+
 function shippingPrice(){
   const o = shippingOption();
-  return o ? o.price : 0;
+  if(!o) return 0;
+  if(o.price > 0 && checkoutFreeShip()) return 0;
+  return o.price;
 }
 
 function renderShippingOptions(){
@@ -424,7 +439,11 @@ function renderShippingOptions(){
              onchange="onShippingChange(this.value)">
       <span class="ship-name">${tr(s.he, s.en)}</span>
       <span class="ship-eta">${tr(s.etaHe, s.etaEn)}</span>
-      <span class="ship-price">${s.price === 0 ? tr("ללא עלות","Free") : "+" + s.price.toLocaleString() + " ₪"}</span>
+      <span class="ship-price">${s.price === 0
+        ? tr("ללא עלות","Free")
+        : (checkoutFreeShip()
+            ? `<s>+${s.price.toLocaleString()} ₪</s> <b class="gift-hot">${tr("חינם 🎁","Free 🎁")}</b>`
+            : "+" + s.price.toLocaleString() + " ₪")}</span>
     </label>`).join("");
 }
 
@@ -525,24 +544,20 @@ function shippingAddressText(){
    הוא מחיר הטכנאי, שנגבה בפועל מלקוחות שירות שלא רכשו חומרה — ולכן
    מותר להציגו מחוק (חוק הגנת הצרכן: מחיר קודם חייב להיגבות באמת). */
 const DVT_SERVICES = [
-  /* --- שלוש רמות הרכבה. group:"assembly" — נבחרת אחת. --- */
+  /* --- הרכבה: מחיר אחד לכל מחשב + פרימיום (החלטת דביר 27.08:
+     "בכל חנות אחרת זה פשוט הרכבת מחשב — 250 לכולם, פרימיום 450").
+     group:"assembly" — נבחרת אחת. הרמה האמצעית (asm-full, 390)
+     מוזגה פנימה: נוזלי/RGB/זכוכית כלולים במחיר האחיד. --- */
   { key:"asm-basic", he:"הרכבת המחשב", en:"PC assembly", price:250, wasPrice:450, group:"assembly", requiresPc:true, hot:true,
     details:[
-      ["הרכבה מלאה של כל הרכיבים במארז, עד 3 מאווררים","Full assembly of every component, up to 3 fans"],
+      ["הרכבה מלאה של כל הרכיבים — כולל קירור נוזלי, RGB ומארזי זכוכית, באותו מחיר","Full assembly of every component — liquid cooling, RGB and glass cases included, same price"],
       ["בדיקת התאמה לפני ההרכבה — שקע, מארז, הספק","Compatibility check first — socket, clearance, PSU headroom"],
-      ["סידור כבלים ובדיקת תקינות מלאה עד BIOS","Cable management and a full health check to BIOS"],
+      ["סידור כבלים, הפעלת XMP/EXPO ובדיקת תקינות מלאה עד BIOS","Cable management, XMP/EXPO enabled and a full health check to BIOS"],
       ["עדכון BIOS אם נדרש","BIOS update if needed"]
     ] },
-  { key:"asm-full", he:"הרכבה מלאה (נוזלי / RGB / זכוכית)", en:"Full build (AIO / RGB / glass)", price:390, wasPrice:620, group:"assembly", requiresPc:true,
+  { key:"asm-premium", he:"הרכבה פרימיום", en:"Premium build", price:450, wasPrice:650, group:"assembly", requiresPc:true,
     details:[
-      ["כל מה שבהרכבה הרגילה","Everything in the standard build"],
-      ["קירור נוזלי או מערך מאווררים מורחב","Liquid cooling or an extended fan array"],
-      ["כבלים מוקפדים למארז זכוכית + עקומות מאווררים ו-RGB","Show-ready cabling for glass cases + fan curves and RGB"],
-      ["הפעלת XMP/EXPO וכוננים נוספים","XMP/EXPO enabled, extra drives installed"]
-    ] },
-  { key:"asm-premium", he:"הרכבת פרימיום", en:"Premium build", price:650, wasPrice:950, group:"assembly", requiresPc:true,
-    details:[
-      ["כל מה שבהרכבה המלאה","Everything in the full build"],
+      ["כל מה שבהרכבת המחשב","Everything in the standard build"],
       ["בדיקת עומס של 3 שעות — טמפרטורות, תדרים, יציבות","A 3-hour stress test — temperatures, clocks, stability"],
       ["דוח מסירה חתום עם תוצאות הבדיקות","A signed hand-over report with the results"],
       ["כיול עקומות מאווררים לשקט/ביצועים","Fan curves tuned for silence or performance"]
@@ -586,8 +601,10 @@ const DVT_SERVICES = [
     ] },
   { key:"bundle-home", he:"חבילה: מחשב חדש עד הבית", en:"Bundle: new PC to your door", price:650, group:"assembly", requiresPc:true,
     includes:["asm-basic","win-install","software-install","onsite-setup","data-transfer"],
-    noteHe:"הכל — כולל הגעה, התקנה בעמדה שלך, העברת נתונים והדרכה. בנפרד: 790 ₪ — חוסך 140 ₪.",
-    noteEn:"Everything — arrival, setup at your desk, data transfer and a walkthrough. Separately: 790 ₪ — you save 140 ₪.",
+    /* ⚠️ הסכום "בנפרד" מחושב מהמחירים החיים של הרכיבים —
+       ‏250+100+50+300+180 = 880. אם מחיר רכיב משתנה, לעדכן כאן. */
+    noteHe:"הכל — כולל הגעה, התקנה בעמדה שלך, העברת נתונים והדרכה. בנפרד: 880 ₪ — חוסך 230 ₪.",
+    noteEn:"Everything — arrival, setup at your desk, data transfer and a walkthrough. Separately: 880 ₪ — you save 230 ₪.",
     details:[
       ["כל מה שבחבילת \"מוכן לעבודה\"","Everything in the ready-to-work bundle"],
       ["הגעה אליך והתקנה מלאה בעמדה (עד 30 דק' נסיעה)","Arrival and full setup at your desk (up to 30 min drive)"],
@@ -626,6 +643,42 @@ const DVT_SERVICES = [
    למחשב קיים עדיין מוצא את הדרך, בלי רשימה שמתחזה לתפריט. */
 
 let selectedServices = [];   // מפתחות בלבד — זה גם מה שנשלח לשרת
+
+/* =====================================================================
+   👤 השלמת פרטים ללקוח מחובר
+   =====================================================================
+   דביר: "אם מחובר משתמש ויש לנו את הפרטים שלו — שבמעמד הקנייה זה
+   ישלים לו אותם. שירגיש שהוא מחובר למשתמש."
+   ⚠️ ממלא רק שדות **ריקים** — מה שהלקוח כבר הקליד קדוש. הנתונים
+   מגיעים מהמטמון שהאזור האישי שומר אחרי כניסה מאומתת; אין כאן
+   קריאת רשת ואין אמון בערכים — השרת ממילא מקבל את מה שבטופס. */
+function checkoutPrefill(){
+  let prof = null;
+  try{
+    const raw = localStorage.getItem("dvt_acct_profile");
+    if(raw) prof = JSON.parse(raw);
+    if(prof && !(prof.exp > Date.now())) prof = null;
+  }catch(e){ prof = null; }
+  if(!prof) return;
+  [["custName", prof.name], ["custPhone", prof.phone], ["custEmail", prof.email]]
+    .forEach(function(pair){
+      const el = document.getElementById(pair[0]);
+      if(el && !el.value.trim() && pair[1]) el.value = pair[1];
+    });
+  const hint = document.getElementById("checkoutPrefillHint");
+  if(hint){
+    hint.textContent = tr("👤 שלום " + (String(prof.name || "").split(" ")[0] || "") +
+                          " — השלמנו את הפרטים מהחשבון שלך. אפשר לערוך הכל.",
+                          "👤 Hi " + (String(prof.name || "").split(" ")[0] || "") +
+                          " — we filled in your account details. Everything is editable.");
+    hint.hidden = false;
+  }
+}
+if(document.readyState === "loading"){
+  document.addEventListener("DOMContentLoaded", checkoutPrefill);
+}else{
+  checkoutPrefill();
+}
 
 /* נצרך פעם אחת בלבד לכל טעינת דף — ראה ההודעה ב-submitCheckout. */
 let lowStockAcked = false;
@@ -982,8 +1035,10 @@ function renderInstallmentOptions(base){
     const fee = installmentFeeAmount(base, n);
     const word = n === 1 ? tr("תשלום אחד", "1 payment")
                          : n + tr(" תשלומים", " payments");
+    /* ⚠️ הסכום מוצג מדויק, לא מעוגל — דביר: "חשוב ע\"פ חוק להראות
+       את התשלום המדויק." אגורות מוצגות רק כשהן קיימות. */
     let txt = fee > 0
-      ? word + "  ·  +" + Math.round(fee).toLocaleString() + " ₪"
+      ? word + "  ·  +" + dvtMoney(fee) + " ₪"
       : word + "  ·  " + tr("ללא עמלה", "no fee");
     if(n === best) txt += "  ·  " + tr("⭐ הכי משתלם", "⭐ best value");
     opt.textContent = txt;
@@ -1010,6 +1065,13 @@ function renderInstallmentOptions(base){
   }
 }
 
+/* מטבע לתצוגה: שלם בלי אגורות, שבר עם שתי ספרות בדיוק. */
+function dvtMoney(n){
+  const v = Math.round(Number(n) * 100) / 100;
+  return v % 1 === 0 ? v.toLocaleString()
+       : v.toLocaleString(undefined, { minimumFractionDigits: 2, maximumFractionDigits: 2 });
+}
+
 function renderCheckoutTotals(){
   const count = parseInt(document.getElementById("installmentsCount").value, 10) || 1;
   const shipCost = shippingPrice();
@@ -1020,6 +1082,7 @@ function renderCheckoutTotals(){
   const fee = installmentFeeAmount(base, count);
   renderInstallmentOptions(base);
   const grandTotal = Math.round((base + fee) * 100) / 100;
+  /* עמלה מוצגת מדויקת גם בשורת הפירוט למטה. */
   /* 🔴 **הבאג שהשאיר "סה\"כ לתשלום: 0 ₪" בקופה החיה.**
      `pct` הוזכר פעמיים בהמשך הפונקציה ומעולם לא הוגדר — שריד
      מריפקטור שבו העמלה עברה מאחוז שטוח ל-installmentFeeAmount().
@@ -1032,7 +1095,17 @@ function renderCheckoutTotals(){
 
   const shipRow = document.getElementById("shipRow");
   if(shipRow){
-    shipRow.style.display = shipCost > 0 ? "block" : "none";
+    /* משלוח שהורווח חינם — מציגים שורה עם 0 ₪ (במתנה) במקום להעלים,
+       כדי שהלקוח יראה שההטבה באמת חלה. */
+    const freeWon = shippingKey !== "pickup" && shippingOption() &&
+                    shippingOption().price > 0 && shipCost === 0;
+    shipRow.style.display = (shipCost > 0 || freeWon) ? "block" : "none";
+    if(freeWon){
+      const o = shippingOption();
+      document.getElementById("shipLabel").textContent =
+        (o ? tr(o.he, o.en) : tr("משלוח","Delivery")) + " " + tr("(במתנה 🎁)","(free gift 🎁)");
+      document.getElementById("shipValue").textContent = "0 ₪";
+    }
     if(shipCost > 0){
       // שם האפשרות שנבחרה בפועל ולא טקסט קבוע — יש יותר מאפשרות אחת
       // בתשלום, ושורה שכתוב בה "משלוח מהיר" כשנבחר משהו אחר היא שקר.
@@ -1060,12 +1133,21 @@ function renderCheckoutTotals(){
   if(pct > 0){
     feeRow.style.display = "block";
     document.getElementById("feeLabel").textContent = t("feeLabelPrefix") + " (" + pct + "%)";
-    document.getElementById("feeValue").textContent = fee.toLocaleString() + " ₪";
+    document.getElementById("feeValue").textContent = dvtMoney(fee) + " ₪";
 
-    const monthly = Math.round((grandTotal / count) * 100) / 100;
+    /* 🔴 **פירוק מדויק לפי חוק — לא "בערך" (27.08).**
+       ‏463 ₪ ב-3 תשלומים אינו "3 × 154.33" (זה 462.99): התשלום
+       הראשון סופג את השארית — 154.34 + 2 × 154.33. מציגים בדיוק
+       את מה שיירד בכרטיס, אגורה באגורה, כמו שחוק הגנת הצרכן
+       (פרטי עסקה) דורש. */
+    const perLow = Math.floor((grandTotal / count) * 100) / 100;
+    const first = Math.round((grandTotal - perLow * (count - 1)) * 100) / 100;
     breakdownRow.style.display = "block";
-    breakdownRow.textContent = t("monthlyBreakdownPrefix") + " " + count + " " +
-      t("monthlyBreakdownMiddle") + " " + monthly.toLocaleString() + " ₪ " + t("monthlyBreakdownSuffix");
+    breakdownRow.textContent = Math.abs(first - perLow) < 0.005
+      ? t("monthlyBreakdownPrefix") + " " + count + " " +
+        t("monthlyBreakdownMiddle") + " " + dvtMoney(perLow) + " ₪ " + t("monthlyBreakdownSuffix")
+      : tr("תשלום ראשון " + dvtMoney(first) + " ₪ + " + (count - 1) + " תשלומים של " + dvtMoney(perLow) + " ₪",
+           "First payment " + dvtMoney(first) + " ₪ + " + (count - 1) + " payments of " + dvtMoney(perLow) + " ₪");
   }else{
     feeRow.style.display = "none";
     breakdownRow.style.display = "none";

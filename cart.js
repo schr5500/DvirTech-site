@@ -44,6 +44,79 @@ function loadCartItems(){
 }
 function saveCartItems(){
   try{ localStorage.setItem(CART_STORAGE_KEY, JSON.stringify(cartItems)); }catch(e){ /* storage unavailable */ }
+  dvtCartPushSoon_();
+}
+
+/* =====================================================================
+   🛒 עגלה מסונכרנת — ללקוח מחובר בלבד
+   =====================================================================
+   דביר: "שאם הוא מתחבר מהטלפון — הכל יופיע לו שם עדיין."
+   בכניסה לדף: מושכים פעם אחת את העגלה השמורה וממזגים (איחוד לפי
+   מק"ט — המקומי גובר על כפילויות). בכל שינוי: דוחפים לשרת אחרי
+   שקט של 2.5 שניות. בלי טוקן — כל זה כבוי לגמרי, אפס בקשות.
+   ⚠️ המחירים בעגלה הם תצוגה בכל מקרה: createPayment_ מתמחר מחדש
+   מהמק"טים ומתעלם ממה שהדפדפן חושב. */
+let dvtCartPushTimer_ = null;
+let dvtCartPulled_ = false;
+
+function dvtAcctToken_(){
+  try{ return localStorage.getItem("dvt_acct_token") || ""; }catch(e){ return ""; }
+}
+
+function dvtCartPushSoon_(){
+  const tok = dvtAcctToken_();
+  if(!tok) return;
+  clearTimeout(dvtCartPushTimer_);
+  dvtCartPushTimer_ = setTimeout(function(){
+    const api = dvtGiftApi_();
+    if(!api) return;
+    fetch(api, {
+      method: "POST",
+      headers: { "Content-Type": "text/plain;charset=utf-8" },
+      body: JSON.stringify({ action: "acctCartSet", token: tok, items: cartItems })
+    }).catch(function(){ /* אין רשת — הדחיפה הבאה תשלים */ });
+  }, 2500);
+}
+
+function dvtCartPullOnce_(){
+  const tok = dvtAcctToken_();
+  if(!tok || dvtCartPulled_) return;
+  dvtCartPulled_ = true;
+  /* פעם ברענון-סשן מספיק — לא בכל ניווט פנימי. */
+  try{ if(sessionStorage.getItem("dvtCartPulled")) return; }catch(e){}
+  const api = dvtGiftApi_();
+  if(!api) return;
+  fetch(api, {
+    method: "POST",
+    headers: { "Content-Type": "text/plain;charset=utf-8" },
+    body: JSON.stringify({ action: "acctCartGet", token: tok })
+  }).then(function(r){ return r.json(); }).then(function(d){
+    try{ sessionStorage.setItem("dvtCartPulled", "1"); }catch(e){}
+    if(!d || !d.ok || !Array.isArray(d.items) || !d.items.length) return;
+    const server = sanitizeCartItems(d.items);
+    if(!server.length) return;
+    const have = {};
+    cartItems.forEach(function(i){ have[(i.type || "") + "|" + (i.sku || i.id || i.name)] = true; });
+    let added = 0;
+    server.forEach(function(i){
+      const k = (i.type || "") + "|" + (i.sku || i.id || i.name);
+      if(have[k]) return;
+      cartItems.push(i);
+      have[k] = true;
+      added++;
+    });
+    if(added){
+      try{ localStorage.setItem(CART_STORAGE_KEY, JSON.stringify(cartItems)); }catch(e){}
+      if(typeof renderCart === "function") renderCart();
+      dvtGiftMeterRender();
+    }
+  }).catch(function(){ /* אין רשת — נמשיך עם המקומית */ });
+}
+
+if(document.readyState === "loading"){
+  document.addEventListener("DOMContentLoaded", dvtCartPullOnce_);
+}else{
+  dvtCartPullOnce_();
 }
 
 /* escHtml מגיע מ-search-core.js, אבל cart.js רץ גם ב-about/builder/
@@ -630,6 +703,24 @@ function dvtGiftMeterDismiss(){
 }
 
 let dvtGiftLastLevel_ = null;
+let dvtGiftLastRemaining_ = null;
+
+/* גלגול ספרות: מהערך הקודם אל החדש, ~450ms, easing עדין. */
+function dvtGiftRollNumber_(el, target){
+  const from = dvtGiftLastRemaining_;
+  dvtGiftLastRemaining_ = target;
+  if(!el || from === null || from === target) return;
+  try{
+    if(window.matchMedia && window.matchMedia("(prefers-reduced-motion: reduce)").matches) return;
+  }catch(e){}
+  const t0 = performance.now(), dur = 450;
+  (function tick(now){
+    const k = Math.min(1, (now - t0) / dur);
+    const e = 1 - Math.pow(1 - k, 3);                       /* easeOutCubic */
+    el.textContent = Math.round(from + (target - from) * e).toLocaleString() + " ₪";
+    if(k < 1) requestAnimationFrame(tick);
+  })(t0);
+}
 
 function dvtGiftMeterRender(){
   const el = document.getElementById("giftMeter");
@@ -652,6 +743,11 @@ function dvtGiftMeterRender(){
          ⚠️ הקריאה כאן ולא בקופה, כי כאן יושב הרגע היחיד שבו ידוע
          שהמדרגות הגיעו. */
       if(typeof renderGiftBlock === "function") renderGiftBlock();
+      /* 🚚 משלוח חינם בקופה נגזר מהמדרגות — שהגיעו הרגע. בלי הרענון
+         הזה הקופה הציגה 29 ₪ על הזמנה שכבר הרוויחה משלוח חינם
+         (הבאג שדביר דיווח 27.08). */
+      if(typeof renderShippingOptions === "function") renderShippingOptions();
+      if(typeof renderCheckoutTotals === "function") renderCheckoutTotals();
     });
     return;
   }
@@ -671,11 +767,16 @@ function dvtGiftMeterRender(){
 
   if(p.next){
     txt.innerHTML = tr("עוד ", "Add ") +
-      '<b>' + p.remaining.toLocaleString() + ' ₪</b>' +
+      '<b class="gift-meter-sum">' + p.remaining.toLocaleString() + ' ₪</b>' +
       tr(" ומגיע לך ", " more and you get ") +
       '<b>' + dvtGiftHot(escHtml(dvtGiftTierLabel(p.next))) + '</b>';
+    /* 🎢 הספרות מתגלגלות אל הערך החדש במקום לקפוץ — בקשת דביר:
+       "שזה יעלה ביותר smooth". הפס עצמו חלק דרך transition ב-CSS
+       (‏.gift-meter-bar i). מכבד prefers-reduced-motion. */
+    dvtGiftRollNumber_(txt.querySelector(".gift-meter-sum"), p.remaining);
   }else{
     txt.innerHTML = '<b>' + tr("קיבלת את כל ההטבות 🎉", "You have unlocked every reward 🎉") + '</b>';
+    dvtGiftLastRemaining_ = 0;
   }
 
   fill.style.width = p.pct.toFixed(1) + "%";
@@ -771,19 +872,29 @@ function dvtGiftRenderTiers(p){
    התנאים המלאים ב-gifts.html (נדרש משפטית — §10.9#5). */
 
 function dvtGiftSampleFor_(cap){
+  /* 🔴 **"שים מוצרים יותר יפים" — דביר, 27.08.** "היקר ביותר בתקרה"
+     החזיר מפצלים ומאווררי-בולק אפורים: בתקרות של 65-109 ₪ היקר
+     ביותר הוא כמעט תמיד החלק המשעמם ביותר. עכשיו בוחרים לפי
+     **קטגוריה מושכת קודם** ורק אז מחיר: ציוד היקפי (מקלדות,
+     אוזניות, עכברים) לפני מאווררי RGB, לפני זיכרון/אחסון — ורק
+     בסוף כבלים ומפצלים. בתוך קטגוריה: היקר ביותר שעדיין בתקרה,
+     ועם רצפה של 40% מהתקרה כדי שלא תוצג מתנה עלובה לתקרה גבוהה. */
   const cat = (typeof dvtCatalogNow === "function") ? dvtCatalogNow() : null;
   if(!cat || !(cap > 0)) return null;
-  let best = null;
+  const pref = { peripherals: 0, fans: 1, cooling: 2, ram: 3, storage: 4, network: 5, thermal: 6 };
+  let best = null, bestScore = Infinity;
   Object.keys(cat).forEach(function(key){
     if(key === "services" || key === "content") return;
     const g = cat[key];
     if(!g || !Array.isArray(g.items)) return;
+    const rank = (key in pref) ? pref[key] : 8;
     g.items.forEach(function(it){
       const price = Number(it.price) || 0;
       if(!(price > 0) || price > cap || !it.image) return;
       if(typeof dvtCanBuy === "function" && !dvtCanBuy(it, key)) return;
-      /* היקר ביותר בתקרה — זה מה שמוכר את המדרגה. */
-      if(!best || price > best.price) best = { name: it.name, image: it.image, price: price };
+      if(price < cap * 0.4 && best) return;          /* מתנה זולה מדי — רק אם אין כלום */
+      const score = rank * 100000 + (cap - price);   /* קטגוריה קודם, אז קרוב לתקרה */
+      if(score < bestScore){ bestScore = score; best = { name: it.name, image: it.image, price: price }; }
     });
   });
   return best;
@@ -825,6 +936,7 @@ function dvtGiftPromoRender(){
           escHtml(tr("לדוגמה: ", "e.g. ") + sample.name) + '" loading="lazy"></span>'
         : '<span class="gp-img gp-img-empty" aria-hidden="true">🎁</span>';
       return '<div class="gp-card gp-r' + i + (x === top ? ' gp-top' : '') + '">' +
+        '<span class="gp-zero" aria-hidden="true">0 ₪</span>' +
         (x === top ? '<span class="gp-best">' + escHtml(tr("המשתלם ביותר","Best value")) + '</span>' : '') +
         img +
         '<span class="gp-min">' + escHtml(tr("בקנייה מעל ","Orders over ")) +
@@ -858,7 +970,14 @@ function dvtGiftPromoRender(){
           escHtml(tr("מוצר אמיתי מהקטלוג, בקבלה ב-0 ₪","A real product, on the receipt at 0 ₪")) + '</span></div></div>' +
       '</div>';
 
+    /* 🎨 v3 (27.08) — דביר: "זה צריך לשדר מבצע!!! (רק לשדר, לא
+       לכתוב באמת 'מבצע')". השראה מפרומו של חנויות גדולות: פינת
+       ‎0 ₪‎ מסתובבת על כל כרטיס, שווי המתנה גדול וזוהר, CTA עם
+       הבזק אור. עדיין HTML חי — המספרים מהשרת, בלי תמונה מגונרטת. */
     host.innerHTML =
+      '<span class="gp-burst" aria-hidden="true">🎁 ' +
+        escHtml(tr("מתנה בכל קנייה מעל " + picks[0].min.toLocaleString() + " ₪",
+                   "A gift with every order over " + picks[0].min.toLocaleString() + " ₪")) + '</span>' +
       '<div class="gp-head">' +
         '<h2>' + escHtml(tr("קנית? ","Buy? ")) + '<em>' + escHtml(tr("קיבלת!","Get!")) + '</em></h2>' +
         '<p>' + escHtml(tr("קונים יותר — מקבלים מתנה שווה יותר. אתם בוחרים אותה, מהקטלוג האמיתי.",

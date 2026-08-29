@@ -17,6 +17,9 @@
 const ACCT_API = (typeof DVT_API_URL === "string" && DVT_API_URL) || "";
 const ACCT_TOKEN_KEY = "dvt_acct_token";
 const ACCT_PLAN_KEY  = "dvt_acct_plan";
+/* פרופיל תצוגה להדר ולקופה: {name, phone, email, plan, pct, exp}.
+   נשמר רק אחרי כניסה מאומתת, נמחק בהתנתקות/מחיקה. תצוגה בלבד. */
+const ACCT_PROFILE_KEY = "dvt_acct_profile";
 
 let acctPhone = "";
 let acctData_ = null;
@@ -44,11 +47,12 @@ function acctShow(id){
   });
 }
 
-function acctMsg(id, text){
+function acctMsg(id, text, good){
   const el = document.getElementById(id);
   if(!el) return;
   el.style.display = text ? "block" : "none";
   el.textContent = text || "";
+  el.classList.toggle("is-good", !!good);
 }
 
 /* ---------- שלב 1: שליחת קוד ---------- */
@@ -68,14 +72,18 @@ async function acctSendCode(){
       acctMsg("acctLoginMsg", d.error || acctT("משהו השתבש — נסו שוב", "Something went wrong — try again"));
       return;
     }
+    /* 🔴 תשובה מפורשת — החלטת דביר (27.08): מספר שלא נמצא נשאר
+       במסך הטלפון עם הסבר, במקום לשלוח את הלקוח לחכות למייל שלא
+       יגיע. ההשלכה (אפשר לגלות שטלפון הוא לקוח) התקבלה במודע —
+       ראה ההערה בצד השרת. */
+    if(!d.sent){
+      acctMsg("acctLoginMsg", d.note || acctT("המספר לא נמצא במערכת", "This number is not in our system"));
+      return;
+    }
     acctPhone = phone;
-    /* גם כשהטלפון לא מוכר עוברים למסך הקוד עם ההסבר — בלי להסגיר
-       מי לקוח ומי לא. ראה ההערה בצד השרת. */
-    document.getElementById("acctCodeLead").textContent = d.sent
-      ? acctT("שלחנו קוד בן 6 ספרות אל " + (d.emailMask || "המייל הרשום") + ". הקוד תקף ל-10 דקות.",
-              "We sent a 6-digit code to " + (d.emailMask || "your email on file") + ". Valid for 10 minutes.")
-      : (d.note || acctT("אם המספר מוכר לנו — נשלח קוד למייל המשויך.",
-                         "If we know this number, a code was sent to the linked email."));
+    document.getElementById("acctCodeLead").textContent =
+      acctT("✓ נמצאת במערכת! שלחנו קוד בן 6 ספרות אל " + (d.emailMask || "המייל הרשום") + ". הקוד תקף ל-10 דקות.",
+            "✓ Found you! We sent a 6-digit code to " + (d.emailMask || "your email on file") + ". Valid for 10 minutes.");
     acctShow("acctCode");
     const ci = document.getElementById("acctCodeInput");
     ci.value = ""; ci.focus();
@@ -120,9 +128,12 @@ function acctLogout(){
   try{
     localStorage.removeItem(ACCT_TOKEN_KEY);
     localStorage.removeItem(ACCT_PLAN_KEY);
+    localStorage.removeItem(ACCT_PROFILE_KEY);
+    sessionStorage.removeItem("dvtCartPulled");
   }catch(e){}
   acctData_ = null;
   acctShow("acctLogin");
+  if(typeof shAcctRender === "function") shAcctRender();
 }
 
 /* ---------- הדשבורד ---------- */
@@ -138,7 +149,17 @@ function acctApply(d){
     }else{
       localStorage.removeItem(ACCT_PLAN_KEY);
     }
+    /* הפרופיל — להדר ("שלום דביר · PLUS") ולהשלמת הפרטים בקופה. */
+    localStorage.setItem(ACCT_PROFILE_KEY, JSON.stringify({
+      name: (d.profile && d.profile.name) || "",
+      phone: (d.profile && d.profile.phone) || "",
+      email: (d.profile && d.profile.email) || "",
+      plan: d.sub ? d.sub.plan : "", pct: d.planDiscountPct || 0,
+      exp: Date.now() + 7 * 86400000
+    }));
   }catch(e){}
+  if(typeof shAcctRender === "function") shAcctRender();
+  if(typeof dvtCartPullOnce_ === "function") dvtCartPullOnce_();
 
   const esc = (typeof escHtml === "function") ? escHtml : function(s){ return String(s); };
   const p = d.profile || {};
@@ -150,8 +171,11 @@ function acctApply(d){
      <p class="acct-row"><span>${acctT("מייל", "Email")}</span><b dir="ltr">${esc(p.email || "—")}</b></p>
      <p class="acct-row"><span>${acctT("כתובת", "Address")}</span><b>${esc(p.address || "—")}</b></p>
      <p class="acct-badge ${d.eligible ? "is-on" : ""}">${d.eligible
-        ? acctT("✅ זכאי למחיר לקוחות DvirTech על שירותים", "✅ Eligible for DvirTech customer pricing")
-        : acctT("קנייה של 1,000 ₪ ומעלה בשנה פותחת מחירי לקוחות DvirTech", "Purchases of 1,000 ₪+ a year unlock DvirTech customer pricing")}</p>`;
+        ? acctT("✅ לקוח DvirTech — מחיר מועדף על כל השירותים", "✅ DvirTech customer — preferred pricing on all services")
+        : acctT("למחיר לקוחות DvirTech: מחשב שלם, או מנוי Care, או קניות של " +
+                  (d.eligMin || 3000).toLocaleString() + " ₪ בשנה (צברת עד כה " + (d.buy12 || 0).toLocaleString() + " ₪)",
+                "DvirTech pricing unlocks with a full PC, a Care plan, or " +
+                  (d.eligMin || 3000).toLocaleString() + " ₪/year in purchases (you're at " + (d.buy12 || 0).toLocaleString() + " ₪)")}</p>`;
 
   /* --- מנוי --- */
   const sub = d.sub;
@@ -192,9 +216,9 @@ function acctApply(d){
     `<h2>🛡️ ${acctT("ציוד באחריות", "Equipment under warranty")}</h2>` +
     (eq.length
       ? eq.map(x => `<p class="acct-row"><span>${esc(x.product)}</span><b>${
-          x.days != null && x.days >= 0
-            ? acctT("עד " + x.until, "until " + x.until)
-            : acctT("הסתיימה", "expired")}</b></p>`).join("")
+          x.days != null && x.days >= 0 ? acctT("עד " + x.until, "until " + x.until)
+          : x.days != null              ? acctT("הסתיימה", "expired")
+          : acctT("לפי היבואן", "per importer")}</b></p>`).join("")
       : `<p class="acct-note">${acctT("כשנרשום עבורך ציוד — תראה כאן בדיוק מתי כל אחריות נגמרת.",
                                       "When equipment is registered for you, you'll see exactly when each warranty ends.")}</p>`);
 
@@ -208,7 +232,12 @@ function acctApply(d){
      <div class="validation-msg" id="acctSetMsg" style="display:none"></div>
      <button class="btn btn-primary" onclick="acctSave()">${acctT("שמירה", "Save")}</button>
      <p class="acct-note">${acctT("שינוי טלפון או שם — רק מולי, בוואטסאפ 050-200-0373. הטלפון הוא המפתח לחשבון, ולכן הוא לא משתנה מהאתר.",
-                                  "Changing your phone or name — with me directly, WhatsApp 050-200-0373. The phone is the account key, so it can't change from the site.")}</p>`;
+                                  "Changing your phone or name — with me directly, WhatsApp 050-200-0373. The phone is the account key, so it can't change from the site.")}</p>
+     <div class="acct-danger">
+       <button class="acct-danger-link" onclick="acctDeleteStart()">${acctT("מחיקת חשבון", "Delete account")}</button>
+       <span>${acctT("— מוחקת את פרטי הקשר שלך לצמיתות. רישומי עסקאות וקבלות נשמרים כנדרש בחוק (7 שנים).",
+                     "— permanently deletes your contact details. Transaction records and receipts are kept as the law requires (7 years).")}</span>
+     </div>`;
 
   acctShow("acctDash");
 }
@@ -228,10 +257,51 @@ async function acctSave(){
       acctData_.profile.email = email || acctData_.profile.email;
       acctData_.profile.address = address || acctData_.profile.address;
     }
-    acctMsg("acctSetMsg", "");
-    acctApply(acctData_);
+    /* 🔴 משוב מיידי — דביר: "הכפתור עובד אבל לא אומר כלום, נראה
+       תקוע." קודם רואים ✓ ירוק, הרינדור המלא מגיע אחרי שנייה. */
+    const sb = document.querySelector("#acctSettingsCard .btn-primary");
+    if(sb){ sb.textContent = acctT("✓ נשמר!", "✓ Saved!"); sb.classList.add("is-saved"); }
+    acctMsg("acctSetMsg", acctT("✓ הפרטים נשמרו", "✓ Details saved"), true);
+    setTimeout(function(){ if(acctData_) acctApply(acctData_); }, 1200);
   }catch(e){
     acctMsg("acctSetMsg", acctT("אין חיבור — נסו שוב", "No connection — try again"));
+  }
+}
+
+/* ---------- מחיקת חשבון (תיקון 13) — שני אישורים, בלתי הפיך ---------- */
+async function acctDeleteStart(){
+  const a = confirm(acctT(
+    "למחוק את החשבון?\n\nיימחקו לצמיתות: שם, טלפון, מייל, כתובת והערות.\n" +
+    "יישמרו כנדרש בחוק: רישומי עסקאות וקבלות (7 שנים).\n\nאי אפשר לבטל את הפעולה.",
+    "Delete the account?\n\nPermanently deleted: name, phone, email, address, notes.\n" +
+    "Kept as required by law: transaction records and receipts (7 years).\n\nThis cannot be undone."));
+  if(!a) return;
+  const b = prompt(acctT('לאישור סופי — הקלידו: מחק', 'To confirm, type: DELETE'));
+  if(b === null) return;
+  const okWord = String(b).trim();
+  if(okWord !== "מחק" && okWord.toUpperCase() !== "DELETE"){
+    alert(acctT("לא אושר — החשבון לא נמחק.", "Not confirmed — the account was not deleted."));
+    return;
+  }
+  try{
+    const d = await acctApi("acctDelete", { token: acctToken() });
+    if(!d.ok){
+      if(d.error === "expired") return acctSessionExpired();
+      alert(d.error || acctT("המחיקה נכשלה — דברו איתנו בוואטסאפ", "Deletion failed — WhatsApp us"));
+      return;
+    }
+    try{
+      localStorage.removeItem(ACCT_TOKEN_KEY);
+      localStorage.removeItem(ACCT_PLAN_KEY);
+      localStorage.removeItem(ACCT_PROFILE_KEY);
+    }catch(e){}
+    acctData_ = null;
+    if(typeof shAcctRender === "function") shAcctRender();
+    acctShow("acctLogin");
+    acctMsg("acctLoginMsg", acctT("החשבון נמחק. רישומי העסקאות נשמרו כנדרש בחוק. תודה שהיית איתנו 💙",
+                                  "Account deleted. Transaction records kept as required by law. Thanks for being with us 💙"), true);
+  }catch(e){
+    alert(acctT("אין חיבור — נסו שוב", "No connection — try again"));
   }
 }
 
