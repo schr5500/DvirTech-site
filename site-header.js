@@ -247,6 +247,35 @@ function shAcctRender(){
   });
 }
 
+/* =====================================================================
+   🍪 טעינת מערכת הסכמת העוגיות — נקודת חיבור אחת לכל האתר
+   =====================================================================
+   site-header.js נטען בכל דף, ולכן הוא המקום היחיד שצריך להזריק את
+   הספרייה (vendor, אחסון עצמי) ואת הקונפיגורציה. הסדר: CSS → ספרייה
+   → init → dvtCookieInit() — והכל אחרי ה-DOM כדי לא לחסום רינדור.
+   ⚠️ אם יתווסף אי פעם תג gtag/GTM — לטעון אותו **אחרי** הקבצים האלה
+   (ברירות המחדל של Consent Mode חייבות לרוץ קודם). */
+function shLoadCookieConsent(){
+  if (document.getElementById("dvtCcCss")) return;
+  const css = document.createElement("link");
+  css.id = "dvtCcCss"; css.rel = "stylesheet"; css.href = "vendor/cookieconsent.css";
+  document.head.appendChild(css);
+  const lib = document.createElement("script");
+  lib.src = "vendor/cookieconsent.umd.js";
+  lib.onload = function(){
+    const init = document.createElement("script");
+    init.src = "cookie-consent-init.js";
+    init.onload = function(){ if (typeof dvtCookieInit === "function") dvtCookieInit(); };
+    document.head.appendChild(init);
+  };
+  document.head.appendChild(lib);
+}
+if(document.readyState === "loading"){
+  document.addEventListener("DOMContentLoaded", shLoadCookieConsent);
+}else{
+  shLoadCookieConsent();
+}
+
 /* מצב מחובר — אחרי שההדר קיים ב-DOM, ושוב אם הדף נטען לאט. */
 if(document.readyState === "loading"){
   document.addEventListener("DOMContentLoaded", shAcctRender);

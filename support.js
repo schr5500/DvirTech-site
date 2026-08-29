@@ -180,8 +180,8 @@ const SUP_SERVICES = [
      ללקוח עסקי — מקורי בלבד, תמיד. */
 
   /* ---------- מערכת הפעלה ---------- */
-  { key:"win11-own-license", sku:"CLI-4007", cat:"os", price:200, dvt:100,
-    he:"התקנת Windows (המפתח שלך)", en:"Windows install (your key)",
+  { key:"win11-own-license", sku:"CLI-4012", cat:"os", price:200, dvt:100,
+    he:"התקנת Windows (ללא רישיון/אקטיבציה)", en:"Windows install (no license/activation)",
     descHe:"אותה ערכת התקנה מלאה (בדיקת רכיבים, דרייברים, טמפרטורות, יציבות) — בלי עלות הרישיון.",
     descEn:"The same full install kit (component check, drivers, temperatures, stability) — without the cost of the license.",
     q:[ SQ.deskOrLaptop,
@@ -466,8 +466,8 @@ const SUP_SERVICES = [
      "רישיון" הוסר מהתכולה (‏§1.4 — אין מקור רישיונות עדיין). */
   { key:"bundle-new-pc", sku:"CLI-4020", cat:"bundles", price:330,
     he:"חבילה: מחשב חדש — מוכן לעבודה", en:"Bundle: new PC — ready to work",
-    descHe:"הרכבה + Windows (המפתח שלך) + דרייברים ועדכונים + תוכנות בסיס. בנפרד: 400 ₪ — חוסך 70 ₪. מחיר לקוחות DvirTech.",
-    descEn:"Assembly + Windows (your key) + drivers & updates + base software. Separately: 400 ₪ — you save 70 ₪. DvirTech customer price.",
+    descHe:"הרכבה + Windows (ללא רישיון) + דרייברים ועדכונים + תוכנות בסיס. בנפרד: 400 ₪ — חוסך 70 ₪. מחיר לקוחות DvirTech.",
+    descEn:"Assembly + Windows (no license) + drivers & updates + base software. Separately: 400 ₪ — you save 70 ₪. DvirTech customer price.",
     q:[ { id:"partsSource", type:"select",
           he:"מאיפה החלקים?", en:"Where are the parts coming from?",
           options:[["בניתי בבונה המחשבים באתר","I built it in the site's PC builder"],
@@ -621,8 +621,8 @@ function supWhyTiers(ev){
           supEsc(supTr("המחיר הרגיל, לכל פונה. זה מחיר אמיתי שנגבה בפועל ממי שמגיע עם חומרה שנקנתה במקום אחר.",
                        "The regular price, for anyone. It is a real price, actually charged when the hardware was bought elsewhere.")) + '</p>' +
         '<p><b>' + supEsc(supTr("מחיר DvirTech","DvirTech price")) + '</b> — ' +
-          supEsc(supTr("מחיר מוזל ללקוחות הבית שלנו. מי נחשב? מספיק אחד מאלה: קניתם כאן מחשב שלם · קניתם מוצרים ב-3,000 ₪+ בשנה האחרונה · יש לכם מנוי Care פעיל.",
-                       "A reduced price for our house customers. Any one of these qualifies: you bought a full PC here · you bought 3,000 ₪+ of products in the last year · you hold an active Care plan.")) + '</p>' +
+          supEsc(supTr("מחיר מוזל ללקוחות הבית שלנו. מי נחשב? מספיק אחד מאלה: קניתם כאן מחשב שלם · קניתם מוצרים (לא שירותים) ב-3,000 ₪+ בשנה האחרונה · יש לכם מנוי Care פעיל.",
+                       "A reduced price for our house customers. Any one of these qualifies: you bought a full PC here · you bought 3,000 ₪+ of products (not services) in the last year · you hold an active Care plan.")) + '</p>' +
         '<p class="sup-why-note">' +
           supEsc(supTr("בקנייה באתר שכוללת מחשב — המחיר המוזל חל אוטומטית בקופה. בקריאת שירות — הזכאות נבדקת מול הרישום שלנו לפני החיוב.",
                        "Buying a PC on the site applies the reduced price automatically at checkout. For service calls, eligibility is checked against our records before billing.")) + '</p>' +

@@ -563,11 +563,11 @@ const DVT_SERVICES = [
       ["כיול עקומות מאווררים לשקט/ביצועים","Fan curves tuned for silence or performance"]
     ] },
 
-  { key:"win-install", he:"התקנת Windows (המפתח שלך)", en:"Windows install (your key)", price:100, wasPrice:200, requiresPc:true,
+  { key:"win-install", he:"התקנת Windows (ללא רישיון/אקטיבציה)", en:"Windows install (no license/activation)", price:100, wasPrice:200, requiresPc:true,
     details:[
       ["התקנה נקייה, בלי תוכנות מיותרות","Clean install, no bloatware"],
       ["כל הדרייברים מותקנים ומעודכנים + עדכוני Windows","All drivers installed and updated + Windows updates"],
-      ["⚠️ הרישיון שלך. אין לך מפתח? נסגור רישיון מקורי בשיחה","⚠️ You supply the license. No key? We'll sort a genuine one by phone"]
+      ["⚠️ בלי רישיון — המערכת עובדת, וניתן להזין מפתח משלך בכל שלב. רוצה רישיון מקורי? נסגור בשיחה","⚠️ No license — Windows runs, and you can enter your own key any time. Want a genuine license? We'll sort it by phone"]
     ] },
   { key:"software-install", he:"התקנת תוכנות", en:"Software installation", price:50, wasPrice:80, requiresPc:true,
     details:[
@@ -596,7 +596,7 @@ const DVT_SERVICES = [
     noteEn:"Assembly + Windows + base software. Separately: 400 ₪ — you save 70 ₪.",
     details:[
       ["הרכבת המחשב המלאה על כל בדיקותיה","The full assembly and all its checks"],
-      ["התקנת Windows עם המפתח שלך + כל הדרייברים","Windows installed with your key + every driver"],
+      ["התקנת Windows (ללא רישיון) + כל הדרייברים","Windows installed (no license) + every driver"],
       ["תוכנות הבסיס שתבקש, מותקנות ומוגדרות","The base software you ask for, installed and configured"]
     ] },
   { key:"bundle-home", he:"חבילה: מחשב חדש עד הבית", en:"Bundle: new PC to your door", price:650, group:"assembly", requiresPc:true,

@@ -107,6 +107,10 @@ function sfBuildHtml(minimal){
       '<a href="accessibility.html">' + sfEsc(sfTr("נגישות","Accessibility")) + "</a>" +
       /* 🔴 גם כאן, ולא רק בעמודת "מידע" — הדרישה היא נגישות מכל עמוד. */
       '<a href="cancel.html">'  + sfEsc(sfTr("ביטול עסקה","Cancel")) + "</a>" +
+      /* 🍪 פתיחת העדפות ההסכמה מכל עמוד — התקן המקצועי (וגם מה
+         שמייתר בקשות "תמחקו לי עוגיות" בוואטסאפ). */
+      '<a href="#" onclick="dvtCookiePrefs&&dvtCookiePrefs();return false">🍪 ' +
+        sfEsc(sfTr("הגדרות עוגיות","Cookie settings")) + "</a>" +
     "</div>";
 
   /* ⚠️ עוסק פטור — מספר העוסק מוצג בפוטר בכוונה. זו דרישת שקיפות

@@ -172,10 +172,10 @@ function acctApply(d){
      <p class="acct-row"><span>${acctT("כתובת", "Address")}</span><b>${esc(p.address || "—")}</b></p>
      <p class="acct-badge ${d.eligible ? "is-on" : ""}">${d.eligible
         ? acctT("✅ לקוח DvirTech — מחיר מועדף על כל השירותים", "✅ DvirTech customer — preferred pricing on all services")
-        : acctT("למחיר לקוחות DvirTech: מחשב שלם, או מנוי Care, או קניות של " +
+        : acctT("למחיר לקוחות DvirTech: מחשב שלם, או מנוי Care, או קניית מוצרים ב-" +
                   (d.eligMin || 3000).toLocaleString() + " ₪ בשנה (צברת עד כה " + (d.buy12 || 0).toLocaleString() + " ₪)",
                 "DvirTech pricing unlocks with a full PC, a Care plan, or " +
-                  (d.eligMin || 3000).toLocaleString() + " ₪/year in purchases (you're at " + (d.buy12 || 0).toLocaleString() + " ₪)")}</p>`;
+                  (d.eligMin || 3000).toLocaleString() + " ₪/year in product purchases (you're at " + (d.buy12 || 0).toLocaleString() + " ₪)")}</p>`;
 
   /* --- מנוי --- */
   const sub = d.sub;
