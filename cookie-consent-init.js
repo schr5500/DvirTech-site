@@ -44,9 +44,15 @@
    אחסון — בלי הסכמה הוא עובד בלי עוגיות (פינגים אנונימיים בלבד),
    ומהרגע שהגולש אישר "שיווק" בחלונית — נפתחות עוגיות הפרסום.
    שום דבר לא נטען לפני ששני המזהים מולאו. */
-/* 🔴 הופעל 30.08 — המזהה של דביר מ-Google Ads. מרגע זה §10.4 בתקנון
-   וסעיפים 2-3 במדיניות הפרטיות מנוסחים בהתאם (עודכנו באותו קומיט). */
-var DVT_GOOGLE_TAG_ID = "AW-18345389113";
+/* 🔴 הופעל 30.08 — שני התגים של חשבון הגוגל של דביר:
+     · AW-18345389113 — Google Ads (המרות ורימרקטינג)
+     · ‏G-795GP7DE5N — "תג Google"/GA4 של החשבון. ה-Tag Assistant
+       בודק דווקא אותו ("Google Tag לחשבון הזה"), ולכן בלעדיו הבדיקה
+       שלו נכשלת גם כשה-AW חי (נצפה אצל דביר 30.08).
+   ‏gtag.js נטען פעם אחת (לפי הראשון) ומקבל config לכל אחד — הדפוס
+   הרשמי לריבוי תגים. אותם אותות הסכמה חלים על שניהם. */
+var DVT_GOOGLE_TAG_IDS = ["AW-18345389113", "G-795GP7DE5N"];
+var DVT_GOOGLE_TAG_ID = DVT_GOOGLE_TAG_IDS[0];   /* תאימות לקוד קיים */
 /* ההמרה שדביר יצר היא מסוג "אירוע purchase" (בלי תווית send_to) —
    ראה dvtAdsConversion. אם אי-פעם תיווצר פעולת המרה עם תווית
    ("AW-…/AbCdEf"), למלא אותה כאן והיא תישלח בנוסף. */
@@ -235,13 +241,15 @@ function dvtCookieInit(){
 
 /* ---------- טעינת תג Google (רק כשהוזן מזהה) ---------- */
 (function dvtLoadGoogleTag(){
-  if (!DVT_GOOGLE_TAG_ID) return;
+  if (!DVT_GOOGLE_TAG_IDS.length) return;
   var s = document.createElement("script");
   s.async = true;
-  s.src = "https://www.googletagmanager.com/gtag/js?id=" + encodeURIComponent(DVT_GOOGLE_TAG_ID);
+  s.src = "https://www.googletagmanager.com/gtag/js?id=" + encodeURIComponent(DVT_GOOGLE_TAG_IDS[0]);
   document.head.appendChild(s);
   gtag("js", new Date());
-  gtag("config", DVT_GOOGLE_TAG_ID);
+  for (var i = 0; i < DVT_GOOGLE_TAG_IDS.length; i++) {
+    gtag("config", DVT_GOOGLE_TAG_IDS[i]);
+  }
 })();
 
 /* ---------- המרת רכישה — נקרא מדף התודה אחרי אימות תשלום ----------
