@@ -12,10 +12,18 @@
   /* Consent Mode: חייב לרוץ לפני התג — כך גוגל עצמם מנחים. */
   window.dataLayer = window.dataLayer || [];
   function gtag(){dataLayer.push(arguments);}
+  /* לפי אזור — זהה ל-cookie-consent-init.js (לשנות בשניהם):
+     גלובלית פעיל; אירופה/בריטניה כבוי עד הסכמה. */
+  gtag("consent", "default", {
+    ad_storage: "granted", ad_user_data: "granted",
+    ad_personalization: "granted", analytics_storage: "granted",
+    functionality_storage: "granted", security_storage: "granted"
+  });
   gtag("consent", "default", {
     ad_storage: "denied", ad_user_data: "denied",
     ad_personalization: "denied", analytics_storage: "denied",
-    functionality_storage: "granted", security_storage: "granted"
+    functionality_storage: "granted", security_storage: "granted",
+    region: ["AT","BE","BG","HR","CY","CZ","DK","EE","FI","FR","DE","GR","HU","IE","IT","LV","LT","LU","MT","NL","PL","PT","RO","SK","SI","ES","SE","IS","LI","NO","GB","CH"]
   });
 </script>
 <!-- Google tag (gtag.js) -->

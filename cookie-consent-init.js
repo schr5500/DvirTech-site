@@ -52,9 +52,32 @@ var DVT_GOOGLE_TAG_ID = "AW-18345389113";
    ("AW-…/AbCdEf"), למלא אותה כאן והיא תישלח בנוסף. */
 var DVT_ADS_CONVERSION = "";
 
-/* ---------- Consent Mode v2: ברירת מחדל — הכל דחוי ---------- */
+/* ---------- Consent Mode v2: ברירת מחדל לפי אזור (30.08) ----------
+   🔴 **הגרסה הראשונה דחתה הכל לכל העולם — וגוגל התריעו במפורש:**
+   ‏"0% consent rate… including regions outside the EEA. This impacts
+   your ads measurement" (Tag diagnostics, צילום של דביר 30.08).
+   הם צודקים: חובת opt-in לעוגיות קיימת באירופה (GDPR/ePrivacy);
+   בישראל הדין אינו דורש הסכמה-מראש לעוגיות פרסום, ומודל
+   ‏opt-out (פעיל + כפתור כיבוי זמין תמיד) הוא המקובל והחוקי.
+
+   לכן שתי פקודות ברירת מחדל, לפי הסדר שגוגל מגדירים:
+     1. גלובלית — granted (ישראל ושאר העולם).
+     2. עם region — denied לאיחוד האירופי, בריטניה ושווייץ, עד הסכמה.
+   גוגל מיישמים את האזור לפי מיקום הגולש. בחירה מפורשת בחלונית
+   (לכל כיוון) גוברת על שתיהן — dvtConsentSync_.
+   ⚠️ הרשימה משוכפלת ב-index.html (דף "בקרוב") — לשנות בשניהם.
+   ⚠️ הטקסטים בחלונית, בתקנון §10.4 ובמדיניות §3 מנוסחים לפי
+   המודל הזה בדיוק — שינוי כאן מחייב עדכון שלהם. */
 window.dataLayer = window.dataLayer || [];
 function gtag(){ window.dataLayer.push(arguments); }
+gtag("consent", "default", {
+  ad_storage: "granted",
+  ad_user_data: "granted",
+  ad_personalization: "granted",
+  analytics_storage: "granted",
+  functionality_storage: "granted",
+  security_storage: "granted"
+});
 gtag("consent", "default", {
   ad_storage: "denied",
   ad_user_data: "denied",
@@ -62,7 +85,8 @@ gtag("consent", "default", {
   analytics_storage: "denied",
   functionality_storage: "granted",   /* עגלה/שפה — הכרחי לתפעול */
   security_storage: "granted",
-  wait_for_update: 500
+  wait_for_update: 500,
+  region: ["AT","BE","BG","HR","CY","CZ","DK","EE","FI","FR","DE","GR","HU","IE","IT","LV","LT","LU","MT","NL","PL","PT","RO","SK","SI","ES","SE","IS","LI","NO","GB","CH"]
 });
 /* פייסבוק (עתידי): fbq('consent','revoke') עד להסכמה — הפונקציה
    תיקרא רק אם הפיקסל יתווסף אי-פעם. */
@@ -124,9 +148,9 @@ function dvtCookieInit(){
           consentModal: {
             title: "🍪 קצת שקיפות על עוגיות",
             description:
-              "האתר משתמש באחסון הכרחי בלבד (עגלה, שפה, חשבון). עוגיות סטטיסטיקה ושיווק " +
-              "יופעלו רק אם תאשרו — וכרגע אנחנו אפילו לא מפעילים כאלה. הבחירה נשמרת וניתנת " +
-              "לשינוי בכל רגע.",
+              "האתר משתמש בעוגיות של Google למדידת המרות ופרסום, לצד אחסון הכרחי (עגלה, " +
+              "שפה, חשבון). אפשר לכבות את עוגיות המדידה והפרסום כאן בכל רגע; באיחוד האירופי " +
+              "הן כבויות עד שמאשרים.",
             acceptAllBtn: "אישור הכל",
             acceptNecessaryBtn: "הכרחי בלבד",
             showPreferencesBtn: "הגדרות",
@@ -142,7 +166,9 @@ function dvtCookieInit(){
               {
                 title: "איך זה עובד",
                 description:
-                  "בחירה כאן קובעת אילו כלים מותר לאתר להפעיל בדפדפן שלכם. אפשר לחזור ולשנות " +
+                  "בחירה כאן קובעת אילו כלים מותר לאתר להפעיל בדפדפן שלכם, והיא גוברת על כל " +
+                  "ברירת מחדל. לא בחרתם? בישראל וברוב העולם עוגיות המדידה והפרסום פעילות " +
+                  "כברירת מחדל; באיחוד האירופי ובבריטניה — כבויות עד הסכמה. אפשר לחזור ולשנות " +
                   "בכל עת דרך «🍪 הגדרות עוגיות» שבתחתית האתר."
               },
               {
@@ -154,15 +180,15 @@ function dvtCookieInit(){
               {
                 title: "סטטיסטיקה",
                 description:
-                  "מדידת שימוש אנונימית (למשל Google Analytics) — כדי להבין אילו עמודים עוזרים. " +
-                  "נכון להיום האתר אינו מפעיל כלי כזה; ההעדפה תכובד אם יופעל.",
+                  "מדידת שימוש דרך תג Google — כדי להבין אילו עמודים עוזרים ואילו קמפיינים " +
+                  "מביאים מבקרים.",
                 linkedCategory: "analytics"
               },
               {
                 title: "שיווק",
                 description:
-                  "עוגיות פרסום (Google Ads / Meta) למדידת קמפיינים והתאמת מודעות. נכון להיום " +
-                  "האתר אינו מפעיל כלי כזה; ההעדפה תכובד אם יופעל.",
+                  "עוגיות Google Ads למדידת המרות ולהתאמת מודעות. פיקסל Meta אינו פעיל כיום; " +
+                  "אם יופעל — יהיה כפוף לאותה בחירה בדיוק.",
                 linkedCategory: "marketing"
               },
               {
@@ -178,9 +204,9 @@ function dvtCookieInit(){
           consentModal: {
             title: "🍪 A word about cookies",
             description:
-              "This site uses essential storage only (cart, language, account). Analytics and " +
-              "marketing cookies run only if you approve — and right now we do not even use any. " +
-              "You can change your choice at any time.",
+              "This site uses Google cookies for conversion measurement and advertising, alongside " +
+              "essential storage (cart, language, account). You can switch measurement and marketing " +
+              "cookies off here at any time; in the EEA they stay off until you approve.",
             acceptAllBtn: "Accept all",
             acceptNecessaryBtn: "Essential only",
             showPreferencesBtn: "Settings",
@@ -194,10 +220,10 @@ function dvtCookieInit(){
             closeIconLabel: "Close",
             sections: [
               { title: "How this works",
-                description: "Your choice controls which tools the site may run in your browser. Change it any time via “🍪 Cookie settings” in the footer." },
+                description: "Your choice controls which tools the site may run in your browser, and overrides any default. Made no choice? In Israel and most of the world, measurement and marketing cookies are on by default; in the EEA and UK they stay off until you approve. Change it any time via “🍪 Cookie settings” in the footer." },
               { title: "Essential", description: "Cart, language, account sign-in. No tracking.", linkedCategory: "necessary" },
-              { title: "Analytics", description: "Anonymous usage measurement (e.g. Google Analytics). Not currently active; your preference will be honoured if enabled.", linkedCategory: "analytics" },
-              { title: "Marketing", description: "Advertising cookies (Google Ads / Meta). Not currently active; your preference will be honoured if enabled.", linkedCategory: "marketing" },
+              { title: "Analytics", description: "Usage measurement via the Google tag — which pages help, which campaigns bring visitors.", linkedCategory: "analytics" },
+              { title: "Marketing", description: "Google Ads cookies for conversion measurement and ad personalisation. A Meta pixel is not currently active; if enabled it will follow this same choice.", linkedCategory: "marketing" },
               { title: "More", description: 'Full details in the <a href="privacy.html">privacy policy</a> and terms (§10.4).' }
             ]
           }
