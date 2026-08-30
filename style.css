@@ -2497,3 +2497,32 @@ html[dir="ltr"] .gp-burst{ transform:rotate(-38deg) }
 }
 /* מחיר DvirTech כיעד להשגה (גולש שאינו זכאי/מחובר) */
 .sup-price-dvt{ font-size:11.5px; font-weight:700; color:#0E7A5F; white-space:nowrap }
+
+/* ==================== 📢 הודעת אתר (נשלטת מהגיליון) ==================== */
+.site-notice{
+  position:relative; z-index:1200;
+  font-size:13.5px; line-height:1.5;
+  border-bottom:1px solid rgba(0,0,0,.08);
+}
+.site-notice-in{
+  display:flex; align-items:center; gap:12px; flex-wrap:wrap;
+  padding:10px 16px; max-width:1240px; margin:0 auto;
+}
+.site-notice-txt{ flex:1 1 auto; font-weight:600 }
+.site-notice-link{
+  flex:none; font-weight:800; text-decoration:underline;
+  text-underline-offset:3px; color:inherit; white-space:nowrap;
+}
+.site-notice-x{
+  flex:none; border:0; background:none; cursor:pointer; color:inherit;
+  font-size:15px; line-height:1; opacity:.6; padding:4px 6px; border-radius:6px;
+}
+.site-notice-x:hover{ opacity:1; background:rgba(0,0,0,.07) }
+/* שלושת המצבים — הצבע נגזר מסוג ההודעה בגיליון, לא מהטקסט */
+.site-notice--info{   background:#EAF2FE; color:#134E8D }
+.site-notice--warn{   background:#FFF4E0; color:#7A5A12 }
+.site-notice--closed{ background:#FDE7E7; color:#8F1B24 }
+@media (max-width:560px){
+  .site-notice-in{ padding:9px 12px; gap:8px }
+  .site-notice{ font-size:12.5px }
+}

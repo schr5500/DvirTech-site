@@ -248,6 +248,87 @@ function shAcctRender(){
 }
 
 /* =====================================================================
+   📢 הודעת אתר — פס עליון שדביר שולט בו מהגיליון (30.08)
+   =====================================================================
+   שורה בלשונית "📢 הודעת אתר" → פס בראש כל דף, בלי פריסה ובלי
+   העלאת קובץ. הצד השרתי: siteNotice_ ב-4-payment-api.gs.
+
+   ⚠️ **נטען אחרי ה-DOM ולא חוסם כלום** — אתר שממתין לרשת כדי
+   להציג את עצמו הוא אתר איטי. הפס נכנס למעלה כשהתשובה מגיעה.
+   ⚠️ **מטמון בסשן (‏5 דק')** — כדי שמעבר בין דפים לא יקרא לשרת
+   בכל פעם. חירום אמיתי: הלקוח יראה אותו בטעינה הבאה.
+   ⚠️ **סגירה נשמרת לפי מזהה הטקסט** — גולש שסגר "עומס משלוחים"
+   לא יראה אותה שוב, אבל **הודעה חדשה כן תוצג** (המזהה משתנה עם
+   הטקסט). זה ההבדל בין "לא מציק" ל"לא מודיע".
+   ⚠️ הטקסט מוזרק כטקסט ולא כ-HTML (shEsc) — הגיליון הוא קלט. */
+const SH_NOTICE_KEY_ = "dvt_notice_v1";
+const SH_NOTICE_TTL_ = 5 * 60 * 1000;
+
+function shNoticeApi_(){
+  return (typeof DVT_API_URL === "string" && DVT_API_URL) ||
+         (typeof PAYMENT_API_URL === "string" && PAYMENT_API_URL) || "";
+}
+
+function shNoticeRender_(n){
+  if(!n || !n.he) return;
+  let closed = "";
+  try{ closed = sessionStorage.getItem("dvtNoticeClosed") || ""; }catch(e){}
+  if(closed === n.id) return;
+
+  const en = shLang() === "en";
+  const txt = en && n.en ? n.en : n.he;
+  const linkTxt = en ? (n.linkEn || n.linkHe) : (n.linkHe || n.linkEn);
+  const type = ["info", "warn", "closed"].indexOf(n.type) >= 0 ? n.type : "info";
+
+  const bar = document.createElement("div");
+  bar.className = "site-notice site-notice--" + type;
+  bar.setAttribute("role", type === "info" ? "status" : "alert");
+  bar.innerHTML =
+    '<div class="wrap site-notice-in">' +
+      '<span class="site-notice-txt">' + shEsc(txt) + '</span>' +
+      (n.href && linkTxt
+        ? '<a class="site-notice-link" href="' + shEsc(n.href) + '">' + shEsc(linkTxt) + ' ←</a>'
+        : "") +
+      '<button type="button" class="site-notice-x" aria-label="' +
+        shEsc(shTr("סגירה","Close")) + '">✕</button>' +
+    '</div>';
+  bar.querySelector(".site-notice-x").addEventListener("click", function(){
+    try{ sessionStorage.setItem("dvtNoticeClosed", n.id); }catch(e){}
+    bar.remove();
+  });
+  document.body.insertBefore(bar, document.body.firstChild);
+}
+
+function shLoadNotice(){
+  /* דף "בקרוב" — אין לו הדר ואין לו מה להודיע. */
+  if(document.querySelector(".coming-soon, #comingSoon")) return;
+
+  try{
+    const raw = sessionStorage.getItem(SH_NOTICE_KEY_);
+    if(raw){
+      const o = JSON.parse(raw);
+      if(o && (Date.now() - o.at) < SH_NOTICE_TTL_){ shNoticeRender_(o.n); return; }
+    }
+  }catch(e){}
+
+  const api = shNoticeApi_();
+  if(!api) return;
+  fetch(api + "?action=siteNotice")
+    .then(function(r){ return r.json(); })
+    .then(function(d){
+      const n = (d && d.ok) ? d.notice : null;
+      try{ sessionStorage.setItem(SH_NOTICE_KEY_, JSON.stringify({ at: Date.now(), n: n })); }catch(e){}
+      shNoticeRender_(n);
+    })
+    .catch(function(){ /* אין רשת — אין פס. האתר ממשיך כרגיל. */ });
+}
+if(document.readyState === "loading"){
+  document.addEventListener("DOMContentLoaded", shLoadNotice);
+}else{
+  shLoadNotice();
+}
+
+/* =====================================================================
    🍪 טעינת מערכת הסכמת העוגיות — נקודת חיבור אחת לכל האתר
    =====================================================================
    site-header.js נטען בכל דף, ולכן הוא המקום היחיד שצריך להזריק את

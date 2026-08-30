@@ -568,6 +568,47 @@ function dvtGiftBase(){
   return Math.round(sum * 100) / 100;
 }
 
+/* =====================================================================
+   🛡️ צורת הסל — פורט של giftShape_ מהשרת (30.08)
+   =====================================================================
+   ⚠️ **חייב להישאר זהה לשרת.** מד שמבטיח מתנה שהשרת ישלול הוא באג
+   שהלקוח רואה ראשון — בדיוק כמו שכתוב ליד dvtGiftBase.
+   ⚠️ הרכבה מהבונה נספרת כשורות הרכיבים שלה, כי כך היא מגיעה לשרת
+   (checkout.js מפרק אותה ל-parts). הרכבה לעולם אינה "סל אביזרים":
+   היא כוללת מעבד/לוח/זיכרון, ולכן חלקה נספר כלא-אביזרים. */
+const DVT_GIFT_ACC_ = ["extras", "peripherals"];
+const DVT_GIFT_ACC_SHARE_ = 0.9;
+
+function dvtGiftShape_(){
+  let lines = 0, acc = 0;
+  cartItems.forEach(function(i){
+    const sku = String(i.sku || "");
+    if(sku.indexOf("services:") === 0 || i.type === "service") return;
+    if(i.type === "build" && Array.isArray(i.parts)){
+      lines += i.parts.length || 1;
+      return;                       /* הרכבה — לא אביזרים */
+    }
+    lines++;
+    const cat = sku.split(":")[0];
+    if(DVT_GIFT_ACC_.indexOf(cat) >= 0){
+      acc += (Number(i.price) || 0) * (Number(i.qty) || 0);
+    }
+  });
+  const base = dvtGiftBase();
+  return { base: base, lines: lines, accShare: base > 0 ? acc / base : 0 };
+}
+
+/* הסף האפקטיבי של כלל, והאם הוא חל — פורט של giftRuleMin_/giftRuleFits_. */
+function dvtGiftMin_(x, shape){
+  return (Number(x.accMin) > 0 && shape.accShare >= DVT_GIFT_ACC_SHARE_)
+    ? Number(x.accMin) : Number(x.min);
+}
+function dvtGiftFits_(x, shape, hasPc){
+  if(x.requiresPc && !hasPc) return false;
+  if(Number(x.minLines) > 0 && shape.lines < Number(x.minLines)) return false;
+  return true;
+}
+
 /* פורט של `cartHasCompletePc_` — עבור כללים עם "דורש מחשב שלם".
    ⚠️ מכוון להיות **זהה** לשרת: מחשב מוכן/נייד, או כל שבעת רכיבי
    הליבה. הרכבה מהבונה מתפרקת ל-parts ולכן נמדדת באותה דרך בדיוק. */
@@ -629,29 +670,44 @@ function dvtGiftProgress(){
   const tiers = dvtGiftTiers_;
   if(!tiers || !tiers.length) return null;
 
-  const base = dvtGiftBase();
+  const shape = dvtGiftShape_();
+  const base = shape.base;
   const hasPc = dvtGiftHasPc();
-  const usable = tiers.filter(function(x){ return !x.requiresPc || hasPc; });
-  if(!usable.length) return null;
+  /* כלל שנשלל בגלל מחשב-שלם/מספר שורות אינו "רחוק יותר" — הוא פשוט
+     לא חל על הסל הזה, ולכן הוא יוצא מהסולם כולו (גם מהיעד הבא). */
+  const usable = tiers.filter(function(x){ return dvtGiftFits_(x, shape, hasPc); });
+  /* 🛡️ מדרגה שנשללה **רק** בגלל מספר השורות — שווה להסביר ללקוח,
+     כי זה משהו שהוא יכול לתקן בשתי שניות (להוסיף עוד פריט). */
+  const blocked = tiers.filter(function(x){
+    return (!x.requiresPc || hasPc) && Number(x.minLines) > 0 &&
+           shape.lines < Number(x.minLines) && base >= dvtGiftMin_(x, shape);
+  }).sort(function(a,b){ return b.min - a.min; })[0] || null;
+  if(!usable.length) return blocked ? { base: base, earned: [], next: null, pct: 0,
+                                        level: "", remaining: 0, pickCap: 0,
+                                        blocked: blocked, needLines: Number(blocked.minLines) } : null;
 
   const earned = [];
   const byGroup = {};
   usable.forEach(function(x){
-    if(base < x.min) return;
+    if(base < dvtGiftMin_(x, shape)) return;
     if(!x.group){ earned.push(x); return; }
     if(!byGroup[x.group] || x.min > byGroup[x.group].min) byGroup[x.group] = x;
   });
   Object.keys(byGroup).forEach(function(g){ earned.push(byGroup[g]); });
 
-  const ahead = usable.filter(function(x){ return x.min > base; })
-                      .sort(function(a,b){ return a.min - b.min; });
+  const ahead = usable.filter(function(x){ return dvtGiftMin_(x, shape) > base; })
+                      .sort(function(a,b){ return dvtGiftMin_(a, shape) - dvtGiftMin_(b, shape); });
   const next = ahead.length ? ahead[0] : null;
 
   /* הפס נמדד **מהמדרגה הקודמת** ולא מאפס — אחרת המעבר מ-1,500
      ל-2,500 מתחיל ב-60% ומרגיש כאילו כבר כמעט הגעת. */
   let prevMin = 0;
-  usable.forEach(function(x){ if(x.min <= base && x.min > prevMin) prevMin = x.min; });
-  const span = next ? (next.min - prevMin) : 0;
+  usable.forEach(function(x){
+    const m = dvtGiftMin_(x, shape);
+    if(m <= base && m > prevMin) prevMin = m;
+  });
+  const nextMin = next ? dvtGiftMin_(next, shape) : 0;
+  const span = next ? (nextMin - prevMin) : 0;
   const pct  = next ? Math.max(2, Math.min(100, ((base - prevMin) / (span || 1)) * 100)) : 100;
 
   /* מזהה מצב — משמש לזיהוי "עכשיו עברנו מדרגה" (קונפטי) ולאיפוס
@@ -660,7 +716,10 @@ function dvtGiftProgress(){
 
   return {
     base: base, earned: earned, next: next, pct: pct, level: level,
-    remaining: next ? Math.max(0, Math.ceil(next.min - base)) : 0,
+    /* 🛡️ מדרגה חסומה-בשורות שהסל כבר עומד בסכומה — המד מסביר. */
+    blocked: blocked, needLines: blocked ? Number(blocked.minLines) : 0,
+    lines: shape.lines,
+    remaining: next ? Math.max(0, Math.ceil(nextMin - base)) : 0,
     /* התקרה של המדרגה הגבוהה מסוג "מוצר לבחירה" שהורווחה. 0 = אין. */
     pickCap: earned.reduce(function(m, x){
       return (x.kind === "pick" && x.cap > m) ? x.cap : m;
@@ -765,6 +824,21 @@ function dvtGiftMeterRender(){
   const sub = document.getElementById("giftMeterSub");
   const fill = document.getElementById("giftMeterFill");
 
+  /* 🛡️ סל של פריט בודד שכבר חצה את הסכום — במקום "קיבלת הכל"
+     שקרי, אומרים בדיוק מה חסר ומה לעשות. */
+  if(p.blocked && !p.earned.length){
+    txt.innerHTML = dvtGiftHot(escHtml(tr(
+      "המתנה נפתחת בהזמנה של " + p.needLines + " מוצרים ומעלה — הוסיפו עוד פריט אחד",
+      "The gift opens on orders of " + p.needLines + "+ products — add one more item")));
+    fill.style.width = "60%";
+    sub.hidden = true;
+    dvtGiftRenderTiers(p);
+    el.classList.remove("is-won");
+    el.hidden = false;
+    dvtGiftLastLevel_ = p.level;
+    return;
+  }
+
   if(p.next){
     txt.innerHTML = tr("עוד ", "Add ") +
       '<b class="gift-meter-sum">' + p.remaining.toLocaleString() + ' ₪</b>' +
@@ -819,6 +893,7 @@ function dvtGiftRenderTiers(p){
   const tog  = document.getElementById("giftMeterToggle");
   if(!host || !tog) return;
 
+  const shape = dvtGiftShape_();
   const tiers = (dvtGiftTiers_ || []).slice().sort(function(a,b){ return a.min - b.min; });
   if(tiers.length < 2){          /* מדרגה אחת — אין מה "להציג הכל" */
     tog.hidden = true; host.hidden = true; return;
@@ -836,10 +911,11 @@ function dvtGiftRenderTiers(p){
     const won = !!earnedIds[key];
     /* מדרגה בקבוצה שהושגה אבל אינה הגבוהה — עברת אותה, אבל היא
        "נבלעה" בסולם. מסומנת כהושגה-ולא-פעילה כדי לא לשקר. */
-    const passed = !won && p.base >= x.min;
-    const gap = Math.max(0, Math.ceil(x.min - p.base));
+    const xMin = dvtGiftMin_(x, shape);
+    const passed = !won && p.base >= xMin;
+    const gap = Math.max(0, Math.ceil(xMin - p.base));
     return '<div class="gift-tier' + (won ? " is-won" : passed ? " is-passed" : "") + '">' +
-      '<span class="gift-tier-min">' + x.min.toLocaleString() + ' ₪</span>' +
+      '<span class="gift-tier-min">' + xMin.toLocaleString() + ' ₪</span>' +
       '<span class="gift-tier-title">' + dvtGiftHot(escHtml(dvtGiftTierLabel(x))) + '</span>' +
       '<span class="gift-tier-state">' +
         (won ? "✓" : passed ? tr("נכלל", "included")
