@@ -9,6 +9,7 @@
      בלי הסכמה התג עובד בלי עוגיות; בדפי החנות ההסכמה מנוהלת בחלונית
      (cookie-consent-init.js) — כאן אין צורך בה. -->
 <script>
+  /* Consent Mode: חייב לרוץ לפני התג — כך גוגל עצמם מנחים. */
   window.dataLayer = window.dataLayer || [];
   function gtag(){dataLayer.push(arguments);}
   gtag("consent", "default", {
@@ -16,10 +17,13 @@
     ad_personalization: "denied", analytics_storage: "denied",
     functionality_storage: "granted", security_storage: "granted"
   });
+</script>
+<!-- Google tag (gtag.js) -->
+<script async src="https://www.googletagmanager.com/gtag/js?id=AW-18345389113"></script>
+<script>
   gtag("js", new Date());
   gtag("config", "AW-18345389113");
 </script>
-<script async src="https://www.googletagmanager.com/gtag/js?id=AW-18345389113"></script>
 <title>DvirTech — האתר בקרוב</title>
 <script>
   (function(){
