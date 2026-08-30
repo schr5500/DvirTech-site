@@ -590,7 +590,7 @@ const DVT_SERVICES = [
     ] },
 
   /* --- חבילות. `includes` — מה שמכוסה מוצג מסומן-נעול ב-0 ₪. --- */
-  { key:"bundle-new-pc", he:"חבילה: מחשב חדש — מוכן לעבודה", en:"Bundle: new PC — ready to work", price:330, group:"assembly", requiresPc:true,
+  { key:"bundle-new-pc", he:"חבילה: מחשב חדש — מוכן לעבודה", en:"Bundle: new PC — ready to work", price:330, wasPrice:400, group:"assembly", requiresPc:true,
     includes:["asm-basic","win-install","software-install"],
     noteHe:"הרכבה + Windows + תוכנות בסיס. בנפרד: 400 ₪ — חוסך 70 ₪.",
     noteEn:"Assembly + Windows + base software. Separately: 400 ₪ — you save 70 ₪.",
@@ -599,7 +599,7 @@ const DVT_SERVICES = [
       ["התקנת Windows (ללא רישיון) + כל הדרייברים","Windows installed (no license) + every driver"],
       ["תוכנות הבסיס שתבקש, מותקנות ומוגדרות","The base software you ask for, installed and configured"]
     ] },
-  { key:"bundle-home", he:"חבילה: מחשב חדש עד הבית", en:"Bundle: new PC to your door", price:650, group:"assembly", requiresPc:true,
+  { key:"bundle-home", he:"חבילה: מחשב חדש עד הבית", en:"Bundle: new PC to your door", price:650, wasPrice:790, group:"assembly", requiresPc:true,
     includes:["asm-basic","win-install","software-install","onsite-setup","data-transfer"],
     /* ⚠️ הסכום "בנפרד" מחושב מהמחירים החיים של הרכיבים —
        ‏250+100+50+300+180 = 880. אם מחיר רכיב משתנה, לעדכן כאן. */

@@ -159,6 +159,8 @@ function acctApply(d){
          רשת (supMe_/supEffective_). ⚠️ תצוגה בלבד: השרת מתמחר
          מחדש בקופה, ודביר גובה שירות ידנית מול הגיליון. */
       eligible: !!d.eligible, buy12: d.buy12 || 0, eligMin: d.eligMin || 3000,
+      /* ההבשלה — כמה ימים עד שמחיר DvirTech נפתח למנוי חדש (§6.7) */
+      vestDays: d.vesting ? d.vesting.days : 0, vestFrom: d.vesting ? d.vesting.from : "",
       exp: Date.now() + 7 * 86400000
     }));
   }catch(e){}
@@ -188,8 +190,11 @@ function acctApply(d){
        <p class="acct-row"><span>${acctT("בתוקף עד", "Valid until")}</span><b>${esc(sub.until)}</b></p>
        ${sub.hoursLeft != null ? `<p class="acct-row"><span>${acctT("שעות תמיכה ביתרה", "Support hours left")}</span><b>${sub.hoursLeft}</b></p>` : ""}
        ${sub.checksLeft != null ? `<p class="acct-row"><span>${acctT("בדיקות תחזוקה ביתרה", "Maintenance checks left")}</span><b>${sub.checksLeft}</b></p>` : ""}
-       <p class="acct-note">${acctT("ההנחה שלך (" + d.planDiscountPct + "%) מוצגת אוטומטית בעמוד השירותים.",
-                                    "Your discount (" + d.planDiscountPct + "%) shows automatically on the services page.")}</p>`
+       <p class="acct-note">${d.vesting
+          ? acctT("מחיר DvirTech על עבודה נפתח לך ב-" + d.vesting.from + " (עוד " + d.vesting.days + " ימים) — שאר הטבות המנוי כבר פעילות.",
+                  "DvirTech pricing on labour opens for you on " + d.vesting.from + " (" + d.vesting.days + " days) — the rest of your plan benefits are already active.")
+          : acctT("מחיר DvirTech על כל עבודה — מוצג אוטומטית בעמוד השירותים.",
+                  "DvirTech pricing on every job — shown automatically on the services page.")}</p>`
     : `<h2>🛡️ DvirTech Care</h2>
        <p class="acct-note">${acctT("אין מנוי פעיל. מנוי Care נותן תמיכה שוטפת, בדיקות תחזוקה והנחה על כל עבודה.",
                                     "No active plan. A Care plan gives ongoing support, maintenance checks and a discount on all labour.")}</p>

@@ -245,9 +245,13 @@ function supMyPriceRender(){
       "עוד " + need.toLocaleString() + " ₪ בקניית מוצרים (או מחשב שלם / מנוי) — ומחיר DvirTech נפתח",
       need.toLocaleString() + " more in product purchases (or a full PC / a plan) unlocks DvirTech pricing")) + '</span>');
   }
-  if(plan){
-    rows.push('<span class="sup-me-tag is-plan">🛡️ Care ' + supEsc(plan.plan) + ' · ' +
-      supEsc(supTr("הנחה " + plan.pct + "% על עבודה", plan.pct + "% off labour")) + '</span>');
+  /* מנוי — התג מציג מה הוא נותן בפועל. אם המחיר עוד לא הבשיל
+     (14 יום, §6.7), אומרים מתי, במקום להבטיח מחיר שלא חל. */
+  if(me.plan){
+    rows.push('<span class="sup-me-tag is-plan">🛡️ Care ' + supEsc(me.plan) + ' · ' +
+      supEsc(Number(me.vestDays) > 0
+        ? supTr("מחיר DvirTech נפתח ב-" + me.vestFrom, "DvirTech pricing opens on " + me.vestFrom)
+        : supTr("מחיר DvirTech על כל עבודה", "DvirTech pricing on all labour")) + '</span>');
   }
 
   host.className = "sup-me is-in";
@@ -1553,15 +1557,15 @@ const CARE_PLANS = [
   { key:"CARE", monthly:50,  yearly:599,
     response:["יום עסקים","One business day"], queue:["לפי סדר הפנייה","In order of arrival"],
     checks:["פעם בשנה","Once a year"], reports:["דוח שנתי","Yearly report"],
-    remote:["עד שעה בשנה","Up to 1 hour a year"], discount:"5%" },
+    remote:["עד שעה בשנה","Up to 1 hour a year"], discount:["מחיר DvirTech על כל עבודה","DvirTech pricing on all labour"] },
   { key:"PLUS", monthly:67,  yearly:799,
     response:["4 שעות עבודה","4 working hours"], queue:["מקדים פניות מזדמנות","Ahead of walk-ins"],
     checks:["פעם בשנה","Once a year"], reports:["פעמיים בשנה","Twice a year"],
-    remote:["עד שעה וחצי בשנה","Up to 1.5 hours a year"], discount:"8%" },
+    remote:["עד שעה וחצי בשנה","Up to 1.5 hours a year"], discount:["מחיר DvirTech על כל עבודה","DvirTech pricing on all labour"] },
   { key:"PRO",  monthly:92,  yearly:1099,
     response:["שעתיים","Two hours"], queue:["ראשון בתור","First in line"],
     checks:["פעמיים בשנה","Twice a year"], reports:["רבעוני","Quarterly"],
-    remote:["עד שעתיים בשנה","Up to 2 hours a year"], discount:"12%" }
+    remote:["עד שעתיים בשנה","Up to 2 hours a year"], discount:["מחיר DvirTech על כל עבודה","DvirTech pricing on all labour"] }
 ];
 
 function careMoney(n){ return n.toLocaleString("he-IL") + " ₪"; }
@@ -1595,7 +1599,7 @@ function careTableHtml(){
         ${row(supTr("בדיקת תחזוקה (מרחוק)","Maintenance check (remote)"), p => supTr(p.checks[0], p.checks[1]))}
         ${row(supTr("דוח בריאות אוטומטי","Automatic health report"), p => supTr(p.reports[0], p.reports[1]))}
         ${row(supTr("תמיכה מרחוק","Remote support"), p => supTr(p.remote[0], p.remote[1]))}
-        ${row(supTr("הנחה על עבודה","Discount on labour"), p => p.discount)}
+        ${row(supTr("מחיר על עבודה","Price on labour"), p => supTr(p.discount[0], p.discount[1]))}
       </tbody>
     </table>
     <p class="care-fine">${supTr(
