@@ -5,7 +5,10 @@
    המשתמש ממשיך ללחוץ/לגלול חופשי. דרישת דביר: מלבן קטן בפינה, בלי
    שכבת-חושך שמגבילה. יש קו-זמן שאוזל ומסמל שהטוסט נעלם, ואז נסגר לבד.
 
-   ⚠️ פעם אחת לכל סשן (sessionStorage). מדלג על checkout/pay ועל "בקרוב".
+   ⚠️ תדירות (30.08, דביר: "פעם ביום סה\"כ — לא רוצה חופר, אבל כן
+   רוצה שיכירו את העסק"): מוצג לכל היותר פעם ב-24 שעות, ונעלם
+   **לתמיד** ברגע שהלקוח הכיר — לחץ על אחד הכפתורים, או ביקר בעמוד
+   "למה DvirTech" מכל מקור. סגירה ב-X היא "לא עכשיו" — מחר שוב.
    ⚠️ עצמאי לגמרי (מזריק גם CSS). ריחוף עוצר את הקו.
    ⚠️ **אין overlay ו-pointer-events רק על הכרטיס** — הדף נשאר אינטראקטיבי.
 ===================================================================== */
@@ -16,7 +19,18 @@
   var mark = (document.title || "") + " " + (document.body ? document.body.className : "");
   if (/בקרוב|coming\s*soon/i.test(mark)) return;
   if (document.querySelector(".coming-soon, #comingSoon")) return;
-  try { if (sessionStorage.getItem("dvtEntrySeen")) return; } catch (e) {}
+
+  /* מי שהגיע לעמוד "למה DvirTech" — הכיר. הבאנר סיים את תפקידו,
+     מכל מקור הגעה (הבאנר, התפריט, קישור ישיר). */
+  if (page === "why-dvirtech.html") {
+    try { localStorage.setItem("dvtEntryDone", "1"); } catch (e) {}
+    return;
+  }
+  try {
+    if (localStorage.getItem("dvtEntryDone")) return;
+    var last = Number(localStorage.getItem("dvtEntryLast")) || 0;
+    if (Date.now() - last < 24 * 3600 * 1000) return;
+  } catch (e) {}
 
   var he = true;
   try { he = (localStorage.getItem("dvirtech_lang") || "he") !== "en"; } catch (e) {}
@@ -111,7 +125,7 @@
     "</div>";
 
   document.body.appendChild(wrap);
-  try { sessionStorage.setItem("dvtEntrySeen", "1"); } catch (e) {}
+  try { localStorage.setItem("dvtEntryLast", String(Date.now())); } catch (e) {}
   requestAnimationFrame(function () { requestAnimationFrame(function () { wrap.classList.add("in"); }); });
 
   var timer = null;
@@ -121,7 +135,13 @@
     wrap.classList.remove("in");
     setTimeout(function () { if (wrap.parentNode) wrap.parentNode.removeChild(wrap); }, 320);
   }
-  wrap.addEventListener("click", function (e) { if (e.target.getAttribute("data-close")) close(); });
+  wrap.addEventListener("click", function (e) {
+    if (e.target.getAttribute("data-close")) close();
+    /* לחיצה על אחד משני הקישורים = הכיר את העסק — לא מציגים שוב. */
+    if (e.target.closest && e.target.closest("a")) {
+      try { localStorage.setItem("dvtEntryDone", "1"); } catch (e2) {}
+    }
+  });
   var fill = wrap.querySelector(".dvt-toast-fill");
   if (fill) fill.addEventListener("animationend", close);
   timer = setTimeout(close, LIFE_MS + 1500);

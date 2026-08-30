@@ -308,6 +308,13 @@ async function verifyOnce(paymentId, orderId){
    ⚠️ שני מסלולים בכוונה — **קישור** למי שקורא במחשב, ו**קוד**
    להקלדה למי שקיבל את המייל בטלפון ופותח את האתר במקום אחר. */
 function thShowTrack(data){
+  /* 🎯 המרת Google Ads — פעם אחת לכל הזמנה (מזוהה ב-transaction_id;
+     ראה dvtAdsConversion). רץ רק אחרי שהשרת אימת את התשלום. */
+  try{
+    if(typeof dvtAdsConversion === "function" && data && data.orderId){
+      dvtAdsConversion(data.orderId, data.amount);
+    }
+  }catch(e){}
   const box = document.getElementById("thxTrack");
   if(!box || !data || !data.code) return;
   const link = document.getElementById("thxTrackLink");

@@ -25,6 +25,28 @@
    ⚠️ ניסוחי הבאנר בעברית ובאנגלית לפי שפת האתר; RTL אוטומטי.
    ===================================================================== */
 
+/* =====================================================================
+   🎯 Google Ads / Analytics — המזהים של דביר
+   =====================================================================
+   דביר (30.08): "אני כבר מחובר לגוגל אדס — רק נשאר לחבר את המעקבים."
+   שני שדות, שניהם מהחשבון שלו (ריק = כבוי, האתר נשאר בלי מעקב):
+
+   DVT_GOOGLE_TAG_ID — מזהה התג: ב-Google Ads → כלים → מנהל הנתונים
+     (Data manager) → תג Google. נראה "AW-1234567890". (אם יתווסף
+     בעתיד GA4 — אפשר לשים כאן את ה-"G-..." ולהוסיף את ה-AW ב-config
+     שני, אבל להתחלה מספיק ה-AW.)
+   DVT_ADS_CONVERSION — תווית המרת "רכישה": Google Ads → מטרות →
+     המרות → פעולת המרה חדשה → אתר → "רכישה", ואז מקבלים
+     "AW-1234567890/AbC-dEfGhIjK". בלי זה הרכישות לא נמדדות כהמרה.
+
+   🔴 **המנגנון בטוח-להסכמה מהרגע הראשון:** התג נטען תמיד (המלצת
+   גוגל — "advanced consent mode"), אבל ברירות המחדל למטה דוחות
+   אחסון — בלי הסכמה הוא עובד בלי עוגיות (פינגים אנונימיים בלבד),
+   ומהרגע שהגולש אישר "שיווק" בחלונית — נפתחות עוגיות הפרסום.
+   שום דבר לא נטען לפני ששני המזהים מולאו. */
+var DVT_GOOGLE_TAG_ID = "";
+var DVT_ADS_CONVERSION = "";
+
 /* ---------- Consent Mode v2: ברירת מחדל — הכל דחוי ---------- */
 window.dataLayer = window.dataLayer || [];
 function gtag(){ window.dataLayer.push(arguments); }
@@ -178,6 +200,35 @@ function dvtCookieInit(){
       }
     }
   });
+}
+
+/* ---------- טעינת תג Google (רק כשהוזן מזהה) ---------- */
+(function dvtLoadGoogleTag(){
+  if (!DVT_GOOGLE_TAG_ID) return;
+  var s = document.createElement("script");
+  s.async = true;
+  s.src = "https://www.googletagmanager.com/gtag/js?id=" + encodeURIComponent(DVT_GOOGLE_TAG_ID);
+  document.head.appendChild(s);
+  gtag("js", new Date());
+  gtag("config", DVT_GOOGLE_TAG_ID);
+})();
+
+/* ---------- המרת רכישה — נקרא מדף התודה אחרי אימות תשלום ----------
+   ⚠️ transaction_id = מספר ההזמנה: Google Ads מסיר כפילויות לפיו,
+   ורענון של דף התודה לא סופר רכישה פעמיים. השמירה המקומית היא
+   חגורה נוספת לאותו דבר. הסכום מדווח כמו שאומת מהשרת. */
+function dvtAdsConversion(orderId, amount){
+  try{
+    if (!DVT_GOOGLE_TAG_ID || !DVT_ADS_CONVERSION || !orderId) return;
+    var key = "dvt_conv_" + orderId;
+    try { if (localStorage.getItem(key)) return; localStorage.setItem(key, "1"); } catch (e) {}
+    gtag("event", "conversion", {
+      send_to: DVT_ADS_CONVERSION,
+      value: Number(amount) || 0,
+      currency: "ILS",
+      transaction_id: String(orderId)
+    });
+  }catch(e){ /* מדידה לעולם לא מפילה דף תודה */ }
 }
 
 /* פתיחת ההעדפות מכל מקום (הקישור בפוטר). */

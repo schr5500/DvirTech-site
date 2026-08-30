@@ -1047,6 +1047,33 @@ function renderInstallmentOptions(base){
 
   /* הסבר קצר מתחת לבורר — אחרת "הכי משתלם" על אפשרות שיש בה עמלה
      נראה כמו טעות. ⚠️ הטקסט נבנה מהמספרים בפועל ולא נכתב ידנית. */
+  /* ⚠️ דף הסליקה של SUMIT מציג בורר תשלומים משלו (1 עד המקסימום
+     ששלחנו) — אין להם פרמטר נעילה אמיתי ל"תשלומים רגילים"
+     (‏MinimumPaymentsCredit חל רק על עסקאות קרדיט; נבדק 30.08 —
+     פתוח מולם). עד שיהיה: אומרים ללקוח במפורש מה לבחור שם, ובצד
+     השרת יש שומר שמתריע אם נבחר מספר אחר (dvtInstallmentsGuard_). */
+  let sumitNote = document.getElementById("installmentsSumitNote");
+  if(!sumitNote){
+    const sel2 = document.getElementById("installmentsCount");
+    if(sel2 && sel2.parentNode){
+      sumitNote = document.createElement("p");
+      sumitNote.id = "installmentsSumitNote";
+      sumitNote.className = "pay-sumit-note";
+      sel2.parentNode.appendChild(sumitNote);
+    }
+  }
+  if(sumitNote){
+    const cur = parseInt((document.getElementById("installmentsCount") || {}).value, 10) || 1;
+    if(cur > 1){
+      sumitNote.hidden = false;
+      sumitNote.textContent = tr(
+        "⚠️ בדף התשלום המאובטח תופיע שוב בחירת תשלומים — בחרו שם שוב " + cur + " תשלומים.",
+        "⚠️ The secure payment page will ask again — pick " + cur + " installments there too.");
+    }else{
+      sumitNote.hidden = true;
+    }
+  }
+
   const hint = document.getElementById("installmentsBest");
   if(hint){
     if(best > 1 && base > 0){
@@ -1280,6 +1307,10 @@ async function submitCheckout(){
       headers: { "Content-Type": "text/plain;charset=utf-8" },
       body: JSON.stringify({
         action: "createPayment",
+        /* 👤 לקוח מחובר — ההזמנה משתייכת לחשבון שלו גם אם הקליד
+           בטופס טלפון אחר (למשל טלפון של בן משפחה). השרת מאמת את
+           החתימה; טוקן לא-תקף פשוט מתעלמים ממנו. ריק = אורח. */
+        acctToken: (typeof dvtAcctToken_ === "function" ? dvtAcctToken_() : ""),
         /* ⚠️ הכתובת נשלחת כשדה נפרד ולא נדחסת לתוך `name` — היא צריכה
            להגיע לקבלה ולהודעה שדביר מקבל, ושם היא נקראת בפני עצמה. */
         customer: { name, phone, email, isBusiness, companyName,

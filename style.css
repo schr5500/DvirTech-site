@@ -2427,3 +2427,10 @@ html[dir="ltr"] .gp-burst{ transform:rotate(-38deg) }
   font-size:12.5px; line-height:1.6;
 }
 
+/* הערת "בחרו שוב X תשלומים" מתחת לבורר — עד ש-SUMIT יתנו נעילה אמיתית */
+.pay-sumit-note{
+  margin:7px 0 0; padding:8px 11px; border-radius:9px;
+  background:#FFF7E6; border:1px solid #F5DFA8; color:#7A5A12;
+  font-size:12px; line-height:1.55;
+}
+.pay-sumit-note[hidden]{ display:none }
