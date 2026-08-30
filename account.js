@@ -155,6 +155,10 @@ function acctApply(d){
       phone: (d.profile && d.profile.phone) || "",
       email: (d.profile && d.profile.email) || "",
       plan: d.sub ? d.sub.plan : "", pct: d.planDiscountPct || 0,
+      /* 🔎 הזכאות — כדי שעמוד השירותים יציג "המחיר שלך" בלי בקשת
+         רשת (supMe_/supEffective_). ⚠️ תצוגה בלבד: השרת מתמחר
+         מחדש בקופה, ודביר גובה שירות ידנית מול הגיליון. */
+      eligible: !!d.eligible, buy12: d.buy12 || 0, eligMin: d.eligMin || 3000,
       exp: Date.now() + 7 * 86400000
     }));
   }catch(e){}
@@ -209,6 +213,21 @@ function acctApply(d){
             </div>
           </div>`).join("") + `</div>`
       : `<p class="acct-note">${acctT("עוד אין הזמנות. הקנייה הראשונה שלך תופיע כאן.", "No orders yet — your first purchase will show here.")}</p>`);
+
+  /* --- מימושי המנוי — "לאן הלכו השעות" (מקושר לכרטיס הלקוח) --- */
+  const red = d.redemptions || [];
+  const redCard = document.getElementById("acctRedeemCard");
+  if(redCard){
+    redCard.hidden = !(d.sub || red.length);
+    redCard.innerHTML =
+      `<h2>⏱️ ${acctT("מה נוצל מהמנוי","What your plan covered")}</h2>` +
+      (red.length
+        ? red.map(x => `<p class="acct-row"><span>${esc(x.date)} · ${esc(x.kind)}${
+            x.what ? " — " + esc(x.what) : ""}</span><b>${esc(x.used)}${
+            x.left ? " · " + acctT("נותרו ","left ") + esc(x.left) : ""}</b></p>`).join("")
+        : `<p class="acct-note">${acctT("עוד לא נוצל כלום מהמכסה שלך — הכל זמין.",
+                                        "Nothing has been used from your allowance yet — it is all available.")}</p>`);
+  }
 
   /* --- ציוד באחריות --- */
   const eq = d.equipment || [];

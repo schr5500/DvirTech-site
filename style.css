@@ -2434,3 +2434,66 @@ html[dir="ltr"] .gp-burst{ transform:rotate(-38deg) }
   font-size:12px; line-height:1.55;
 }
 .pay-sumit-note[hidden]{ display:none }
+
+/* ==================== 🎯 בחירה לפי כוונה (עמוד השירותים) ==================== */
+.sup-int-wrap{ margin:0 0 18px }
+.sup-int-lead{ font-size:14px; font-weight:800; color:var(--ink,#0E2A47); margin:0 0 10px }
+.sup-int-lead span{ font-weight:500; color:var(--ink-soft,#5F7590); font-size:12.5px }
+.sup-int-row{
+  display:grid; gap:10px;
+  grid-template-columns:repeat(auto-fit,minmax(178px,1fr));
+}
+.sup-int{
+  position:relative; text-align:start; cursor:pointer;
+  background:var(--surface,#fff); border:1.5px solid var(--line,#DEE6F0);
+  border-radius:14px; padding:13px 14px 12px; font:inherit;
+  display:flex; flex-direction:column; gap:3px; transition:.16s;
+}
+.sup-int:hover{ border-color:var(--blue,#1B6FE0); transform:translateY(-1px);
+  box-shadow:0 8px 20px rgba(11,44,77,.08) }
+.sup-int.is-on{ border-color:var(--blue,#1B6FE0); background:#EFF6FF;
+  box-shadow:0 0 0 3px rgba(27,111,224,.14) }
+.sup-int-ic{ font-size:21px; line-height:1 }
+.sup-int b{ font-size:14px; color:var(--ink,#0E2A47) }
+.sup-int-sub{ font-size:11.5px; color:var(--ink-soft,#5F7590); line-height:1.45 }
+.sup-int-n{
+  position:absolute; top:10px; inset-inline-end:11px;
+  background:var(--surface-2,#F2F7FC); color:var(--ink-soft,#5F7590);
+  border-radius:999px; min-width:21px; text-align:center;
+  font-size:11px; font-weight:800; padding:2px 6px;
+}
+.sup-int.is-on .sup-int-n{ background:var(--blue,#1B6FE0); color:#fff }
+.sup-int-clear{
+  margin-top:10px; border:0; background:none; cursor:pointer; font:inherit;
+  font-size:12.5px; font-weight:700; color:var(--blue,#1B6FE0);
+  text-decoration:underline; text-underline-offset:3px; padding:0;
+}
+
+/* ==================== 💳 "מה המחיר שלי?" ==================== */
+.sup-me{
+  background:var(--surface,#fff); border:1px solid var(--line,#DEE6F0);
+  border-radius:14px; padding:14px 16px; margin:0 0 16px;
+}
+.sup-me.is-in{ background:linear-gradient(180deg,#F2FBF7,#FFFFFF); border-color:#BFE6D5 }
+.sup-me-in{ display:flex; align-items:center; gap:12px; flex-wrap:wrap }
+.sup-me-ic{ font-size:22px; line-height:1; flex:none }
+.sup-me-in > div{ flex:1 1 260px; min-width:0 }
+.sup-me-in b{ display:block; font-size:14.5px; color:var(--ink,#0E2A47) }
+.sup-me-in > div > span{ display:block; font-size:12.5px; color:var(--ink-soft,#5F7590); line-height:1.55; margin-top:2px }
+.sup-me-tags{ display:flex; flex-wrap:wrap; gap:7px; margin-top:6px }
+.sup-me-tag{
+  font-size:11.5px; font-weight:700; line-height:1.5;
+  background:var(--surface-2,#F2F7FC); color:var(--ink-soft,#5F7590);
+  border-radius:999px; padding:4px 11px;
+}
+.sup-me-tag.is-on{ background:#E9FBF3; color:#0E7A5F }
+.sup-me-tag.is-plan{ background:#EDE9FE; color:#6D28D9 }
+.sup-me-cta{ width:auto; margin:0; padding:10px 20px; font-size:13.5px; flex:none }
+.sup-me-link{ font-size:12.5px; font-weight:800; color:var(--blue,#1B6FE0); text-decoration:none; flex:none }
+.sup-me-link:hover{ text-decoration:underline }
+.sup-me-note{
+  margin:10px 0 0; padding-top:9px; border-top:1px dashed var(--line,#DEE6F0);
+  font-size:11.5px; color:var(--ink-soft,#5F7590); line-height:1.6;
+}
+/* מחיר DvirTech כיעד להשגה (גולש שאינו זכאי/מחובר) */
+.sup-price-dvt{ font-size:11.5px; font-weight:700; color:#0E7A5F; white-space:nowrap }

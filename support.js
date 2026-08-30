@@ -67,6 +67,204 @@ const SUP_CATS = [
   { key:"bundles",  he:"חבילות",       en:"Bundles" }
 ];
 
+
+/* =====================================================================
+   🎯 מקטעים לפי כוונה — סוגר את פתוח #3 (30.08)
+   =====================================================================
+   דביר: "עמוד השירותים לפי כוונה + בורר מה המחיר שלי."
+
+   🔴 **למה זה נדרש:** הקטגוריות (הרכבה · מערכת הפעלה · תיקונים…)
+   הן איך **דביר** חושב על העבודה. הלקוח לא מגיע עם "אני צריך
+   קטגוריית תיקונים" — הוא מגיע עם **"המחשב שלי איטי"** או **"בניתי
+   מחשב וצריך שיורכב"**. הכוונות כאן הן שכבה מעל הקטגוריות: הן
+   מסננות אותן, לא מחליפות אותן, ולכן הכל ממשיך לעבוד גם כשלא
+   נבחרה כוונה (ברירת המחדל = הכל, בדיוק כמו קודם).
+
+   ⚠️ שירות יכול להופיע בכמה כוונות — זה מכוון: "העברת נתונים"
+   רלוונטית גם למחשב חדש וגם לתקלה. */
+const SUP_INTENTS = [
+  { key:"new",     ic:"🖥️", he:"קניתי / בניתי מחשב",  en:"I bought or built a PC",
+    subHe:"הרכבה, Windows, תוכנות, התקנה אצלך", subEn:"Assembly, Windows, software, setup at your place",
+    keys:["assembly-parts","assembly-premium","assembly-win","win11-own-license",
+          "win-laptop","onsite-setup","bundle-home","data-transfer"] },
+  { key:"broken",  ic:"🚑", he:"משהו לא עובד",         en:"Something is broken",
+    subHe:"אבחון, תיקון, פירמוט, מחשב שנתקע או איטי", subEn:"Diagnosis, repair, clean install, a slow or stuck PC",
+    keys:["diagnostics","diagnose-repair","format-reinstall","clean-thermal",
+          "bundle-revive","remote-support"] },
+  { key:"upgrade", ic:"⚡", he:"רוצה לשדרג",           en:"I want an upgrade",
+    subHe:"החלפת רכיב, שדרוג מלא, ניקוי ומשחה", subEn:"Component swap, full upgrade, cleaning and paste",
+    keys:["part-upgrade","part-complex","bundle-upgrade","bundle-full-upgrade","clean-thermal"] },
+  { key:"home",    ic:"🏠", he:"שיגיעו אליי הביתה",    en:"Come to my place",
+    subHe:"ביקור בית, התקנה בעמדה שלך", subEn:"Home visit, setup at your desk",
+    keys:["visit-30","onsite-setup","bundle-home"] },
+  { key:"quick",   ic:"💬", he:"עזרה מהירה",           en:"Quick help",
+    subHe:"תמיכה מרחוק, התקנת תוכנות, העברת נתונים", subEn:"Remote support, software install, data transfer",
+    keys:["remote-support","software-install","data-transfer"] }
+];
+
+let supIntent = "";           /* "" = הכל */
+
+function supIntentKeys_(){
+  const it = SUP_INTENTS.filter(function(x){ return x.key === supIntent; })[0];
+  return it ? it.keys : null;
+}
+
+function supInIntent_(s){
+  const keys = supIntentKeys_();
+  return !keys || keys.indexOf(s.key) !== -1;
+}
+
+function supSetIntent(key){
+  supIntent = (supIntent === key) ? "" : key;
+  supRenderIntents();
+  supRenderCats();
+  supRenderCatalog();
+  supSyncCatBadges();
+  const host = document.getElementById("supCatalog");
+  if(host && supIntent) host.scrollIntoView({ behavior:"smooth", block:"start" });
+}
+
+function supRenderIntents(){
+  const host = document.getElementById("supIntents");
+  if(!host) return;
+  host.innerHTML =
+    '<p class="sup-int-lead">' + supEsc(supTr("מה הביא אותך?","What brings you here?")) +
+      ' <span>' + supEsc(supTr("בוחרים — ורואים רק את מה שרלוונטי","Pick one and see only what is relevant")) + '</span></p>' +
+    '<div class="sup-int-row">' +
+    SUP_INTENTS.map(function(it){
+      const n = SUP_SERVICES.filter(function(s){ return it.keys.indexOf(s.key) !== -1; }).length;
+      return '<button type="button" class="sup-int' + (supIntent === it.key ? " is-on" : "") +
+             '" data-intent="' + it.key + '" aria-pressed="' + (supIntent === it.key) + '">' +
+             '<span class="sup-int-ic" aria-hidden="true">' + it.ic + '</span>' +
+             '<b>' + supEsc(supTr(it.he, it.en)) + '</b>' +
+             '<span class="sup-int-sub">' + supEsc(supTr(it.subHe, it.subEn)) + '</span>' +
+             '<span class="sup-int-n">' + n + '</span>' +
+             '</button>';
+    }).join("") +
+    '</div>' +
+    (supIntent
+      ? '<button type="button" class="sup-int-clear" data-intent-clear="1">' +
+        supEsc(supTr("× הצג את כל השירותים","× Show all services")) + '</button>'
+      : "");
+
+  /* מאזין אחד על המכל — לא onclick בתוך HTML (מדיניות CSP-ידידותית,
+     וגם כי ה-HTML נבנה מחדש בכל סינון). */
+  if(!host.dataset.wired){
+    host.dataset.wired = "1";
+    host.addEventListener("click", function(e){
+      const clear = e.target.closest("[data-intent-clear]");
+      if(clear){ supIntent = ""; supRenderIntents(); supRenderCats(); supRenderCatalog(); supSyncCatBadges(); return; }
+      const b = e.target.closest("[data-intent]");
+      if(b) supSetIntent(b.dataset.intent);
+    });
+  }
+}
+
+
+/* =====================================================================
+   💳 "מה המחיר שלי?" — ואיסור כפל הטבות
+   =====================================================================
+   דביר (30.08): *"כל דבר צריך להיות מחובר ישירות ללקוח שיראה לו
+   מחירים מוזלים… צריך גם להוסיף שאין כפל מבצעים — אי אפשר גם מחיר
+   הרכבה חלקים מהחנות וגם עוד מחיר DvirTech, זה ירושש אותי."*
+
+   🔴 **הכלל: הטבה אחת — הטובה ביותר. לעולם לא סכום שלהן.**
+   שלוש דרכים לקבל מחיר מוזל, והן **מתחרות** זו בזו:
+     1. מחיר DvirTech (רכשת אצלנו חומרה) — 250 ₪ במקום 450.
+     2. הנחת מנוי Care — אחוז ממחיר הטכנאי (PLUS: 450 → 414).
+     3. (עתידי) מבצע נקודתי — ייכנס לאותו חישוב בדיוק.
+   המחיר שמוצג = **הנמוך מביניהם**, ומצוין איזו הטבה חלה. בדוגמה
+   למעלה DvirTech מנצח (250 < 414) — ולכן מנוי PLUS **אינו** מוריד
+   את ה-250 ל-230, כפי שהיה עד 30.08. זה השינוי שדביר ביקש.
+
+   ⚠️⚠️ **אבטחה — כל זה תצוגה בלבד.** הנתונים נקראים ממטמון שנכתב
+   רק אחרי כניסה מאומתת (OTP), אבל **הדפדפן אינו מקור אמת**: בקופה
+   השרת מתמחר מחדש מ-SERVICE_OPTIONS_ ומתעלם מכל מספר שהגיע ממנו,
+   ובקריאת שירות דביר גובה ידנית מול הגיליון. ערך מזויף
+   ב-localStorage משנה מה שכתוב על המסך של המזייף — ולא שקל אחד
+   במה שנגבה. **אסור** להוסיף כאן מסלול שבו מחיר עובר מהדפדפן לשרת.
+   ⚠️ הכלל חייב להישאר זהה לתקנון §6.8א (אין כפל הטבות). */
+function supMe_(){
+  try{
+    const raw = localStorage.getItem("dvt_acct_profile");
+    if(!raw) return null;
+    const p = JSON.parse(raw);
+    if(!p || !(p.exp > Date.now())) return null;
+    return p;
+  }catch(e){ return null; }
+}
+
+/* המחיר האפקטיבי לגולש הזה + איזו הטבה יצרה אותו. */
+function supEffective_(s){
+  const tech = Number(s.price) || 0;
+  const me = supMe_();
+  const plan = supPlan_();
+  let best = tech, via = "";
+
+  /* מחיר DvirTech — רק ללקוח שהוכח כזכאי. גולש לא מזוהה רואה את
+     מחיר הטכנאי כראשי ואת מחיר DvirTech כיעד להשגה. */
+  if(s.dvt != null && s.dvt < best && me && me.eligible){ best = s.dvt; via = "dvt"; }
+
+  /* הנחת מנוי — על מחיר הטכנאי, ורק אם היא טובה יותר. */
+  if(plan && plan.pct > 0){
+    const planPrice = Math.round(tech * (1 - plan.pct / 100));
+    if(planPrice < best){ best = planPrice; via = "plan"; }
+  }
+  return { tech: tech, dvt: (s.dvt != null ? s.dvt : tech), price: best, via: via };
+}
+
+function supMyPriceRender(){
+  const host = document.getElementById("supMyPrice");
+  if(!host) return;
+  const me = supMe_();
+  const plan = supPlan_();
+
+  if(!me){
+    host.className = "sup-me";
+    host.innerHTML =
+      '<div class="sup-me-in">' +
+        '<span class="sup-me-ic" aria-hidden="true">🔎</span>' +
+        '<div><b>' + supEsc(supTr("מה המחיר שלי?","What is my price?")) + '</b>' +
+        '<span>' + supEsc(supTr(
+          "המחירים למטה הם מחיר הטכנאי. ללקוחות שקנו אצלנו חומרה יש מחיר מוזל — התחברו וכל העמוד יציג את המחיר שלכם.",
+          "Prices below are the technician price. Customers who bought hardware here get a reduced price — sign in and the whole page shows yours.")) + '</span></div>' +
+        '<a class="btn btn-primary sup-me-cta" href="account.html">' +
+          supEsc(supTr("כניסה לחשבון","Sign in")) + '</a>' +
+      '</div>';
+    return;
+  }
+
+  const first = supEsc(String(me.name || "").split(" ")[0]);
+  const rows = [];
+  if(me.eligible){
+    rows.push('<span class="sup-me-tag is-on">✅ ' +
+      supEsc(supTr("לקוח DvirTech — מחיר מועדף על כל העמוד","DvirTech customer — preferred pricing across this page")) + '</span>');
+  }else{
+    const need = Math.max(0, (Number(me.eligMin) || 3000) - (Number(me.buy12) || 0));
+    rows.push('<span class="sup-me-tag">' + supEsc(supTr(
+      "עוד " + need.toLocaleString() + " ₪ בקניית מוצרים (או מחשב שלם / מנוי) — ומחיר DvirTech נפתח",
+      need.toLocaleString() + " more in product purchases (or a full PC / a plan) unlocks DvirTech pricing")) + '</span>');
+  }
+  if(plan){
+    rows.push('<span class="sup-me-tag is-plan">🛡️ Care ' + supEsc(plan.plan) + ' · ' +
+      supEsc(supTr("הנחה " + plan.pct + "% על עבודה", plan.pct + "% off labour")) + '</span>');
+  }
+
+  host.className = "sup-me is-in";
+  host.innerHTML =
+    '<div class="sup-me-in">' +
+      '<span class="sup-me-ic" aria-hidden="true">👤</span>' +
+      '<div><b>' + supEsc(supTr("שלום " + first + " — אלה המחירים שלך", "Hi " + first + " — these are your prices")) + '</b>' +
+      '<div class="sup-me-tags">' + rows.join("") + '</div></div>' +
+      '<a class="sup-me-link" href="account.html">' + supEsc(supTr("האזור האישי ←","My account →")) + '</a>' +
+    '</div>' +
+    ((me.eligible && plan)
+      ? '<p class="sup-me-note">' + supEsc(supTr(
+          "יש לך גם מחיר DvirTech וגם מנוי — ההטבות לא מצטברות, ובכל שירות מוצג המחיר הנמוך מביניהן.",
+          "You have both DvirTech pricing and a plan — benefits do not stack; each service shows the lower of the two.")) + '</p>'
+      : "");
+}
+
 /* ==================== שאלות משותפות ==================== */
 /* שאלה שחוזרת בכמה שירותים מוגדרת פעם אחת — גם כדי שהניסוח יהיה זהה
    בכל מקום, וגם כדי שלא יהיו שתי גרסאות אנגלית לאותה שאלה. */
@@ -193,13 +391,13 @@ const SUP_SERVICES = [
                    ["לא בטוח","Not sure"]] },
         SQ.files, SQ.boots ] },
 
-  { key:"win-laptop", sku:"CLI-4039", cat:"os", price:280, dvt:150,
+  { key:"win-laptop", sku:"CLI-4013", cat:"os", price:280, dvt:150,
     he:"התקנת Windows למחשב נייד (כולל ציד דרייברים)", en:"Windows install on a laptop (incl. driver hunt)",
     descHe:"התקנה נקייה למחשב נייד — כולל איתור והתקנה של הדרייברים הייעודיים של היצרן (טאצ'פד, מקשי פונקציה, סוללה), שזה החלק שלוקח את הזמן.",
     descEn:"A clean install on a laptop — including hunting down the maker's dedicated drivers (touchpad, function keys, battery), which is the part that takes the time.",
     q:[ SQ.files, SQ.boots ] },
 
-  { key:"format-reinstall", sku:"CLI-4008", cat:"os", price:320, dvt:250,
+  { key:"format-reinstall", sku:"CLI-4014", cat:"os", price:320, dvt:250,
     he:"פירמוט + התקנה מחדש", en:"Format + clean reinstall",
     descHe:"מחיקה מלאה והתקנה מאפס, כולל דרייברים ותוכנות בסיס.",
     descEn:"Full wipe and a from-scratch install, including drivers and basic software.",
@@ -234,7 +432,7 @@ const SUP_SERVICES = [
           options:[["אחד","One"],["שניים","Two"],["שלושה ומעלה","Three or more"]] },
         SQ.when ] },
 
-  { key:"onsite-setup", sku:"CLI-4013", cat:"visit", price:450, dvt:300,
+  { key:"onsite-setup", sku:"CLI-4017", cat:"visit", price:450, dvt:300,
     he:"התקנת מחשב בעמדת הלקוח", en:"On-site PC setup",
     descHe:"מגיע, מחבר ומעמיד את העמדה לעבודה. כולל הגעה עד 30 דק' נסיעה.",
     descEn:"I come over, connect everything and get the workstation running. Includes travel of up to 30 minutes.",
@@ -274,7 +472,7 @@ const SUP_SERVICES = [
         SQ.when ] },
 
   /* השירות המרכזי בדף — כאן השאלות הן בדיוק מה שטכנאי שואל בטלפון. */
-  { key:"diagnostics", sku:"CLI-4015", cat:"support", price:150, dvt:100,
+  { key:"diagnostics", sku:"CLI-4030", cat:"support", price:150, dvt:100,
     he:"אבחון תקלה", en:"Fault diagnosis",
     descHe:"בודק מה באמת התקלה ואומר לך מה צריך — לפני שמחליפים חלקים.",
     descEn:"I find out what's actually wrong and tell you what it needs — before anything gets replaced.",
@@ -308,7 +506,7 @@ const SUP_SERVICES = [
      "תיקון" ומשלם 150+300 על אותה עבודה. אותה טעות בדיוק שהיתה
      בחבילת "הכל כלול". המחיר חייב להישאר זהה ל-PRICE_LIST ב-
      2-pricelist-picker.gs ול-REAL_SUMIT_SKUS ב-4-payment-api.gs. */
-  { key:"diagnose-repair", sku:"CLI-4023", cat:"support", price:350, dvt:280,
+  { key:"diagnose-repair", sku:"CLI-4031", cat:"support", price:350, dvt:280,
     he:"אבחון + תיקון תקלה", en:"Diagnosis + repair",
     descHe:"כולל את האבחון — לא משלמים עליו פעמיים. אם התיקון דורש חלק חדש, אומר לך את המחיר לפני שמזמינים.",
     descEn:"The diagnosis is included — you don't pay for it twice. If the repair needs a new part, I'll quote it before ordering.",
@@ -338,7 +536,7 @@ const SUP_SERVICES = [
      הלקוח רואה מחיר אחד ומשלם אחר.
      ⚠️ מק"ט CLI-4024 **עדיין לא נוצר ב-SUMIT.** כאן זו פנייה בוואטסאפ
      בלבד ולכן אין סיכון, אבל בקופה השורה תיפול עד שהמק"ט ייווצר. */
-  { key:"software-install", sku:"CLI-4024", cat:"support", price:80, dvt:50,
+  { key:"software-install", sku:"CLI-4015", cat:"support", price:80, dvt:50,
     he:"התקנת תוכנות", en:"Software installation",
     descHe:"מתקין ומגדיר את מה שאתה צריך — אופיס, דרייברים, אנטי-וירוס, תוכנות עבודה.",
     descEn:"I install and set up what you need — Office, drivers, antivirus, work software.",
@@ -382,7 +580,7 @@ const SUP_SERVICES = [
   /* ---------- תיקונים ---------- */
   /* פוצל 27.08: פשוט (זיכרון/SSD) מול מורכב (ספק/קירור/לוח) —
      ההשוואה לשוק הראתה ש-150 אחיד היה +114% מול Sagi על הפשוט. */
-  { key:"part-upgrade", sku:"CLI-4017", cat:"repairs", price:100, dvt:50,
+  { key:"part-upgrade", sku:"CLI-4034", cat:"repairs", price:100, dvt:50,
     he:"התקנת רכיב פשוט (זיכרון · SSD · כרטיס)", en:"Simple component install (RAM · SSD · card)",
     descHe:"התקנה והרצה של רכיב בהחלפה פשוטה. מחיר הרכיב עצמו לא כלול.",
     descEn:"Installing and running in a simple swap-in component. The part itself is not included.",
@@ -404,7 +602,7 @@ const SUP_SERVICES = [
           phEn:"e.g. i5-12400 CPU, B660 board, 550W PSU" },
         SQ.deskOrLaptop ] },
 
-  { key:"part-complex", sku:"CLI-4042", cat:"repairs", price:200, dvt:120,
+  { key:"part-complex", sku:"CLI-4035", cat:"repairs", price:200, dvt:120,
     he:"התקנת רכיב מורכב (ספק · קירור · לוח אם)", en:"Complex component install (PSU · cooling · motherboard)",
     descHe:"החלפה שדורשת פירוק והרכבה מחדש של חלק מהמחשב — ספק כוח, קירור או לוח אם — כולל בדיקת יציבות אחרי ההתקנה. מחיר הרכיב לא כלול.",
     descEn:"A swap that needs partial teardown and rebuild — PSU, cooling or motherboard — including a stability check afterwards. The part itself is not included.",
@@ -426,7 +624,7 @@ const SUP_SERVICES = [
                    ["משחקים לא רצים חלק","Games don't run smoothly"],
                    ["הכל — תחזוקה כללית","Everything — a general tune-up"]] } ] },
 
-  { key:"clean-thermal", sku:"CLI-4018", cat:"repairs", price:180, dvt:140,
+  { key:"clean-thermal", sku:"CLI-4036", cat:"repairs", price:180, dvt:140,
     he:"ניקוי פנימי + משחה תרמית", en:"Internal cleaning + thermal paste",
     descHe:"פירוק, ניקוי אבק והחלפת משחה תרמית. מוריד חום ורעש.",
     descEn:"Teardown, dust removal and fresh thermal paste. Lower temps and less noise.",
@@ -442,7 +640,7 @@ const SUP_SERVICES = [
           options:[["אף פעם","Never"],["לפני יותר משנה","Over a year ago"],
                    ["בשנה האחרונה","Within the past year"],["לא יודע","Not sure"]] } ] },
 
-  { key:"data-transfer", sku:"CLI-4019", cat:"repairs", price:250, dvt:180,
+  { key:"data-transfer", sku:"CLI-4016", cat:"repairs", price:250, dvt:180,
     he:"העברת נתונים / גיבוי", en:"Data transfer / backup",
     descHe:"מעביר קבצים, תמונות ומיילים — גם ממחשב שכבר לא עולה.",
     descEn:"Moving files, photos and mail — including off a PC that no longer boots.",
@@ -484,7 +682,7 @@ const SUP_SERVICES = [
           he:"להעביר נתונים ממחשב ישן?", en:"Move data from an old PC?",
           options:[["כן","Yes"],["לא","No"],["אין לי מחשב ישן","I don't have an old PC"]] } ] },
 
-  { key:"bundle-home", sku:"CLI-4036", cat:"bundles", price:790, dvt:650,
+  { key:"bundle-home", sku:"CLI-4021", cat:"bundles", price:790, dvt:650,
     he:"חבילה: מחשב חדש עד הבית", en:"Bundle: new PC to your door",
     descHe:"הכל — הרכבה, Windows, תוכנות, הגעה אליך, התקנה מלאה בעמדה, העברת נתונים מהישן והדרכה קצרה.",
     descEn:"Everything — assembly, Windows, software, arrival, full desk setup, data transfer from the old PC and a short walkthrough.",
@@ -494,7 +692,7 @@ const SUP_SERVICES = [
           phHe:"רשימת חלקים אם יש, או תקציב משוער",
           phEn:"A parts list if you have one, or an approximate budget" } ] },
 
-  { key:"bundle-upgrade", sku:"CLI-4021", cat:"bundles", price:240, dvt:190,
+  { key:"bundle-upgrade", sku:"CLI-4022", cat:"bundles", price:240, dvt:190,
     he:"חבילה: שדרוג מהיר", en:"Bundle: quick upgrade",
     descHe:"התקנת עד 2 רכיבים + ניקוי פנימי + משחה תרמית + בדיקת ביצועים. מחיר הרכיבים לא כלול.",
     descEn:"Up to 2 components installed + internal clean + thermal paste + a performance check. Parts not included.",
@@ -517,7 +715,7 @@ const SUP_SERVICES = [
      PRO מוצגים באזור #care ומנוהלים בהצטרפות מתואמת (ראה תקנון 6.6).
      המק"ט נשאר ב-SUMIT ובמחירון — להיסטוריית מסמכים בלבד. */
 
-  { key:"bundle-full-upgrade", sku:"CLI-4037", cat:"bundles", price:620, dvt:500,
+  { key:"bundle-full-upgrade", sku:"CLI-4023", cat:"bundles", price:620, dvt:500,
     he:"חבילה: שדרוג מלא", en:"Bundle: full upgrade",
     descHe:"כל מה שבשדרוג המהיר + פירמוט והתקנה מחדש של Windows + העברת הנתונים חזרה. המחשב חוזר כמו חדש.",
     descEn:"Everything in the quick upgrade + a format and clean Windows reinstall + your data moved back. The PC comes back like new.",
@@ -528,7 +726,7 @@ const SUP_SERVICES = [
 
   /* ⭐ "החייאת מחשב" — החבילה החשובה ביותר לפי מחקר המודעות: אנשים
      מחפשים תסמינים ("מחשב איטי", "לא נדלק") — לא שם של שירות. */
-  { key:"bundle-revive", sku:"CLI-4038", cat:"bundles", price:830, dvt:690,
+  { key:"bundle-revive", sku:"CLI-4024", cat:"bundles", price:830, dvt:690,
     he:"⭐ החייאת מחשב — איטי? תקוע? נחזיר אותו לחיים", en:"⭐ PC revival — slow? stuck? back to life",
     descHe:"ביקור בית + אבחון מלא + פירמוט והתקנה מחדש + העברת כל הקבצים + התקנת התוכנות שלך. הכל בפגישה אחת, אצלך.",
     descEn:"A home visit + full diagnosis + format and clean reinstall + all your files moved + your software installed. All in one visit, at your place.",
@@ -584,17 +782,27 @@ function supPlan_(){
    הנחת המנוי חלה על מחיר DvirTech, כפי שקובע התקנון (על עבודה בלבד). */
 function supPriceHtml(s){
   if(s.dvt != null && s.dvt < s.price){
-    const plan = supPlan_();
-    const planLine = plan
-      ? `<span class="sup-price-plan">${supEsc(supTr(
-          "שלך עם " + plan.plan + ": " + supPriceLabel(Math.round(s.dvt * (1 - plan.pct / 100)), s.from),
-          "Yours with " + plan.plan + ": " + supPriceLabel(Math.round(s.dvt * (1 - plan.pct / 100)), s.from)))}</span>`
-      : "";
-    return `<s class="sup-price-was">${supEsc(supPriceLabel(s.price, s.from))}</s>` +
-           `<span class="sup-price-now">${supEsc(supPriceLabel(s.dvt, s.from))}</span>` +
-           `<button type="button" class="sup-price-tag sup-price-why" onclick="supWhyTiers(event)">${
-             supEsc(supTr("ללקוחות DvirTech · מה זה?","DvirTech customers · what's this?"))}</button>` +
-           planLine;
+    /* 🔴 **הוסר 30.08 — כאן ישב חישוב כפל ההטבות.** הגרסה הקודמת
+       הכפילה את הנחת המנוי על **מחיר DvirTech** (250 → 230), כלומר
+       העניקה את שתי ההטבות יחד. דביר: "אי אפשר גם מחיר הרכבה
+       חלקים מהחנות וגם עוד מחיר DvirTech — זה ירושש אותי."
+       ההכרעה עברה ל-supEffective_: הטבה אחת, הטובה ביותר.
+       ⚠️ לא להחזיר שורת "שלך עם PLUS" שמחושבת מ-dvt. */
+    const eff = supEffective_(s);
+    const why = `<button type="button" class="sup-price-tag sup-price-why" onclick="supWhyTiers(event)">${
+      supEsc(eff.via === "plan" ? supTr("מחיר המנוי שלך · מה זה?","Your plan price · what's this?")
+           : eff.via === "dvt"  ? supTr("המחיר שלך · לקוח DvirTech","Your price · DvirTech customer")
+           : supTr("ללקוחות DvirTech · מה זה?","DvirTech customers · what's this?"))}</button>`;
+    /* מחובר וזכאי → המחיר שלו ראשי ומחיר הטכנאי מחוק לצידו.
+       לא מחובר / לא זכאי → מחיר הטכנאי ראשי, ומחיר DvirTech מוצג
+       כיעד להשגה. בשני המקרים מוצג **מחיר אחד** ולא סכום הטבות. */
+    if(eff.via){
+      return `<s class="sup-price-was">${supEsc(supPriceLabel(eff.tech, s.from))}</s>` +
+             `<span class="sup-price-now">${supEsc(supPriceLabel(eff.price, s.from))}</span>` + why;
+    }
+    return `<span class="sup-price-now">${supEsc(supPriceLabel(eff.tech, s.from))}</span>` +
+           `<span class="sup-price-dvt">${supEsc(supTr("ללקוחות DvirTech: ","DvirTech customers: ") +
+             supPriceLabel(eff.dvt, s.from))}</span>` + why;
   }
   return supEsc(supPriceLabel(s.price, s.from));
 }
@@ -623,6 +831,9 @@ function supWhyTiers(ev){
         '<p><b>' + supEsc(supTr("מחיר DvirTech","DvirTech price")) + '</b> — ' +
           supEsc(supTr("מחיר מוזל ללקוחות הבית שלנו. מי נחשב? מספיק אחד מאלה: קניתם כאן מחשב שלם · קניתם מוצרים (לא שירותים) ב-3,000 ₪+ בשנה האחרונה · יש לכם מנוי Care פעיל.",
                        "A reduced price for our house customers. Any one of these qualifies: you bought a full PC here · you bought 3,000 ₪+ of products (not services) in the last year · you hold an active Care plan.")) + '</p>' +
+        '<p><b>' + supEsc(supTr("אין כפל הטבות","Benefits do not stack")) + '</b> — ' +
+          supEsc(supTr("למי שיש גם מחיר DvirTech וגם מנוי Care — חל הנמוך מביניהם, לא שניהם יחד. תמיד מוצג המחיר הטוב ביותר שמגיע לכם.",
+                       "If you have both DvirTech pricing and a Care plan, the lower of the two applies — not both together. The best price you qualify for is always the one shown.")) + '</p>' +
         '<p class="sup-why-note">' +
           supEsc(supTr("בקנייה באתר שכוללת מחשב — המחיר המוזל חל אוטומטית בקופה. בקריאת שירות — הזכאות נבדקת מול הרישום שלנו לפני החיוב.",
                        "Buying a PC on the site applies the reduced price automatically at checkout. For service calls, eligibility is checked against our records before billing.")) + '</p>' +
@@ -651,7 +862,8 @@ function supRenderCats(){
   if(!nav) return;
   nav.setAttribute("aria-label", supTr("קטגוריות שירות","Service categories"));
   nav.innerHTML = SUP_CATS.map(c => {
-    const n = SUP_SERVICES.filter(s => s.cat === c.key).length;
+    const n = SUP_SERVICES.filter(s => s.cat === c.key && supInIntent_(s)).length;
+    if(!n) return "";
     return `<button type="button" class="sup-chip" data-jump="supcat-${supEsc(c.key)}" data-cat="${supEsc(c.key)}">
         <span>${supEsc(supTr(c.he, c.en))}</span>
         <span class="sup-chip-n" data-n="${n}">${n}</span>
@@ -676,8 +888,9 @@ function supRenderCatalog(){
   const host = document.getElementById("supCatalog");
   if(!host) return;
 
+  supMyPriceRender();
   host.innerHTML = SUP_CATS.map(c => {
-    const list = SUP_SERVICES.filter(s => s.cat === c.key);
+    const list = SUP_SERVICES.filter(s => s.cat === c.key && supInIntent_(s));
     if(!list.length) return "";
     const note = c.noteHe
       ? `<p class="sup-note">${supEsc(supTr(c.noteHe, c.noteEn))}</p>` : "";
@@ -1161,6 +1374,7 @@ function setLang(lang){
   supDropLocalizedAnswers();
   setLangCore(lang);
   supApplyI18n();
+  supRenderIntents();
   supRenderCats();
   supRenderCatalog();
   supSyncCatBadges();
@@ -1226,6 +1440,7 @@ function supWatchPanel(){
 
 function supInit(){
   supApplyI18n();
+  supRenderIntents();
   supRenderCats();
   supRenderCatalog();
   supRenderPanel();
