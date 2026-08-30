@@ -44,7 +44,12 @@
    אחסון — בלי הסכמה הוא עובד בלי עוגיות (פינגים אנונימיים בלבד),
    ומהרגע שהגולש אישר "שיווק" בחלונית — נפתחות עוגיות הפרסום.
    שום דבר לא נטען לפני ששני המזהים מולאו. */
-var DVT_GOOGLE_TAG_ID = "";
+/* 🔴 הופעל 30.08 — המזהה של דביר מ-Google Ads. מרגע זה §10.4 בתקנון
+   וסעיפים 2-3 במדיניות הפרטיות מנוסחים בהתאם (עודכנו באותו קומיט). */
+var DVT_GOOGLE_TAG_ID = "AW-18345389113";
+/* ההמרה שדביר יצר היא מסוג "אירוע purchase" (בלי תווית send_to) —
+   ראה dvtAdsConversion. אם אי-פעם תיווצר פעולת המרה עם תווית
+   ("AW-…/AbCdEf"), למלא אותה כאן והיא תישלח בנוסף. */
 var DVT_ADS_CONVERSION = "";
 
 /* ---------- Consent Mode v2: ברירת מחדל — הכל דחוי ---------- */
@@ -219,15 +224,29 @@ function dvtCookieInit(){
    חגורה נוספת לאותו דבר. הסכום מדווח כמו שאומת מהשרת. */
 function dvtAdsConversion(orderId, amount){
   try{
-    if (!DVT_GOOGLE_TAG_ID || !DVT_ADS_CONVERSION || !orderId) return;
+    if (!DVT_GOOGLE_TAG_ID || !orderId) return;
     var key = "dvt_conv_" + orderId;
     try { if (localStorage.getItem(key)) return; localStorage.setItem(key, "1"); } catch (e) {}
-    gtag("event", "conversion", {
-      send_to: DVT_ADS_CONVERSION,
+    /* פעולת ההמרה שדביר הגדיר ב-Google Ads היא מסוג
+       "www.dvirtech.co.il (web) purchase" — כלומר היא מאזינה לאירוע
+       ‏purchase הסטנדרטי דרך התג (זה בדיוק קטע הקוד שהם הציגו לו:
+       gtag('event','purchase',{...})). לכן זה האירוע שנורה, עם
+       הפרמטרים שמתעדים סכום ומזהה עסקה. */
+    gtag("event", "purchase", {
       value: Number(amount) || 0,
       currency: "ILS",
       transaction_id: String(orderId)
     });
+    /* תווית המרה ישירה — רק אם תוגדר אי-פעם פעולת המרה מסוג
+       "קטע קוד" עם send_to. לא חובה במסלול הנוכחי. */
+    if (DVT_ADS_CONVERSION) {
+      gtag("event", "conversion", {
+        send_to: DVT_ADS_CONVERSION,
+        value: Number(amount) || 0,
+        currency: "ILS",
+        transaction_id: String(orderId)
+      });
+    }
   }catch(e){ /* מדידה לעולם לא מפילה דף תודה */ }
 }
 

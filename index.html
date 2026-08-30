@@ -3,6 +3,23 @@
 <head>
 <meta charset="UTF-8">
 <meta name="viewport" content="width=device-width, initial-scale=1.0">
+<!-- Google tag — נדרש גם כאן: מאמת-התג של Google Ads בודק את כתובת
+     השורש, ובזמן "בקרוב" זה הדף שמוגש שם (30.08 — הבדיקה של דביר
+     נכשלה בדיוק בגלל זה). ברירות המחדל של Consent Mode דחויות, ולכן
+     בלי הסכמה התג עובד בלי עוגיות; בדפי החנות ההסכמה מנוהלת בחלונית
+     (cookie-consent-init.js) — כאן אין צורך בה. -->
+<script>
+  window.dataLayer = window.dataLayer || [];
+  function gtag(){dataLayer.push(arguments);}
+  gtag("consent", "default", {
+    ad_storage: "denied", ad_user_data: "denied",
+    ad_personalization: "denied", analytics_storage: "denied",
+    functionality_storage: "granted", security_storage: "granted"
+  });
+  gtag("js", new Date());
+  gtag("config", "AW-18345389113");
+</script>
+<script async src="https://www.googletagmanager.com/gtag/js?id=AW-18345389113"></script>
 <title>DvirTech — האתר בקרוב</title>
 <script>
   (function(){
