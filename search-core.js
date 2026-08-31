@@ -220,6 +220,57 @@ function dvtOutOfStockSkus(skus){
   return out;
 }
 
+/* =====================================================================
+   🔴 פריט שכבר לא קיים בקטלוג — 31.08
+   =====================================================================
+   ההערה ב-`dvtOutOfStockSkus` קובעת: *"לא מוכר בקטלוג = לא חוסמים…
+   התמחור בצד שרת ידחה SKU שבאמת לא קיים."* חצי מזה נכון, והחצי השני
+   הוא בדיוק הבעיה — **מדדתי מה השרת עושה בפועל**:
+
+       priceCart_ →  return { error: "פריט לא זמין: psu:PSU-6072 …" }
+
+   הוא לא מדלג על השורה, הוא **מפיל את כל התשלום**. והעגלה יושבת
+   ב-localStorage עם עותק מלא של הפריט (שם ומחיר), ולכן היא ממשיכה
+   להיראות תקינה לגמרי — הלקוח רואה עגלה מלאה, לוחץ "שלם", ומקבל
+   "רענן את הדף ונסה שוב". רענון לא מנקה כלום, והוא תקוע.
+
+   זה קרה בפועל: ניקוי הכפילויות של 31.08 מחק ארבעה מתאמי DC
+   (`PSU-607x`) שקיימים היום רק כ-`ACC-1460x`.
+
+   ⚠️⚠️ **הבדיקה חוקית רק כשהקטלוג באמת נטען.** קטלוג ריק, חלקי, או
+   בקשה שנכשלה — ו"אין את המוצר" הופך ל"אין שום מוצר", והעגלה של
+   הלקוח נמחקת. לכן הסף למטה, ולכן זו הפונקציה היחידה שמסתכלת עליו. */
+function dvtCatalogUsable_(){
+  const cat = dvtCatalogNow();
+  if(!cat) return false;
+  let n = 0;
+  for(const k in cat){
+    if(cat[k] && Array.isArray(cat[k].items)) n += cat[k].items.length;
+  }
+  /* הקטלוג האמיתי הוא ~1,600 פריטים. 50 הוא סף שפוי שמבדיל בין
+     "נטען" ל"חזר משהו מוזר", בלי להיות תלוי במספר המדויק. */
+  return n >= 50;
+}
+
+/* מחזיר {products:[…], builds:[…]} — פריטים שה-SKU שלהם כבר לא
+   בקטלוג. ⚠️ מוצר והרכבה מטופלים שונה בכוונה: מוצר בודד אפשר להסיר,
+   הרכבה היא **עבודה של הלקוח** ואסור למחוק אותה בשקט. */
+function dvtCartMissing(items){
+  const out = { products: [], builds: [] };
+  if(!dvtCatalogUsable_()) return out;
+
+  (items || []).forEach(function(i){
+    if(!i) return;
+    if(i.type === "product" && i.sku){
+      if(!dvtFindBySku(i.sku)) out.products.push({ id: i.id, sku: i.sku, name: i.name });
+    }else if(i.type === "build" && Array.isArray(i.parts)){
+      const gone = i.parts.filter(function(p){ return p && p.sku && !dvtFindBySku(p.sku); });
+      if(gone.length) out.builds.push({ id: i.id, name: i.name, parts: gone });
+    }
+  });
+  return out;
+}
+
 /* מקבל את פריטי העגלה ומחזיר את מה שאזל — כולל רכיבים בתוך הרכבה. */
 function dvtCartOutOfStock(items){
   const skus = [];

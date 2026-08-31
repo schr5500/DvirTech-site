@@ -1257,6 +1257,25 @@ async function submitCheckout(){
      לאזול עד שהלקוח חוזר לשלם, ואת זה בדיקת ההוספה לא תופסת.
      הבדיקה בצד שרת (`checkStockLive_`) היא הקו האחרון, אבל היא רצה
      אחרי שהלקוח כבר מילא טפסים — עדיף לומר לו כאן. */
+  /* 🔴 **רכיב שנמחק מהקטלוג — לפני בדיקת המלאי, בכוונה.**
+     מוצר בודד כזה כבר הוסר מהעגלה ב-`dvtCartPruneMissing_`. מה שנשאר
+     כאן הוא **הרכבה** שאחד מרכיביה ירד מהמדף: אותה לא מוחקים בשקט,
+     אבל אי אפשר לשלוח אותה לתשלום — `priceCart_` בשרת יחזיר
+     "פריט לא זמין" ויפיל את כל ההזמנה עם הודעה שהלקוח לא יכול לפעול
+     לפיה. עדיף לומר לו כאן בדיוק מה קרה. */
+  if(typeof dvtCartMissing === "function"){
+    const miss = dvtCartMissing(items);
+    if(miss.builds.length){
+      box.style.display = "block";
+      box.textContent = tr("בהרכבה שלך יש רכיב שכבר אינו בקטלוג: ",
+                           "Your build contains a part that is no longer available: ") +
+                        miss.builds[0].parts.map(function(p){ return p.name || p.sku; }).join(", ") +
+                        tr(". חזור לבונה והחלף אותו, או הסר את ההרכבה מהעגלה.",
+                           ". Please return to the builder and replace it, or remove the build.");
+      return;
+    }
+  }
+
   if(typeof dvtCartOutOfStock === "function"){
     const gone = dvtCartOutOfStock(items);
     if(gone.length){

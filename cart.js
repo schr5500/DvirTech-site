@@ -493,6 +493,34 @@ function hookCartIntoLangSwitch(){
   window.setLang = function(lang){ original(lang); renderCartStaticText(); };
 }
 
+/* =====================================================================
+   🧹 ניקוי פריטים שכבר לא בקטלוג
+   =====================================================================
+   רץ **אחרי** שהקטלוג נטען, לא לפניו — ההחלטה "המוצר לא קיים" חסרת
+   ערך כשאין מול מה להשוות. ההגנה עצמה ב-`dvtCatalogUsable_`.
+
+   ⚠️ **מוצר מוסר, הרכבה לא.** הרכבה היא בחירה של הלקוח בעשרה רכיבים;
+   מחיקתה בגלל רכיב אחד שירד מהמדף היא אובדן עבודה. היא נשארת בעגלה,
+   והקופה מסבירה מה לעשות (checkout.js).
+   ⚠️ הודעה ולא שקט: עגלה שמצטמצמת לבד בלי הסבר נראית כמו באג. */
+function dvtCartPruneMissing_(){
+  if(typeof dvtCartMissing !== "function" || !cartItems.length) return;
+  const miss = dvtCartMissing(cartItems);
+  if(!miss.products.length) return;
+
+  const gone = {};
+  miss.products.forEach(function(p){ gone[p.id] = 1; });
+  cartItems = cartItems.filter(function(i){ return !gone[i.id]; });
+  saveCartItems();
+  renderCart();
+
+  const names = miss.products.map(function(p){ return p.name; }).join(", ");
+  const msg = tr("הוסרו מהעגלה מוצרים שכבר אינם בקטלוג: ",
+                 "Removed from your cart — no longer available: ") + names;
+  if(typeof showToast === "function") showToast(msg);
+  else if(typeof console !== "undefined") console.warn(msg);
+}
+
 /* ================= init ================= */
 function initCart(){
   loadCartItems();
@@ -502,6 +530,12 @@ function initCart(){
   renderCartStaticText();
   renderCart();
   hookCartIntoLangSwitch();
+
+  /* ⚠️ `.then` ולא קריאה ישירה: בטעינה ראשונה הקטלוג עדיין ברשת,
+     ובדיקה מיידית הייתה מדלגת תמיד (ובצדק — אין מול מה להשוות). */
+  if(typeof dvtGetCatalog === "function"){
+    dvtGetCatalog().then(dvtCartPruneMissing_).catch(function(){});
+  }
 }
 
 if(document.readyState === "loading"){
