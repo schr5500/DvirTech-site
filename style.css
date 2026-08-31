@@ -2526,3 +2526,165 @@ html[dir="ltr"] .gp-burst{ transform:rotate(-38deg) }
   .site-notice-in{ padding:9px 12px; gap:8px }
   .site-notice{ font-size:12.5px }
 }
+
+/* ==================== 🎁 שומר-מקום למודעה (מונע קפיצת פריסה) ====
+   המודעה תלויה בקריאה ל-Apps Script (~2 שניות בביקור ראשון). בלי
+   הגובה השמור כאן, האזור הוא 0 ואז קופץ — וכל מה שמתחת נדחף.
+   ⚠️ הגובה מוגדר על מיכל **ריק** בלבד, ולכן הוא לא משפיע על
+   המודעה עצמה — כולל אם תוכן המודעה יוחלף בעתיד. */
+#giftPromoWrap.gp-loading #giftPromo:empty{
+  display:block; min-height:420px; border-radius:20px;
+  background:
+    linear-gradient(90deg, rgba(255,255,255,0) 0%, rgba(255,255,255,.06) 50%, rgba(255,255,255,0) 100%),
+    linear-gradient(160deg, #0E2A47, #0B2036);
+  background-size:200% 100%, 100% 100%;
+  animation:gpSkeleton 1.4s ease-in-out infinite;
+}
+@keyframes gpSkeleton{ to{ background-position:-200% 0, 0 0 } }
+@media (max-width:640px){
+  #giftPromoWrap.gp-loading #giftPromo:empty{ min-height:560px }
+}
+@media (prefers-reduced-motion:reduce){
+  #giftPromoWrap.gp-loading #giftPromo:empty{ animation:none }
+}
+
+/* ==================== 🎁 מודעת המתנות v4 (31.08) ====================
+   העיצוב ש-דביר בנה, מותאם לאתר: תצלום שולחן גיימינג ברקע במקום
+   גרדיאנט שטוח, כותרת Rubik ענקית, וכרטיסי מדרגה בוהקים.
+
+   🔴 **המקור היה 1536×1220 פיקסלים קבועים, וזה לא יכול לעבוד באתר.**
+   מודעה במידות קבועות נחתכת בטלפון ומשאירה פס לבן בדסקטופ רחב.
+   כאן הכל יחסי, והתצלום מקבל שני טיפולים:
+     · דסקטופ — גרדיאנט **צדי**: הטקסט על הכהה, התצלום נשאר גלוי בצד
+     · מובייל — גרדיאנט **אנכי** וכהה יותר, אחרת הטקסט יושב על
+       הצילום ולא נקרא בכלל
+
+   ⚠️ v2/v3 שלמעלה (`.gp-head`, `.gp-card`, `.gp-burst`…) **כבר לא
+   נפלטות** — הרינדור עבר כולו ל-`gp4-`. הן נשארו בקובץ כדי לא לגעת
+   ב-200 שורות CSS באותו סבב שבו מחליפים עיצוב; המחיקה שייכת ל-#42
+   (איחוד קוד). ⚠️ לא למחוק את `.gift-meter-*` ואת `.gift-hot` — הן
+   של מד ההתקדמות בעגלה, לא של המודעה. */
+#giftPromo{ background:#020712; border-color:#123253; padding:0 }
+#giftPromo::before, #giftPromo::after{ content:none }
+
+.gp4{ position:relative; isolation:isolate; padding:clamp(22px,3.4vw,40px) clamp(18px,3vw,44px) 18px }
+.gp4::before{
+  content:""; position:absolute; inset:0; z-index:-2;
+  background:url("images/promo-gift-bg.jpg") center top / cover no-repeat;
+}
+/* RTL: הטקסט בימין ⇐ האטימות בימין, התצלום נושם בשמאל. */
+.gp4::after{
+  content:""; position:absolute; inset:0; z-index:-1;
+  background:linear-gradient(to left,
+    rgba(2,7,18,.95) 0%, rgba(2,7,18,.9) 44%, rgba(2,7,18,.68) 58%,
+    rgba(2,7,18,.22) 68%, rgba(2,7,18,0) 76%);
+}
+html[dir="ltr"] .gp4::after{
+  background:linear-gradient(to right,
+    rgba(2,7,18,.95) 0%, rgba(2,7,18,.9) 44%, rgba(2,7,18,.68) 58%,
+    rgba(2,7,18,.22) 68%, rgba(2,7,18,0) 76%);
+}
+
+.gp4-hero{ max-width:min(62%,660px) }
+.gp4-hero h2{
+  margin:0 0 10px; font-family:'Rubik',sans-serif; font-weight:900;
+  font-size:clamp(30px,4.8vw,60px); line-height:1.06; color:#fff;
+  text-shadow:0 0 30px rgba(79,216,255,.45);
+}
+.gp4-hero h2 em{
+  font-style:normal;
+  background:linear-gradient(90deg,#4FD8FF,#7DE3FF,#4FD8FF);
+  background-size:200% 100%;
+  -webkit-background-clip:text; background-clip:text; -webkit-text-fill-color:transparent;
+  animation:gpShine 3.2s linear infinite;
+}
+.gp4-hero p{ margin:0 0 20px; font-size:clamp(14px,1.6vw,20px); font-weight:500; color:#BFE6F7 }
+.gp4-cta{
+  position:relative; overflow:hidden; font-weight:900;
+  box-shadow:0 10px 26px rgba(79,216,255,.35);
+}
+.gp4-cta::after{
+  content:""; position:absolute; top:0; bottom:0; width:44px; inset-inline-start:-60px;
+  background:linear-gradient(100deg,transparent,rgba(255,255,255,.55),transparent);
+  animation:gpSweep 2.8s ease-in-out infinite;
+}
+
+/* ⚠️ `auto-fit` ולא מספר עמודות קבוע: מספר המדרגות מגיע מהשרת
+   ויכול להיות 3 או 5, ופריסה שמניחה 4 הייתה נשברת בשקט. */
+.gp4-tiers{
+  margin-top:clamp(20px,3vw,34px);
+  display:grid; gap:12px;
+  grid-template-columns:repeat(auto-fit,minmax(148px,1fr));
+  max-width:min(96%,940px);
+}
+.gp4-card{
+  position:relative; display:flex; flex-direction:column; align-items:center; text-align:center;
+  background:rgba(10,22,38,.9); border:1px solid rgba(79,216,255,.25);
+  border-radius:16px; padding:16px 10px 14px; backdrop-filter:blur(6px);
+}
+.gp4-top{
+  background:linear-gradient(180deg,#132A4D,#0A1626);
+  border:1.5px solid #4FD8FF; box-shadow:0 0 24px rgba(79,216,255,.35);
+}
+.gp4-tag{
+  position:absolute; top:-11px; inset-inline-start:50%; transform:translateX(50%);
+  background:#4FD8FF; color:#020712; font-weight:800; font-size:11px;
+  padding:4px 14px; border-radius:999px; white-space:nowrap;
+}
+html[dir="ltr"] .gp4-tag{ transform:translateX(-50%) }
+.gp4-over{ font-size:12px; color:#8FB8CC }
+.gp4-min{ font-family:'Rubik',sans-serif; font-size:clamp(19px,2vw,25px); font-weight:800; color:#fff }
+.gp4-img{
+  width:64px; height:64px; margin:10px 0 8px; display:flex; align-items:center; justify-content:center;
+  border-radius:12px; background:rgba(255,255,255,.06); overflow:hidden;
+}
+.gp4-img img{ max-width:100%; max-height:100%; object-fit:contain }
+.gp4-img-empty{ font-size:30px; background:none }
+.gp4-lbl{ font-size:11px; color:#8FB8CC }
+.gp4-cap{ font-family:'Rubik',sans-serif; font-size:clamp(20px,2.1vw,27px); font-weight:800; color:#4FD8FF }
+.gp4-sample{ margin-top:6px; font-size:10.5px; color:#7FA6BC; line-height:1.35 }
+/* ⚠️ `margin-top:auto` דוחף את הכפתור לתחתית הכרטיס — בלעדיו
+   כרטיס עם שם דוגמה ארוך משאיר את הכפתור באמצע, וארבעת הכפתורים
+   לא מתיישרים בשורה אחת. */
+.gp4-pick{
+  display:block; width:100%; margin-top:auto; padding-top:0;
+  border-radius:999px; padding:7px 0;
+  font-size:12px; font-weight:700; color:#4FD8FF;
+  background:rgba(79,216,255,.12); border:1px solid rgba(79,216,255,.4);
+}
+.gp4-top .gp4-pick{ background:#4FD8FF; border-color:#4FD8FF; color:#020712; font-weight:800 }
+
+.gp4-ship{
+  margin:18px 0 0; font-size:clamp(13px,1.5vw,16px); font-weight:800; color:#4FD9C7;
+}
+.gp4-flow{
+  margin-top:16px; display:flex; align-items:center; gap:14px; flex-wrap:wrap;
+  font-size:13px; color:#BFE6F7;
+}
+.gp4-step{ display:flex; align-items:center; gap:8px }
+.gp4-step b{ font-weight:700 }
+.gp4-arr{ color:#4FD8FF }
+
+.gp4-foot{ margin-top:18px; border-top:1px solid rgba(79,216,255,.16); padding-top:12px }
+.gp4-terms{ font-size:13px; color:#9FD9F5; text-decoration:underline; text-underline-offset:3px }
+.gp4-legal{ margin:8px 0 0; font-size:10px; line-height:1.5; color:#8FA4B4 }
+
+/* 📱 מובייל — הטקסט לא יכול לשבת על הצילום. */
+@media (max-width:900px){
+  .gp4::after{
+    background:linear-gradient(to bottom, rgba(2,7,18,.82) 0%, rgba(2,7,18,.94) 55%, rgba(2,7,18,.97) 100%);
+  }
+  html[dir="ltr"] .gp4::after{
+    background:linear-gradient(to bottom, rgba(2,7,18,.82) 0%, rgba(2,7,18,.94) 55%, rgba(2,7,18,.97) 100%);
+  }
+  .gp4-hero{ max-width:100% }
+  .gp4-tiers{ max-width:100%; grid-template-columns:repeat(auto-fit,minmax(132px,1fr)) }
+}
+@media (max-width:420px){
+  .gp4-tiers{ grid-template-columns:1fr 1fr }
+  .gp4-img{ width:50px; height:50px }
+}
+@media (prefers-reduced-motion: reduce){
+  .gp4-hero h2 em{ animation:none }
+  .gp4-cta::after{ animation:none; display:none }
+}

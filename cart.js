@@ -633,34 +633,69 @@ function dvtGiftApi_(){
          (typeof PAYMENT_API_URL === "string" && PAYMENT_API_URL) || "";
 }
 
-/* טעינת המדרגות. מוחזרת Promise תמיד, ולעולם לא נדחית. */
-function dvtGiftLoadTiers(){
-  if(dvtGiftTiers_) return Promise.resolve(dvtGiftTiers_);
-  try{
-    const raw = sessionStorage.getItem(DVT_GIFT_TIERS_KEY_);
-    if(raw){
-      const o = JSON.parse(raw);
-      if(o && (Date.now() - o.at) < DVT_GIFT_TIERS_TTL_ && Array.isArray(o.tiers)){
-        dvtGiftTiers_ = o.tiers;
-        return Promise.resolve(dvtGiftTiers_);
-      }
-    }
-  }catch(e){ /* sessionStorage חסום — פשוט מביאים מהרשת */ }
+/* =====================================================================
+   טעינת המדרגות — מטמון עמיד, ורענון ברקע (31.08)
+   =====================================================================
+   🔴 **הבעיה שנמדדה בפרודקשן:** דביר: "אני נכנס לאתר, מחכה כמה
+   שניות ואז המודעה פתאום קופצת." המדידה אישרה בדיוק: קריאת
+   `giftTiers` מתחילה ב-1,455ms ונמשכת 1,876ms — כלומר המודעה
+   לא יכולה להופיע לפני ~3.3 שניות. זה לא באג בקוד שלנו; זו
+   התנהגות Apps Script (‏1-2 שניות לכל קריאה, תמיד).
 
+   שני תיקונים, ושניהם משנים את **מה שהמשתמש חווה**:
+     1. **localStorage במקום sessionStorage** — המדרגות שורדות בין
+        ביקורים, ולכן מהביקור השני המודעה נבנית בפריים הראשון,
+        בלי רשת בכלל.
+     2. **stale-while-revalidate** — מטמון שפג עדיין מוצג מיד,
+        והרענון רץ ברקע ומעדכן כשחוזר. עדיף רף ישן בשנייה 0 על
+        רף מדויק בשנייה 3.
+   ⚠️ המדרגות אינן סוד ואינן משתנות בתדירות גבוהה; הסיכון היחיד
+   הוא הצגת רף ישן לדקות ספורות, וגם זה רק עד שהרענון חוזר.
+   ⚠️ **ההכרעה נשארת בשרת** — createPayment_ מתמחר מחדש ולא סומך
+   על שום דבר מהמטמון הזה. */
+function dvtGiftTiersRead_(){
+  try{
+    const raw = localStorage.getItem(DVT_GIFT_TIERS_KEY_) ||
+                sessionStorage.getItem(DVT_GIFT_TIERS_KEY_);
+    if(!raw) return null;
+    const o = JSON.parse(raw);
+    if(!o || !Array.isArray(o.tiers)) return null;
+    return { tiers: o.tiers, fresh: (Date.now() - o.at) < DVT_GIFT_TIERS_TTL_ };
+  }catch(e){ return null; }
+}
+
+function dvtGiftTiersFetch_(){
   const api = dvtGiftApi_();
   if(!api){ dvtGiftTiers_ = []; return Promise.resolve(dvtGiftTiers_); }
-
   return fetch(api + "?action=giftTiers")
     .then(function(r){ return r.json(); })
     .then(function(d){
       dvtGiftTiers_ = (d && d.ok && Array.isArray(d.tiers)) ? d.tiers : [];
       try{
-        sessionStorage.setItem(DVT_GIFT_TIERS_KEY_,
+        localStorage.setItem(DVT_GIFT_TIERS_KEY_,
           JSON.stringify({ at: Date.now(), tiers: dvtGiftTiers_ }));
       }catch(e){}
       return dvtGiftTiers_;
     })
-    .catch(function(){ dvtGiftTiers_ = []; return dvtGiftTiers_; });
+    .catch(function(){ dvtGiftTiers_ = dvtGiftTiers_ || []; return dvtGiftTiers_; });
+}
+
+function dvtGiftLoadTiers(){
+  if(dvtGiftTiers_) return Promise.resolve(dvtGiftTiers_);
+
+  const cached = dvtGiftTiersRead_();
+  if(cached){
+    dvtGiftTiers_ = cached.tiers;
+    /* פג תוקף → מרעננים ברקע ומרנדרים שוב כשחוזר, בלי להשהות כלום. */
+    if(!cached.fresh){
+      dvtGiftTiersFetch_().then(function(){
+        if(typeof dvtGiftPromoRender === "function") dvtGiftPromoRender();
+        dvtGiftMeterRender();
+      });
+    }
+    return Promise.resolve(dvtGiftTiers_);
+  }
+  return dvtGiftTiersFetch_();
 }
 
 /* מצב ההתקדמות: מה כבר הורווח, מה הבא בתור, וכמה חסר.
@@ -982,6 +1017,16 @@ function dvtGiftPromoRender(){
   const strip = document.getElementById("giftCatalogBanner");
   if(!host && !strip) return;
 
+  /* 🔴 **שומר-מקום — כדי שהמודעה לא תדחוף את הדף כשהיא מגיעה.**
+     גם עם המטמון, ביקור ראשון עדיין ממתין לרשת. במקום שהאזור יהיה
+     בגובה 0 ואז יקפוץ ל-800px (קפיצת פריסה שדוחפת את כל מה שמתחת),
+     הוא שומר על גובהו מראש ומראה שלד עדין. ⚠️ הגובה ב-CSS ולא כאן
+     (`#giftPromo:empty`), כדי שיישאר נכון גם אם תוכן המודעה יוחלף. */
+  if(host && wrap && !host.innerHTML){
+    wrap.hidden = false;
+    wrap.classList.add("gp-loading");
+  }
+
   dvtGiftLoadTiers().then(function(tiers){
     const picks = (tiers || []).filter(function(x){ return x.kind === "pick" && x.min > 0; })
                                .sort(function(a,b){ return a.min - b.min; });
@@ -1002,75 +1047,90 @@ function dvtGiftPromoRender(){
     }
 
     if(!host) return;
-    if(!picks.length){ if(wrap) wrap.hidden = true; return; }
+    if(!picks.length){
+      /* אין מדרגות פעילות — מסירים גם את שומר-המקום. */
+      if(wrap){ wrap.hidden = true; wrap.classList.remove("gp-loading"); }
+      return;
+    }
 
+    /* 🎨 **v4 (31.08) — העיצוב שדביר בנה, מושתל באתר.**
+       תצלום שולחן גיימינג ברקע, כותרת Rubik ענקית, ומדרגות
+       ככרטיסים בוהקים.
+
+       🔴 **מה השתנה מהקובץ שדביר שלח, וזה העיקר:** שם המספרים היו
+       **כתובים בקוד** — 400→65, 800→87, 1,500→103, 2,500→109.
+       כאן הם מגיעים מ-`giftTiers` בשרת, כמו קודם. מודעה עם מספרים
+       קבועים מתיישנת בשקט ברגע שמשנים רף בלשונית ההטבות, והלקוח
+       רואה הבטחה שהמערכת כבר לא מקיימת — בדיוק סוג התקלה שאי אפשר
+       לגלות בבדיקה ידנית.
+
+       מה שלא נכנס מהעיצוב, ובכוונה:
+         • **"הכי פופולרי!"** → "המשתלם ביותר". אין עדיין נתוני
+           מכירות, וטענת פופולריות בלי נתונים היא הטעיה. (אותה
+           החלטה כבר התקבלה ב-27.08 — ראה v2.)
+         • **פסי האמון** (מותגים · מאובטח · אחריות) — `trust-strip`
+           של דף הבית יושב **20 פיקסלים מעליהם** ואומר בדיוק אותו
+           דבר. חזרה עליהם רק מרחיקה את המדרגות מהעין.
+         • **"אחריות מלאה"** — הניסוח באתר הוא "אחריות ושירות".
+           לא מחמירים ניסוח אחריות במודעה. */
     const top = picks[picks.length - 1];
     const cards = picks.map(function(x, i){
       const sample = dvtGiftSampleFor_(x.cap);
-      const img = sample
-        ? '<span class="gp-img"><img src="' + escHtml(sample.image) + '" alt="' +
+      const media = sample
+        ? '<span class="gp4-img"><img src="' + escHtml(sample.image) + '" alt="' +
           escHtml(tr("לדוגמה: ", "e.g. ") + sample.name) + '" loading="lazy"></span>'
-        : '<span class="gp-img gp-img-empty" aria-hidden="true">🎁</span>';
-      return '<div class="gp-card gp-r' + i + (x === top ? ' gp-top' : '') + '">' +
-        '<span class="gp-zero" aria-hidden="true">0 ₪</span>' +
-        (x === top ? '<span class="gp-best">' + escHtml(tr("המשתלם ביותר","Best value")) + '</span>' : '') +
-        img +
-        '<span class="gp-min">' + escHtml(tr("בקנייה מעל ","Orders over ")) +
-          '<b>' + x.min.toLocaleString() + ' ₪</b></span>' +
-        '<span class="gp-what">' + dvtGiftHot(escHtml(
-          tr("מוצר עד " + x.cap + " ₪ במתנה", "A product up to " + x.cap + " ₪ free"))) + '</span>' +
-        (sample ? '<span class="gp-sample">' + escHtml(tr("לדוגמה: ","e.g. ") +
-          ((typeof dvtDisplayName === "function") ? dvtDisplayName(sample.name) : sample.name)) + '</span>' : '') +
-        '</div>';
+        : '<span class="gp4-img gp4-img-empty" aria-hidden="true">🎁</span>';
+      return '<div class="gp4-card gp4-r' + i + (x === top ? ' gp4-top' : '') + '">' +
+        (x === top ? '<span class="gp4-tag">' +
+          escHtml(tr("המשתלם ביותר","Best value")) + '</span>' : '') +
+        '<span class="gp4-over">' + escHtml(tr("בקנייה מעל","Orders over")) + '</span>' +
+        '<b class="gp4-min">' + x.min.toLocaleString() + ' ₪</b>' +
+        media +
+        '<span class="gp4-lbl">' + escHtml(tr("מוצר במתנה עד","Free product up to")) + '</span>' +
+        '<b class="gp4-cap">' + dvtGiftHot(escHtml(x.cap.toLocaleString() + " ₪")) + '</b>' +
+        (sample ? '<span class="gp4-sample">' + escHtml(tr("לדוגמה: ","e.g. ") +
+          ((typeof dvtDisplayName === "function") ? dvtDisplayName(sample.name) : sample.name)) +
+          '</span>' : '') +
+        '<span class="gp4-pick">' + escHtml(tr("בוחרים בתשלום","Pick at checkout")) + '</span>' +
+      '</div>';
     }).join("");
 
-    /* 🎨 v2 (27.08) — הכיוון של המודעה שדביר עיצב (רקע נייבי כהה,
-       שלושת השלבים בצד, כרטיסים בוהקים), אבל **HTML חי ולא תמונה**:
-       המספרים מהשרת, קורא מסך קורא, ושינוי רף לא דורש רג'נרוט.
-       מה שלא נכנס מהתמונה — בכוונה:
-         • "הכי פופולרי" → "המשתלם ביותר" (אין עדיין לקוחות — הטעיה)
-         • "משלוח מהיר עד הבית" → "משלוח חינם" מהמדרגה החיה (אין מהיר)
-         • מדרגת 300 ₪ שלא קיימת — רק מה שבאמת פעיל בלשונית */
     const flow =
-      '<div class="gp-flow">' +
-        '<div class="gp-step"><span class="gp-step-ic">🛒</span><div><b>' +
-          escHtml(tr("קונים באתר","Shop the site")) + '</b><span>' +
-          escHtml(tr("ממלאים עגלה כרגיל","Fill your cart as usual")) + '</span></div></div>' +
-        '<div class="gp-step-arr" aria-hidden="true">⌄</div>' +
-        '<div class="gp-step"><span class="gp-step-ic">🎯</span><div><b>' +
-          escHtml(tr("מגיעים לרף","Hit a tier")) + '</b><span>' +
-          escHtml(tr("מד ההתקדמות מראה כמה נשאר","The meter shows how close you are")) + '</span></div></div>' +
-        '<div class="gp-step-arr" aria-hidden="true">⌄</div>' +
-        '<div class="gp-step"><span class="gp-step-ic">🎁</span><div><b>' +
-          escHtml(tr("בוחרים מתנה","Pick your gift")) + '</b><span>' +
-          escHtml(tr("מוצר אמיתי מהקטלוג, בקבלה ב-0 ₪","A real product, on the receipt at 0 ₪")) + '</span></div></div>' +
+      '<div class="gp4-flow">' +
+        '<div class="gp4-step"><span aria-hidden="true">🛒</span><b>' +
+          escHtml(tr("קונים באתר","Shop the site")) + '</b></div>' +
+        '<span class="gp4-arr" aria-hidden="true">←</span>' +
+        '<div class="gp4-step"><span aria-hidden="true">🎯</span><b>' +
+          escHtml(tr("עוברים את הרף","Cross a tier")) + '</b></div>' +
+        '<span class="gp4-arr" aria-hidden="true">←</span>' +
+        '<div class="gp4-step"><span aria-hidden="true">🎁</span><b>' +
+          escHtml(tr("בוחרים מתנה","Pick your gift")) + '</b></div>' +
       '</div>';
 
-    /* 🎨 v3 (27.08) — דביר: "זה צריך לשדר מבצע!!! (רק לשדר, לא
-       לכתוב באמת 'מבצע')". השראה מפרומו של חנויות גדולות: פינת
-       ‎0 ₪‎ מסתובבת על כל כרטיס, שווי המתנה גדול וזוהר, CTA עם
-       הבזק אור. עדיין HTML חי — המספרים מהשרת, בלי תמונה מגונרטת. */
     host.innerHTML =
-      '<span class="gp-burst" aria-hidden="true">🎁 ' +
-        escHtml(tr("מתנה בכל קנייה מעל " + picks[0].min.toLocaleString() + " ₪",
-                   "A gift with every order over " + picks[0].min.toLocaleString() + " ₪")) + '</span>' +
-      '<div class="gp-head">' +
-        '<h2>' + escHtml(tr("קנית? ","Buy? ")) + '<em>' + escHtml(tr("קיבלת!","Get!")) + '</em></h2>' +
-        '<p>' + escHtml(tr("קונים יותר — מקבלים מתנה שווה יותר. אתם בוחרים אותה, מהקטלוג האמיתי.",
-                           "The more you buy, the bigger the gift — and you pick it, from the real catalogue.")) + '</p>' +
-      '</div>' +
-      '<div class="gp-body">' + flow + '<div class="gp-row">' + cards + '</div></div>' +
-      (ship ? '<p class="gp-ship">🚚 ' + dvtGiftHot(escHtml(
-        tr("ומעל " + ship.min.toLocaleString() + " ₪ — גם משלוח חינם עד הבית",
-           "And over " + ship.min.toLocaleString() + " ₪ — free home delivery too"))) + '</p>' : '') +
-      '<div class="gp-foot">' +
-        '<a class="btn btn-accent gp-cta" href="products.html">' +
-          escHtml(tr("לקטלוג — מתחילים לצבור 🎁","To the catalogue — start earning 🎁")) + '</a>' +
-        '<a class="gp-terms" href="gifts.html">' +
-          escHtml(tr("איך זה עובד + תנאי המבצע","How it works + terms")) + '</a>' +
-      '</div>' +
-      '<p class="gp-tag">' + escHtml(tr("כל מה שהמחשב שלך צריך — DvirTech","Everything your PC needs — DvirTech")) + '</p>';
-    if(wrap) wrap.hidden = false;
+      '<div class="gp4">' +
+        '<div class="gp4-hero">' +
+          '<h2>' + escHtml(tr("קונים יותר","Buy more")) + '<br><em>' +
+            escHtml(tr("מקבלים יותר!","get more!")) + '</em></h2>' +
+          '<p>' + escHtml(tr("בוחרים מתנה בכל קנייה — וכל מדרגה שווה יותר",
+                             "Pick a gift with every order — each tier is worth more")) + '</p>' +
+          '<a class="btn btn-accent gp4-cta" href="products.html">' +
+            escHtml(tr("לקטלוג — מתחילים לצבור 🎁","To the catalogue — start earning 🎁")) + '</a>' +
+        '</div>' +
+        '<div class="gp4-tiers">' + cards + '</div>' +
+        (ship ? '<p class="gp4-ship">🚚 ' + dvtGiftHot(escHtml(
+          tr("ומעל " + ship.min.toLocaleString() + " ₪ — גם משלוח חינם עד הבית",
+             "And over " + ship.min.toLocaleString() + " ₪ — free home delivery too"))) + '</p>' : '') +
+        flow +
+        '<div class="gp4-foot">' +
+          '<a class="gp4-terms" href="gifts.html">' +
+            escHtml(tr("איך זה עובד + תנאי המבצע","How it works + terms")) + '</a>' +
+          '<p class="gp4-legal">' + escHtml(tr(
+            "* תמונות להמחשה בלבד. המתנה נבחרת בדף התשלום מרשימת המוצרים הזמינים לאותה מדרגה, בכפוף למלאי. ט.ל.ח, בכפוף לתקנון האתר.",
+            "* Images are illustrative. The gift is chosen at checkout from the products available for that tier, subject to stock. E&OE, subject to the site terms.")) + '</p>' +
+        '</div>' +
+      '</div>';
+    if(wrap){ wrap.hidden = false; wrap.classList.remove("gp-loading"); }
 
     /* תמונות הדוגמה תלויות בקטלוג, שנטען במקביל — רינדור שני כשהוא
        מוכן. ריצה כפולה בונה מחדש מאפס, אז אין כפילות. */
