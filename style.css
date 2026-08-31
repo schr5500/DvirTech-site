@@ -2688,3 +2688,18 @@ html[dir="ltr"] .gp4-tag{ transform:translateX(-50%) }
   .gp4-hero h2 em{ animation:none }
   .gp4-cta::after{ animation:none; display:none }
 }
+
+/* ==================== 🚚 הודעת אזור משלוח (31.08) ====================
+   יושבת מתחת לשדה העיר בקופה. שני מצבים: חסום (אדום) ותוספת (כתום).
+   ⚠️ `aria-live="polite"` ב-HTML — קורא מסך צריך לשמוע שהיישוב לא
+   נתמך **כשזה קורה**, לא כשהוא מגיע לכפתור התשלום. */
+.ship-area-msg{
+  margin-top:8px; padding:9px 12px; border-radius:10px;
+  font-size:13px; line-height:1.55; font-weight:600;
+}
+.ship-area-msg.checkout-note-block{
+  background:#FEF2F2; color:#991B1B; border:1px solid #FECACA;
+}
+.ship-area-msg.checkout-note-warn{
+  background:#FFFBEB; color:#92400E; border:1px solid #FDE68A;
+}

@@ -425,7 +425,9 @@ function shippingPrice(){
   const o = shippingOption();
   if(!o) return 0;
   if(o.price > 0 && checkoutFreeShip()) return 0;
-  return o.price;
+  /* ⚠️ תוספת האזור מתווספת **בדיוק כמו בשרת** (`ship.price + shipExtra`).
+     פער בין השניים אומר שהלקוח רואה סכום אחד ונגבה ממנו אחר. */
+  return o.price + (typeof dvtAreaExtra_ === "function" ? dvtAreaExtra_() : 0);
 }
 
 function renderShippingOptions(){
@@ -460,7 +462,22 @@ function onShippingChange(key){
 function toggleAddressFields(){
   const box = document.getElementById("shipAddressBlock");
   if(box) box.style.display = (shippingKey === "pickup") ? "none" : "";
+  /* מעבר לאיסוף עצמי מבטל את הודעת האזור — אין לאן לשלוח, אין מה לחסום. */
+  if(typeof dvtAreaRender_ === "function") dvtAreaRender_();
 }
+
+/* ⚠️ `input` ולא `change`: לקוח שמקליד "אריאל" ועובר לשדה הבא בלי
+   לצאת מהשדה היה מגלה רק בלחיצה על "שלם". */
+document.addEventListener("DOMContentLoaded", function(){
+  const inp = document.getElementById("custCity");
+  if(!inp) return;
+  dvtAreasLoad_().then(function(){ dvtAreaRender_(); });
+  let t = null;
+  inp.addEventListener("input", function(){
+    clearTimeout(t);
+    t = setTimeout(function(){ dvtAreaRender_(); }, 250);
+  });
+});
 
 /* מחזיר את הכתובת כמחרוזת אחת לקבלה, או "" באיסוף עצמי. */
 function shippingAddressText(){
@@ -1203,6 +1220,102 @@ function cartItemsToLines(items){
   return lines;
 }
 
+
+/* =====================================================================
+   🚚 אזור המשלוח — בדיקה תוך כדי הקלדה (31.08)
+   =====================================================================
+   דביר לא שולח לכל מקום, ולקוח שיגלה את זה **אחרי** שמילא טופס שלם
+   ולחץ "שלם" יחווה את זה כתקלה באתר. הבדיקה כאן רצה על שדה העיר
+   ומגיבה מיד.
+
+   ⚠️ **זו נוחות, לא אכיפה.** `createPayment_` בשרת בודק שוב — ראה
+   `shipAreaCheck_`. אין כאן שום החלטה שאפשר לסמוך עליה.
+   ⚠️ הרשימה נטענת פעם אחת ונשמרת ב-localStorage: היא קטנה, משתנה
+   לעיתים רחוקות, וטעינה מחדש בכל הקלדה הייתה בקשת רשת לכל תו.
+   ⚠️ **רשימה ריקה = הכל מותר.** גם כשל רשת מגיע לאותו מצב, ובכוונה:
+   חסימת לקוח בגלל בקשה שנכשלה גרועה בהרבה מהזמנה שדביר יתאם ידנית. */
+const DVT_AREAS_KEY_ = "dvt_ship_areas_v1";
+const DVT_AREAS_TTL_ = 6 * 60 * 60 * 1000;
+let dvtAreas_ = null;
+let dvtAreaHit_ = null;        /* הכלל שנמצא לעיר הנוכחית, אם יש */
+
+function dvtAreaNorm_(s){
+  return String(s == null ? "" : s)
+    .replace(/["'`\u05f3\u05f4]/g, "")
+    .replace(/[-\u2013\u2014,.;:\/\\()\[\]]/g, " ")
+    .replace(/\s+/g, " ").trim().toLowerCase();
+}
+
+function dvtAreasLoad_(){
+  if(dvtAreas_) return Promise.resolve(dvtAreas_);
+  try{
+    const raw = localStorage.getItem(DVT_AREAS_KEY_);
+    if(raw){
+      const o = JSON.parse(raw);
+      if(o && Array.isArray(o.areas) && (Date.now() - o.at) < DVT_AREAS_TTL_){
+        dvtAreas_ = o.areas;
+        return Promise.resolve(dvtAreas_);
+      }
+    }
+  }catch(e){}
+  return fetch(PAYMENT_API_URL + "?action=shipAreas")
+    .then(r => r.json())
+    .then(d => {
+      dvtAreas_ = (d && d.ok && Array.isArray(d.areas)) ? d.areas : [];
+      try{ localStorage.setItem(DVT_AREAS_KEY_, JSON.stringify({ at: Date.now(), areas: dvtAreas_ })); }catch(e){}
+      return dvtAreas_;
+    })
+    .catch(() => { dvtAreas_ = []; return dvtAreas_; });
+}
+
+/* מחזיר את הכלל לעיר שהוקלדה, או null. */
+function dvtAreaFor_(city){
+  if(!dvtAreas_ || !dvtAreas_.length) return null;
+  const c = dvtAreaNorm_(city);
+  if(!c) return null;
+  return dvtAreas_.find(a => dvtAreaNorm_(a.city) === c) || null;
+}
+
+/* מצייר את התשובה מתחת לשדה העיר ומחזיר true אם חסום. */
+function dvtAreaRender_(){
+  const box = document.getElementById("shipAreaMsg");
+  const inp = document.getElementById("custCity");
+  if(!box || !inp) return false;
+
+  dvtAreaHit_ = (shippingKey === "pickup") ? null : dvtAreaFor_(inp.value);
+  if(!dvtAreaHit_ || dvtAreaHit_.status === "ok"){
+    box.style.display = "none";
+    box.textContent = "";
+    renderCheckoutTotals();
+    return false;
+  }
+  const blocked = dvtAreaHit_.status === "block";
+  box.style.display = "block";
+  /* ⚠️ שם המחלקה הבסיסית נשמר: `.ship-area-msg` מחזיקה את הריפוד
+     והמרווח, והשנייה רק את הצבע. השמה של אחת בלבד מוחקת את השנייה. */
+  box.className = "ship-area-msg " + (blocked ? "checkout-note-block" : "checkout-note-warn");
+  box.textContent = blocked
+    ? (dvtAreaHit_.note || tr("אין לנו כרגע משלוח ליישוב הזה.",
+                              "We do not deliver to this town at the moment.")) + " " +
+      tr("אפשר לבחור איסוף עצמי למעלה, או לפנות אלינו ונבדוק יחד.",
+         "You can pick it up yourself, or contact us and we will look into it.")
+    : (dvtAreaHit_.note || tr("היישוב מחוץ לאזור החלוקה הרגיל.",
+                              "This town is outside the standard delivery area.")) +
+      (dvtAreaHit_.extra ? " " + tr("תוספת משלוח: ", "Delivery surcharge: ") +
+                           dvtAreaHit_.extra.toLocaleString() + " \u20aa" : "");
+  renderCheckoutTotals();
+  return blocked;
+}
+
+/* תוספת האזור, לשורת הסיכום. ⚠️ מתאפסת כשהמדרגה נתנה משלוח חינם —
+   בדיוק כמו בשרת, אחרת הלקוח רואה סכום אחד ונגבה ממנו אחר. */
+function dvtAreaExtra_(){
+  if(shippingKey === "pickup") return 0;
+  if(typeof checkoutFreeShip === "function" && checkoutFreeShip()) return 0;
+  return (dvtAreaHit_ && dvtAreaHit_.status === "extra") ? (dvtAreaHit_.extra || 0) : 0;
+}
+
+
 async function submitCheckout(){
   const name = document.getElementById("custName").value.trim();
   const phone = document.getElementById("custPhone").value.trim();
@@ -1228,6 +1341,12 @@ async function submitCheckout(){
     box.style.display = "block";
     box.textContent = tr("צריך עיר ורחוב כדי שנדע לאן לשלוח. בוחרים איסוף עצמי? החלף את אופן האספקה למעלה.",
                          "We need a city and street to ship to. Picking it up yourself? Switch the delivery method above.");
+    return;
+  }
+  /* 🚚 יישוב שאיננו שולחים אליו — עוצרים כאן, לפני הסליקה.
+     ⚠️ ההודעה כבר מוצגת מתחת לשדה העיר; זו רק העצירה. */
+  if(needAddr && typeof dvtAreaRender_ === "function" && dvtAreaRender_()){
+    document.getElementById("custCity").focus();
     return;
   }
   if(!termsOk){
@@ -1300,7 +1419,9 @@ async function submitCheckout(){
     if(low.length){
       lowStockAcked = true;
       box.style.display = "block";
-      box.className = "checkout-note-warn";
+      /* 🔴 `className =` **דרס** את `validation-msg`, והתיבה איבדה את
+         כל העיצוב שלה ברגע שהודעת המלאי הופיעה. */
+      box.className = "validation-msg checkout-note-warn";
       box.textContent =
         tr("שים לב: ", "Please note: ") +
         low.map(l => l.name).join(", ") +
@@ -1334,6 +1455,10 @@ async function submitCheckout(){
            להגיע לקבלה ולהודעה שדביר מקבל, ושם היא נקראת בפני עצמה. */
         customer: { name, phone, email, isBusiness, companyName,
                     address: shippingAddressText() },
+        /* 🚚 העיר נשלחת **בנפרד** מהכתובת: השרת מתאים אותה מול
+           `🚚 אזורי משלוח`, וסריקת מחרוזת בכתובת חופשית היא גיבוי
+           פחות אמין (שם יישוב יכול להיות גם שם רחוב). */
+        city: ((document.getElementById("custCity") || {}).value || "").trim(),
         lines: lines,
         installments: installments,
         // רק המפתח נשלח. המחיר נקבע בשרת — ראה SHIPPING_OPTIONS_.

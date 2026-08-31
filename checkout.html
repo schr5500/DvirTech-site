@@ -240,6 +240,10 @@
         <div class="checkout-field">
           <label class="field-label" id="labelCity"></label>
           <input id="custCity" type="text" autocomplete="address-level2">
+          <!-- 🚚 תשובת אזור המשלוח, מיד מתחת לשדה. ⚠️ הודעה שיושבת
+               ליד השדה שגרם לה נקראת; הודעה בתחתית הטופס לא. -->
+          <div id="shipAreaMsg" class="ship-area-msg" style="display:none"
+               role="status" aria-live="polite"></div>
         </div>
         <div class="checkout-field">
           <label class="field-label" id="labelStreet"></label>
