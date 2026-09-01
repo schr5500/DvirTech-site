@@ -1107,49 +1107,70 @@ function dvtGiftPromoRender(){
            דבר. חזרה עליהם רק מרחיקה את המדרגות מהעין.
          • **"אחריות מלאה"** — הניסוח באתר הוא "אחריות ושירות".
            לא מחמירים ניסוח אחריות במודעה. */
+    /* 🎨 **v5 (01.09) — רזה ורחבה.** דביר: *"חסר למודעה כרגע הרבה,
+       תנסה גם לקצץ אותה בגובה — היא עבה מדי. אני רוצה רזה ורחבה
+       (לצדדים) יותר."*
+
+       מה שהוריד את הגובה, לפי הסדר:
+         · **תמונת המוצר לדוגמה ירדה מהכרטיס** (‏64px + שם ארוך
+           מתחתיה ≈ 90px לכרטיס). המידע לא אבד — שם המוצר עבר
+           ל-`title`, כלומר נקרא במעבר עכבר וגם ע"י קורא מסך.
+         · **כפתור "בוחרים בתשלום" ירד** מכל כרטיס — הוא חזר על
+           עצמו ארבע פעמים ולא היה לחיץ. הצעד הזה נאמר עכשיו פעם
+           אחת בשורת "איך זה עובד".
+         · ריווחים וגדלי כותרת הוקטנו ב-CSS.
+       ורוחב: רשת המדרגות עברה ל-100% מהמיכל במקום 940px.
+
+       ⚠️ **ה-CTA נשאר** למרות שאינו במוקאפ. מודעה בלי כפתור פעולה
+       היא כרזה — הלקוח מבין את המבצע ואין לו לאן ללחוץ. הוא הוקטן
+       והועבר להיצמד לכותרת במקום לשבת בשורה משלו. */
     const top = picks[picks.length - 1];
     const cards = picks.map(function(x, i){
       const sample = dvtGiftSampleFor_(x.cap);
-      const media = sample
-        ? '<span class="gp4-img"><img src="' + escHtml(sample.image) + '" alt="' +
-          escHtml(tr("לדוגמה: ", "e.g. ") + sample.name) + '" loading="lazy"></span>'
-        : '<span class="gp4-img gp4-img-empty" aria-hidden="true">🎁</span>';
-      return '<div class="gp4-card gp4-r' + i + (x === top ? ' gp4-top' : '') + '">' +
+      /* שם המוצר לדוגמה נשמר כ-title — מידע חי בלי גובה. */
+      const ttl = sample
+        ? ' title="' + escHtml(tr("לדוגמה: ", "e.g. ") +
+            ((typeof dvtDisplayName === "function") ? dvtDisplayName(sample.name) : sample.name)) + '"'
+        : '';
+      return '<div class="gp4-card gp4-r' + i + (x === top ? ' gp4-top' : '') + '"' + ttl + '>' +
         (x === top ? '<span class="gp4-tag">' +
-          escHtml(tr("המשתלם ביותר","Best value")) + '</span>' : '') +
-        '<span class="gp4-over">' + escHtml(tr("בקנייה מעל","Orders over")) + '</span>' +
+          escHtml(tr("הכי משתלם","Best value")) + '</span>' : '') +
+        '<span class="gp4-over">' + escHtml(tr("קנייה מעל","Orders over")) + '</span>' +
         '<b class="gp4-min">' + x.min.toLocaleString() + ' ₪</b>' +
-        media +
-        '<span class="gp4-lbl">' + escHtml(tr("מוצר במתנה עד","Free product up to")) + '</span>' +
+        '<span class="gp4-sep" aria-hidden="true"></span>' +
+        '<span class="gp4-lbl">' + escHtml(tr("מתנה בשווי עד","Gift worth up to")) + '</span>' +
         '<b class="gp4-cap">' + dvtGiftHot(escHtml(x.cap.toLocaleString() + " ₪")) + '</b>' +
-        (sample ? '<span class="gp4-sample">' + escHtml(tr("לדוגמה: ","e.g. ") +
-          ((typeof dvtDisplayName === "function") ? dvtDisplayName(sample.name) : sample.name)) +
-          '</span>' : '') +
-        '<span class="gp4-pick">' + escHtml(tr("בוחרים בתשלום","Pick at checkout")) + '</span>' +
+        '<span class="gp4-gifts" aria-hidden="true">🎁</span>' +
       '</div>';
     }).join("");
 
+    const STEPS = [
+      ["🛒", tr("מוסיפים מוצרים לעגלה","Add products to your cart")],
+      ["🎁", tr("עוברים את סף הקנייה","Cross the order threshold")],
+      ["👆", tr("בוחרים את המתנה בתשלום","Pick your gift at checkout")],
+      ["📦", tr("אנחנו דואגים לשאר","We take care of the rest")]
+    ];
     const flow =
       '<div class="gp4-flow">' +
-        '<div class="gp4-step"><span aria-hidden="true">🛒</span><b>' +
-          escHtml(tr("קונים באתר","Shop the site")) + '</b></div>' +
-        '<span class="gp4-arr" aria-hidden="true">←</span>' +
-        '<div class="gp4-step"><span aria-hidden="true">🎯</span><b>' +
-          escHtml(tr("עוברים את הרף","Cross a tier")) + '</b></div>' +
-        '<span class="gp4-arr" aria-hidden="true">←</span>' +
-        '<div class="gp4-step"><span aria-hidden="true">🎁</span><b>' +
-          escHtml(tr("בוחרים מתנה","Pick your gift")) + '</b></div>' +
+        '<h3 class="gp4-flow-t">' + escHtml(tr("איך זה עובד?","How does it work?")) + '</h3>' +
+        '<div class="gp4-steps">' +
+          STEPS.map(function(s, i){
+            return (i ? '<span class="gp4-arr" aria-hidden="true">←</span>' : '') +
+              '<div class="gp4-step"><span class="gp4-ic" aria-hidden="true">' + s[0] +
+              '</span><b>' + escHtml(s[1]) + '</b></div>';
+          }).join("") +
+        '</div>' +
       '</div>';
 
     host.innerHTML =
       '<div class="gp4">' +
         '<div class="gp4-hero">' +
-          '<h2>' + escHtml(tr("קונים יותר","Buy more")) + '<br><em>' +
+          '<h2>' + escHtml(tr("קונים יותר,","Buy more,")) + '<br><em>' +
             escHtml(tr("מקבלים יותר!","get more!")) + '</em></h2>' +
-          '<p>' + escHtml(tr("בוחרים מתנה בכל קנייה — וכל מדרגה שווה יותר",
-                             "Pick a gift with every order — each tier is worth more")) + '</p>' +
-          '<a class="btn btn-accent gp4-cta" href="products.html">' +
-            escHtml(tr("לקטלוג — מתחילים לצבור 🎁","To the catalogue — start earning 🎁")) + '</a>' +
+          '<p>' + escHtml(tr("על כל קנייה באתר — בוחרים מתנה שווה במיוחד",
+                             "With every order — pick a gift worth having")) +
+            '<a class="gp4-cta" href="products.html">' +
+              escHtml(tr("לקטלוג 🎁","To the catalogue 🎁")) + '</a></p>' +
         '</div>' +
         '<div class="gp4-tiers">' + cards + '</div>' +
         (ship ? '<p class="gp4-ship">🚚 ' + dvtGiftHot(escHtml(
@@ -1159,11 +1180,12 @@ function dvtGiftPromoRender(){
         '<div class="gp4-foot">' +
           '<a class="gp4-terms" href="gifts.html">' +
             escHtml(tr("איך זה עובד + תנאי המבצע","How it works + terms")) + '</a>' +
-          '<p class="gp4-legal">' + escHtml(tr(
-            "* תמונות להמחשה בלבד. המתנה נבחרת בדף התשלום מרשימת המוצרים הזמינים לאותה מדרגה, בכפוף למלאי. ט.ל.ח, בכפוף לתקנון האתר.",
-            "* Images are illustrative. The gift is chosen at checkout from the products available for that tier, subject to stock. E&OE, subject to the site terms.")) + '</p>' +
+          '<span class="gp4-legal">' + escHtml(tr(
+            "* תמונות להמחשה. המתנה נבחרת בדף התשלום מהמוצרים הזמינים לאותה מדרגה, בכפוף למלאי. ט.ל.ח, בכפוף לתקנון.",
+            "* Images are illustrative. The gift is chosen at checkout from products available for that tier, subject to stock.")) + '</span>' +
         '</div>' +
       '</div>';
+
     if(wrap){ wrap.hidden = false; wrap.classList.remove("gp-loading"); }
 
     /* תמונות הדוגמה תלויות בקטלוג, שנטען במקביל — רינדור שני כשהוא
