@@ -468,10 +468,30 @@ function toggleAddressFields(){
 
 /* ⚠️ `input` ולא `change`: לקוח שמקליד "אריאל" ועובר לשדה הבא בלי
    לצאת מהשדה היה מגלה רק בלחיצה על "שלם". */
+/* ⚠️ `datalist` ולא `select`: רשימת יישובים היא מאות שורות, ובחירה
+   מ-select ארוך בטלפון היא סיוט. datalist נותן השלמה תוך כדי
+   הקלדה, והאכיפה נשארת ב-`dvtAreaRender_` + בשרת. */
+function dvtAreaFillList_(){
+  const inp = document.getElementById("custCity");
+  if(!inp || !dvtAreasActive_ || !dvtAreas_ || !dvtAreas_.length) return;
+  let dl = document.getElementById("shipCityList");
+  if(!dl){
+    dl = document.createElement("datalist");
+    dl.id = "shipCityList";
+    document.body.appendChild(dl);
+  }
+  dl.innerHTML = dvtAreas_
+    .filter(function(a){ return a.status !== "block"; })
+    .map(function(a){ return '<option value="' + escHtml(a.city) + '"></option>'; })
+    .join("");
+  inp.setAttribute("list", "shipCityList");
+  inp.setAttribute("autocomplete", "off");
+}
+
 document.addEventListener("DOMContentLoaded", function(){
   const inp = document.getElementById("custCity");
   if(!inp) return;
-  dvtAreasLoad_().then(function(){ dvtAreaRender_(); });
+  dvtAreasLoad_().then(function(){ dvtAreaFillList_(); dvtAreaRender_(); });
   let t = null;
   inp.addEventListener("input", function(){
     clearTimeout(t);
@@ -1234,9 +1254,10 @@ function cartItemsToLines(items){
    לעיתים רחוקות, וטעינה מחדש בכל הקלדה הייתה בקשת רשת לכל תו.
    ⚠️ **רשימה ריקה = הכל מותר.** גם כשל רשת מגיע לאותו מצב, ובכוונה:
    חסימת לקוח בגלל בקשה שנכשלה גרועה בהרבה מהזמנה שדביר יתאם ידנית. */
-const DVT_AREAS_KEY_ = "dvt_ship_areas_v1";
+const DVT_AREAS_KEY_ = "dvt_ship_areas_v2";
 const DVT_AREAS_TTL_ = 6 * 60 * 60 * 1000;
 let dvtAreas_ = null;
+let dvtAreasActive_ = false;   /* יש רשימה בגיליון? רק אז אוכפים */
 let dvtAreaHit_ = null;        /* הכלל שנמצא לעיר הנוכחית, אם יש */
 
 function dvtAreaNorm_(s){
@@ -1253,7 +1274,7 @@ function dvtAreasLoad_(){
     if(raw){
       const o = JSON.parse(raw);
       if(o && Array.isArray(o.areas) && (Date.now() - o.at) < DVT_AREAS_TTL_){
-        dvtAreas_ = o.areas;
+        dvtAreas_ = o.areas; dvtAreasActive_ = !!o.active;
         return Promise.resolve(dvtAreas_);
       }
     }
@@ -1262,10 +1283,18 @@ function dvtAreasLoad_(){
     .then(r => r.json())
     .then(d => {
       dvtAreas_ = (d && d.ok && Array.isArray(d.areas)) ? d.areas : [];
-      try{ localStorage.setItem(DVT_AREAS_KEY_, JSON.stringify({ at: Date.now(), areas: dvtAreas_ })); }catch(e){}
+      /* ⚠️ `active` מגיע מהשרת ולא נגזר מהאורך בדפדפן: תשובה חלקית
+         או ישנה מהמטמון לא אמורה להפעיל אכיפה בטעות. */
+      dvtAreasActive_ = !!(d && d.active);
+      try{
+        localStorage.setItem(DVT_AREAS_KEY_,
+          JSON.stringify({ at: Date.now(), active: dvtAreasActive_, areas: dvtAreas_ }));
+      }catch(e){}
       return dvtAreas_;
     })
-    .catch(() => { dvtAreas_ = []; return dvtAreas_; });
+    /* 🔴 כשל רשת → **לא אוכפים**. עדיף הזמנה שנתאם ידנית מלקוח
+       שנחסם בגלל בקשה שנפלה. */
+    .catch(() => { dvtAreas_ = []; dvtAreasActive_ = false; return dvtAreas_; });
 }
 
 /* מחזיר את הכלל לעיר שהוקלדה, או null. */
@@ -1276,16 +1305,38 @@ function dvtAreaFor_(city){
   return dvtAreas_.find(a => dvtAreaNorm_(a.city) === c) || null;
 }
 
-/* מצייר את התשובה מתחת לשדה העיר ומחזיר true אם חסום. */
+/* מצייר את התשובה מתחת לשדה העיר ומחזיר true אם אי אפשר לשלוח.
+
+   🔴 **רשימת היתר, לא רשימת חסומים.** יישוב שאינו ברשימה = אין
+   משלוח. זו הדרישה של דביר, והיא גם היחידה שנכשלת **סגור**:
+   רשימה חלקית בגישה ההפוכה מעבירה הזמנה שאי אפשר לספק, ואת זה
+   מגלים רק אחרי שהכסף נגבה.
+   ⚠️ נאכף **רק** כש-`dvtAreasActive_` — כלומר כשיש רשימה בגיליון. */
 function dvtAreaRender_(){
   const box = document.getElementById("shipAreaMsg");
   const inp = document.getElementById("custCity");
   if(!box || !inp) return false;
 
-  dvtAreaHit_ = (shippingKey === "pickup") ? null : dvtAreaFor_(inp.value);
-  if(!dvtAreaHit_ || dvtAreaHit_.status === "ok"){
-    box.style.display = "none";
-    box.textContent = "";
+  const off = (shippingKey === "pickup") || !dvtAreasActive_;
+  dvtAreaHit_ = off ? null : dvtAreaFor_(inp.value);
+
+  /* לא הוקלד עדיין כלום — לא מציקים למי שרק הגיע לטופס. */
+  if(off || !String(inp.value || "").trim()){
+    box.style.display = "none"; box.textContent = "";
+    renderCheckoutTotals();
+    return false;
+  }
+  if(!dvtAreaHit_){
+    box.style.display = "block";
+    box.className = "ship-area-msg checkout-note-block";
+    box.textContent = tr(
+      "היישוב שהוזן אינו ברשימת אזורי החלוקה שלנו. בחר יישוב מהרשימה, או עבור לאיסוף עצמי / צור קשר ונתאם.",
+      "This locality is not in our delivery area. Pick one from the list, or choose self-collection / contact us.");
+    renderCheckoutTotals();
+    return true;
+  }
+  if(dvtAreaHit_.status === "ok"){
+    box.style.display = "none"; box.textContent = "";
     renderCheckoutTotals();
     return false;
   }

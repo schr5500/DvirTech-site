@@ -290,7 +290,15 @@ const PD_TECH_FIELDS = {
     { key:"supportsOverclocking", label:"תמיכה ב-OC" },
     { key:"wifi",               label:"תקן WiFi" },
     { key:"color",               label:"צבע" },
-    { key:"lanSpeed",               label:"מהירות רשת קווית" }
+    { key:"lanSpeed",               label:"מהירות רשת קווית" },
+    /* ===== נוסף 01.09 — מגיע מהמפרט של הספק ===== */
+    { key:"cpuSupport", label:"מעבדים נתמכים" },
+    { key:"pcieSlotVer", label:"ממשק כרטיס מסך" },
+    { key:"pcieLayout", label:"פריסת חריצי PCIe" },
+    { key:"audioChip", label:"שבב שמע" },
+    { key:"raid", label:"תמיכת RAID" },
+    { key:"maxDisplays", label:"מסכים בו-זמנית" },
+    { key:"fanHeaders", label:"חיבורי מאוורר" }
   ],
 
   ram: [
@@ -321,7 +329,11 @@ const PD_TECH_FIELDS = {
     { key:"outputs",               label:"יציאות תצוגה" },
     { key:"pcieIface",               label:"ממשק PCIe" },
     { key:"boostClockMhz",               label:"תדר Boost (MHz)" },
-    { key:"color",               label:"צבע" }
+    { key:"color",               label:"צבע" },
+    /* ===== נוסף 01.09 — מגיע מהמפרט של הספק ===== */
+    { key:"hdmiPorts", label:"יציאות HDMI" },
+    { key:"dpPorts", label:"יציאות DisplayPort" },
+    { key:"maxDisplays", label:"מסכים בו-זמנית" }
   ],
 
   cooling: [
@@ -348,7 +360,11 @@ const PD_TECH_FIELDS = {
     { key:"readMbs",               label:"קריאה (MB/s)" },
     { key:"writeMbs",               label:"כתיבה (MB/s)" },
     { key:"tbw",               label:"עמידות (TBW)" },
-    { key:"color",               label:"צבע" }
+    { key:"color",               label:"צבע" },
+    /* ===== נוסף 01.09 — מגיע מהמפרט של הספק ===== */
+    { key:"rpm", label:'סל"ד (RPM)' },
+    { key:"cacheMb", label:"זיכרון מטמון (MB)" },
+    { key:"nandType", label:"סוג זיכרון NAND" }
   ],
 
   psu: [
@@ -361,7 +377,13 @@ const PD_TECH_FIELDS = {
     { key:"tier",       label:"דרג" },
     { key:"fanMm",               label:'גודל מאוורר (מ"מ)' },
     { key:"color",               label:"צבע" },
-    { key:"atxVer",               label:"תקן ATX" }
+    { key:"atxVer",               label:"תקן ATX" },
+    /* ===== נוסף 01.09 — מגיע מהמפרט של הספק ===== */
+    { key:"sataConnectors", label:"חיבורי SATA" },
+    { key:"pcieConnectors", label:"חיבורי כרטיס מסך" },
+    { key:"epsConnectors", label:"חיבורי EPS למעבד" },
+    { key:"has12vhpwr", label:"מחבר 12VHPWR" },
+    { key:"fanMm", label:'גודל מאוורר (מ"מ)' }
   ],
 
   /* ⚠️ שלושה מפתחות כאן שונים מהגיליון, כי postProcessSheetItem_ ב-
@@ -478,7 +500,15 @@ const PD_TECH_FIELDS = {
     { key:"batteryHours",               label:"שעות סוללה" },
     { key:"weightG",               label:"משקל (גרם)" },
     { key:"color",               label:"צבע" },
-    { key:"ports",               label:"יציאות" }
+    { key:"ports",               label:"יציאות" },
+    /* ===== נוסף 01.09 — מגיע מהמפרט של הספק ===== */
+    { key:"contrast", label:"ניגודיות" },
+    { key:"viewingAngle", label:"זווית צפייה" },
+    { key:"brightnessNits", label:"בהירות (cd/m²)" },
+    { key:"aspectRatio", label:"יחס גובה-רוחב" },
+    { key:"adaptiveSync", label:"סנכרון אדפטיבי" },
+    { key:"speakers", label:"רמקולים מובנים" },
+    { key:"pivot", label:"סיבוב מסך (Pivot)" }
   ],
 
   services: []
