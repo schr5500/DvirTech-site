@@ -303,11 +303,20 @@ function shLoadNotice(){
   /* דף "בקרוב" — אין לו הדר ואין לו מה להודיע. */
   if(document.querySelector(".coming-soon, #comingSoon")) return;
 
+  /* מטמון עמיד (localStorage) ולא לסשן בלבד: הודעה שכבר נראתה
+     מופיעה מיד בביקור הבא, בלי להמתין ל-Apps Script. מטמון שפג
+     עדיין מוצג מיד, והרענון רץ ברקע — אותה גישה כמו במדרגות. */
+  let stale = false;
   try{
-    const raw = sessionStorage.getItem(SH_NOTICE_KEY_);
+    const raw = localStorage.getItem(SH_NOTICE_KEY_) ||
+                sessionStorage.getItem(SH_NOTICE_KEY_);
     if(raw){
       const o = JSON.parse(raw);
-      if(o && (Date.now() - o.at) < SH_NOTICE_TTL_){ shNoticeRender_(o.n); return; }
+      if(o){
+        shNoticeRender_(o.n);
+        if((Date.now() - o.at) < SH_NOTICE_TTL_) return;
+        stale = true;                     /* הוצג — ועכשיו מרעננים ברקע */
+      }
     }
   }catch(e){}
 
@@ -317,7 +326,13 @@ function shLoadNotice(){
     .then(function(r){ return r.json(); })
     .then(function(d){
       const n = (d && d.ok) ? d.notice : null;
-      try{ sessionStorage.setItem(SH_NOTICE_KEY_, JSON.stringify({ at: Date.now(), n: n })); }catch(e){}
+      try{ localStorage.setItem(SH_NOTICE_KEY_, JSON.stringify({ at: Date.now(), n: n })); }catch(e){}
+      /* רענון של הודעה שכבר מוצגת: מסירים את הישנה לפני שמציגים
+         חדשה, אחרת יופיעו שני פסים זה מעל זה. */
+      if(stale){
+        const old = document.querySelector(".site-notice");
+        if(old) old.remove();
+      }
       shNoticeRender_(n);
     })
     .catch(function(){ /* אין רשת — אין פס. האתר ממשיך כרגיל. */ });
