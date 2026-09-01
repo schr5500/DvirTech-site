@@ -433,6 +433,9 @@ const DVT_CAT_LABEL = {
   peripherals: ["ציוד היקפי",     "Peripherals"],
   mouse:       ["עכברים",         "Mice"],
   keyboard:    ["מקלדות",         "Keyboards"],
+  /* נוספו 01.09 לקראת בנדא — 93 כיסאות ו-129 בקרים אצלם. */
+  chair:       ["כיסאות גיימינג", "Gaming Chairs"],
+  controller:  ["בקרי משחק",      "Controllers"],
   headset:     ["אוזניות",        "Headsets"],
   webcam:      ["מצלמות רשת",     "Webcams"],
   cpu:         ["מעבדים",         "Processors"],
@@ -667,7 +670,11 @@ const DVT_VIRTUAL_CATS = {
   mouse:    { from: "peripherals", match: it => it.subType === "mouse"    },
   keyboard: { from: "peripherals", match: it => it.subType === "keyboard" },
   headset:  { from: "peripherals", match: it => it.subType === "headset"  },
-  webcam:   { from: "peripherals", match: it => it.subType === "webcam"   }
+  webcam:   { from: "peripherals", match: it => it.subType === "webcam"   },
+  /* נוספו 01.09 — המדפים של סחורת בנדא. מוצר בלי subType מתאים פשוט
+     לא מופיע במדף, ולכן הוספה כאן בטוחה גם כשהקטגוריה עדיין ריקה. */
+  chair:      { from: "peripherals", match: it => it.subType === "chair"      },
+  controller: { from: "peripherals", match: it => it.subType === "controller" }
 };
 
 function dvtIsVirtualCat(cat){ return !!DVT_VIRTUAL_CATS[cat]; }
@@ -753,7 +760,7 @@ const FACET_LABELS = {
    (שמות יצרנים, LGA1700, DDR5 וכו' — לא מתרגמים). */
 const VALUE_LABELS = {
   useCase:    { office:{he:"משרדי",en:"Office"}, gaming:{he:"גיימינג",en:"Gaming"}, creative:{he:"עריכה ויצירה",en:"Creative"}, server:{he:"שרת",en:"Server"} },
-  subType:    { mouse:{he:"עכבר",en:"Mouse"}, keyboard:{he:"מקלדת",en:"Keyboard"}, monitor:{he:"מסך",en:"Monitor"}, headset:{he:"אוזניות",en:"Headset"}, speakers:{he:"רמקולים",en:"Speakers"}, webcam:{he:"מצלמת רשת",en:"Webcam"}, chair:{he:"כיסא",en:"Chair"}, other:{he:"אחר",en:"Other"} },
+  subType:    { mouse:{he:"עכבר",en:"Mouse"}, keyboard:{he:"מקלדת",en:"Keyboard"}, monitor:{he:"מסך",en:"Monitor"}, headset:{he:"אוזניות",en:"Headset"}, speakers:{he:"רמקולים",en:"Speakers"}, webcam:{he:"מצלמת רשת",en:"Webcam"}, chair:{he:"כיסא גיימינג",en:"Gaming chair"}, controller:{he:"בקר משחק",en:"Controller"}, mousepad:{he:"משטח לעכבר",en:"Mouse pad"}, microphone:{he:"מיקרופון",en:"Microphone"}, "capture-card":{he:"כרטיס לכידה",en:"Capture card"}, mount:{he:"זרוע ותושבת",en:"Mount"}, other:{he:"אחר",en:"Other"} },
   connection: { wired:{he:"חוטי",en:"Wired"}, wireless:{he:"אלחוטי",en:"Wireless"}, bluetooth:{he:"Bluetooth",en:"Bluetooth"} },
   switchType: { mechanical:{he:"מכני",en:"Mechanical"}, membrane:{he:"ממברנה",en:"Membrane"}, optical:{he:"אופטי",en:"Optical"} },
   type:       { air:{he:"אוויר",en:"Air"}, aio:{he:"נוזלי (AIO)",en:"Liquid (AIO)"} },

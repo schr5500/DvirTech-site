@@ -29,7 +29,7 @@
    ב-DVT_VIRTUAL_CATS חייבת להופיע גם ברשימה הזו. */
 const SHOP_CATEGORY_ORDER = [
   "all", "sale", "readyPc", "laptop",
-  "monitor", "keyboard", "mouse", "headset", "webcam", "peripherals",
+  "monitor", "keyboard", "mouse", "headset", "webcam", "chair", "controller", "peripherals",
   "cpu", "gpu", "mobo", "ram", "storage", "cooling", "psu", "case",
   "caseFans", "wifi", "paste", "extras"
 ];
@@ -58,6 +58,10 @@ const FACETS = {
   // מסכים הם תת-קבוצה של ציוד היקפי, ולכן אותם שדות בלי subType —
   // כאן כולם מסכים ממילא, וקבוצת סינון עם ערך יחיד לא מסננת כלום.
   monitor:     ["brand", "sizeInch", "refreshHz", "resolution", "panel", "connection"],
+  /* נוספו 01.09 — מדפי בנדא. הסינון נבנה מהערכים שקיימים בפועל,
+     אז שדה שעוד לא מולא פשוט לא מופיע כקבוצה. */
+  chair:       ["brand", "color"],
+  controller:  ["brand", "connection", "rgb", "color"],
   peripherals: ["subType", "brand", "connection", "switchType", "sizeInch", "refreshHz", "resolution", "panel", "rgb"],
   cpu:         ["brand", "socket", "ramType", "overclockable"],
   gpu:         ["chipset", "brand", "vramGb"],
